@@ -582,7 +582,7 @@ Deno.serve(async (req) => {
       if (text && text.length > 200) {
         pages.push({ url, text: text.slice(0, 22000) });
       }
-      if (pages.length >= 5) break;
+      if (pages.length >= 8) break;
     }
 
     let figures: Record<string, unknown> = {
