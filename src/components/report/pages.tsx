@@ -151,7 +151,7 @@ export function WhoWeArePage() {
         <p className="text-xs text-muted-foreground mb-3">
           We only refer to licensed firms that meet a strict vetting standard.
         </p>
-        <div className="rounded-xl bg-white border border-border px-6 py-5 grid grid-cols-3 gap-6 items-center">
+        <div className="rounded-xl bg-white border border-border px-6 py-5 grid grid-cols-3 gap-6 items-center shadow-card">
           <img src={logoInheritance} alt="Inheritance Financial Advice" className="max-h-12 w-auto object-contain mx-auto" loading="lazy" />
           <img src={logoMyAdvice} alt="MyAdvice Hub" className="max-h-12 w-auto object-contain mx-auto" loading="lazy" />
           <img src={logoPure} alt="Pure" className="max-h-12 w-auto object-contain mx-auto" loading="lazy" />
@@ -314,7 +314,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
         </p>
       </SectionCard>
 
-      <div className="mt-5 relative rounded-2xl overflow-hidden bg-gradient-to-br from-navy to-[hsl(215_60%_18%)] flex-1 min-h-[260px]">
+      <div className="mt-5 relative rounded-2xl overflow-hidden bg-gradient-to-br from-navy to-[hsl(215_60%_18%)] flex-1 min-h-[260px] shadow-card">
         <img
           src={riskIllustration}
           alt="Illustration of long-term superannuation growth toward retirement"
