@@ -756,7 +756,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
               Total projected extra benefit: <span className="font-bold tabular-nums">{fmtMoney(totalBenefit)}</span> · Threshold: $100,000
             </div>
           </div>
-          <div className={`px-4 py-2 rounded-md text-sm font-black ${eligible ? "bg-cyan text-cyan-foreground" : "bg-white/10 text-white/80"}`}>
+          <div className={`px-4 py-2 rounded-md text-sm font-black ${eligible ? "bg-online text-white" : "bg-white/10 text-white/80"}`}>
             {eligible ? "ELIGIBLE" : "NOT ELIGIBLE"}
           </div>
         </div>
