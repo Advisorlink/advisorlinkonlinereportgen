@@ -357,7 +357,7 @@ export function FeesAndDisclosurePage({ s }: { s: ReportSummary }) {
         <FeeTableHeader />
         <FeeRow label="Admin fee — flat" current={exFlat} comparison={cmpFlat} />
         <FeeRow label="Admin fee — % of balance" current={exPctFee} comparison={cmpAdmin} />
-        <FeeRow label="Annual product fee" current={0} comparison={cmpAnnual} />
+        
         <FeeRow label="Advice fee (one-off, year 1)" current={0} comparison={cmpAdvice} />
         <FeeRow label="Total" current={exTotalFee} comparison={cmpTotalFee} highlight />
         <p className="text-[10px] text-muted-foreground mt-2">
