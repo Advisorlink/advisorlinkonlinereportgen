@@ -578,7 +578,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
           {s.yearsIncomeComparison - s.yearsIncomeExisting > 0 && (
             <div className="rounded-md bg-cyan/10 border border-cyan/30 px-4 py-3">
               <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Additional years of income</div>
-              <div className="mt-1 text-2xl font-black text-cyan tabular-nums">
+              <div className="mt-1 text-2xl text-cyan tabular-nums font-bold">
                 +{s.yearsIncomeComparison - s.yearsIncomeExisting} yrs
               </div>
               <div className="text-[10px] text-muted-foreground mt-0.5">Longer your money lasts</div>
