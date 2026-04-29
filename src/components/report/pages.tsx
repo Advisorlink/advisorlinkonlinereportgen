@@ -181,7 +181,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           <Row label="Admin fee — flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
           <Row label="Admin fee — tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
           <Row label="Annual fee" value="1.76%" />
-          <Row label="Advice fee (4.4% capped at $6,500)" value={fmtMoney(comparisonAdviceFee(i.superBalance))} />
+          <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(i.superBalance))} />
           
         </SectionCard>
       </div>
