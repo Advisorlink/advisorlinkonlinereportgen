@@ -186,13 +186,12 @@ export function WhoWeArePage() {
       <div className="mt-5 rounded-2xl border border-border bg-white p-5 shadow-card">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-border">
-              <span className="text-lg font-black" style={{
-                background: "linear-gradient(90deg,#4285F4 0%,#EA4335 25%,#FBBC05 55%,#34A853 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}>G</span>
-            </div>
+            <svg viewBox="0 0 48 48" className="w-10 h-10" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
+              <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
+              <path fill="#FBBC05" d="M11.69 28.18c-.44-1.32-.69-2.73-.69-4.18s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/>
+              <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
+            </svg>
             <div>
               <div className="text-sm font-bold text-navy leading-tight">Google Reviews</div>
               <div className="flex items-center gap-1.5 mt-0.5">
@@ -201,8 +200,7 @@ export function WhoWeArePage() {
                     <Star key={i} className="w-3.5 h-3.5 fill-[#FBBC05] text-[#FBBC05]" />
                   ))}
                 </div>
-                <span className="text-[11px] font-semibold text-foreground">4.9</span>
-                <span className="text-[11px] text-muted-foreground">· based on 127 verified reviews</span>
+                <span className="text-[11px] font-semibold text-foreground">5.0 stars</span>
               </div>
             </div>
           </div>
