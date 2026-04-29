@@ -330,7 +330,7 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
               <div className="font-bold text-navy">{r.age}</div>
               <div className="text-right text-muted-foreground tabular-nums">{yearNumber}</div>
               <div className="text-right tabular-nums">{fmtMoney(r.existing)}</div>
-              <div className="text-right tabular-nums text-cyan font-semibold">{fmtMoney(r.comparison)}</div>
+              <div className="text-right tabular-nums text-cyan font-bold">{fmtMoney(r.comparison)}</div>
             </div>
           );
         })}
