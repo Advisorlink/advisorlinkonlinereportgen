@@ -35,6 +35,7 @@ export async function importFromFile(file: File): Promise<ClientInputs> {
     adminFeeFlat: num(get("K21"), 0),
     adminFeePct: num(get("O21"), 0),
     grossReturn: num(get("J25"), 0.066),
+    investmentRiskProfile: str(get("J27"), ""),
     secondBalance: num(get("R16"), 0),
     secondGrowthPct: num(get("R18"), 0),
     secondAdminFlat: num(get("S21"), 0),
@@ -58,4 +59,5 @@ export const DEFAULT_INPUTS: ClientInputs = {
   adminFeeFlat: 78,
   adminFeePct: 0.001,
   grossReturn: 0.066,
+  investmentRiskProfile: "Growth",
 };
