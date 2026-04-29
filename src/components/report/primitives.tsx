@@ -258,7 +258,7 @@ export function StatPill({ label, value, tone = "navy" }: { label: string; value
   return (
     <div className="flex items-center gap-2">
       <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase", map[tone])}>{label}</span>
-      <span className="text-sm font-bold text-navy tabular-nums">{value}</span>
+      <span className="text-sm font-semibold text-navy tabular-nums">{value}</span>
     </div>
   );
 }
