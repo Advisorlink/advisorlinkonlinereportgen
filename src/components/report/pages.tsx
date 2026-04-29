@@ -413,7 +413,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
         <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/10 to-transparent" />
         <div className="absolute bottom-5 left-6 right-6 text-navy-foreground">
           <div className="text-[10px] tracking-[0.25em] font-bold text-cyan mb-1">CLIMB, DON'T COAST</div>
-          <div className="text-lg leading-tight max-w-sm font-medium">
+          <div className="text-lg leading-tight max-w-sm font-medium font-heading">
             Make sure you can still climb the mountain. Don't be the one stuck in the bus taking photos.
           </div>
         </div>
