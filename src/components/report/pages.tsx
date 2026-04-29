@@ -206,7 +206,7 @@ export function WhoWeArePage() {
               <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
             </svg>
              <div>
-              <div className="text-sm font-bold text-navy leading-tight">Google Reviews</div>
+              <div className="text-sm font-semibold text-navy leading-tight">Google Reviews</div>
               <div className="flex flex-row items-center gap-1.5 mt-2 whitespace-nowrap">
                  <span className="inline-flex items-center">
                    {[0,1,2,3,4].map(i => (
