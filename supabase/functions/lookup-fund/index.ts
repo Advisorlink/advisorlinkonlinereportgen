@@ -88,6 +88,7 @@ function hostFrom(url: string): string | null {
 }
 
 function fundHostTokens(fundName: string): string[] {
+  const compactName = fundName.toLowerCase().replace(/[^a-z0-9]/g, "");
   const words = fundName
     .toLowerCase()
     .replace(/&/g, " and ")
@@ -105,7 +106,9 @@ function fundHostTokens(fundName: string): string[] {
         "and",
       ].includes(w)
     );
-  return Array.from(new Set([words.join(""), ...words].filter((w) => w.length >= 4)));
+  return Array.from(
+    new Set([compactName, words.join(""), ...words].filter((w) => w.length >= 4)),
+  );
 }
 
 function isOfficialFundUrl(url: string, fundName: string, officialHosts: string[]): boolean {
