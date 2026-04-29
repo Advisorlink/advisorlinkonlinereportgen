@@ -573,7 +573,7 @@ Deno.serve(async (req) => {
         (url) => isOfficialFundUrl(url, fundName, officialHosts),
       );
     }
-    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 8);
+    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 12);
 
     // ---- Step 2: actually scrape those pages and extract figures ----
     const pages: { url: string; text: string }[] = [];
