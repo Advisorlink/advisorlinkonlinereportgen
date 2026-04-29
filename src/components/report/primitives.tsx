@@ -1,4 +1,8 @@
 import { cn } from "@/lib/utils";
+import {
+  AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, ReferenceLine, Legend,
+} from "recharts";
 
 export function PageShell({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn("report-page", className)}>{children}</div>;
