@@ -433,7 +433,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="ACCUMULATION" />
-      <h2 className="text-3xl font-heading">Projection to retirement</h2>
+      <h2 className="text-3xl font-bold font-heading">Projection to retirement</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Year-by-year projection of the current fund vs the comparison scenario, including periodic market dips.
       </p>
