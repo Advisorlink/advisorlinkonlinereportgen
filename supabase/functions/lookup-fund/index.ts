@@ -58,11 +58,45 @@ function isAllowedOfficialCandidate(url: string): boolean {
   }
 }
 
-async function fetchPageText(url: string, timeoutMs = 12000): Promise<string | null> {
-  const jinaUrl = `https://r.jina.ai/http://r.jina.ai/http://${url}`;
+const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
+
+async function fetchPageText(url: string, timeoutMs = 45000): Promise<string | null> {
+  // Use Firecrawl for full JS rendering — same content Gemini.google.com sees
+  if (FIRECRAWL_API_KEY) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), timeoutMs);
+      const resp = await fetch("https://api.firecrawl.dev/v2/scrape", {
+        method: "POST",
+        signal: ctrl.signal,
+        headers: {
+          Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url,
+          formats: ["markdown"],
+          onlyMainContent: true,
+          waitFor: 2500,
+        }),
+      });
+      clearTimeout(t);
+      if (resp.ok) {
+        const j = await resp.json();
+        const md: string = j?.data?.markdown ?? j?.markdown ?? "";
+        if (md && md.length > 200) return md.replace(/\s+/g, " ").trim();
+      } else {
+        console.warn("Firecrawl scrape non-ok", url, resp.status, await resp.text().catch(() => ""));
+      }
+    } catch (e) {
+      console.warn("Firecrawl scrape failed", url, e instanceof Error ? e.message : e);
+    }
+  }
+
+  // Fallback: plain fetch
   try {
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    const t = setTimeout(() => ctrl.abort(), 12000);
     const resp = await fetch(url, {
       redirect: "follow",
       signal: ctrl.signal,
@@ -76,28 +110,39 @@ async function fetchPageText(url: string, timeoutMs = 12000): Promise<string | n
     if (resp.ok) {
       const html = await resp.text();
       const text = textFromHtml(html);
-      if (text.length > 300 && !/^#?\s*404\s+-\s+page not found/i.test(text)) return text;
+      if (text.length > 300) return text;
     }
   } catch (e) {
-    console.warn("fetchPageText failed", url, e instanceof Error ? e.message : e);
+    console.warn("plain fetch failed", url, e instanceof Error ? e.message : e);
   }
+  return null;
+}
 
+async function firecrawlSearch(query: string, limit = 6): Promise<string[]> {
+  if (!FIRECRAWL_API_KEY) return [];
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), timeoutMs + 8000);
-    const resp = await fetch(jinaUrl, {
-      redirect: "follow",
-      signal: ctrl.signal,
-      headers: { "Accept": "text/plain" },
+    const resp = await fetch("https://api.firecrawl.dev/v2/search", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query, limit }),
     });
-    clearTimeout(t);
-    if (!resp.ok) return null;
-    const text = await resp.text();
-    if (/Warning:\s*Target URL returned error\s+404/i.test(text) || /^Title:\s*404\s+-\s+Page Not Found/i.test(text)) return null;
-    return text.replace(/\s+/g, " ").trim();
+    if (!resp.ok) {
+      console.warn("Firecrawl search non-ok", resp.status, await resp.text().catch(() => ""));
+      return [];
+    }
+    const j = await resp.json();
+    const results = j?.data?.web ?? j?.data ?? j?.web ?? [];
+    const urls: string[] = [];
+    for (const r of Array.isArray(results) ? results : []) {
+      if (typeof r?.url === "string") urls.push(r.url);
+    }
+    return urls;
   } catch (e) {
-    console.warn("fallback fetchPageText failed", url, e instanceof Error ? e.message : e);
-    return null;
+    console.warn("Firecrawl search failed", e instanceof Error ? e.message : e);
+    return [];
   }
 }
 
@@ -278,16 +323,32 @@ Deno.serve(async (req) => {
     );
     if (!step1) return jsonResponse({ error: "AI did not return source URLs" }, 502);
 
-    const candidateUrls = urlsFrom(step1.sourceUrls).filter(isAllowedOfficialCandidate).slice(0, 6);
+    let candidateUrls = urlsFrom(step1.sourceUrls).filter(isAllowedOfficialCandidate);
+
+    // Augment with Firecrawl web search — finds the freshest performance pages
+    const fundName = String(step1.fundName ?? "").trim();
+    const optionLabel = String(step1.modelLabel ?? "").trim();
+    if (fundName) {
+      const searchQueries = [
+        `${fundName} ${optionLabel} 5 year performance ${CURRENT_YEAR}`,
+        `${fundName} investment performance monthly update ${CURRENT_YEAR}`,
+        `${fundName} ${optionLabel} returns as at ${CURRENT_YEAR}`,
+      ];
+      for (const q of searchQueries) {
+        const found = (await firecrawlSearch(q, 5)).filter(isAllowedOfficialCandidate);
+        candidateUrls.push(...found);
+      }
+    }
+    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 8);
 
     // ---- Step 2: actually scrape those pages and extract figures ----
     const pages: { url: string; text: string }[] = [];
     for (const url of candidateUrls) {
       const text = await fetchPageText(url);
       if (text && text.length > 200) {
-        // truncate to keep prompt size sane
-        pages.push({ url, text: text.slice(0, 18000) });
+        pages.push({ url, text: text.slice(0, 22000) });
       }
+      if (pages.length >= 5) break;
     }
 
     let figures: Record<string, unknown> = {
