@@ -1,8 +1,9 @@
-// Edge function: look up Australian super fund details by actually scraping the
-// official fund website. Two-step pipeline:
-//   1) AI parses the user text + finds official source URLs (Google grounding).
-//   2) We fetch those URLs ourselves and ask AI to extract the 5-year p.a. NET
-//      return for the exact allocated investment option from the real page text.
+// Edge function: look up Australian super fund details by using Gemini 3 with
+// Google Search lookup, then scraping the returned official pages ourselves.
+// Two-step pipeline:
+//   1) Gemini 3 parses the user text + finds official source URLs using lookup.
+//   2) We fetch only those pages that actually load and ask AI to extract the
+//      5-year p.a. return for the exact allocated option from the real text.
 // This works for ANY Australian super fund, not a hard-coded one.
 
 const corsHeaders = {
@@ -41,20 +42,21 @@ function urlsFrom(value: unknown): string[] {
   return Array.from(new Set(raw.match(/https?:\/\/[^\s)\],;"']+/g) ?? []));
 }
 
-const OFFICIAL_DOMAINS = [
-  "australiansuper.com", "hostplus.com.au", "hesta.com.au", "rest.com.au",
-  "unisuper.com.au", "aware.com.au", "cbussuper.com.au", "art.com.au",
-  "australianretirementtrust.com.au", "mlc.com.au", "amp.com.au",
-  "colonialfirststate.com.au", "mercersuper.com.au", "vanguard.com.au",
-  "brightersuper.com.au", "spiritsuper.com.au", "equipsuper.com.au",
-  "csc.gov.au", "gesb.wa.gov.au", "qsuper.qld.gov.au", "smartmonday.com.au",
-  "netwealth.com.au", "hub24.com.au", "macquarie.com.au", "caresuper.com.au",
-  "ngssuper.com.au", "vissf.com.au", "firststatesuper.com.au", "telstrasuper.com.au",
-  "russellinvestments.com", "perpetual.com.au", "iag.com.au",
+const BLOCKED_SOURCE_DOMAINS = [
+  "google.com", "bing.com", "vertexaisearch.cloud.google.com", "superratings.com.au",
+  "canstar.com.au", "chantwest.com.au", "rainmaker.com.au", "superreview.com.au",
+  "moneymag.com.au", "finder.com.au", "mozo.com.au", "stockspot.com.au",
+  "wikipedia.org", "reddit.com", "facebook.com", "linkedin.com", "youtube.com",
 ];
 
-const isOfficialUrl = (url: string) =>
-  OFFICIAL_DOMAINS.some(d => url.toLowerCase().includes(d));
+function isAllowedOfficialCandidate(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+    return !BLOCKED_SOURCE_DOMAINS.some(d => host === d || host.endsWith(`.${d}`));
+  } catch {
+    return false;
+  }
+}
 
 async function fetchPageText(url: string, timeoutMs = 12000): Promise<string | null> {
   try {
