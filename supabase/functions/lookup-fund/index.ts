@@ -609,15 +609,48 @@ Deno.serve(async (req) => {
       // Hard verification: the percentage we extracted must literally appear
       // in the scraped page text near a 5-year mention and the option label.
       const allText = pages.map((p) => p.text).join("\n");
+      const verifyNotes: string[] = [];
       if (
         figures.grossReturn != null &&
         !returnAppearsNearOption(allText, figures.grossReturn, step1.modelLabel)
       ) {
         figures.grossReturn = null;
-        figures.sourceNotes = `${
-          figures.sourceNotes ?? ""
-        }\nVerification: extracted 5-year return could not be located near "${step1.modelLabel}" + "5 year" in the official page text, so it was discarded.`
-          .trim();
+        verifyNotes.push(
+          `Extracted 5-year return could not be located near "${step1.modelLabel}" + "5 year" in the official page text, so it was discarded.`,
+        );
+      }
+      // Apply the SAME literal-text verification to fees & growth assets.
+      if (
+        figures.adminFeePct != null &&
+        !pctAppearsInText(allText, figures.adminFeePct)
+      ) {
+        figures.adminFeePct = null;
+        verifyNotes.push(
+          "Asset-based admin fee % could not be located in the official page text, so it was discarded.",
+        );
+      }
+      if (
+        figures.growthAssetsPct != null &&
+        !pctAppearsInText(allText, figures.growthAssetsPct, step1.modelLabel)
+      ) {
+        figures.growthAssetsPct = null;
+        verifyNotes.push(
+          `Growth assets % could not be located near "${step1.modelLabel}" in the official page text, so it was discarded.`,
+        );
+      }
+      if (
+        figures.adminFeeFlat != null &&
+        !flatFeeAppearsInText(allText, figures.adminFeeFlat)
+      ) {
+        figures.adminFeeFlat = null;
+        verifyNotes.push(
+          "Flat admin fee $ could not be located in the official page text, so it was discarded.",
+        );
+      }
+      if (verifyNotes.length) {
+        figures.sourceNotes = `${figures.sourceNotes ?? ""}\nVerification: ${
+          verifyNotes.join(" ")
+        }`.trim();
       }
     } else {
       figures.sourceNotes =
