@@ -837,7 +837,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
               </div>
             </div>
             <div className="text-[15px] font-black leading-[1.25]">
-              Call your Senior Research Consultant today for a no-obligation chat.
+              Call your <span className="text-cyan">Senior Research Consultant</span> today for a no-obligation chat.
             </div>
           </div>
 
