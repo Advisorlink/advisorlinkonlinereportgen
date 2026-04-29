@@ -213,7 +213,6 @@ export function WhoWeArePage() {
                      <Star key={i} className="w-3.5 h-3.5 fill-[#FBBC05] text-[#FBBC05]" />
                    ))}
                  </span>
-                 <span className="text-[11px] font-semibold text-foreground inline-block">5.0 stars</span>
                </div>
             </div>
           </div>
