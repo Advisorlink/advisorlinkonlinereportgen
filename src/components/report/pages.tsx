@@ -457,7 +457,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
           <div className="h-4 w-px bg-border" />
           <div className="flex items-baseline gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Comparison</span>
-            <span className="text-base font-black text-cyan tabular-nums">{((s.comparisonReturn - 0.025 - s.comparisonAdminPct - Math.min(i.superBalance * 0.0176, 5000) / i.superBalance) * 100).toFixed(2)}%</span>
+            <span className="text-base font-black text-cyan tabular-nums">{(cmpNetReturn * 100).toFixed(2)}%</span>
           </div>
         </div>
       </div>
