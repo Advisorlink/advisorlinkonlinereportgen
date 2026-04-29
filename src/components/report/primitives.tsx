@@ -122,3 +122,142 @@ export function Gauge({ value, max = 100, label }: { value: number; max?: number
     </div>
   );
 }
+
+// ---- Charts ----
+const fmtAxisMoney = (n: number) => {
+  if (Math.abs(n) >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (Math.abs(n) >= 1_000) return `$${Math.round(n / 1_000)}k`;
+  return `$${Math.round(n)}`;
+};
+
+export function AccumulationChart({
+  data, retirementAge, goalBalance,
+}: {
+  data: { age: number; existing: number; comparison: number }[];
+  retirementAge: number;
+  goalBalance: number;
+}) {
+  return (
+    <div style={{ width: "100%", height: 230 }}>
+      <ResponsiveContainer>
+        <AreaChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
+          <defs>
+            <linearGradient id="exFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(215 60% 12%)" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="hsl(215 60% 12%)" stopOpacity={0.04} />
+            </linearGradient>
+            <linearGradient id="cmpFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(195 95% 50%)" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="hsl(195 95% 50%)" stopOpacity={0.04} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid stroke="hsl(215 20% 92%)" vertical={false} />
+          <XAxis dataKey="age" tick={{ fill: "hsl(215 16% 45%)", fontSize: 10 }} tickLine={false} axisLine={{ stroke: "hsl(215 20% 88%)" }} />
+          <YAxis tickFormatter={fmtAxisMoney} tick={{ fill: "hsl(215 16% 45%)", fontSize: 10 }} tickLine={false} axisLine={false} width={48} />
+          <Tooltip
+            formatter={(v: number) => fmtAxisMoney(v)}
+            labelFormatter={(l) => `Age ${l}`}
+            contentStyle={{ background: "white", border: "1px solid hsl(215 20% 88%)", borderRadius: 8, fontSize: 11 }}
+          />
+          <ReferenceLine y={goalBalance} stroke="hsl(45 90% 50%)" strokeDasharray="4 4" label={{ value: "Goal", fill: "hsl(45 70% 35%)", fontSize: 10, position: "right" }} />
+          <ReferenceLine x={retirementAge} stroke="hsl(215 16% 65%)" strokeDasharray="2 4" />
+          <Area type="monotone" dataKey="existing" stroke="hsl(215 60% 12%)" strokeWidth={2} fill="url(#exFill)" name="Current" />
+          <Area type="monotone" dataKey="comparison" stroke="hsl(195 95% 50%)" strokeWidth={2} fill="url(#cmpFill)" name="Comparison" />
+          <Legend iconType="plainline" wrapperStyle={{ fontSize: 10, paddingTop: 4 }} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function WithdrawalChart({
+  existing, comparison,
+}: {
+  existing: { age: number; balance: number }[];
+  comparison: { age: number; balance: number }[];
+}) {
+  // Merge both series by age
+  const ages = new Set<number>();
+  existing.forEach(r => ages.add(r.age));
+  comparison.forEach(r => ages.add(r.age));
+  const sorted = Array.from(ages).sort((a, b) => a - b);
+  const exMap = new Map(existing.map(r => [r.age, r.balance]));
+  const cmpMap = new Map(comparison.map(r => [r.age, r.balance]));
+  const data = sorted.map(age => ({
+    age,
+    existing: exMap.get(age) ?? null,
+    comparison: cmpMap.get(age) ?? null,
+  }));
+  return (
+    <div style={{ width: "100%", height: 220 }}>
+      <ResponsiveContainer>
+        <LineChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
+          <CartesianGrid stroke="hsl(215 20% 92%)" vertical={false} />
+          <XAxis dataKey="age" tick={{ fill: "hsl(215 16% 45%)", fontSize: 10 }} tickLine={false} axisLine={{ stroke: "hsl(215 20% 88%)" }} />
+          <YAxis tickFormatter={fmtAxisMoney} tick={{ fill: "hsl(215 16% 45%)", fontSize: 10 }} tickLine={false} axisLine={false} width={48} />
+          <Tooltip
+            formatter={(v: number) => fmtAxisMoney(v)}
+            labelFormatter={(l) => `Age ${l}`}
+            contentStyle={{ background: "white", border: "1px solid hsl(215 20% 88%)", borderRadius: 8, fontSize: 11 }}
+          />
+          <Line type="monotone" dataKey="existing" stroke="hsl(215 60% 12%)" strokeWidth={2.2} dot={false} name="Current drawdown" />
+          <Line type="monotone" dataKey="comparison" stroke="hsl(195 95% 50%)" strokeWidth={2.2} dot={false} name="Comparison drawdown" />
+          <Legend iconType="plainline" wrapperStyle={{ fontSize: 10, paddingTop: 4 }} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function FeeRow({
+  label, current, comparison, format = (n: number) => `$${Math.round(n).toLocaleString()}`,
+  highlight = false,
+}: {
+  label: string; current: number; comparison: number;
+  format?: (n: number) => string;
+  highlight?: boolean;
+}) {
+  const diff = current - comparison;
+  return (
+    <div className={cn("grid grid-cols-[1.2fr_1fr_1fr_1fr] items-center gap-3 py-2 border-b border-border last:border-0",
+      highlight && "font-bold text-navy")}>
+      <div className="text-xs">{label}</div>
+      <div className="text-xs tabular-nums text-right">{format(current)}</div>
+      <div className="text-xs tabular-nums text-right">{format(comparison)}</div>
+      <div className={cn("text-xs tabular-nums text-right font-semibold",
+        diff > 0 ? "text-destructive" : diff < 0 ? "text-online" : "text-muted-foreground")}>
+        {diff === 0 ? "—" : (diff > 0 ? "+" : "") + format(Math.abs(diff)).replace(/^-/, "")}
+      </div>
+    </div>
+  );
+}
+
+export function FeeTableHeader() {
+  return (
+    <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-3 pb-2 border-b-2 border-navy text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+      <div>Fee</div>
+      <div className="text-right">Current</div>
+      <div className="text-right">Comparison</div>
+      <div className="text-right">Difference</div>
+    </div>
+  );
+}
+
+export function StatPill({ label, value, tone = "navy" }: { label: string; value: string; tone?: "navy" | "cyan" | "gold" }) {
+  const map = { navy: "bg-navy text-navy-foreground", cyan: "bg-cyan text-cyan-foreground", gold: "bg-[hsl(45_90%_50%)] text-navy" };
+  return (
+    <div className="flex items-center gap-2">
+      <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase", map[tone])}>{label}</span>
+      <span className="text-sm font-bold text-navy tabular-nums">{value}</span>
+    </div>
+  );
+}
+
+export function Disclaimer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-lg border border-border bg-secondary/40 p-4 text-[10px] leading-relaxed text-muted-foreground">
+      <div className="font-bold text-navy uppercase tracking-wider text-[10px] mb-1.5">Important · General advice only</div>
+      {children}
+    </div>
+  );
+}
