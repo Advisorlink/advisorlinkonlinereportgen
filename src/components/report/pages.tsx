@@ -522,6 +522,16 @@ export function IncomePage({ s }: { s: ReportSummary }) {
         <div className="space-y-3">
           <ComparisonBar label="Current" value={s.totalIncomeExisting} max={maxIncome} displayValue={fmtMoney(s.totalIncomeExisting)} color="navy" />
           <ComparisonBar label="Comparison" value={s.totalIncomeComparison} max={maxIncome} displayValue={fmtMoney(s.totalIncomeComparison)} color="cyan" />
+          {(() => {
+            const extraYears = Math.max(0, s.yearsIncomeComparison - s.yearsIncomeExisting);
+            if (extraYears <= 0) return null;
+            return (
+              <div className="mt-2 flex items-center justify-between rounded-md bg-cyan/10 px-3 py-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-navy">Additional years of income</span>
+                <span className="text-base font-black text-cyan tabular-nums">+{extraYears} yrs</span>
+              </div>
+            );
+          })()}
         </div>
       </SectionCard>
 
