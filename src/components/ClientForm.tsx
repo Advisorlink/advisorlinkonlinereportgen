@@ -121,6 +121,34 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
               <p className="text-[10px] text-muted-foreground">
                 AI searches the web for the latest fees & returns, then fills the fields below. Always review before sending.
               </p>
+              {lastResult && (
+                <div className="mt-2 rounded-md border border-border bg-muted/40 p-2 space-y-1">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sources</div>
+                  {Array.isArray(lastResult.sourceUrls) && (lastResult.sourceUrls as string[]).length > 0 ? (
+                    <ul className="space-y-1">
+                      {(lastResult.sourceUrls as string[]).map((u, i) => (
+                        <li key={i} className="text-[11px] break-all">
+                          <a href={u} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:no-underline">
+                            {u}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground">No source URL was returned.</p>
+                  )}
+                  {typeof lastResult.sourceNotes === "string" && lastResult.sourceNotes.trim() && (
+                    <p className="text-[10px] text-muted-foreground whitespace-pre-line pt-1 border-t border-border/60">
+                      {lastResult.sourceNotes}
+                    </p>
+                  )}
+                  {typeof lastResult.returnEvidenceText === "string" && lastResult.returnEvidenceText.trim() && (
+                    <p className="text-[10px] italic text-muted-foreground pt-1 border-t border-border/60">
+                      Return evidence: “{lastResult.returnEvidenceText}”
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </Group>
           <Group title="Personal">
