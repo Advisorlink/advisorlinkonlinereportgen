@@ -814,10 +814,10 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
       >
         {/* Decorative glow */}
         <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/25 blur-3xl pointer-events-none" />
-        <div className="absolute right-1/3 -bottom-20 w-56 h-56 rounded-full bg-cyan/10 blur-3xl pointer-events-none" />
+        <div className="absolute -left-20 -bottom-24 w-64 h-64 rounded-full bg-cyan/10 blur-3xl pointer-events-none" />
         {/* Subtle grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{
             backgroundImage:
               "linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)",
@@ -827,32 +827,38 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
         {/* Accent bar */}
         <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-cyan via-cyan/70 to-cyan/30" />
 
-        <div className="relative px-6 py-5">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
-            <div className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan">
-              Ready to take the next step?
+        <div className="relative grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-6 px-7 py-6">
+          {/* Left: message */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-2 mb-2.5">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan" />
+              <div className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan">
+                Ready to take the next step?
+              </div>
+            </div>
+            <div className="text-[22px] font-black leading-[1.15]">
+              Call your Senior Research Consultant today for a no-obligation chat.
             </div>
           </div>
 
-          <div className="text-2xl font-black leading-tight max-w-xl">
-            Call your Senior Research Consultant today for a no-obligation chat.
-          </div>
-
-          <div className="mt-4">
-            <div className="text-base font-black leading-tight">Travis Seckod</div>
-            <div className="text-[11px] uppercase tracking-wider text-cyan/90 font-bold">
+          {/* Right: consultant card */}
+          <div className="rounded-xl bg-white/[0.06] border border-white/10 backdrop-blur-sm px-5 py-4">
+            <div className="text-[9.5px] font-black uppercase tracking-[0.22em] text-cyan/90 mb-1.5">
+              Your Consultant
+            </div>
+            <div className="text-lg font-black leading-tight">Travis Seckod</div>
+            <div className="text-[10.5px] uppercase tracking-wider text-navy-foreground/70 font-semibold mt-0.5">
               Director · Senior Research
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px]">
-              <a href="tel:0485991688" className="inline-flex items-center gap-2 font-black text-cyan">
-                <span aria-hidden>☎</span>
-                <span className="tabular-nums tracking-wide">0485 991 688</span>
+            <div className="mt-3 pt-3 border-t border-white/10 space-y-2">
+              <a href="tel:0485991688" className="flex items-center gap-2.5 group">
+                <span className="flex-shrink-0 h-7 w-7 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-xs">☎</span>
+                <span className="text-[13px] font-black tabular-nums tracking-wide">0485 991 688</span>
               </a>
-              <a href="mailto:admin@advisorlinkonline.com.au" className="inline-flex items-center gap-2 font-semibold text-navy-foreground/90 hover:text-cyan">
-                <span aria-hidden className="opacity-80">✉</span>
-                <span>admin@advisorlinkonline.com.au</span>
+              <a href="mailto:admin@advisorlinkonline.com.au" className="flex items-center gap-2.5 group">
+                <span className="flex-shrink-0 h-7 w-7 rounded-full bg-white/10 text-cyan flex items-center justify-center text-xs">✉</span>
+                <span className="text-[12px] font-semibold break-all">admin@advisorlinkonline.com.au</span>
               </a>
             </div>
           </div>
