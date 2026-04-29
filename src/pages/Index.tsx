@@ -84,7 +84,7 @@ export default function Index() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-6 grid h-[calc(100vh-64px)] grid-cols-1 gap-6 overflow-hidden lg:grid-cols-[420px_1fr]">
+      <main className="max-w-7xl mx-auto px-6 py-6 grid h-[calc(100vh-64px)] grid-cols-1 grid-rows-[minmax(280px,42vh)_1fr] gap-6 overflow-hidden lg:grid-cols-[420px_1fr] lg:grid-rows-1">
         <aside className="no-print min-h-0 overflow-y-auto pr-2 pb-6">
           <ClientForm value={inputs} onChange={setInputs} />
           <p className="mt-3 text-[11px] text-muted-foreground">
