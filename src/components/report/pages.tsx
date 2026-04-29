@@ -797,6 +797,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
         </div>
       </SectionCard>
 
+      <Disclaimer>
         Advisor Link Online is an independent education and referral service and is not licensed to provide financial advice.
         This Super Performance Report contains factual information only and does not constitute personal advice. Eligibility for
         a referral is based solely on the projected extra benefit shown in this report and does not guarantee a particular outcome.
