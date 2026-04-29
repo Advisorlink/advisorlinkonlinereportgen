@@ -115,7 +115,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                 />
                 <Button onClick={runLookup} disabled={loading} className="w-full">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  <span className="ml-2">{loading ? "Searching…" : "Auto-fill"}</span>
+                  <span className="ml-2">{loading ? "Searching…" : "START SEARCH"}</span>
                 </Button>
               </div>
               <p className="text-[10px] text-muted-foreground">
