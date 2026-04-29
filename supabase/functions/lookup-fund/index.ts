@@ -236,7 +236,7 @@ const STEP2_TOOL = [{
       properties: {
         adminFeeFlat: { type: ["number", "null"] },
         adminFeePct: { type: ["number", "null"], description: "Decimal e.g. 0.0035" },
-        grossReturn: { type: ["number", "null"], description: "Decimal e.g. 0.0633 — 5yr NET p.a." },
+        grossReturn: { type: ["number", "null"], description: "Decimal e.g. 0.0633 — exact 5yr p.a. return shown on the website" },
         growthAssetsPct: { type: ["number", "null"], description: "Decimal e.g. 0.70" },
         investmentRiskProfile: { type: ["string", "null"] },
         returnEvidenceText: { type: ["string", "null"] },
@@ -272,7 +272,7 @@ Deno.serve(async (req) => {
     );
     if (!step1) return jsonResponse({ error: "AI did not return source URLs" }, 502);
 
-    const candidateUrls = urlsFrom(step1.sourceUrls).filter(isOfficialUrl).slice(0, 4);
+    const candidateUrls = urlsFrom(step1.sourceUrls).filter(isAllowedOfficialCandidate).slice(0, 6);
 
     // ---- Step 2: actually scrape those pages and extract figures ----
     const pages: { url: string; text: string }[] = [];
@@ -329,8 +329,8 @@ Deno.serve(async (req) => {
       grossReturn: figures.grossReturn ?? null,
       growthAssetsPct: figures.growthAssetsPct ?? null,
       investmentRiskProfile: figures.investmentRiskProfile ?? null,
-      sourceNotes: [figures.sourceNotes, ...candidateUrls.map(u => `• ${u}`)].filter(Boolean).join("\n"),
-      sourceUrls: candidateUrls,
+      sourceNotes: [figures.sourceNotes, ...pages.map(p => `• ${p.url}`)].filter(Boolean).join("\n"),
+      sourceUrls: pages.map(p => p.url),
       returnEvidenceText: figures.returnEvidenceText ?? null,
       scrapedPageCount: pages.length,
     };
