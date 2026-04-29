@@ -13,7 +13,9 @@ import {
 } from "./primitives";
 import riskIllustration from "@/assets/risk-illustration.jpg";
 import asicRegistered from "@/assets/asic-registered.png";
-import trustedAdvisers from "@/assets/trusted-advisers.png";
+import logoInheritance from "@/assets/logo-inheritance.png";
+import logoMyAdvice from "@/assets/logo-myadvice.png";
+import logoPure from "@/assets/logo-pure.png";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
