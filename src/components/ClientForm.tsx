@@ -94,7 +94,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
       </button>
       {!collapsed && (
         <div className="space-y-5">
-          <Group title="AI Fund Lookup">
+          <Group title="Fund Lookup">
             <div className="col-span-2 space-y-2">
               <Label className="text-[11px] text-muted-foreground">
                 Describe the client's super (fund, option, age, balance, income…)
@@ -115,7 +115,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                 />
                 <Button onClick={runLookup} disabled={loading} className="w-full">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  <span className="ml-2">{loading ? "Searching…" : "Auto-fill"}</span>
+                  <span className="ml-2">{loading ? "Searching…" : "START SEARCH"}</span>
                 </Button>
               </div>
               <p className="text-[10px] text-muted-foreground">
