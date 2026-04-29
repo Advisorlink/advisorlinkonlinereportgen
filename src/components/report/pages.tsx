@@ -637,7 +637,7 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
             </div>
             <div className="mt-1 text-4xl font-black text-cyan tabular-nums">{fmtMoney(totalBenefit)}</div>
             <div className="text-[11px] text-muted-foreground mt-1">
-              Combined lifetime benefit of switching from the current to the comparison scenario.
+              Potential Combined lifetime benefit after receiving licenced financial advice.
             </div>
           </div>
           <div className={cnTone(eligible)}>
