@@ -46,7 +46,7 @@ FUND FIELDS (Australian context, from official sources):
 - modelLabel: investment option name exactly as the fund names it (e.g. "Balanced", "High Growth", "Indexed Balanced").
 - adminFeeFlat: annual flat administration fee in AUD (e.g. 117 means $117/yr). If the fund only charges weekly, multiply by 52.
 - adminFeePct: annual percentage admin/asset-based fee as a DECIMAL (0.0035 = 0.35%). Include any asset-based admin or trustee fee. Exclude investment fees.
-- grossReturn: most recent 5-year p.a. NET investment return for the chosen option, as a DECIMAL (0.078 = 7.8% p.a.). If 5yr unavailable, use 10yr and note it.
+- grossReturn: most recent 5-year p.a. NET investment return (after investment fees and tax, as published by the fund) for the chosen option, as a DECIMAL (0.078 = 7.8% p.a.). DO NOT use gross/before-fee returns. If the fund only publishes a "net of investment fees and tax" return, use that. If 5yr unavailable, use 10yr and note it in sourceNotes.
 - growthAssetsPct: strategic growth-asset allocation as a DECIMAL (0.70 = 70%).`;
 
     const tools = [
@@ -63,7 +63,7 @@ FUND FIELDS (Australian context, from official sources):
               modelLabel: { type: ["string", "null"] },
               adminFeeFlat: { type: ["number", "null"] },
               adminFeePct: { type: ["number", "null"], description: "Decimal e.g. 0.0035" },
-              grossReturn: { type: ["number", "null"], description: "Decimal e.g. 0.078 — 5yr net p.a." },
+              grossReturn: { type: ["number", "null"], description: "Decimal e.g. 0.078 — 5yr NET p.a. return (after investment fees and tax). Never gross." },
               growthAssetsPct: { type: ["number", "null"], description: "Decimal e.g. 0.70" },
               age: { type: ["number", "null"] },
               retirementAge: { type: ["number", "null"] },
