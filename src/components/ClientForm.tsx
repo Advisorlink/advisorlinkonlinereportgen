@@ -23,7 +23,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
             <Field label="Age"><NumInput v={value.age} on={n => set("age", n)} /></Field>
             <Field label="Retirement age"><NumInput v={value.retirementAge} on={n => set("retirementAge", n)} /></Field>
             <Field label="Annual income"><NumInput v={value.annualIncome} on={n => set("annualIncome", n)} /></Field>
-            <Field label="Goal balance"><NumInput v={value.goalBalance} on={n => set("goalBalance", n)} /></Field>
+            <Field label="Target balance"><NumInput v={value.goalBalance} on={n => set("goalBalance", n)} /></Field>
           </Group>
           <Group title="Desired retirement income">
             <Field label="Amount"><NumInput v={value.desiredIncomeAmount} on={n => set("desiredIncomeAmount", n)} /></Field>
