@@ -115,7 +115,7 @@ export function WhoWeArePage() {
       <h2 className="text-3xl font-black text-navy">Who we are & why people choose us</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Advisor Link is a 100% ASIC-regulated research and referral company. We don't sell
-        products — we help you understand your super and, if you choose, connect you with a
+        products - we help you understand your super and, if you choose, connect you with a
         licensed adviser from our trusted network.
       </p>
 
@@ -135,7 +135,7 @@ export function WhoWeArePage() {
             </div>
             <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
               Registered with the Australian Securities &amp; Investments Commission. We operate
-              as an independent education and referral service — never a product issuer.
+              as an independent education and referral service - never a product issuer.
             </p>
           </div>
         </div>
@@ -364,8 +364,8 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           <Row label="Growth assets" value={fmtPct(i.growthAssetsPct, 0)} />
           <Row label="Investment risk profile" value={i.investmentRiskProfile || s.riskProfile} />
           <Row label="5-year net return" value={fmtPct(i.grossReturn)} />
-          <Row label="Admin fee — flat" value={fmtMoney(i.adminFeeFlat)} />
-          <Row label="Admin fee — % of balance" value={fmtPct(i.adminFeePct, 2)} />
+          <Row label="Admin fee - flat" value={fmtMoney(i.adminFeeFlat)} />
+          <Row label="Admin fee - % of balance" value={fmtPct(i.adminFeePct, 2)} />
           <Row label="Effective admin fee %" value={fmtPct(s.existingAdminPct, 2)} />
           
         </SectionCard>
@@ -373,9 +373,9 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           <Row label="Scenario" value="Aligned to risk profile" />
           <Row label="Risk profile" value={s.riskProfile} />
           <Row label="Gross return (tiered by profile)" value={fmtPct(s.comparisonReturn)} />
-          <Row label="Admin fee — flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
-          <Row label="Admin fee — flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
-          <Row label="Admin fee — tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
+          <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
+          <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
+          <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
           <Row label="Optional annual advice fee" value="1.76%" />
           <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(i.superBalance))} />
           
@@ -439,8 +439,8 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
 
       <div className="grid grid-cols-3 gap-3 mb-5">
         <KpiCard label="Current Balance" value={fmtMoney(s.startingBalance)} sub="Today" />
-        <KpiCard label="Projected — Current" value={fmtMoney(s.projectedExisting)} sub={`At age ${s.retirementAge}`} />
-        <KpiCard label="Projected — Comparison" value={fmtMoney(s.projectedComparison)} sub={`At age ${s.retirementAge}`} accent />
+        <KpiCard label="Projected - Current" value={fmtMoney(s.projectedExisting)} sub={`At age ${s.retirementAge}`} />
+        <KpiCard label="Projected - Comparison" value={fmtMoney(s.projectedComparison)} sub={`At age ${s.retirementAge}`} accent />
       </div>
 
       <SectionCard title="Balance projection" icon="◆" className="mb-5">
@@ -507,7 +507,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
       <div className="grid grid-cols-3 gap-3 mb-5">
         <KpiCard label="Starting Balance" value={fmtMoney(s.projectedExisting)} sub="Projected at retirement" />
         <KpiCard label="Annual Withdrawal" value={fmtMoney(s.annualWithdrawal)} sub="Desired annual income" accent />
-        <KpiCard label="Total Income — Current" value={fmtMoney(s.totalIncomeExisting)} sub={`Over ${s.yearsIncomeExisting} yrs`} />
+        <KpiCard label="Total Income - Current" value={fmtMoney(s.totalIncomeExisting)} sub={`Over ${s.yearsIncomeExisting} yrs`} />
       </div>
 
       <SectionCard title="Drawdown projection" icon="◆" className="mb-5">
@@ -515,7 +515,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
       </SectionCard>
 
       <div className="grid grid-cols-2 gap-4">
-        <SectionCard title="Income sustainability — current">
+        <SectionCard title="Income sustainability - current">
           <div className="flex items-center gap-4">
             <div>
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Money lasts to age</div>
@@ -525,7 +525,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
             <div className="ml-auto"><Gauge value={s.yearsIncomeExisting} max={30} label={`${s.yearsIncomeExisting} yrs`} /></div>
           </div>
         </SectionCard>
-        <SectionCard title="Income sustainability — comparison">
+        <SectionCard title="Income sustainability - comparison">
           <div className="flex items-center gap-4">
             <div>
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Money lasts to age</div>
@@ -574,8 +574,8 @@ export function FeesAndDisclosurePage({ s }: { s: ReportSummary }) {
 
       <SectionCard title="Annual fee comparison (year 1)" icon="◆" className="mb-5">
         <FeeTableHeader />
-        <FeeRow label="Admin fee — flat" current={exFlat} comparison={cmpFlat} />
-        <FeeRow label="Admin fee — % of balance" current={exPctFee} comparison={cmpAdmin} />
+        <FeeRow label="Admin fee - flat" current={exFlat} comparison={cmpFlat} />
+        <FeeRow label="Admin fee - % of balance" current={exPctFee} comparison={cmpAdmin} />
         
         <FeeRow label="Advice fee (one-off, year 1)" current={0} comparison={cmpAdvice} />
         <FeeRow label="Total" current={exTotalFee} comparison={cmpTotalFee} highlight />

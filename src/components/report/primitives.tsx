@@ -236,7 +236,7 @@ export function FeeRow({
       <div className="text-xs tabular-nums text-right">{format(comparison)}</div>
       <div className={cn("text-xs tabular-nums text-right font-semibold",
         diff > 0 ? "text-destructive" : diff < 0 ? "text-online" : "text-muted-foreground")}>
-        {diff === 0 ? "—" : (diff > 0 ? "+" : "") + format(Math.abs(diff)).replace(/^-/, "")}
+        {diff === 0 ? "-" : (diff > 0 ? "+" : "") + format(Math.abs(diff)).replace(/^-/, "")}
       </div>
     </div>
   );

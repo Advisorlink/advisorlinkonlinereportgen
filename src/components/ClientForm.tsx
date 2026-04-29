@@ -176,8 +176,8 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
             <Field label="Super balance"><NumInput v={value.superBalance} on={n => set("superBalance", n)} /></Field>
             <Field label="Growth assets %"><PctInput v={value.growthAssetsPct} on={n => set("growthAssetsPct", n)} /></Field>
             <Field label="5-year net return %"><PctInput v={value.grossReturn} on={n => set("grossReturn", n)} /></Field>
-            <Field label="Admin fee — flat $"><NumInput v={value.adminFeeFlat} on={n => set("adminFeeFlat", n)} /></Field>
-            <Field label="Admin fee — %"><PctInput v={value.adminFeePct} on={n => set("adminFeePct", n)} /></Field>
+            <Field label="Admin fee - flat $"><NumInput v={value.adminFeeFlat} on={n => set("adminFeeFlat", n)} /></Field>
+            <Field label="Admin fee - %"><PctInput v={value.adminFeePct} on={n => set("adminFeePct", n)} /></Field>
             <Field label="Investment risk profile"><Input value={value.investmentRiskProfile || ""} onChange={e => set("investmentRiskProfile", e.target.value)} /></Field>
           </Group>
         </div>
