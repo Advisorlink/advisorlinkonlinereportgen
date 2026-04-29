@@ -48,12 +48,12 @@ export function CoverPage({ s }: { s: ReportSummary }) {
 
         <div className="relative flex items-start justify-between gap-4 text-base">
           <img src={logoUrl} alt="Advisor Link Online" className="h-9 w-auto" />
-          <div className="text-right text-[10px] leading-[1.45] opacity-85">
-            <div className="font-bold tracking-wide text-base">Advisor Link Pty Ltd</div>
-            <div className="text-sm">(07) 5241 1244</div>
-            <div className="text-sm">21 Upton Street,</div>
-            <div className="text-sm">Bundall QLD 4217</div>
-            <div className="text-sm">admin@advisorlinkonline.com.au</div>
+          <div className="text-right leading-[1.5] opacity-90">
+            <div className="font-bold tracking-wide text-lg">Advisor Link Pty Ltd</div>
+            <div className="text-base">(07) 5241 1244</div>
+            <div className="text-base">21 Upton Street,</div>
+            <div className="text-base">Bundall QLD 4217</div>
+            <div className="text-base">admin@advisorlinkonline.com.au</div>
           </div>
         </div>
 
