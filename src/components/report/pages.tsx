@@ -46,11 +46,15 @@ export function CoverPage({ s }: { s: ReportSummary }) {
         <div className="absolute -right-10 top-10 w-44 h-44 rounded-full bg-cyan/25 pointer-events-none" />
         <div className="absolute -left-20 -bottom-24 w-72 h-72 rounded-full bg-[hsl(225_85%_60%)]/15 blur-3xl pointer-events-none" />
 
-        <div className="relative flex items-center justify-between gap-4">
+        <div className="relative flex items-start justify-between gap-4">
           <img src={logoUrl} alt="Advisor Link Online" className="h-9 w-auto" />
-          <span className="text-[10px] font-bold tracking-[0.22em] uppercase opacity-70">
-            Super Performance Report
-          </span>
+          <div className="text-right text-[10px] leading-[1.45] opacity-85">
+            <div className="font-bold tracking-wide">Advisor Link Pty Ltd</div>
+            <div>(07) 5241 1244</div>
+            <div>21 Upton Street,</div>
+            <div>Bundall QLD 4217</div>
+            <div>admin@advisorlinkonline.com.au</div>
+          </div>
         </div>
 
         <div className="relative mt-8">
