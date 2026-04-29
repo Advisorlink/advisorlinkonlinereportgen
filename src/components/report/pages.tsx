@@ -449,12 +449,12 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
         <div className="flex items-center gap-6">
           <div className="flex items-baseline gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">Current</span>
-            <span className="text-base font-black text-white tabular-nums">{(s.existingNetReturn * 100).toFixed(2)}%</span>
+            <span className="text-base font-bold text-white tabular-nums">{(s.existingNetReturn * 100).toFixed(2)}%</span>
           </div>
           <div className="h-4 w-px bg-white/30" />
           <div className="flex items-baseline gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">Comparison</span>
-            <span className="text-base font-black text-cyan tabular-nums">{(cmpAfterFees * 100).toFixed(2)}%</span>
+            <span className="text-base font-bold text-cyan tabular-nums">{(cmpAfterFees * 100).toFixed(2)}%</span>
           </div>
         </div>
       </div>
