@@ -69,7 +69,42 @@ function hasVerifiedFiveYearReturn(sourceText: string, grossReturn: unknown, mod
   return false;
 }
 
+function extractFiveYearReturnFromEvidence(evidence: unknown, modelLabel: unknown): number | null {
+  const text = String(evidence ?? "");
+  if (!text.trim()) return null;
+  const tokens = optionTokens(modelLabel);
+  const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  const headerIndex = lines.findIndex(line => /\|/.test(line) && /(5|five)\s*[- ]?\s*(year|yr)/i.test(line));
+  const rowIndex = lines.findIndex((line, index) => index !== headerIndex && /\|/.test(line) && tokens.some(token => line.toLowerCase().includes(token)));
+  if (headerIndex >= 0 && rowIndex >= 0) {
+    const headers = lines[headerIndex].split("|").map(cell => cell.trim().toLowerCase()).filter(Boolean);
+    const cells = lines[rowIndex].split("|").map(cell => cell.trim()).filter(Boolean);
+    const fiveYearIndex = headers.findIndex(cell => /(5|five)\s*[- ]?\s*(year|yr)/i.test(cell));
+    const value = fiveYearIndex >= 0 ? cells[fiveYearIndex]?.match(/-?\d+(?:\.\d+)?/)?.[0] : null;
+    if (value) return Number(value) / 100;
+  }
+
+  const normalized = text.toLowerCase().replace(/\s+/g, " ");
+  const optionMentioned = tokens.length === 0 || tokens.some(token => normalized.includes(token));
+  if (!optionMentioned || !/(5|five)\s*[- ]?\s*(year|yr)/i.test(normalized)) return null;
+  const patterns = [
+    /(5|five)\s*[- ]?\s*(year|yr)[^%\d-]{0,120}(-?\d+(?:\.\d+)?)\s*%/i,
+    /(-?\d+(?:\.\d+)?)\s*%[^.]{0,120}(5|five)\s*[- ]?\s*(year|yr)/i,
+  ];
+  for (const pattern of patterns) {
+    const match = normalized.match(pattern);
+    const numberText = match?.[3] ?? match?.[1];
+    if (numberText && /^-?\d/.test(numberText)) return Number(numberText) / 100;
+  }
+  return null;
+}
+
 async function verifyReturnAgainstSources(parsed: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const evidenceReturn = extractFiveYearReturnFromEvidence(parsed.returnEvidenceText, parsed.modelLabel);
+  if (evidenceReturn != null) {
+    return { ...parsed, grossReturn: evidenceReturn };
+  }
+
   if (parsed.grossReturn == null) return parsed;
   const urls = urlsFrom(parsed.sourceUrls).concat(urlsFrom(parsed.sourceNotes));
   if (!urls.length) {
