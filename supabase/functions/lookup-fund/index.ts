@@ -390,16 +390,17 @@ const STEP1_SYSTEM =
     NOW.toISOString().slice(0, 10)
   }.
 
-For the named fund, you MUST locate the OFFICIAL fund website pages (and PDS / Investment Guide if needed) that publish:
+For the named fund, you MUST locate the OFFICIAL fund website pages (and PDS / Investment Guide / Fees & Costs document if needed) that publish:
   (a) the MOST RECENTLY PUBLISHED investment performance / returns table for the allocated investment option (must show 5-year p.a. return, as recent as possible — ideally as at a ${CURRENT_YEAR} month-end, or otherwise the most recent ${PREV_YEAR} update), and
-  (b) the current fees & costs (admin fee + asset-based admin fee), and
-  (c) the strategic asset allocation / growth assets % and the official risk profile label.
+  (b) the CURRENT (${CURRENT_YEAR}) fees & costs (admin fee + asset-based admin fee) — find the latest published fees page, fee schedule, or current PDS/Fees & Costs update for ${CURRENT_YEAR}, and
+  (c) the CURRENT (${CURRENT_YEAR}) strategic asset allocation / growth assets % and the official risk profile label for the allocated option — find the latest investment option page, investment guide update, or asset-allocation disclosure for ${CURRENT_YEAR}.
 
 Rules:
 - Identify WHICHEVER Australian super fund the user names — industry, retail, corporate, public sector, SMSF platform, etc. Never default to AustralianSuper or any specific fund.
 - Use ONLY URLs that Gemini 3 lookup finds on the fund's own official domain. Never invent URLs. Never use third-party comparison sites, news, blogs, SuperRatings, Canstar, Chant West, etc.
-- Add search terms like "${CURRENT_YEAR}", "monthly returns", "performance update", "as at" to find the freshest performance page. Prefer the live performance dashboard / monthly update page over PDS PDFs (PDS data is usually stale).
-- Return up to 6 URLs, ordered by RECENCY of the published 5-year p.a. figure (newest performance/returns/dashboard pages first, then PDS/Investment Guide as fallback). The URLs must be real lookup results or pages clearly reached from real lookup results.
+- Add search terms like "${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}" to find the freshest pages. Prefer live dashboards / current ${CURRENT_YEAR} update pages over older PDS PDFs.
+- Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages — do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
+- Return up to 6 URLs, ordered by RECENCY (newest ${CURRENT_YEAR} performance / fees / asset allocation pages first, then ${PREV_YEAR} updates, then PDS/Investment Guide as last resort). The URLs must be real lookup results or pages clearly reached from real lookup results.
 - Also parse the client's personal details from the free-text input.
 
 Frequencies must be exactly "Weekly", "Monthly", or "Annually".
