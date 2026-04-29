@@ -100,7 +100,7 @@ export function ComparisonBar({
       <div className="h-6 rounded-md bg-secondary overflow-hidden">
         <div className={cn("h-full rounded-md", fill)} style={{ width: `${pct * 100}%` }} />
       </div>
-      <div className="text-sm font-bold text-navy tabular-nums">{displayValue}</div>
+      <div className="text-sm text-navy tabular-nums font-semibold">{displayValue}</div>
     </div>
   );
 }
