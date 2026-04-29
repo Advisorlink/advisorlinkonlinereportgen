@@ -842,23 +842,23 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
           </div>
 
           {/* Right: consultant card */}
-          <div className="rounded-xl bg-white/[0.07] border border-white/10 px-4 py-3 min-w-0">
-            <div className="flex items-baseline justify-between gap-2 mb-1">
-              <div className="text-[14px] font-black leading-tight truncate">Travis Seckod</div>
-              <div className="text-[8.5px] font-black uppercase tracking-[0.18em] text-cyan/90 flex-shrink-0">
+          <div className="rounded-2xl bg-white/[0.06] border border-white/10 px-4 py-3 min-w-0">
+            <div className="flex items-baseline justify-between gap-3 mb-0.5">
+              <div className="text-[15px] font-black leading-tight truncate">Travis Seckod</div>
+              <div className="text-[9px] font-black uppercase tracking-[0.22em] text-cyan flex-shrink-0">
                 Your Consultant
               </div>
             </div>
-            <div className="text-[9.5px] uppercase tracking-wider text-navy-foreground/70 font-semibold mb-2">
+            <div className="text-[9.5px] uppercase tracking-wider text-navy-foreground/70 font-semibold mb-2.5">
               Director · Senior Research
             </div>
 
-            <div className="pt-2 border-t border-white/10 space-y-1.5">
-              <a href="tel:0485991688" className="flex items-center gap-2">
+            <div className="space-y-1.5">
+              <a href="tel:0485991688" className="flex items-center gap-2.5">
                 <span className="flex-shrink-0 h-5 w-5 rounded-full bg-cyan/25 text-cyan flex items-center justify-center text-[10px]">☎</span>
                 <span className="text-[12px] font-black tabular-nums tracking-wide">0485 991 688</span>
               </a>
-              <a href="mailto:admin@advisorlinkonline.com.au" className="flex items-center gap-2 min-w-0">
+              <a href="mailto:admin@advisorlinkonline.com.au" className="flex items-center gap-2.5 min-w-0">
                 <span className="flex-shrink-0 h-5 w-5 rounded-full bg-white/10 text-cyan flex items-center justify-center text-[10px]">✉</span>
                 <span className="text-[10.5px] font-semibold truncate">admin@advisorlinkonline.com.au</span>
               </a>
