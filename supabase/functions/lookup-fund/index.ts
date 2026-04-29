@@ -332,7 +332,7 @@ Deno.serve(async (req) => {
     );
     if (!step1) return jsonResponse({ error: "AI did not return source URLs" }, 502);
 
-    let candidateUrls = urlsFrom(step1.sourceUrls).filter(isAllowedOfficialCandidate);
+    let candidateUrls: string[] = [];
 
     // Augment with Firecrawl web search — finds the freshest performance pages
     const fundName = String(step1.fundName ?? "").trim();
@@ -342,11 +342,15 @@ Deno.serve(async (req) => {
         `${fundName} ${optionLabel} 5 year performance ${CURRENT_YEAR}`,
         `${fundName} investment performance monthly update ${CURRENT_YEAR}`,
         `${fundName} ${optionLabel} returns as at ${CURRENT_YEAR}`,
+        `${fundName} fees costs asset allocation ${CURRENT_YEAR}`,
       ];
       for (const q of searchQueries) {
         const found = (await firecrawlSearch(q, 5)).filter(isAllowedOfficialCandidate);
         candidateUrls.push(...found);
       }
+    }
+    if (!candidateUrls.length) {
+      candidateUrls = urlsFrom(step1.sourceUrls).filter(isAllowedOfficialCandidate);
     }
     candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 8);
 
