@@ -536,10 +536,26 @@ export function IncomePage({ s }: { s: ReportSummary }) {
         </SectionCard>
       </div>
 
-      {s.yearsIncomeComparison - s.yearsIncomeExisting > 0 && (
-        <div className="mt-4 flex items-center justify-between rounded-md bg-cyan/10 px-4 py-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-navy">Additional years of income</span>
-          <span className="text-lg font-black text-cyan tabular-nums">+{s.yearsIncomeComparison - s.yearsIncomeExisting} yrs</span>
+      {(s.totalIncomeComparison - s.totalIncomeExisting > 0 || s.yearsIncomeComparison - s.yearsIncomeExisting > 0) && (
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          {s.totalIncomeComparison - s.totalIncomeExisting > 0 && (
+            <div className="rounded-md bg-cyan/10 border border-cyan/30 px-4 py-3">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Additional retirement income</div>
+              <div className="mt-1 text-2xl font-black text-cyan tabular-nums">
+                +{fmtMoney(s.totalIncomeComparison - s.totalIncomeExisting)}
+              </div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">Extra income provided over retirement</div>
+            </div>
+          )}
+          {s.yearsIncomeComparison - s.yearsIncomeExisting > 0 && (
+            <div className="rounded-md bg-cyan/10 border border-cyan/30 px-4 py-3">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Additional years of income</div>
+              <div className="mt-1 text-2xl font-black text-cyan tabular-nums">
+                +{s.yearsIncomeComparison - s.yearsIncomeExisting} yrs
+              </div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">Longer your money lasts</div>
+            </div>
+          )}
         </div>
       )}
 
