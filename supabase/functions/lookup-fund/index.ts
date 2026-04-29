@@ -100,10 +100,13 @@ Deno.serve(async (req) => {
   try {
     const { query } = await req.json();
     if (!query || typeof query !== "string" || query.trim().length < 2) {
-      return new Response(JSON.stringify({ error: "query is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "query is required" }, 400);
+    }
+
+    const cacheKey = normalizeQuery(query);
+    const cached = lookupCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return jsonResponse({ data: cached.data, cached: true });
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -118,7 +121,8 @@ ACCURACY RULES (CRITICAL):
 - The return percentage must be the 5-year p.a. NET investment return/performance currently published for the exact allocated option. Do NOT use 1-year, 3-year, 7-year, 10-year, since-inception, financial-year-only, generic fund average, another option, an older cached result, a gross/before-fee return, or a figure from a comparison/third-party website.
 - If the exact 5-year p.a. net return for that exact option is not available on the official fund website/PDS, return null for grossReturn and explain that the 5-year net return could not be verified. NEVER substitute a different time period.
 - If you cannot find a figure on the named fund's official source with confidence, return null for that field. NEVER guess, estimate, substitute another fund's figures, or interpolate.
-- In sourceNotes, list the exact URLs you used (must be from the named fund's domain or its official PDS host), the exact "5 year"/"5-year" return label copied from the page, the allocated option name, the risk profile label if shown, and the as-of date for the figures.
+- Return sourceUrls as a separate array of exact official URLs used. In sourceNotes, list the exact "5 year"/"5-year" return label copied from the page, the allocated option name, the risk profile label if shown, and the as-of date for the figures.
+- Be deterministic: if the same client text is submitted again, return the same values unless the official website content has changed.
 
 PARSING RULES (from the user's free-text input):
 - clientName: extract the person's full name if present (e.g. "for John Smith", "client: Jane Doe", or a name at the start). Title-case it. Strip the fund name.
@@ -169,6 +173,11 @@ FUND FIELDS (Australian context, from official sources):
               sourceNotes: {
                 type: "string",
                 description: "List the exact official URLs used and the as-of date. If a field is null, say which one and why it could not be verified.",
+              },
+              sourceUrls: {
+                type: "array",
+                items: { type: "string" },
+                description: "Exact official fund or official PDS URLs used to verify fees, growth allocation, risk profile, and 5-year net return.",
               },
             },
             required: ["sourceNotes"],
