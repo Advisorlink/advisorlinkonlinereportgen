@@ -790,12 +790,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
       </div>
 
       <div className="mb-5 rounded-2xl border border-cyan/20 bg-gradient-to-br from-cyan/5 via-transparent to-transparent p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-navy text-navy-foreground px-3 py-1">
-            <span className="text-cyan text-xs">✦</span>
-            <span className="text-[10px] font-black uppercase tracking-[0.18em]">Important — your protections</span>
-          </div>
-        </div>
+
         <div className="grid grid-cols-3 gap-4">
           {[
             { n: "01", title: "Best interest duty", body: "An adviser will only recommend personal advice if it is genuinely in your best interest. If it isn't, they won't proceed." },
