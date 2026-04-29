@@ -12,6 +12,7 @@ import {
   FeeRow, FeeTableHeader, Disclaimer,
 } from "./primitives";
 import riskIllustration from "@/assets/risk-illustration.jpg";
+import logoUrl from "@/assets/logo.svg";
 import asicRegistered from "@/assets/asic-registered.png";
 import logoInheritance from "@/assets/logo-inheritance.png";
 import logoMyAdvice from "@/assets/logo-myadvice.png";
@@ -32,23 +33,36 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 export function CoverPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
-      <PageHeader flush />
-      <div
-        className="relative -mx-14 -mt-px mb-6 px-14 pt-6 pb-10 rounded-b-[28px] text-navy-foreground overflow-hidden"
+      {/* Unified cover hero — logo + title in one cohesive block so the PDF
+          renders a single, seamless header section. */}
+      <header
+        className="relative -mx-14 -mt-[16mm] mb-6 px-14 pt-7 pb-10 rounded-b-[28px] text-navy-foreground overflow-hidden"
         style={{
           background:
-            "linear-gradient(165deg, hsl(215 60% 18%) 0%, hsl(210 55% 24%) 55%, hsl(200 70% 32%) 100%)",
+            "linear-gradient(160deg, hsl(215 65% 14%) 0%, hsl(215 60% 18%) 40%, hsl(205 60% 26%) 80%, hsl(195 75% 34%) 100%)",
         }}
       >
-        <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-cyan/20 blur-2xl" />
-        <div className="absolute -right-8 top-8 w-40 h-40 rounded-full bg-cyan/30" />
-        <h1 className="relative text-[44px] leading-[1.05] font-black tracking-tight">
-          SUPER PERFORMANCE<br/>REPORT
-        </h1>
-        <p className="relative mt-3 text-sm max-w-md opacity-80">
-          A complete review of your superannuation: current position, projection to retirement, income outlook, fees and a comparison scenario.
-        </p>
-      </div>
+        <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/20 blur-3xl pointer-events-none" />
+        <div className="absolute -right-10 top-10 w-44 h-44 rounded-full bg-cyan/25 pointer-events-none" />
+        <div className="absolute -left-20 -bottom-24 w-72 h-72 rounded-full bg-[hsl(225_85%_60%)]/15 blur-3xl pointer-events-none" />
+
+        <div className="relative flex items-center justify-between gap-4">
+          <img src={logoUrl} alt="Advisor Link Online" className="h-9 w-auto" />
+          <span className="text-[10px] font-bold tracking-[0.22em] uppercase opacity-70">
+            Super Performance Report
+          </span>
+        </div>
+
+        <div className="relative mt-8">
+          <div className="h-[3px] w-12 rounded-full bg-cyan mb-4" />
+          <h1 className="text-[44px] leading-[1.02] font-black tracking-tight">
+            SUPER PERFORMANCE<br/>REPORT
+          </h1>
+          <p className="mt-3 text-sm max-w-lg opacity-80 leading-relaxed">
+            A complete review of your superannuation: current position, projection to retirement, income outlook, fees and a comparison scenario.
+          </p>
+        </div>
+      </header>
 
       <div className="grid grid-cols-3 gap-3 mb-5">
         <KpiCard label="Current Balance" value={fmtMoney(s.startingBalance)} sub={s.inputs.fundName} accent />
