@@ -319,36 +319,24 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
         </p>
       </SectionCard>
 
-      <SectionCard title="Projection assumptions" icon="◆" className="mt-5">
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-lg border border-border bg-secondary/40 p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">%</span>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Inflation</div>
-            </div>
-            <div className="text-xs text-muted-foreground leading-relaxed">
-              Set at <strong className="text-navy">2.5% p.a.</strong> for the rising cost of living. All results are shown in <strong className="text-navy">today's dollars</strong>.
-            </div>
-          </div>
-          <div className="rounded-lg border border-border bg-secondary/40 p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">↗</span>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Performance</div>
-            </div>
-            <div className="text-xs text-muted-foreground leading-relaxed">
-              Employer contributions, rates of return and fees are assumed to remain <strong className="text-navy">consistent</strong> across the projection.
-            </div>
-          </div>
-          <div className="rounded-lg border border-border bg-secondary/40 p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">⚠</span>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Market crash</div>
-            </div>
-            <div className="text-xs text-muted-foreground leading-relaxed">
-              A <strong className="text-navy">10% loss every 7 years</strong> is factored in to account for periodic market corrections.
-            </div>
-          </div>
+      <SectionCard title="Selected projection years" icon="◉" className="mt-5">
+        <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-1.5">
+          <div>Age</div>
+          <div className="text-right">Year</div>
+          <div className="text-right">Current</div>
+          <div className="text-right">Comparison</div>
         </div>
+        {sampleRows(s.accumulationSeries, 6).map((r, idx) => {
+          const yearNumber = new Date().getFullYear() + (r.age - s.inputs.age);
+          return (
+            <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-2 py-1.5 text-xs border-b border-border last:border-0">
+              <div className="font-semibold text-navy">{r.age}</div>
+              <div className="text-right text-muted-foreground tabular-nums">{yearNumber}</div>
+              <div className="text-right tabular-nums">{fmtMoney(r.existing)}</div>
+              <div className="text-right tabular-nums text-cyan font-semibold">{fmtMoney(r.comparison)}</div>
+            </div>
+          );
+        })}
       </SectionCard>
 
       <PageFooter />
@@ -474,24 +462,36 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Selected projection years" icon="◉">
-        <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-1.5">
-          <div>Age</div>
-          <div className="text-right">Year</div>
-          <div className="text-right">Current</div>
-          <div className="text-right">Comparison</div>
-        </div>
-        {sampleRows(s.accumulationSeries, 6).map((r, idx) => {
-          const yearNumber = new Date().getFullYear() + (r.age - s.inputs.age);
-          return (
-            <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-2 py-1.5 text-xs border-b border-border last:border-0">
-              <div className="font-semibold text-navy">{r.age}</div>
-              <div className="text-right text-muted-foreground tabular-nums">{yearNumber}</div>
-              <div className="text-right tabular-nums">{fmtMoney(r.existing)}</div>
-              <div className="text-right tabular-nums text-cyan font-semibold">{fmtMoney(r.comparison)}</div>
+      <SectionCard title="Projection assumptions" icon="◆">
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-lg border border-border bg-secondary/40 p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">%</span>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Inflation</div>
             </div>
-          );
-        })}
+            <div className="text-xs text-muted-foreground leading-relaxed">
+              Set at <strong className="text-navy">2.5% p.a.</strong> for the rising cost of living. All results are shown in <strong className="text-navy">today's dollars</strong>.
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-secondary/40 p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">↗</span>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Performance</div>
+            </div>
+            <div className="text-xs text-muted-foreground leading-relaxed">
+              Employer contributions, rates of return and fees are assumed to remain <strong className="text-navy">consistent</strong> across the projection.
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-secondary/40 p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">⚠</span>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Market crash</div>
+            </div>
+            <div className="text-xs text-muted-foreground leading-relaxed">
+              A <strong className="text-navy">10% loss every 7 years</strong> is factored in to account for periodic market corrections.
+            </div>
+          </div>
+        </div>
       </SectionCard>
 
       <PageFooter />
