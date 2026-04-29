@@ -112,8 +112,8 @@ export default function Index() {
           <CoverPage s={summary} />
           <WhoWeArePage />
           <SnapshotPage s={summary} />
-          <FundsPage s={summary} />
           <ProjectionPage s={summary} />
+          <FundsPage s={summary} />
           <IncomePage s={summary} />
           <ImprovementSummaryPage s={summary} />
           <WhatsNextPage s={summary} />
