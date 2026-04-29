@@ -351,7 +351,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="FUND DETAILS" />
-      <h2 className="text-3xl font-bold font-heading">Current fund vs comparison</h2>
+      <h2 className="text-3xl font-bold font-heading text-white">Current fund vs comparison</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Side-by-side view of the existing fund settings and the comparison scenario used throughout this report.
       </p>
