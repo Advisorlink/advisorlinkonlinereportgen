@@ -780,7 +780,23 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
         </div>
       </SectionCard>
 
-      <Disclaimer>
+      <SectionCard title="Important — your protections" icon="✦" className="mb-5">
+        <div className="grid grid-cols-3 gap-3 text-[11px]">
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1">Best interest duty</div>
+            <div className="text-muted-foreground leading-relaxed">An adviser will only recommend personal advice if it is genuinely in your best interest. If it isn't, they won't proceed.</div>
+          </div>
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1">Annual opt-in</div>
+            <div className="text-muted-foreground leading-relaxed">Ongoing advice fees require your written consent every year. You sign a renewal document annually before any fee can be charged — giving you full control.</div>
+          </div>
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1">Paid from super</div>
+            <div className="text-muted-foreground leading-relaxed">If you choose to engage an adviser, fees are deducted from your superannuation balance — not paid out of pocket.</div>
+          </div>
+        </div>
+      </SectionCard>
+
         Advisor Link Online is an independent education and referral service and is not licensed to provide financial advice.
         This Super Performance Report contains factual information only and does not constitute personal advice. Eligibility for
         a referral is based solely on the projected extra benefit shown in this report and does not guarantee a particular outcome.
