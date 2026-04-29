@@ -323,16 +323,32 @@ Deno.serve(async (req) => {
     );
     if (!step1) return jsonResponse({ error: "AI did not return source URLs" }, 502);
 
-    const candidateUrls = urlsFrom(step1.sourceUrls).filter(isAllowedOfficialCandidate).slice(0, 6);
+    let candidateUrls = urlsFrom(step1.sourceUrls).filter(isAllowedOfficialCandidate);
+
+    // Augment with Firecrawl web search — finds the freshest performance pages
+    const fundName = String(step1.fundName ?? "").trim();
+    const optionLabel = String(step1.modelLabel ?? "").trim();
+    if (fundName) {
+      const searchQueries = [
+        `${fundName} ${optionLabel} 5 year performance ${CURRENT_YEAR}`,
+        `${fundName} investment performance monthly update ${CURRENT_YEAR}`,
+        `${fundName} ${optionLabel} returns as at ${CURRENT_YEAR}`,
+      ];
+      for (const q of searchQueries) {
+        const found = (await firecrawlSearch(q, 5)).filter(isAllowedOfficialCandidate);
+        candidateUrls.push(...found);
+      }
+    }
+    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 8);
 
     // ---- Step 2: actually scrape those pages and extract figures ----
     const pages: { url: string; text: string }[] = [];
     for (const url of candidateUrls) {
       const text = await fetchPageText(url);
       if (text && text.length > 200) {
-        // truncate to keep prompt size sane
-        pages.push({ url, text: text.slice(0, 18000) });
+        pages.push({ url, text: text.slice(0, 22000) });
       }
+      if (pages.length >= 5) break;
     }
 
     let figures: Record<string, unknown> = {
