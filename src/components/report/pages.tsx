@@ -48,10 +48,6 @@ export function CoverPage({ s }: { s: ReportSummary }) {
         <p className="relative mt-3 text-sm max-w-md opacity-80">
           A complete review of your superannuation: current position, projection to retirement, income outlook, fees and a comparison scenario.
         </p>
-        <div className="relative mt-5 flex gap-2">
-          <span className="px-2.5 py-1 rounded-md bg-white/10 backdrop-blur text-[10px] font-bold tracking-wider">PREPARED FOR</span>
-          <span className="px-2.5 py-1 rounded-md bg-cyan text-cyan-foreground text-[10px] font-bold tracking-wider">{s.inputs.clientName.toUpperCase()}</span>
-        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-5">
