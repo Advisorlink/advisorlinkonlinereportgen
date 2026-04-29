@@ -536,7 +536,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
       </p>
 
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <KpiCard label="Starting Balance" value={fmtMoney(s.projectedExisting)} sub="Projected at retirement" />
+        <KpiCard label="Starting Balance" value={fmtMoney(s.projectedExisting)} sub={`Projected at retirement (age ${s.retirementAge})`} />
         <KpiCard label="Annual Withdrawal" value={fmtMoney(s.annualWithdrawal)} sub="Desired annual income" accent />
       </div>
 
