@@ -58,7 +58,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
       <SectionCard title="What's inside this report" icon="◆">
         <div className="grid grid-cols-2 gap-y-2 text-xs">
           {[
-            "Client snapshot & goals",
+            "Client snapshot & targets",
             "Current fund details",
             "Comparison scenario",
             "Accumulation projection chart",
@@ -110,14 +110,14 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
       <PageHeader pageLabel="CLIENT SNAPSHOT" />
       <h2 className="text-3xl font-black text-navy">Executive snapshot</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
-        Personal details, goals and the current super position at a glance.
+        Personal details, targets and the current super position at a glance.
       </p>
 
       <div className="grid grid-cols-4 gap-3 mb-5">
         <KpiCard label="Age" value={String(i.age)} sub="Current age" />
         <KpiCard label="Target Retirement" value={String(i.retirementAge)} sub="Desired age" />
         <KpiCard label="Years Remaining" value={String(s.yearsRemaining)} sub="Until retirement" />
-        <KpiCard label="Goal Balance" value={fmtMoney(s.goalBalance)} sub="Reference goal" accent />
+        <KpiCard label="Target Balance" value={fmtMoney(s.goalBalance)} sub="Reference target" accent />
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-5">
@@ -128,13 +128,13 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
           <Row label="Desired retirement income" value={`${fmtMoney(i.desiredIncomeAmount)} ${i.desiredIncomeFrequency.toLowerCase()}`} />
           <Row label="Annualised desired income" value={fmtMoney(s.annualWithdrawal)} />
         </SectionCard>
-        <SectionCard title="Goals" icon="◆">
-          <Row label="Retirement age goal" value={i.retirementAge} />
-          <Row label="Reference balance goal" value={fmtMoney(s.goalBalance)} />
+        <SectionCard title="Targets" icon="◆">
+          <Row label="Retirement age target" value={i.retirementAge} />
+          <Row label="Reference balance target" value={fmtMoney(s.goalBalance)} />
           <Row label="Projected balance at retirement" value={fmtMoney(s.projectedExisting)} />
-          <Row label="Goal progress" value={fmtPct(s.goalProgressPct)} />
+          <Row label="Target progress" value={fmtPct(s.goalProgressPct)} />
           <div className="mt-3">
-            <ProgressBar pct={s.goalProgressPct} label={`${(s.goalProgressPct * 100).toFixed(1)}% of goal`} />
+            <ProgressBar pct={s.goalProgressPct} label={`${(s.goalProgressPct * 100).toFixed(1)}% of target`} />
           </div>
         </SectionCard>
       </div>
@@ -144,7 +144,7 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
           Based on {s.inputs.clientName.split(" ")[0]}'s current balance of <strong className="text-navy">{fmtMoney(s.startingBalance)}</strong>,
           continued contributions of <strong className="text-navy">{fmtMoney(sgContrib)}</strong> per year and the existing fund's net return,
           the projected balance at age {s.retirementAge} is <strong className="text-navy">{fmtMoney(s.projectedExisting)}</strong>.
-          The reference goal of {fmtMoney(s.goalBalance)} is included for context only.
+          The reference target of {fmtMoney(s.goalBalance)} is included for context only.
         </p>
       </SectionCard>
 
@@ -269,11 +269,11 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
         />
         <div className="grid grid-cols-3 gap-3 mt-3 text-[11px]">
           <div className="rounded-md bg-secondary/50 px-3 py-2">
-            <div className="text-muted-foreground">Goal balance</div>
+            <div className="text-muted-foreground">Target balance</div>
             <div className="font-bold text-navy tabular-nums">{fmtMoney(s.goalBalance)}</div>
           </div>
           <div className="rounded-md bg-secondary/50 px-3 py-2">
-            <div className="text-muted-foreground">Difference (current vs goal)</div>
+            <div className="text-muted-foreground">Difference (current vs target)</div>
             <div className="font-bold text-navy tabular-nums">{fmtMoney(s.projectedExisting - s.goalBalance)}</div>
           </div>
           <div className="rounded-md bg-cyan/10 px-3 py-2">
