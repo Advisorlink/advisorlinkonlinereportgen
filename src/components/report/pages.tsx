@@ -254,7 +254,7 @@ export function WhoWeArePage() {
               </div>
               <p className="mt-2 text-[11px] leading-relaxed text-foreground">"{r.text}"</p>
               <div className="mt-3">
-                <div className="text-[11px] font-bold text-navy leading-tight">{r.name}</div>
+                <div className="text-[11px] font-bold text-navy leading-tight font-heading">{r.name}</div>
                 <div className="text-[9px] text-muted-foreground">{r.loc}</div>
               </div>
             </div>
