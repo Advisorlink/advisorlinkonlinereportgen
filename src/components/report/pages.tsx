@@ -827,37 +827,48 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
         {/* Accent bar */}
         <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-cyan via-cyan/70 to-cyan/30" />
 
-        <div className="relative px-6 py-5">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
-            <div className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan">
-              Ready to take the next step?
+        <div className="relative px-6 py-5 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-5 items-center">
+          {/* Left: kicker + headline */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
+              <div className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan">
+                Ready to take the next step?
+              </div>
+            </div>
+            <div className="text-2xl font-black leading-tight">
+              Call your <span className="text-cyan">Senior Research Consultant</span> today<br />
+              for a no-obligation chat.
             </div>
           </div>
 
-          <div className="text-2xl font-black leading-tight max-w-xl">
-            Call your Senior Research Consultant today for a no-obligation chat.
-          </div>
-
-          <div className="mt-4">
-            <div className="text-base font-black leading-tight">Travis Seckod</div>
-            <div className="text-[11px] uppercase tracking-wider text-cyan/90 font-bold">
-              Director · Senior Research
+          {/* Right: consultant card */}
+          <div className="rounded-xl bg-white/[0.06] backdrop-blur border border-white/15 px-5 py-4 min-w-[260px]">
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <div>
+                <div className="text-base font-black leading-tight">Travis Seckod</div>
+                <div className="text-[10px] uppercase tracking-wider text-white/70 font-bold mt-0.5">
+                  Director · Senior Research
+                </div>
+              </div>
+              <div className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan whitespace-nowrap pt-1">
+                Your Consultant
+              </div>
             </div>
 
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-3 space-y-1.5">
               <a
                 href="tel:0485991688"
-                className="inline-flex items-center gap-2 rounded-full bg-cyan text-navy px-3.5 py-1.5 text-[12px] font-black shadow-md"
+                className="flex items-center gap-2.5 text-[12px] font-bold"
               >
-                <span>☎</span>
+                <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">☎</span>
                 <span className="tabular-nums">0485 991 688</span>
               </a>
               <a
                 href="mailto:admin@advisorlinkonline.com.au"
-                className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/15 px-3.5 py-1.5 text-[12px] font-semibold"
+                className="flex items-center gap-2.5 text-[12px] font-semibold"
               >
-                <span className="opacity-80">✉</span>
+                <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">✉</span>
                 <span>admin@advisorlinkonline.com.au</span>
               </a>
             </div>
