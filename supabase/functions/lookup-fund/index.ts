@@ -180,7 +180,7 @@ FUND FIELDS (Australian context, from official sources):
                 description: "Exact official fund or official PDS URLs used to verify fees, growth allocation, risk profile, and 5-year net return.",
               },
             },
-            required: ["sourceNotes"],
+            required: ["sourceNotes", "sourceUrls"],
             additionalProperties: false,
           },
         },
