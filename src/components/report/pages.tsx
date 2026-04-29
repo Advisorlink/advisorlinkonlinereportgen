@@ -28,12 +28,12 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* PAGE 1 — COVER                                                     */
+/* PAGE 1 - COVER                                                     */
 /* ------------------------------------------------------------------ */
 export function CoverPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
-      {/* Unified cover hero — logo + title in one cohesive block so the PDF
+      {/* Unified cover hero - logo + title in one cohesive block so the PDF
           renders a single, seamless header section. */}
       <header
         className="relative -mx-14 -mt-[16mm] mb-6 px-14 pt-7 pb-10 rounded-b-[28px] text-navy-foreground overflow-hidden"
@@ -129,7 +129,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* PAGE 1.5 — WHO WE ARE                                              */
+/* PAGE 1.5 - WHO WE ARE                                              */
 /* ------------------------------------------------------------------ */
 export function WhoWeArePage() {
   const vetting = [
@@ -218,7 +218,7 @@ export function WhoWeArePage() {
           </div>
           <div className="flex flex-col items-end gap-1">
             <span className="text-[10px] tracking-[0.2em] font-bold text-cyan">VERIFIED</span>
-            <span className="text-[10px] font-medium text-muted-foreground italic">Just Google us and check yourself — 5.0 star rating on Google</span>
+            <span className="text-[10px] font-medium text-muted-foreground italic">Just Google us and check yourself - 5.0 star rating on Google</span>
           </div>
         </div>
 
@@ -268,7 +268,7 @@ export function WhoWeArePage() {
 }
 
 /* ------------------------------------------------------------------ */
-/* PAGE 2 — CLIENT SNAPSHOT                                           */
+/* PAGE 2 - CLIENT SNAPSHOT                                           */
 /* ------------------------------------------------------------------ */
 export function SnapshotPage({ s }: { s: ReportSummary }) {
   const i = s.inputs;
@@ -342,7 +342,7 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* PAGE 3 — CURRENT FUND vs COMPARISON                                */
+/* PAGE 3 - CURRENT FUND vs COMPARISON                                */
 /* ------------------------------------------------------------------ */
 export function FundsPage({ s }: { s: ReportSummary }) {
   const i = s.inputs;
@@ -425,7 +425,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* PAGE 4 — ACCUMULATION PROJECTION                                   */
+/* PAGE 4 - ACCUMULATION PROJECTION                                   */
 /* ------------------------------------------------------------------ */
 export function ProjectionPage({ s }: { s: ReportSummary }) {
   const i = s.inputs;
@@ -520,7 +520,7 @@ function sampleRows<T>(arr: T[], count: number): T[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* PAGE 5 — RETIREMENT INCOME & DRAWDOWN                              */
+/* PAGE 5 - RETIREMENT INCOME & DRAWDOWN                              */
 /* ------------------------------------------------------------------ */
 export function IncomePage({ s }: { s: ReportSummary }) {
   const maxIncome = Math.max(s.totalIncomeExisting, s.totalIncomeComparison, 1);
@@ -634,7 +634,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* PAGE — POTENTIAL IMPROVEMENT SUMMARY                                */
+/* PAGE - POTENTIAL IMPROVEMENT SUMMARY                                */
 /* ------------------------------------------------------------------ */
 export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
   const balanceUplift = Math.max(0, s.potentialUplift);
@@ -712,7 +712,7 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
               <div className="mt-2 text-[11px]">
                 <span className="font-semibold text-navy">Your result:</span>{" "}
                 <span className={eligible ? "text-online font-bold" : "text-destructive font-bold"}>
-                  {fmtMoney(totalBenefit)} {eligible ? "— eligible" : "— below threshold"}
+                  {fmtMoney(totalBenefit)} {eligible ? "- eligible" : "- below threshold"}
                 </span>
               </div>
             </div>
@@ -732,7 +732,7 @@ function cnTone(eligible: boolean) {
 }
 
 /* ------------------------------------------------------------------ */
-/* PAGE — WHAT'S NEXT                                                  */
+/* PAGE - WHAT'S NEXT                                                  */
 /* ------------------------------------------------------------------ */
 export function WhatsNextPage({ s }: { s: ReportSummary }) {
   const totalBenefit = Math.max(0, s.potentialUplift) + Math.max(0, s.totalIncomeComparison - s.totalIncomeExisting);
@@ -742,7 +742,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
     {
       n: "1",
       title: "Review this report",
-      body: "Read through the projection, fee comparison and income outlook. Make sure the inputs reflect your real situation — especially salary, balance, fees and retirement age.",
+      body: "Read through the projection, fee comparison and income outlook. Make sure the inputs reflect your real situation - especially salary, balance, fees and retirement age.",
     },
     {
       n: "2",
@@ -757,7 +757,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
     {
       n: "4",
       title: "Receive personal advice",
-      body: "Your adviser will assess your full circumstances and provide a Statement of Advice tailored to you — covering investment options, fees, insurance and retirement strategy.",
+      body: "Your adviser will assess your full circumstances and provide a Statement of Advice tailored to you - covering investment options, fees, insurance and retirement strategy.",
     },
   ];
 
@@ -822,8 +822,8 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
         <div className="grid grid-cols-3 gap-4">
           {[
             { n: "01", title: "Best interest duty", body: "An adviser will only recommend personal advice if it is genuinely in your best interest. If it isn't, they won't proceed." },
-            { n: "02", title: "Annual opt-in", body: "Ongoing advice fees require your written consent every year. You sign a renewal document annually before any fee can be charged — giving you full control." },
-            { n: "03", title: "Paid from super", body: "If you choose to engage an adviser, fees are deducted from your superannuation balance — not paid out of pocket." },
+            { n: "02", title: "Annual opt-in", body: "Ongoing advice fees require your written consent every year. You sign a renewal document annually before any fee can be charged - giving you full control." },
+            { n: "03", title: "Paid from super", body: "If you choose to engage an adviser, fees are deducted from your superannuation balance - not paid out of pocket." },
           ].map((c) => (
             <div key={c.n} className="relative">
               <div className="text-3xl font-black text-cyan/30 leading-none mb-1.5 tabular-nums">{c.n}</div>
@@ -917,7 +917,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* PAGE 6 — FEES & ASSUMPTIONS & DISCLAIMER                            */
+/* PAGE 6 - FEES & ASSUMPTIONS & DISCLAIMER                            */
 /* ------------------------------------------------------------------ */
 export function FeesAndDisclosurePage({ s }: { s: ReportSummary }) {
   const i = s.inputs;
