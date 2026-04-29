@@ -784,7 +784,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
             <div className="mt-1 text-2xl font-bold font-heading text-white">
               {eligible ? "You qualify for an adviser referral" : "Referral threshold not met"}
             </div>
-            <div className="mt-1 text-xs opacity-80">
+            <div className="mt-1 text-xs opacity-80 text-white">
               Total projected extra benefit: <span className="font-bold tabular-nums">{fmtMoney(totalBenefit)}</span> · Threshold: $100,000
             </div>
           </div>
@@ -891,14 +891,14 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
             <div className="mt-3 space-y-1.5">
               <a
                 href="tel:0485991688"
-                className="flex items-center gap-2.5 text-[12px] font-bold"
+                className="flex items-center gap-2.5 text-[12px] font-bold text-white"
               >
                 <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">☎</span>
                 <span className="tabular-nums">0485 991 688</span>
               </a>
               <a
                 href="mailto:admin@advisorlinkonline.com.au"
-                className="flex items-center gap-2.5 text-[12px] font-semibold"
+                className="flex items-center gap-2.5 text-[12px] font-semibold text-white"
               >
                 <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">✉</span>
                 <span>admin@advisorlinkonline.com.au</span>
