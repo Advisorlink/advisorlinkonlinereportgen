@@ -75,6 +75,25 @@ export function CoverPage({ s }: { s: ReportSummary }) {
         </div>
       </SectionCard>
 
+      <div className="mt-5 rounded-xl bg-white border border-border p-5 shadow-[0_20px_45px_-15px_hsl(215_60%_15%/0.25),0_8px_20px_-8px_hsl(215_60%_15%/0.15)]">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="inline-block w-1.5 h-5 rounded-full bg-cyan" />
+          <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-navy">
+            Important · General advice only
+          </h3>
+        </div>
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          The information in this Super Health Check is general in nature only and does not take into
+          account your personal objectives, financial situation or needs. It is based on the inputs
+          provided and the assumptions stated above. Investment returns are not guaranteed; past
+          performance is not a reliable indicator of future performance. All figures are illustrative
+          only and should not be relied upon as personal financial advice. Before acting on any
+          information you should consider its appropriateness having regard to your own circumstances
+          and obtain personal advice from a licensed financial adviser. Fees, returns, contribution
+          rates and tax settings used in this report are simplified for illustration.
+        </p>
+      </div>
+
       <PageFooter />
     </PageShell>
   );
