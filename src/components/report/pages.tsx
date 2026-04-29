@@ -450,20 +450,12 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
           goalBalance={s.goalBalance}
         />
         <div className="mt-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-          After fees and contributions
+          After fees and market corrections
         </div>
-        <div className="grid grid-cols-3 gap-3 mt-2 text-sm">
-          <div className="rounded-lg bg-secondary/50 px-4 py-3">
-            <div className="text-xs text-muted-foreground">Target balance</div>
-            <div className="text-lg font-black text-navy tabular-nums mt-0.5">{fmtMoney(s.goalBalance)}</div>
-          </div>
-          <div className="rounded-lg bg-secondary/50 px-4 py-3">
-            <div className="text-xs text-muted-foreground">Difference (current vs target)</div>
-            <div className="text-lg font-black text-navy tabular-nums mt-0.5">{fmtMoney(s.projectedExisting - s.goalBalance)}</div>
-          </div>
-          <div className="rounded-lg bg-cyan/10 px-4 py-3">
+        <div className="mt-2">
+          <div className="rounded-lg bg-cyan/10 px-5 py-4">
             <div className="text-xs text-muted-foreground">Potential uplift</div>
-            <div className="text-lg font-black text-cyan tabular-nums mt-0.5">{fmtMoney(Math.max(0, s.potentialUplift))}</div>
+            <div className="text-2xl font-black text-cyan tabular-nums mt-1">{fmtMoney(Math.max(0, s.potentialUplift))}</div>
           </div>
         </div>
       </SectionCard>
