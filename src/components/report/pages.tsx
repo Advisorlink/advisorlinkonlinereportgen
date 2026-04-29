@@ -66,7 +66,6 @@ export function CoverPage({ s }: { s: ReportSummary }) {
             "Retirement income & sustainability",
             "Fee comparison (line by line)",
             "Assumptions used",
-            "General-advice disclaimer",
           ].map(t => (
             <div key={t} className="flex items-center gap-2">
               <span className="text-cyan font-bold">✓</span>
