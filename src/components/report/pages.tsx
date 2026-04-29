@@ -245,9 +245,9 @@ export function WhoWeArePage() {
             },
           ].map(r => (
             <div key={r.name} className="rounded-xl border border-border bg-secondary/30 p-3.5">
-              <div className="flex">
+              <div className="flex items-center">
                 {[0,1,2,3,4].map(i => (
-                  <Star key={i} className="w-3 h-3 fill-[#FBBC05] text-[#FBBC05]" />
+                  <Star key={i} className="w-3 h-3 fill-[#FBBC05] text-[#FBBC05] block" />
                 ))}
               </div>
               <p className="mt-2 text-[11px] leading-relaxed text-foreground">"{r.text}"</p>
