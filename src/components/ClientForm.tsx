@@ -13,12 +13,50 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
   const [collapsed, setCollapsed] = useState(false);
   const [lookupText, setLookupText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lookupCache, setLookupCache] = useState<Record<string, unknown> | null>(null);
+  const [lookupCacheKey, setLookupCacheKey] = useState("");
+
+  const applyLookupResult = (r: Record<string, unknown>) => {
+    const next: ClientInputs = { ...value };
+    const numeric = (k: keyof ClientInputs, v: unknown) => {
+      if (typeof v === "number" && Number.isFinite(v)) (next[k] as number) = v;
+    };
+    const text = (k: keyof ClientInputs, v: unknown) => {
+      if (typeof v === "string" && v.trim()) (next[k] as string) = v.trim();
+    };
+
+    text("clientName", r.clientName);
+    text("fundName", r.fundName);
+    text("modelLabel", r.modelLabel);
+    numeric("age", r.age);
+    numeric("retirementAge", r.retirementAge);
+    numeric("annualIncome", r.annualIncome);
+    numeric("superBalance", r.superBalance);
+    numeric("goalBalance", r.goalBalance);
+    numeric("desiredIncomeAmount", r.desiredIncomeAmount);
+    if (r.desiredIncomeFrequency === "Weekly" || r.desiredIncomeFrequency === "Monthly" || r.desiredIncomeFrequency === "Annually") {
+      next.desiredIncomeFrequency = r.desiredIncomeFrequency;
+    }
+    numeric("adminFeeFlat", r.adminFeeFlat);
+    numeric("adminFeePct", r.adminFeePct);
+    numeric("grossReturn", r.grossReturn);
+    numeric("growthAssetsPct", r.growthAssetsPct);
+    text("investmentRiskProfile", r.investmentRiskProfile);
+    onChange(next);
+  };
 
   const runLookup = async () => {
     if (lookupText.trim().length < 3) {
       toast.error("Enter at least the fund name and investment option.");
       return;
     }
+    const cacheKey = lookupText.trim().toLowerCase().replace(/\s+/g, " ");
+    if (lookupCache && lookupCacheKey === cacheKey) {
+      applyLookupResult(lookupCache);
+      toast.success("Fund details applied", { description: "Used the same verified result as the previous fill." });
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("lookup-fund", {
@@ -28,33 +66,9 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
       if (data?.error) throw new Error(data.error);
 
       const r = data?.data ?? {};
-      const next: ClientInputs = { ...value };
-      const numeric = (k: keyof ClientInputs, v: unknown) => {
-        if (typeof v === "number" && Number.isFinite(v)) (next[k] as number) = v;
-      };
-      const text = (k: keyof ClientInputs, v: unknown) => {
-        if (typeof v === "string" && v.trim()) (next[k] as string) = v.trim();
-      };
-
-      text("clientName", r.clientName);
-      text("fundName", r.fundName);
-      text("modelLabel", r.modelLabel);
-      numeric("age", r.age);
-      numeric("retirementAge", r.retirementAge);
-      numeric("annualIncome", r.annualIncome);
-      numeric("superBalance", r.superBalance);
-      numeric("goalBalance", r.goalBalance);
-      numeric("desiredIncomeAmount", r.desiredIncomeAmount);
-      if (r.desiredIncomeFrequency === "Weekly" || r.desiredIncomeFrequency === "Monthly" || r.desiredIncomeFrequency === "Annually") {
-        next.desiredIncomeFrequency = r.desiredIncomeFrequency;
-      }
-      numeric("adminFeeFlat", r.adminFeeFlat);
-      numeric("adminFeePct", r.adminFeePct);
-      numeric("grossReturn", r.grossReturn);
-      numeric("growthAssetsPct", r.growthAssetsPct);
-      text("investmentRiskProfile", r.investmentRiskProfile);
-
-      onChange(next);
+      applyLookupResult(r);
+      setLookupCache(r);
+      setLookupCacheKey(cacheKey);
       toast.success("Fund details applied", {
         description: r.sourceNotes || "Review the figures and edit anything that's off.",
       });
