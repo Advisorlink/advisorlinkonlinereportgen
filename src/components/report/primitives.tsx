@@ -271,7 +271,7 @@ export function StatPill({ label, value, tone = "navy" }: { label: string; value
 
 export function Disclaimer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-border bg-secondary/40 p-4 text-[10px] leading-relaxed text-muted-foreground">
+    <div className="rounded-lg border border-border bg-secondary/40 p-4 text-[10px] leading-relaxed text-muted-foreground shadow-card">
       <div className="font-bold text-navy uppercase tracking-wider text-[10px] mb-1.5">Important · General advice only</div>
       {children}
     </div>
