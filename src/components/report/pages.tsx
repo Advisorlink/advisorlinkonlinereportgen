@@ -532,7 +532,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
       <PageHeader pageLabel="RETIREMENT INCOME" />
       <h2 className="text-3xl font-black text-navy">Retirement income view</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
-        Translating the projected balance into a sustainable retirement income with a defensive investment mix.
+        How long will your money potentially last when you need it the most?
       </p>
 
       <div className="grid grid-cols-2 gap-3 mb-5">
