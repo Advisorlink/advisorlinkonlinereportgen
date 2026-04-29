@@ -7,6 +7,93 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const lookupCache = new Map<string, { expiresAt: number; data: Record<string, unknown> }>();
+const CACHE_MS = 30 * 60 * 1000;
+
+const jsonResponse = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
+const normalizeQuery = (query: string) => query.toLowerCase().replace(/\s+/g, " ").trim();
+const stripTrailingZeros = (value: string) => value.replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1");
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const textFromHtml = (html: string) =>
+  html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+
+function urlsFrom(value: unknown): string[] {
+  const raw = Array.isArray(value) ? value.join(" ") : String(value ?? "");
+  return Array.from(new Set(raw.match(/https?:\/\/[^\s)\],;"']+/g) ?? [])).slice(0, 4);
+}
+
+function pctVariants(decimal: unknown): string[] {
+  if (typeof decimal !== "number" || !Number.isFinite(decimal)) return [];
+  const pct = decimal * 100;
+  return Array.from(new Set([
+    stripTrailingZeros(pct.toFixed(4)),
+    stripTrailingZeros(pct.toFixed(3)),
+    stripTrailingZeros(pct.toFixed(2)),
+    stripTrailingZeros(pct.toFixed(1)),
+  ].filter(Boolean)));
+}
+
+function optionTokens(modelLabel: unknown): string[] {
+  return String(modelLabel ?? "")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(token => token.length > 3 && !["default", "mysuper", "option", "super", "fund"].includes(token));
+}
+
+function hasVerifiedFiveYearReturn(sourceText: string, grossReturn: unknown, modelLabel: unknown): boolean {
+  const variants = pctVariants(grossReturn);
+  if (!variants.length) return false;
+  const tokens = optionTokens(modelLabel);
+  const normalized = sourceText.toLowerCase().replace(/\s+/g, " ");
+  for (const variant of variants) {
+    const matcher = new RegExp(`${escapeRegExp(variant)}\\s*%`, "i");
+    const match = matcher.exec(normalized);
+    if (!match) continue;
+    const context = normalized.slice(Math.max(0, match.index - 700), match.index + 700);
+    const mentionsFiveYear = /(5|five)\s*[- ]?\s*(year|yr)/i.test(context);
+    const mentionsOption = tokens.length === 0 || tokens.some(token => context.includes(token));
+    if (mentionsFiveYear && mentionsOption) return true;
+  }
+  return false;
+}
+
+async function verifyReturnAgainstSources(parsed: Record<string, unknown>): Promise<Record<string, unknown>> {
+  if (parsed.grossReturn == null) return parsed;
+  const urls = urlsFrom(parsed.sourceUrls).concat(urlsFrom(parsed.sourceNotes));
+  if (!urls.length) {
+    return { ...parsed, grossReturn: null, sourceNotes: `${parsed.sourceNotes ?? ""}\nVerification failed: no official source URL was returned for the 5-year net return.`.trim() };
+  }
+
+  for (const url of urls) {
+    try {
+      const response = await fetch(url, { redirect: "follow" });
+      const body = await response.text();
+      if (!response.ok) continue;
+      if (hasVerifiedFiveYearReturn(textFromHtml(body), parsed.grossReturn, parsed.modelLabel)) return parsed;
+    } catch (error) {
+      console.warn("Source verification failed", url, error);
+    }
+  }
+
+  return {
+    ...parsed,
+    grossReturn: null,
+    sourceNotes: `${parsed.sourceNotes ?? ""}\nVerification failed: the cited official source pages did not contain the exact returned 5-year percentage near the allocated option, so the return was not auto-filled.`.trim(),
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
