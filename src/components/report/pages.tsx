@@ -808,6 +808,41 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
       </div>
 
 
+      <div
+        className="mb-4 rounded-2xl overflow-hidden relative text-navy-foreground"
+        style={{ background: "linear-gradient(135deg, hsl(215 60% 14%) 0%, hsl(200 70% 28%) 60%, hsl(195 95% 38%) 100%)" }}
+      >
+        <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-cyan/30 blur-3xl" />
+        <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-cyan/20 blur-2xl" />
+        <div className="relative p-5 flex items-center gap-5">
+          <div className="flex-shrink-0 h-20 w-20 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-3xl font-black tracking-tight">
+            TS
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan">Talk to your consultant</div>
+            <div className="mt-0.5 text-xl font-black leading-tight">
+              Call your Senior Research Consultant today for a chat.
+            </div>
+            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[11px]">
+              <div>
+                <div className="font-black text-sm">Travis Seckod</div>
+                <div className="opacity-80">Director / Senior Research</div>
+              </div>
+              <div className="flex flex-col justify-center">
+                <div className="flex items-center gap-1.5">
+                  <span className="opacity-60">✉</span>
+                  <span className="font-semibold">admin@advisorlinkonline.com.au</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="opacity-60">☎</span>
+                  <span className="font-semibold tabular-nums">0485 991 688</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Disclaimer>
         Advisor Link Online is an independent education and referral service and is not licensed to provide financial advice.
         This Super Performance Report contains factual information only and does not constitute personal advice. Eligibility for
