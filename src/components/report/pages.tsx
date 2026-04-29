@@ -527,7 +527,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="RETIREMENT INCOME" />
-      <h2 className="text-3xl font-bold font-heading text-white">Retirement income view</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-white">Retirement income view</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         How long will your money potentially last when you need it the most?
       </p>
