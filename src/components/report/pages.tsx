@@ -670,7 +670,7 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
           </div>
           <div className={cnTone(eligible)}>
             <div className="text-[10px] font-bold uppercase tracking-wider">{eligible ? "Eligible for referral" : "Not currently eligible"}</div>
-            <div className="text-base font-black mt-0.5">{eligible ? "✓ $100,000+ threshold met" : "Below $100,000 threshold"}</div>
+            <div className="text-base mt-0.5 font-medium">{eligible ? "✓ $100,000+ threshold met" : "Below $100,000 threshold"}</div>
           </div>
         </div>
       </SectionCard>
