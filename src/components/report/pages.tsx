@@ -417,18 +417,21 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
           retirementAge={s.retirementAge}
           goalBalance={s.goalBalance}
         />
-        <div className="grid grid-cols-3 gap-3 mt-3 text-[11px]">
-          <div className="rounded-md bg-secondary/50 px-3 py-2">
-            <div className="text-muted-foreground">Target balance</div>
-            <div className="font-bold text-navy tabular-nums">{fmtMoney(s.goalBalance)}</div>
+        <div className="mt-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          After fees and contributions
+        </div>
+        <div className="grid grid-cols-3 gap-3 mt-2 text-sm">
+          <div className="rounded-lg bg-secondary/50 px-4 py-3">
+            <div className="text-xs text-muted-foreground">Target balance</div>
+            <div className="text-lg font-black text-navy tabular-nums mt-0.5">{fmtMoney(s.goalBalance)}</div>
           </div>
-          <div className="rounded-md bg-secondary/50 px-3 py-2">
-            <div className="text-muted-foreground">Difference (current vs target)</div>
-            <div className="font-bold text-navy tabular-nums">{fmtMoney(s.projectedExisting - s.goalBalance)}</div>
+          <div className="rounded-lg bg-secondary/50 px-4 py-3">
+            <div className="text-xs text-muted-foreground">Difference (current vs target)</div>
+            <div className="text-lg font-black text-navy tabular-nums mt-0.5">{fmtMoney(s.projectedExisting - s.goalBalance)}</div>
           </div>
-          <div className="rounded-md bg-cyan/10 px-3 py-2">
-            <div className="text-muted-foreground">Potential uplift</div>
-            <div className="font-bold text-cyan tabular-nums">{fmtMoney(Math.max(0, s.potentialUplift))}</div>
+          <div className="rounded-lg bg-cyan/10 px-4 py-3">
+            <div className="text-xs text-muted-foreground">Potential uplift</div>
+            <div className="text-lg font-black text-cyan tabular-nums mt-0.5">{fmtMoney(Math.max(0, s.potentialUplift))}</div>
           </div>
         </div>
       </SectionCard>
