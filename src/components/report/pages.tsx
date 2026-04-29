@@ -447,16 +447,16 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
         <KpiCard label="Projected - Comparison" value={fmtMoney(s.projectedComparison)} sub={`At age ${s.retirementAge}`} accent />
       </div>
 
-      <div className="mb-5 flex items-center justify-between rounded-lg border border-border bg-secondary/40 px-4 py-2.5">
-        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-navy">5 Year Return (p.a.)</div>
+      <div className="mb-5 flex items-center justify-between rounded-lg border border-navy bg-navy px-4 py-2.5">
+        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-white">5 Year Return (p.a.)</div>
         <div className="flex items-center gap-6">
           <div className="flex items-baseline gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Current</span>
-            <span className="text-base font-black text-navy tabular-nums">{(s.existingNetReturn * 100).toFixed(2)}%</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">Current</span>
+            <span className="text-base font-black text-white tabular-nums">{(s.existingNetReturn * 100).toFixed(2)}%</span>
           </div>
-          <div className="h-4 w-px bg-border" />
+          <div className="h-4 w-px bg-white/30" />
           <div className="flex items-baseline gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Comparison</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">Comparison</span>
             <span className="text-base font-black text-cyan tabular-nums">{(cmpNetReturn * 100).toFixed(2)}%</span>
           </div>
         </div>
