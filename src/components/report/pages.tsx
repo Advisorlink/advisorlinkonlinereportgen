@@ -119,28 +119,6 @@ export function WhoWeArePage() {
         licensed adviser from our trusted network.
       </p>
 
-      {/* ASIC trust strip */}
-      <div className="rounded-2xl border border-border bg-white p-5 shadow-card mb-5">
-        <div className="grid grid-cols-[auto_1fr] gap-5 items-center">
-          <img
-            src={asicRegistered}
-            alt="ASIC registered company extract for Advisorlink Pty Ltd"
-            className="h-24 w-auto object-contain"
-            loading="lazy"
-          />
-          <div>
-            <div className="text-[10px] tracking-[0.22em] font-bold text-cyan mb-1">100% ASIC REGULATED</div>
-            <div className="text-lg font-black text-navy leading-tight">
-              ADVISORLINK PTY LTD &nbsp;·&nbsp; ACN 671 139 923
-            </div>
-            <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
-              Registered with the Australian Securities &amp; Investments Commission. We operate
-              as an independent education and referral service - never a product issuer.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Trusted advisers */}
       <SectionCard title="Some of our trusted advisers" icon="◆" className="mb-5">
         <p className="text-xs text-muted-foreground mb-3">
