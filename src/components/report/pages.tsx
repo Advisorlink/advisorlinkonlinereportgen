@@ -498,7 +498,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
           </div>
           <div className="rounded-lg border border-border bg-secondary/40 p-4">
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">⚠</span>
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-bold">⚠</span>
               <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Market crash</div>
             </div>
             <div className="text-xs text-muted-foreground leading-relaxed">
