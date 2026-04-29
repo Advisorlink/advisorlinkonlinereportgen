@@ -845,19 +845,13 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
               Director · Senior Research
             </div>
 
-            <div className="mt-2 flex flex-wrap gap-2">
-              <a
-                href="tel:0485991688"
-                className="inline-flex items-center gap-2 rounded-full bg-cyan text-navy px-3.5 py-1.5 text-[12px] font-black shadow-md"
-              >
-                <span>☎</span>
-                <span className="tabular-nums">0485 991 688</span>
+            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px]">
+              <a href="tel:0485991688" className="inline-flex items-center gap-2 font-black text-cyan">
+                <span aria-hidden>☎</span>
+                <span className="tabular-nums tracking-wide">0485 991 688</span>
               </a>
-              <a
-                href="mailto:admin@advisorlinkonline.com.au"
-                className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/15 px-3.5 py-1.5 text-[12px] font-semibold"
-              >
-                <span className="opacity-80">✉</span>
+              <a href="mailto:admin@advisorlinkonline.com.au" className="inline-flex items-center gap-2 font-semibold text-navy-foreground/90 hover:text-cyan">
+                <span aria-hidden className="opacity-80">✉</span>
                 <span>admin@advisorlinkonline.com.au</span>
               </a>
             </div>
