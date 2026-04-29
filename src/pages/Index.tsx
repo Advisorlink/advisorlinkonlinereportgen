@@ -75,7 +75,7 @@ export default function Index() {
       // jsPDF exposes setDisplayMode for this purpose
       (pdf as unknown as { setDisplayMode: (zoom: string | number, layout?: string, pmode?: string) => void })
         .setDisplayMode(1, "continuous", "UseNone");
-      pdf.save(`Super_Health_Check_${inputs.clientName.replace(/\s+/g, "_")}.pdf`);
+      pdf.save(`${inputs.clientName.trim()} Performance Report.pdf`);
       toast.success("PDF exported");
     } catch (e) {
       console.error(e);
