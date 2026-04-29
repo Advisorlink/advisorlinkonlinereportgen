@@ -59,7 +59,7 @@ export default function Index() {
             <span className="px-2.5 py-1 rounded-md bg-cyan text-cyan-foreground text-[10px] font-bold tracking-wide">
               Advisor Link
             </span>
-            <span className="text-xs font-semibold opacity-70">Super Health Check Builder</span>
+            <span className="text-xs font-semibold opacity-70">Super Performance Report Builder</span>
           </div>
           <div className="flex items-center gap-2">
             <input

@@ -38,7 +38,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
         <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-cyan/20 blur-2xl" />
         <div className="absolute -right-8 top-8 w-40 h-40 rounded-full bg-cyan/30" />
         <h1 className="relative text-[44px] leading-[1.05] font-black tracking-tight">
-          SUPER HEALTH<br/>CHECK
+          SUPER PERFORMANCE<br/>REPORT
         </h1>
         <p className="relative mt-3 text-sm max-w-md opacity-80">
           A complete review of your superannuation: current position, projection to retirement, income outlook, fees and a comparison scenario.
@@ -83,7 +83,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
           </h3>
         </div>
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          The information in this Super Health Check is general in nature only and does not take into
+          The information in this Super Performance Report is general in nature only and does not take into
           account your personal objectives, financial situation or needs. It is based on the inputs
           provided and the assumptions stated above. Investment returns are not guaranteed; past
           performance is not a reliable indicator of future performance. All figures are illustrative
@@ -408,7 +408,7 @@ export function FeesAndDisclosurePage({ s }: { s: ReportSummary }) {
       </SectionCard>
 
       <Disclaimer>
-        The information in this Super Health Check is general in nature only and does not take into account
+        The information in this Super Performance Report is general in nature only and does not take into account
         your personal objectives, financial situation or needs. It is based on the inputs provided and the
         assumptions stated above. Investment returns are not guaranteed; past performance is not a reliable
         indicator of future performance. All figures are illustrative only and should not be relied upon as
