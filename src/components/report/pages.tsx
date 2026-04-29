@@ -843,11 +843,8 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
 
           {/* Right: consultant card */}
           <div className="rounded-2xl bg-white/[0.06] border border-white/10 px-4 py-3 min-w-0">
-            <div className="flex items-baseline justify-between gap-3 mb-0.5">
+            <div className="mb-0.5">
               <div className="text-[15px] font-black leading-tight truncate">Travis Seckod</div>
-              <div className="text-[9px] font-black uppercase tracking-[0.22em] text-cyan flex-shrink-0">
-                Your Consultant
-              </div>
             </div>
             <div className="text-[9.5px] uppercase tracking-wider text-navy-foreground/70 font-semibold mb-2.5">
               Director · Senior Research
