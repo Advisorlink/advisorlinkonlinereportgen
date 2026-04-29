@@ -806,7 +806,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
             <div key={c.title} className="relative rounded-xl border border-border bg-card p-4 overflow-hidden group">
               <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-cyan/5 group-hover:bg-cyan/10 transition-colors" />
               <div className="relative">
-                <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-cyan/10 text-cyan text-base font-black mb-2.5">
+                <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-cyan/10 text-cyan text-base font-bold mb-2.5">
                   {c.icon}
                 </div>
                 <div className="text-navy mb-1 text-sm font-bold">{c.title}</div>
