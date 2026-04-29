@@ -195,6 +195,8 @@ FUND FIELDS (Australian context, from official sources):
       },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
+        temperature: 0,
+        top_p: 0,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: query },
@@ -208,21 +210,12 @@ FUND FIELDS (Australian context, from official sources):
       const errText = await aiResp.text();
       console.error("AI gateway error:", aiResp.status, errText);
       if (aiResp.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
+        return jsonResponse({ error: "Rate limit exceeded. Try again in a moment." }, 429);
       }
       if (aiResp.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Add credits in Settings → Workspace → Usage." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
+        return jsonResponse({ error: "AI credits exhausted. Add credits in Settings → Workspace → Usage." }, 402);
       }
-      return new Response(JSON.stringify({ error: "AI lookup failed" }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "AI lookup failed" }, 502);
     }
 
     const aiJson = await aiResp.json();
