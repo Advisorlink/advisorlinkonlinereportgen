@@ -132,7 +132,7 @@ export function projectAccumulation(i: ClientInputs): YearRow[] {
   const exAdmin = existingAdminPct(i);
   const exRate = exReturn - 0.025 - exAdmin;
 
-  const profile = inferRiskProfile(i.growthAssetsPct);
+  const profile = (i.investmentRiskProfile?.trim() || inferRiskProfile(i.growthAssetsPct)) as RiskProfile;
   const cmpReturn = comparisonReturnFor(profile);
   const cmpAdminPct = COMPARISON_ADMIN_FLAT / i.superBalance + comparisonAdminPct(i.superBalance);
   const cmpAnnualPct = comparisonAnnualFeePct(i.superBalance);
