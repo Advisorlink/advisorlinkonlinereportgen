@@ -457,7 +457,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
           <div className="h-4 w-px bg-white/30" />
           <div className="flex items-baseline gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">Comparison</span>
-            <span className="text-base font-black text-cyan tabular-nums">{(s.comparisonReturn * 100).toFixed(2)}%</span>
+            <span className="text-base font-black text-cyan tabular-nums">{(cmpAfterFees * 100).toFixed(2)}%</span>
           </div>
         </div>
       </div>
