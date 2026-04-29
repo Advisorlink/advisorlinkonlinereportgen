@@ -543,6 +543,47 @@ export function IncomePage({ s }: { s: ReportSummary }) {
         </div>
       )}
 
+      <SectionCard title="Projection assumptions" icon="◆" className="mt-5">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-lg border border-border bg-secondary/40 p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-black">↘</span>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Returns</div>
+            </div>
+            <div className="text-[11px] text-muted-foreground leading-relaxed">
+              Returns in retirement are set at <strong className="text-navy">50% of accumulation returns</strong> to account for reduced growth assets.
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-secondary/40 p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-black">%</span>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Inflation</div>
+            </div>
+            <div className="text-[11px] text-muted-foreground leading-relaxed">
+              Set at <strong className="text-navy">2.5% p.a.</strong> for the rising cost of living. Results shown in <strong className="text-navy">today's dollars</strong>.
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-secondary/40 p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-black">↗</span>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Performance</div>
+            </div>
+            <div className="text-[11px] text-muted-foreground leading-relaxed">
+              Rates of return and fees are assumed to remain <strong className="text-navy">consistent</strong> across the projection.
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-secondary/40 p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-black">⚠</span>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Market crash</div>
+            </div>
+            <div className="text-[11px] text-muted-foreground leading-relaxed">
+              A <strong className="text-navy">5% loss every 7 years</strong> is factored in to account for periodic market corrections.
+            </div>
+          </div>
+        </div>
+      </SectionCard>
+
       <PageFooter />
     </PageShell>
   );
