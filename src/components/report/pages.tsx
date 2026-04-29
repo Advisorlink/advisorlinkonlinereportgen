@@ -471,7 +471,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
         <div className="mt-2 flex justify-center">
           <div className="rounded-lg bg-cyan/10 px-8 py-4 text-center min-w-[260px]">
             <div className="text-xs text-muted-foreground">Potential uplift</div>
-            <div className="text-2xl font-black text-cyan tabular-nums mt-1">{fmtMoney(Math.max(0, s.potentialUplift))}</div>
+            <div className="text-2xl text-cyan tabular-nums mt-1 font-bold">{fmtMoney(Math.max(0, s.potentialUplift))}</div>
           </div>
         </div>
       </SectionCard>
