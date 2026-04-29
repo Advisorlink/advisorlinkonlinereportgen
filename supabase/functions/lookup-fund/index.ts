@@ -196,7 +196,7 @@ const STEP2_SYSTEM = `You extract Australian super fund figures from RAW WEBSITE
 
 Strict rules:
 - ONLY use numbers that literally appear in the provided page text. Do NOT use prior knowledge, do NOT estimate, do NOT use other time periods.
-- grossReturn must be the 5-year p.a. NET investment return/performance for the EXACT allocated investment option, copied from the page text. If you cannot find a figure clearly labelled as 5 years (or 5 yr / 5-year / 5 years p.a.) for that exact option, return null.
+- grossReturn must be the 5-year p.a. return for the EXACT allocated investment option, copied straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
 - adminFeeFlat: annual flat admin fee in AUD (multiply weekly fees by 52). Null if not in text.
 - adminFeePct: annual asset-based admin/trustee fee as a DECIMAL (0.0035 = 0.35%). Exclude investment fees. Null if not in text.
 - growthAssetsPct: strategic growth-asset allocation as DECIMAL (0.70 = 70%). Null if not in text.
