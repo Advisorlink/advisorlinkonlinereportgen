@@ -64,6 +64,17 @@ export default function Index() {
         if (i > 0) pdf.addPage();
         pdf.addImage(img, "JPEG", 0, 0, 210, 297, undefined, "FAST");
       }
+      // Set the default open view to "Actual Size" (100% zoom) when the PDF is opened.
+      // /XYZ null null null preserves position; the magnification "null" combined with
+      // PageMode keeps viewers from auto-fitting. We also set OpenAction to use a
+      // zoom of 1 (100%) explicitly via the viewer preferences.
+      const anyPdf = pdf as unknown as {
+        internal: { write: (s: string) => void };
+        _jsPDF?: unknown;
+      };
+      // jsPDF exposes setDisplayMode for this purpose
+      (pdf as unknown as { setDisplayMode: (zoom: string | number, layout?: string, pmode?: string) => void })
+        .setDisplayMode(1, "continuous", "UseNone");
       pdf.save(`Super_Health_Check_${inputs.clientName.replace(/\s+/g, "_")}.pdf`);
       toast.success("PDF exported");
     } catch (e) {
