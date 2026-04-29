@@ -171,7 +171,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           <Row label="Admin fee — flat" value={fmtMoney(i.adminFeeFlat)} />
           <Row label="Admin fee — % of balance" value={fmtPct(i.adminFeePct, 2)} />
           <Row label="Effective admin fee %" value={fmtPct(s.existingAdminPct, 2)} />
-          <Row label="Net return after fees & inflation drag" value={fmtPct(s.existingNetReturn - 0.025 - s.existingAdminPct)} />
+          
         </SectionCard>
         <SectionCard title="Comparison scenario" icon="◉">
           <Row label="Scenario" value="Aligned to risk profile" />
@@ -182,7 +182,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           <Row label="Admin fee — tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
           <Row label="Annual fee" value="1.76%" />
           <Row label="Advice fee (4.4% capped at $6,500)" value={fmtMoney(comparisonAdviceFee(i.superBalance))} />
-          <Row label="Net return after fees & inflation drag" value={fmtPct(s.comparisonReturn - 0.025 - s.comparisonAdminPct)} />
+          
         </SectionCard>
       </div>
 
