@@ -646,7 +646,7 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="POTENTIAL IMPROVEMENT" />
-      <h2 className="text-3xl font-bold font-heading text-white">Potential improvement summary</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-white">Potential improvement summary</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         A consolidated view of the projected uplift if the comparison scenario were implemented, and your eligibility for an adviser referral.
       </p>
