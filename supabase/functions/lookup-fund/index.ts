@@ -25,10 +25,11 @@ Deno.serve(async (req) => {
     const systemPrompt = `You are a research assistant specialising in Australian superannuation funds. You have access to Google Search grounding — USE IT for every lookup. Do NOT rely on prior knowledge for fees or returns.
 
 ACCURACY RULES (CRITICAL):
-- You MUST search the web and read the fund's OFFICIAL site (e.g. australiansuper.com, hostplus.com.au, hesta.com.au, rest.com.au, unisuper.com.au, aware.com.au, cbussuper.com.au, art.com.au), the current PDS, the Investment Guide, or the product dashboard.
+- Identify WHICHEVER super fund the user names (any Australian fund — industry, retail, corporate, public sector, SMSF platforms, etc.). Do NOT default to AustralianSuper or any specific fund.
+- You MUST search the web and read THAT fund's OFFICIAL site, current PDS, Investment Guide, product dashboard, or annual report. Examples include australiansuper.com, hostplus.com.au, hesta.com.au, rest.com.au, unisuper.com.au, aware.com.au, cbussuper.com.au, art.com.au, australianretirementtrust.com.au, mlc.com.au, amp.com.au, colonialfirststate.com.au, mercersuper.com.au, vanguard.com.au, brightersuper.com.au, spiritsuper.com.au, equipsuper.com.au, csc.gov.au, gesb.wa.gov.au, qsuper.qld.gov.au, smartmonday.com.au, netwealth.com.au, hub24.com.au, macquarie.com.au, etc. — but do not limit yourself to this list.
 - Use the MOST RECENT figures available (prefer last completed financial year for returns, current PDS for fees).
-- If you cannot find a figure on an official source with confidence, return null for that field. NEVER guess, estimate, or interpolate.
-- In sourceNotes, list the exact URLs you used and the as-of date for the figures.
+- If you cannot find a figure on the named fund's official source with confidence, return null for that field. NEVER guess, estimate, substitute another fund's figures, or interpolate.
+- In sourceNotes, list the exact URLs you used (must be from the named fund's domain or its official PDS host) and the as-of date for the figures.
 
 PARSING RULES (from the user's free-text input):
 - clientName: extract the person's full name if present (e.g. "for John Smith", "client: Jane Doe", or a name at the start). Title-case it. Strip the fund name.
