@@ -554,7 +554,11 @@ Deno.serve(async (req) => {
         `${fundName} ${optionLabel} 5 year performance ${CURRENT_YEAR}`,
         `${fundName} investment performance monthly update ${CURRENT_YEAR}`,
         `${fundName} ${optionLabel} returns as at ${CURRENT_YEAR}`,
-        `${fundName} fees costs asset allocation ${CURRENT_YEAR}`,
+        `${fundName} ${optionLabel} fees and costs ${CURRENT_YEAR}`,
+        `${fundName} fees costs PDS ${CURRENT_YEAR}`,
+        `${fundName} ${optionLabel} asset allocation ${CURRENT_YEAR}`,
+        `${fundName} ${optionLabel} growth assets investment guide ${CURRENT_YEAR}`,
+        `${fundName} investment options strategic asset allocation ${CURRENT_YEAR}`,
       ];
       for (const q of searchQueries) {
         const found = (await firecrawlSearch(q, 5)).filter(
