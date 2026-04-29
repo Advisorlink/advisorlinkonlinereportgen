@@ -1,4 +1,4 @@
-import { Check, Info } from "lucide-react";
+import { Check, Info, Star } from "lucide-react";
 import type { ReportSummary } from "@/lib/calc";
 import {
   fmtMoney, fmtPct,
