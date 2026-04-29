@@ -504,10 +504,9 @@ export function IncomePage({ s }: { s: ReportSummary }) {
         Translating the projected balance into a sustainable retirement income with a defensive investment mix.
       </p>
 
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-2 gap-3 mb-5">
         <KpiCard label="Starting Balance" value={fmtMoney(s.projectedExisting)} sub="Projected at retirement" />
         <KpiCard label="Annual Withdrawal" value={fmtMoney(s.annualWithdrawal)} sub="Desired annual income" accent />
-        <KpiCard label="Total Income - Current" value={fmtMoney(s.totalIncomeExisting)} sub={`Over ${s.yearsIncomeExisting} yrs`} />
       </div>
 
       <SectionCard title="Drawdown projection" icon="◆" className="mb-5">
