@@ -1,3 +1,4 @@
+import { Check, Info } from "lucide-react";
 import type { ReportSummary } from "@/lib/calc";
 import {
   fmtMoney, fmtPct,
@@ -164,7 +165,9 @@ export function WhoWeArePage() {
           <ul className="space-y-2">
             {vetting.map(v => (
               <li key={v} className="flex items-start gap-2 text-xs">
-                <span className="mt-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-cyan text-cyan-foreground text-[10px] font-black">✓</span>
+                <span className="mt-0.5 inline-flex shrink-0 items-center justify-center w-4 h-4 rounded-full bg-cyan text-cyan-foreground">
+                  <Check className="w-2.5 h-2.5" strokeWidth={3.5} />
+                </span>
                 <span className="text-foreground">{v}</span>
               </li>
             ))}
@@ -174,7 +177,9 @@ export function WhoWeArePage() {
           <ul className="space-y-2">
             {restrictions.map(r => (
               <li key={r} className="flex items-start gap-2 text-xs">
-                <span className="mt-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-navy text-navy-foreground text-[10px] font-black leading-none">i</span>
+                <span className="mt-0.5 inline-flex shrink-0 items-center justify-center w-4 h-4 rounded-full bg-navy text-navy-foreground">
+                  <Info className="w-2.5 h-2.5" strokeWidth={3} />
+                </span>
                 <span className="text-foreground leading-snug">{r}</span>
               </li>
             ))}
