@@ -763,39 +763,55 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
       </div>
 
 
-      <SectionCard title="How a referral works" icon="◉" className="mb-5">
-        <div className="grid grid-cols-3 gap-3 text-[11px]">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1">No cost to you</div>
-            <div className="text-muted-foreground leading-relaxed">Advisor Link Online does not charge you for the introduction. We are an education and referral service only.</div>
-          </div>
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1">Independent network</div>
-            <div className="text-muted-foreground leading-relaxed">Advisers in our network are licensed in Australia and assessed for quality. You are under no obligation to proceed.</div>
-          </div>
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1">Your data, your control</div>
-            <div className="text-muted-foreground leading-relaxed">We only share your details with an adviser once you confirm you'd like to be contacted.</div>
-          </div>
+      <div className="mb-5">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="h-px flex-1 bg-border" />
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan">How a referral works</div>
+          <div className="h-px flex-1 bg-border" />
         </div>
-      </SectionCard>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { icon: "$", title: "No cost to you", body: "Advisor Link Online does not charge you for the introduction. We are an education and referral service only." },
+            { icon: "✦", title: "Independent network", body: "Advisers in our network are licensed in Australia and assessed for quality. You are under no obligation to proceed." },
+            { icon: "🔒", title: "Your data, your control", body: "We only share your details with an adviser once you confirm you'd like to be contacted." },
+          ].map((c) => (
+            <div key={c.title} className="relative rounded-xl border border-border bg-card p-4 overflow-hidden group">
+              <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-cyan/5 group-hover:bg-cyan/10 transition-colors" />
+              <div className="relative">
+                <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-cyan/10 text-cyan text-base font-black mb-2.5">
+                  {c.icon}
+                </div>
+                <div className="text-[12px] font-black text-navy mb-1">{c.title}</div>
+                <div className="text-[10.5px] text-muted-foreground leading-relaxed">{c.body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
-      <SectionCard title="Important — your protections" icon="✦" className="mb-5">
-        <div className="grid grid-cols-3 gap-3 text-[11px]">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1">Best interest duty</div>
-            <div className="text-muted-foreground leading-relaxed">An adviser will only recommend personal advice if it is genuinely in your best interest. If it isn't, they won't proceed.</div>
-          </div>
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1">Annual opt-in</div>
-            <div className="text-muted-foreground leading-relaxed">Ongoing advice fees require your written consent every year. You sign a renewal document annually before any fee can be charged — giving you full control.</div>
-          </div>
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1">Paid from super</div>
-            <div className="text-muted-foreground leading-relaxed">If you choose to engage an adviser, fees are deducted from your superannuation balance — not paid out of pocket.</div>
+      <div className="mb-5 rounded-2xl border border-cyan/20 bg-gradient-to-br from-cyan/5 via-transparent to-transparent p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full bg-navy text-navy-foreground px-3 py-1">
+            <span className="text-cyan text-xs">✦</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.18em]">Important — your protections</span>
           </div>
         </div>
-      </SectionCard>
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { n: "01", title: "Best interest duty", body: "An adviser will only recommend personal advice if it is genuinely in your best interest. If it isn't, they won't proceed." },
+            { n: "02", title: "Annual opt-in", body: "Ongoing advice fees require your written consent every year. You sign a renewal document annually before any fee can be charged — giving you full control." },
+            { n: "03", title: "Paid from super", body: "If you choose to engage an adviser, fees are deducted from your superannuation balance — not paid out of pocket." },
+          ].map((c) => (
+            <div key={c.n} className="relative">
+              <div className="text-3xl font-black text-cyan/30 leading-none mb-1.5 tabular-nums">{c.n}</div>
+              <div className="h-px w-8 bg-cyan mb-2" />
+              <div className="text-[12px] font-black text-navy mb-1">{c.title}</div>
+              <div className="text-[10.5px] text-muted-foreground leading-relaxed">{c.body}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
 
       <Disclaimer>
         Advisor Link Online is an independent education and referral service and is not licensed to provide financial advice.
