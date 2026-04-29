@@ -148,7 +148,7 @@ export function WhoWeArePage() {
   return (
     <PageShell>
       <PageHeader pageLabel="WHO WE ARE" />
-      <h2 className="text-3xl font-bold font-heading text-white">Who we are & why people choose us</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-white">Who we are & why people choose us</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Advisor Link is a 100% ASIC-regulated research and referral company. We don't sell
         products - we help you understand your super and, if you choose, connect you with a
