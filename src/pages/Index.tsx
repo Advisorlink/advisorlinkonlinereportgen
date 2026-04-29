@@ -59,7 +59,7 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-secondary/40">
+    <div className="h-screen overflow-hidden bg-secondary/40">
       {/* Top bar */}
       <header className="no-print sticky top-0 z-40 bg-navy text-navy-foreground shadow-elevated">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
@@ -84,15 +84,15 @@ export default function Index() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
-        <aside className="no-print lg:sticky lg:top-20 lg:self-start">
+      <main className="max-w-7xl mx-auto px-6 py-6 grid h-[calc(100vh-64px)] grid-cols-1 grid-rows-[minmax(280px,42vh)_1fr] gap-6 overflow-hidden lg:grid-cols-[420px_1fr] lg:grid-rows-1">
+        <aside className="no-print min-h-0 overflow-y-auto pr-2 pb-6">
           <ClientForm value={inputs} onChange={setInputs} />
           <p className="mt-3 text-[11px] text-muted-foreground">
             Tip: edits update the report instantly. Use <strong>Upload XLSX</strong> to load a saved
             Client Data sheet, then download the PDF when you're happy.
           </p>
         </aside>
-        <section ref={reportRef} className="space-y-0">
+        <section ref={reportRef} className="min-h-0 space-y-0 overflow-y-auto pb-6">
           <CoverPage s={summary} />
           <WhoWeArePage />
           <SnapshotPage s={summary} />
