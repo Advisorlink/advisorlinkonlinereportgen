@@ -449,11 +449,11 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
           retirementAge={s.retirementAge}
           goalBalance={s.goalBalance}
         />
-        <div className="mt-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        <div className="mt-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-center">
           After fees and market corrections
         </div>
-        <div className="mt-2">
-          <div className="rounded-lg bg-cyan/10 px-5 py-4">
+        <div className="mt-2 flex justify-center">
+          <div className="rounded-lg bg-cyan/10 px-8 py-4 text-center min-w-[260px]">
             <div className="text-xs text-muted-foreground">Potential uplift</div>
             <div className="text-2xl font-black text-cyan tabular-nums mt-1">{fmtMoney(Math.max(0, s.potentialUplift))}</div>
           </div>
