@@ -276,7 +276,7 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="CLIENT SNAPSHOT" />
-      <h2 className="text-3xl font-heading">Executive snapshot</h2>
+      <h2 className="text-3xl font-bold font-heading">Executive snapshot</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Personal details, targets and the current super position at a glance.
       </p>
