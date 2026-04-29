@@ -103,6 +103,6 @@
     box-shadow: none;
     margin: 0;
     width: 210mm;
-    min-height: 297mm;
+    height: 297mm;
   }
 }
