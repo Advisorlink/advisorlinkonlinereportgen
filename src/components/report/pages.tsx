@@ -784,7 +784,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
             <div className="mt-1 text-2xl font-bold font-heading text-white">
               {eligible ? "You qualify for an adviser referral" : "Referral threshold not met"}
             </div>
-            <div className="mt-1 text-xs opacity-80">
+            <div className="mt-1 text-xs opacity-80 text-white">
               Total projected extra benefit: <span className="font-bold tabular-nums">{fmtMoney(totalBenefit)}</span> · Threshold: $100,000
             </div>
           </div>
