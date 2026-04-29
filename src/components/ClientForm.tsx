@@ -15,6 +15,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
   const [loading, setLoading] = useState(false);
   const [lookupCache, setLookupCache] = useState<Record<string, unknown> | null>(null);
   const [lookupCacheKey, setLookupCacheKey] = useState("");
+  const [lastResult, setLastResult] = useState<Record<string, unknown> | null>(null);
 
   const applyLookupResult = (r: Record<string, unknown>) => {
     const next: ClientInputs = { ...value };
@@ -53,6 +54,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
     const cacheKey = lookupText.trim().toLowerCase().replace(/\s+/g, " ");
     if (lookupCache && lookupCacheKey === cacheKey) {
       applyLookupResult(lookupCache);
+      setLastResult(lookupCache);
       toast.success("Fund details applied", { description: "Used the same verified result as the previous fill." });
       return;
     }
@@ -69,8 +71,9 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
       applyLookupResult(r);
       setLookupCache(r);
       setLookupCacheKey(cacheKey);
+      setLastResult(r);
       toast.success("Fund details applied", {
-        description: r.sourceNotes || "Review the figures and edit anything that's off.",
+        description: "Review the figures and source links below.",
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Lookup failed";
@@ -118,6 +121,34 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
               <p className="text-[10px] text-muted-foreground">
                 AI searches the web for the latest fees & returns, then fills the fields below. Always review before sending.
               </p>
+              {lastResult && (
+                <div className="mt-2 rounded-md border border-border bg-muted/40 p-2 space-y-1">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sources</div>
+                  {Array.isArray(lastResult.sourceUrls) && (lastResult.sourceUrls as string[]).length > 0 ? (
+                    <ul className="space-y-1">
+                      {(lastResult.sourceUrls as string[]).map((u, i) => (
+                        <li key={i} className="text-[11px] break-all">
+                          <a href={u} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:no-underline">
+                            {u}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground">No source URL was returned.</p>
+                  )}
+                  {typeof lastResult.sourceNotes === "string" && lastResult.sourceNotes.trim() && (
+                    <p className="text-[10px] text-muted-foreground whitespace-pre-line pt-1 border-t border-border/60">
+                      {lastResult.sourceNotes}
+                    </p>
+                  )}
+                  {typeof lastResult.returnEvidenceText === "string" && lastResult.returnEvidenceText.trim() && (
+                    <p className="text-[10px] italic text-muted-foreground pt-1 border-t border-border/60">
+                      Return evidence: “{lastResult.returnEvidenceText}”
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </Group>
           <Group title="Personal">
