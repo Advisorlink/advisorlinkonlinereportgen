@@ -252,8 +252,8 @@ export function WhoWeArePage() {
               </div>
               <p className="mt-2 text-[11px] leading-relaxed text-foreground">"{r.text}"</p>
               <div className="mt-3 flex items-center gap-2">
-                <div className={`w-7 h-7 rounded-full ${r.color} text-white text-[10px] font-bold flex items-center justify-center`}>
-                  {r.initials}
+                <div className={`w-7 h-7 rounded-full ${r.color} text-white text-[10px] font-bold flex items-center justify-center leading-none`}>
+                  <span className="leading-none">{r.initials}</span>
                 </div>
                 <div>
                   <div className="text-[11px] font-bold text-navy leading-tight">{r.name}</div>
