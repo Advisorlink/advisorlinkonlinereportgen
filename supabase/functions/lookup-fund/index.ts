@@ -59,6 +59,7 @@ function isAllowedOfficialCandidate(url: string): boolean {
 }
 
 async function fetchPageText(url: string, timeoutMs = 12000): Promise<string | null> {
+  const jinaUrl = `https://r.jina.ai/http://r.jina.ai/http://${url}`;
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -74,9 +75,27 @@ async function fetchPageText(url: string, timeoutMs = 12000): Promise<string | n
     clearTimeout(t);
     if (!resp.ok) return null;
     const html = await resp.text();
-    return textFromHtml(html);
+    const text = textFromHtml(html);
+    if (text.length > 300 && !/^#?\s*404\s+-\s+page not found/i.test(text)) return text;
   } catch (e) {
     console.warn("fetchPageText failed", url, e instanceof Error ? e.message : e);
+  }
+
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs + 8000);
+    const resp = await fetch(jinaUrl, {
+      redirect: "follow",
+      signal: ctrl.signal,
+      headers: { "Accept": "text/plain" },
+    });
+    clearTimeout(t);
+    if (!resp.ok) return null;
+    const text = await resp.text();
+    if (/Warning:\s*Target URL returned error\s+404/i.test(text) || /^Title:\s*404\s+-\s+Page Not Found/i.test(text)) return null;
+    return text.replace(/\s+/g, " ").trim();
+  } catch (e) {
+    console.warn("fallback fetchPageText failed", url, e instanceof Error ? e.message : e);
     return null;
   }
 }
@@ -122,11 +141,10 @@ async function callAI(messages: unknown[], tools: unknown[], toolName: string): 
     method: "POST",
     headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-2.5-pro",
+      model: "google/gemini-3-flash-preview",
       temperature: 0,
-      top_p: 0,
       messages,
-      tools,
+      tools: [{ type: "google_search" }, ...tools],
       tool_choice: { type: "function", function: { name: toolName } },
     }),
   });
