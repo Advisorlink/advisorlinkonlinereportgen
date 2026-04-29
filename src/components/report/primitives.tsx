@@ -9,7 +9,7 @@ export function PageShell({ children, className }: { children: React.ReactNode; 
   return <div className={cn("report-page", className)}>{children}</div>;
 }
 
-export function PageHeader({ pageLabel = "SUPER HEALTH CHECK", flush = false }: { pageLabel?: string; flush?: boolean }) {
+export function PageHeader({ pageLabel = "SUPER PERFORMANCE REPORT", flush = false }: { pageLabel?: string; flush?: boolean }) {
   return (
     <header
       className={cn(
