@@ -35,10 +35,18 @@ export default function Index() {
       const pages = Array.from(reportRef.current.querySelectorAll(".report-page")) as HTMLElement[];
       const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
       for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i], { scale: 2, backgroundColor: "#ffffff", useCORS: true });
-        const img = canvas.toDataURL("image/jpeg", 0.95);
+        const canvas = await html2canvas(pages[i], {
+          scale: 3,
+          backgroundColor: "#ffffff",
+          useCORS: true,
+          imageTimeout: 0,
+          logging: false,
+          windowWidth: pages[i].scrollWidth,
+          windowHeight: pages[i].scrollHeight,
+        });
+        const img = canvas.toDataURL("image/png");
         if (i > 0) pdf.addPage();
-        pdf.addImage(img, "JPEG", 0, 0, 210, 297, undefined, "FAST");
+        pdf.addImage(img, "PNG", 0, 0, 210, 297, undefined, "SLOW");
       }
       pdf.save(`Super_Health_Check_${inputs.clientName.replace(/\s+/g, "_")}.pdf`);
       toast.success("PDF exported");
