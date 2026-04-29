@@ -809,7 +809,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
                 <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-cyan/10 text-cyan text-base font-black mb-2.5">
                   {c.icon}
                 </div>
-                <div className="text-[12px] font-black text-navy mb-1">{c.title}</div>
+                <div className="text-navy mb-1 text-sm font-bold">{c.title}</div>
                 <div className="text-[10.5px] text-muted-foreground leading-relaxed">{c.body}</div>
               </div>
             </div>
