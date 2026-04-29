@@ -31,7 +31,7 @@ ACCURACY RULES (CRITICAL):
 - The return percentage must be the 5-year p.a. NET investment return/performance currently published for the exact allocated option. Do NOT use 1-year, 3-year, 7-year, 10-year, since-inception, financial-year-only, generic fund average, another option, an older cached result, a gross/before-fee return, or a figure from a comparison/third-party website.
 - If the exact 5-year p.a. net return for that exact option is not available on the official fund website/PDS, return null for grossReturn and explain that the 5-year net return could not be verified. NEVER substitute a different time period.
 - If you cannot find a figure on the named fund's official source with confidence, return null for that field. NEVER guess, estimate, substitute another fund's figures, or interpolate.
-- In sourceNotes, list the exact URLs you used (must be from the named fund's domain or its official PDS host), the exact "5 year"/"5-year" return label copied from the page, the allocated option name, and the as-of date for the figures.
+- In sourceNotes, list the exact URLs you used (must be from the named fund's domain or its official PDS host), the exact "5 year"/"5-year" return label copied from the page, the allocated option name, the risk profile label if shown, and the as-of date for the figures.
 
 PARSING RULES (from the user's free-text input):
 - clientName: extract the person's full name if present (e.g. "for John Smith", "client: Jane Doe", or a name at the start). Title-case it. Strip the fund name.
@@ -49,7 +49,8 @@ FUND FIELDS (Australian context, from official sources):
 - adminFeeFlat: annual flat administration fee in AUD (e.g. 117 means $117/yr). If the fund only charges weekly, multiply by 52.
 - adminFeePct: annual percentage admin/asset-based fee as a DECIMAL (0.0035 = 0.35%). Include any asset-based admin or trustee fee. Exclude investment fees.
 - grossReturn: the 5-year p.a. NET investment return/performance shown on the official fund website for the exact allocated investment option, as a DECIMAL (6.33% = 0.0633). It must be after investment fees and tax where the fund labels it net. DO NOT use gross/before-fee returns. DO NOT use 1-year or any period other than 5-year. Copy the official 5-year website percentage exactly.
-- growthAssetsPct: strategic growth-asset allocation as a DECIMAL (0.70 = 70%).`;
+- growthAssetsPct: strategic growth-asset allocation as a DECIMAL (0.70 = 70%).
+- investmentRiskProfile: risk level/profile exactly as the official fund page or PDS labels the allocated option, e.g. "High", "Medium to High", "Growth", "Balanced", "Very High". If not officially shown, return null.`;
 
     const tools = [
       {
@@ -67,6 +68,7 @@ FUND FIELDS (Australian context, from official sources):
               adminFeePct: { type: ["number", "null"], description: "Decimal e.g. 0.0035" },
               grossReturn: { type: ["number", "null"], description: "Decimal e.g. 0.078 — 5yr NET p.a. return (after investment fees and tax). Never gross." },
               growthAssetsPct: { type: ["number", "null"], description: "Decimal e.g. 0.70" },
+              investmentRiskProfile: { type: ["string", "null"], description: "Official risk level/profile for the allocated investment option" },
               age: { type: ["number", "null"] },
               retirementAge: { type: ["number", "null"] },
               annualIncome: { type: ["number", "null"] },
