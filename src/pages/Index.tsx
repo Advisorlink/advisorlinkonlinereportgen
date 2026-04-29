@@ -33,20 +33,36 @@ export default function Index() {
         import("jspdf"),
       ]);
       const pages = Array.from(reportRef.current.querySelectorAll(".report-page")) as HTMLElement[];
-      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-      for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i], {
-          scale: 3,
-          backgroundColor: "#ffffff",
-          useCORS: true,
-          imageTimeout: 0,
-          logging: false,
-          windowWidth: pages[i].scrollWidth,
-          windowHeight: pages[i].scrollHeight,
-        });
-        const img = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait",
+        compress: true,
+      });
+
+      // Render all pages to canvases in parallel — massive speed win vs sequential.
+      // scale: 2 produces ~300 DPI on A4 (210mm wide → ~1654px), keeping text crisp
+      // while being ~2.25× faster than scale 3. JPEG at 0.95 quality is visually
+      // indistinguishable from PNG for this content but encodes/embeds far faster
+      // and yields a much smaller PDF.
+      const canvases = await Promise.all(
+        pages.map((page) =>
+          html2canvas(page, {
+            scale: 2,
+            backgroundColor: "#ffffff",
+            useCORS: true,
+            imageTimeout: 0,
+            logging: false,
+            windowWidth: page.scrollWidth,
+            windowHeight: page.scrollHeight,
+          })
+        )
+      );
+
+      for (let i = 0; i < canvases.length; i++) {
+        const img = canvases[i].toDataURL("image/jpeg", 0.95);
         if (i > 0) pdf.addPage();
-        pdf.addImage(img, "PNG", 0, 0, 210, 297, undefined, "SLOW");
+        pdf.addImage(img, "JPEG", 0, 0, 210, 297, undefined, "FAST");
       }
       pdf.save(`Super_Health_Check_${inputs.clientName.replace(/\s+/g, "_")}.pdf`);
       toast.success("PDF exported");
