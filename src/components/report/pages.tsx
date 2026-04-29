@@ -647,7 +647,7 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Where the improvement comes from" icon="◉" className="mb-5">
+      <SectionCard title="Factors Influencing the Projection" icon="◉" className="mb-5">
         <div className="space-y-2">
           <div className="grid grid-cols-[1.4fr_1fr_1fr] gap-3 pb-2 border-b-2 border-navy text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             <div>Driver</div>
