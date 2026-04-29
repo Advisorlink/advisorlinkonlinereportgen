@@ -34,6 +34,13 @@ function urlsFrom(value: unknown): string[] {
   return Array.from(new Set(raw.match(/https?:\/\/[^\s)\],;"']+/g) ?? [])).slice(0, 4);
 }
 
+function normalizeOfficialUrl(url: string): string {
+  if (/caresuper\.com\.au/i.test(url) && /investment|performance|return/i.test(url)) {
+    return "https://www.caresuper.com.au/investments/investment-performance";
+  }
+  return url;
+}
+
 function pctVariants(decimal: unknown): string[] {
   if (typeof decimal !== "number" || !Number.isFinite(decimal)) return [];
   const pct = decimal * 100;
@@ -71,7 +78,7 @@ function hasVerifiedFiveYearReturn(sourceText: string, grossReturn: unknown, mod
 
 async function verifyReturnAgainstSources(parsed: Record<string, unknown>): Promise<Record<string, unknown>> {
   if (parsed.grossReturn == null) return parsed;
-  const urls = urlsFrom(parsed.sourceUrls).concat(urlsFrom(parsed.sourceNotes));
+  const urls = Array.from(new Set(urlsFrom(parsed.sourceUrls).concat(urlsFrom(parsed.sourceNotes)).map(normalizeOfficialUrl)));
   if (!urls.length) {
     return { ...parsed, grossReturn: null, sourceNotes: `${parsed.sourceNotes ?? ""}\nVerification failed: no official source URL was returned for the 5-year net return.`.trim() };
   }
