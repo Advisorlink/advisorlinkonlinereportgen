@@ -431,6 +431,8 @@ export function FundsPage({ s }: { s: ReportSummary }) {
 /* PAGE 4 — ACCUMULATION PROJECTION                                   */
 /* ------------------------------------------------------------------ */
 export function ProjectionPage({ s }: { s: ReportSummary }) {
+  const i = s.inputs;
+  const cmpNetReturn = s.comparisonReturn - 0.025 - s.comparisonAdminPct - Math.min(i.superBalance * 0.0176, 5000) / i.superBalance;
   return (
     <PageShell>
       <PageHeader pageLabel="ACCUMULATION" />
