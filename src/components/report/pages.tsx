@@ -439,10 +439,25 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
         Year-by-year projection of the current fund vs the comparison scenario, including periodic market dips.
       </p>
 
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-3 gap-3 mb-3">
         <KpiCard label="Current Balance" value={fmtMoney(s.startingBalance)} sub="Today" />
         <KpiCard label="Projected - Current" value={fmtMoney(s.projectedExisting)} sub={`At age ${s.retirementAge}`} />
         <KpiCard label="Projected - Comparison" value={fmtMoney(s.projectedComparison)} sub={`At age ${s.retirementAge}`} accent />
+      </div>
+
+      <div className="mb-5 flex items-center justify-between rounded-lg border border-border bg-secondary/40 px-4 py-2.5">
+        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-navy">5 Year Return (p.a.)</div>
+        <div className="flex items-center gap-6">
+          <div className="flex items-baseline gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Current</span>
+            <span className="text-base font-black text-navy tabular-nums">{(s.existingNetReturn * 100).toFixed(2)}%</span>
+          </div>
+          <div className="h-4 w-px bg-border" />
+          <div className="flex items-baseline gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Comparison</span>
+            <span className="text-base font-black text-cyan tabular-nums">{(s.comparisonReturn * 100).toFixed(2)}%</span>
+          </div>
+        </div>
       </div>
 
       <SectionCard title="Balance projection" icon="◆" className="mb-5">
