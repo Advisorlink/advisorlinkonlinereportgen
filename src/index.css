@@ -80,7 +80,8 @@
 /* Print-perfect A4 pages */
 .report-page {
   width: 210mm;
-  min-height: 297mm;
+  height: 297mm;
+  max-height: 297mm;
   padding: 16mm 14mm;
   background: white;
   color: hsl(var(--foreground));
@@ -102,6 +103,6 @@
     box-shadow: none;
     margin: 0;
     width: 210mm;
-    min-height: 297mm;
+    height: 297mm;
   }
 }

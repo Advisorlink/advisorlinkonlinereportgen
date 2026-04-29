@@ -33,20 +33,35 @@ export default function Index() {
         import("jspdf"),
       ]);
       const pages = Array.from(reportRef.current.querySelectorAll(".report-page")) as HTMLElement[];
-      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-      for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i], {
-          scale: 3,
-          backgroundColor: "#ffffff",
-          useCORS: true,
-          imageTimeout: 0,
-          logging: false,
-          windowWidth: pages[i].scrollWidth,
-          windowHeight: pages[i].scrollHeight,
-        });
-        const img = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+
+      // A4 size in CSS pixels at 96dpi: 210mm = 793.7px, 297mm = 1122.5px
+      const A4_W_PX = 794;
+      const A4_H_PX = 1123;
+      const SCALE = 2; // 2x is sharp on screen + zoom, much faster than 3x
+
+      // Render all pages in parallel for speed
+      const canvases = await Promise.all(
+        pages.map((page) =>
+          html2canvas(page, {
+            scale: SCALE,
+            backgroundColor: "#ffffff",
+            useCORS: true,
+            imageTimeout: 0,
+            logging: false,
+            width: A4_W_PX,
+            height: A4_H_PX,
+            windowWidth: A4_W_PX,
+            windowHeight: A4_H_PX,
+          })
+        )
+      );
+
+      for (let i = 0; i < canvases.length; i++) {
+        const img = canvases[i].toDataURL("image/jpeg", 0.92);
         if (i > 0) pdf.addPage();
-        pdf.addImage(img, "PNG", 0, 0, 210, 297, undefined, "SLOW");
+        // Exact A4 fit — same aspect as capture, so no stretching
+        pdf.addImage(img, "JPEG", 0, 0, 210, 297, undefined, "FAST");
       }
       pdf.save(`Super_Health_Check_${inputs.clientName.replace(/\s+/g, "_")}.pdf`);
       toast.success("PDF exported");
