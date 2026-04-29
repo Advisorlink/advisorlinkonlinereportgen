@@ -204,11 +204,11 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           loading="lazy"
           className="absolute inset-0 w-full h-full object-cover opacity-95"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/10 to-transparent" />
         <div className="absolute bottom-5 left-6 right-6 text-navy-foreground">
-          <div className="text-[10px] tracking-[0.25em] font-bold text-cyan mb-1">THE LONG VIEW</div>
-          <div className="text-lg font-black leading-tight max-w-xs">
-            Small decisions today shape the summit of your retirement.
+          <div className="text-[10px] tracking-[0.25em] font-bold text-cyan mb-1">CLIMB, DON'T COAST</div>
+          <div className="text-lg font-black leading-tight max-w-sm">
+            Make sure you can still climb the mountain — don't be the one stuck in the bus taking photos.
           </div>
         </div>
       </div>
