@@ -387,7 +387,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
             <div
               key={p}
               className={
-                "rounded-lg border px-2 py-3 text-[11px] font-bold " +
+                "rounded-lg border px-2 py-3 text-[11px] font-semibold " +
                 (p === s.riskProfile
                   ? "bg-navy text-navy-foreground border-navy"
                   : "bg-secondary/50 text-muted-foreground border-border")
