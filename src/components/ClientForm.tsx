@@ -94,7 +94,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
       </button>
       {!collapsed && (
         <div className="space-y-5">
-          <Group title="AI Fund Lookup">
+          <Group title="Fund Lookup">
             <div className="col-span-2 space-y-2">
               <Label className="text-[11px] text-muted-foreground">
                 Describe the client's super (fund, option, age, balance, income…)
