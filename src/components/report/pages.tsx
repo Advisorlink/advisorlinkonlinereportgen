@@ -10,6 +10,7 @@ import {
   AccumulationChart, WithdrawalChart,
   FeeRow, FeeTableHeader, Disclaimer,
 } from "./primitives";
+import riskIllustration from "@/assets/risk-illustration.jpg";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -195,6 +196,22 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           Comparison gross returns are illustrative tiered figures.
         </p>
       </SectionCard>
+
+      <div className="mt-5 relative rounded-2xl overflow-hidden bg-gradient-to-br from-navy to-[hsl(215_60%_18%)] flex-1 min-h-[260px]">
+        <img
+          src={riskIllustration}
+          alt="Illustration of long-term superannuation growth toward retirement"
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover opacity-95"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-transparent to-transparent" />
+        <div className="absolute bottom-5 left-6 right-6 text-navy-foreground">
+          <div className="text-[10px] tracking-[0.25em] font-bold text-cyan mb-1">THE LONG VIEW</div>
+          <div className="text-lg font-black leading-tight max-w-xs">
+            Small decisions today shape the summit of your retirement.
+          </div>
+        </div>
+      </div>
 
       <PageFooter />
     </PageShell>
