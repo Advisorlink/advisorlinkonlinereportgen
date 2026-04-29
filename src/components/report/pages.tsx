@@ -205,15 +205,15 @@ export function WhoWeArePage() {
               <path fill="#FBBC05" d="M11.69 28.18c-.44-1.32-.69-2.73-.69-4.18s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/>
               <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
             </svg>
-            <div>
+             <div>
               <div className="text-sm font-bold text-navy leading-tight">Google Reviews</div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <div className="flex">
+              <div className="flex items-center gap-1.5 mt-1">
+                <div className="flex items-center">
                   {[0,1,2,3,4].map(i => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-[#FBBC05] text-[#FBBC05]" />
+                    <Star key={i} className="w-3.5 h-3.5 fill-[#FBBC05] text-[#FBBC05] block" />
                   ))}
                 </div>
-                <span className="text-[11px] font-semibold text-foreground">5.0 stars</span>
+                <span className="text-[11px] font-semibold text-foreground leading-none">5.0 stars</span>
               </div>
             </div>
           </div>
