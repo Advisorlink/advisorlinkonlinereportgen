@@ -207,14 +207,14 @@ export function WhoWeArePage() {
             </svg>
              <div>
               <div className="text-sm font-bold text-navy leading-tight">Google Reviews</div>
-              <div className="flex items-center gap-1.5 mt-2">
-                <div className="flex items-center">
-                  {[0,1,2,3,4].map(i => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-[#FBBC05] text-[#FBBC05] block" />
-                  ))}
-                </div>
-                <span className="text-[11px] font-semibold text-foreground leading-none">5.0 stars</span>
-              </div>
+              <div className="flex flex-row items-center gap-1.5 mt-2 whitespace-nowrap">
+                 <span className="inline-flex items-center">
+                   {[0,1,2,3,4].map(i => (
+                     <Star key={i} className="w-3.5 h-3.5 fill-[#FBBC05] text-[#FBBC05]" />
+                   ))}
+                 </span>
+                 <span className="text-[11px] font-semibold text-foreground inline-block">5.0 stars</span>
+               </div>
             </div>
           </div>
           <span className="text-[10px] tracking-[0.2em] font-bold text-cyan">VERIFIED</span>
