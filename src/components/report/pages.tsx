@@ -663,7 +663,7 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
             <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               Balance uplift + additional retirement income
             </div>
-            <div className="mt-1 text-4xl font-black text-cyan tabular-nums">{fmtMoney(totalBenefit)}</div>
+            <div className="mt-1 text-4xl text-cyan tabular-nums font-bold">{fmtMoney(totalBenefit)}</div>
             <div className="text-[11px] text-muted-foreground mt-1">
               Potential Combined lifetime benefit after receiving licenced financial advice.
             </div>
