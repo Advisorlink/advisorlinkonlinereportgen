@@ -343,7 +343,7 @@ export function FeesAndDisclosurePage({ s }: { s: ReportSummary }) {
   const cmpAdmin = comparisonAdminPct(i.superBalance) * i.superBalance;
   const cmpAnnual = comparisonAnnualFee(i.superBalance);
   const cmpAdvice = comparisonAdviceFee(i.superBalance);
-  const cmpTotalFee = cmpFlat + cmpAdmin + cmpAnnual + cmpAdvice;
+  const cmpTotalFee = cmpFlat + cmpAdmin + cmpAdvice;
 
   return (
     <PageShell>
