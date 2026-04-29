@@ -71,8 +71,9 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
       applyLookupResult(r);
       setLookupCache(r);
       setLookupCacheKey(cacheKey);
+      setLastResult(r);
       toast.success("Fund details applied", {
-        description: r.sourceNotes || "Review the figures and edit anything that's off.",
+        description: "Review the figures and source links below.",
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Lookup failed";
