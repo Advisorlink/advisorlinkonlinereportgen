@@ -839,37 +839,27 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
             Call your Senior Research Consultant today for a no-obligation chat.
           </div>
 
-          <div className="mt-4 grid grid-cols-[auto_1fr] gap-4 items-center">
-            {/* Avatar / monogram */}
-            <div className="relative">
-              <div className="absolute inset-0 rounded-2xl bg-cyan/40 blur-md" />
-              <div className="relative h-16 w-16 rounded-2xl bg-gradient-to-br from-cyan to-cyan/60 text-navy flex items-center justify-center text-xl font-black tracking-tight shadow-lg">
-                TS
-              </div>
+          <div className="mt-4">
+            <div className="text-base font-black leading-tight">Travis Seckod</div>
+            <div className="text-[11px] uppercase tracking-wider text-cyan/90 font-bold">
+              Director · Senior Research
             </div>
 
-            <div className="min-w-0">
-              <div className="text-base font-black leading-tight">Travis Seckod</div>
-              <div className="text-[11px] uppercase tracking-wider text-cyan/90 font-bold">
-                Director · Senior Research
-              </div>
-
-              <div className="mt-2 flex flex-wrap gap-2">
-                <a
-                  href="tel:0485991688"
-                  className="inline-flex items-center gap-2 rounded-full bg-cyan text-navy px-3.5 py-1.5 text-[12px] font-black shadow-md"
-                >
-                  <span>☎</span>
-                  <span className="tabular-nums">0485 991 688</span>
-                </a>
-                <a
-                  href="mailto:admin@advisorlinkonline.com.au"
-                  className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/15 px-3.5 py-1.5 text-[12px] font-semibold"
-                >
-                  <span className="opacity-80">✉</span>
-                  <span>admin@advisorlinkonline.com.au</span>
-                </a>
-              </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <a
+                href="tel:0485991688"
+                className="inline-flex items-center gap-2 rounded-full bg-cyan text-navy px-3.5 py-1.5 text-[12px] font-black shadow-md"
+              >
+                <span>☎</span>
+                <span className="tabular-nums">0485 991 688</span>
+              </a>
+              <a
+                href="mailto:admin@advisorlinkonline.com.au"
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/15 px-3.5 py-1.5 text-[12px] font-semibold"
+              >
+                <span className="opacity-80">✉</span>
+                <span>admin@advisorlinkonline.com.au</span>
+              </a>
             </div>
           </div>
         </div>
