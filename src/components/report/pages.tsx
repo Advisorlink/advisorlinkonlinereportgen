@@ -151,13 +151,10 @@ export function WhoWeArePage() {
         <p className="text-xs text-muted-foreground mb-3">
           We only refer to licensed firms that meet a strict vetting standard.
         </p>
-        <div className="rounded-xl bg-secondary/40 border border-border p-4 flex items-center justify-center">
-          <img
-            src={trustedAdvisers}
-            alt="Logos of trusted financial adviser partners"
-            className="max-h-40 w-auto object-contain"
-            loading="lazy"
-          />
+        <div className="rounded-xl bg-white border border-border px-6 py-5 grid grid-cols-3 gap-6 items-center">
+          <img src={logoInheritance} alt="Inheritance Financial Advice" className="max-h-12 w-auto object-contain mx-auto" loading="lazy" />
+          <img src={logoMyAdvice} alt="MyAdvice Hub" className="max-h-12 w-auto object-contain mx-auto" loading="lazy" />
+          <img src={logoPure} alt="Pure" className="max-h-12 w-auto object-contain mx-auto" loading="lazy" />
         </div>
       </SectionCard>
 
