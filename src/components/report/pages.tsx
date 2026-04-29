@@ -546,7 +546,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
           <div className="flex items-center gap-4">
             <div>
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Money lasts to age</div>
-              <div className="text-4xl font-black text-navy tabular-nums">{s.ageMoneyLastsExisting}</div>
+              <div className="text-4xl text-navy tabular-nums font-bold">{s.ageMoneyLastsExisting}</div>
               <div className="mt-1 text-xs font-bold text-cyan">{s.yearsIncomeExisting} years of income</div>
             </div>
             <div className="ml-auto"><Gauge value={s.yearsIncomeExisting} max={30} label={`${s.yearsIncomeExisting} yrs`} /></div>
