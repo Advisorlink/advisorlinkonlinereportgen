@@ -809,34 +809,66 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
 
 
       <div
-        className="mb-4 rounded-2xl overflow-hidden relative text-navy-foreground"
-        style={{ background: "linear-gradient(135deg, hsl(215 60% 14%) 0%, hsl(200 70% 28%) 60%, hsl(195 95% 38%) 100%)" }}
+        className="mb-4 rounded-2xl overflow-hidden relative text-navy-foreground shadow-elevated"
+        style={{ background: "linear-gradient(120deg, hsl(215 65% 10%) 0%, hsl(210 60% 16%) 50%, hsl(200 70% 22%) 100%)" }}
       >
-        <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-cyan/30 blur-3xl" />
-        <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-cyan/20 blur-2xl" />
-        <div className="relative p-5 flex items-center gap-5">
-          <div className="flex-shrink-0 h-20 w-20 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-3xl font-black tracking-tight">
-            TS
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan">Talk to your consultant</div>
-            <div className="mt-0.5 text-xl font-black leading-tight">
-              Call your Senior Research Consultant today for a chat.
+        {/* Decorative glow */}
+        <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/25 blur-3xl pointer-events-none" />
+        <div className="absolute right-1/3 -bottom-20 w-56 h-56 rounded-full bg-cyan/10 blur-3xl pointer-events-none" />
+        {/* Subtle grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          style={{
+            backgroundImage:
+              "linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+        {/* Accent bar */}
+        <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-cyan via-cyan/70 to-cyan/30" />
+
+        <div className="relative px-6 py-5">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
+            <div className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan">
+              Ready to take the next step?
             </div>
-            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[11px]">
-              <div>
-                <div className="font-black text-sm">Travis Seckod</div>
-                <div className="opacity-80">Director / Senior Research</div>
+          </div>
+
+          <div className="text-2xl font-black leading-tight max-w-xl">
+            Call your Senior Research Consultant today for a no-obligation chat.
+          </div>
+
+          <div className="mt-4 grid grid-cols-[auto_1fr] gap-4 items-center">
+            {/* Avatar / monogram */}
+            <div className="relative">
+              <div className="absolute inset-0 rounded-2xl bg-cyan/40 blur-md" />
+              <div className="relative h-16 w-16 rounded-2xl bg-gradient-to-br from-cyan to-cyan/60 text-navy flex items-center justify-center text-xl font-black tracking-tight shadow-lg">
+                TS
               </div>
-              <div className="flex flex-col justify-center">
-                <div className="flex items-center gap-1.5">
-                  <span className="opacity-60">✉</span>
-                  <span className="font-semibold">admin@advisorlinkonline.com.au</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="opacity-60">☎</span>
-                  <span className="font-semibold tabular-nums">0485 991 688</span>
-                </div>
+            </div>
+
+            <div className="min-w-0">
+              <div className="text-base font-black leading-tight">Travis Seckod</div>
+              <div className="text-[11px] uppercase tracking-wider text-cyan/90 font-bold">
+                Director · Senior Research
+              </div>
+
+              <div className="mt-2 flex flex-wrap gap-2">
+                <a
+                  href="tel:0485991688"
+                  className="inline-flex items-center gap-2 rounded-full bg-cyan text-navy px-3.5 py-1.5 text-[12px] font-black shadow-md"
+                >
+                  <span>☎</span>
+                  <span className="tabular-nums">0485 991 688</span>
+                </a>
+                <a
+                  href="mailto:admin@advisorlinkonline.com.au"
+                  className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/15 px-3.5 py-1.5 text-[12px] font-semibold"
+                >
+                  <span className="opacity-80">✉</span>
+                  <span>admin@advisorlinkonline.com.au</span>
+                </a>
               </div>
             </div>
           </div>
