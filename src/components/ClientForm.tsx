@@ -54,6 +54,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
     const cacheKey = lookupText.trim().toLowerCase().replace(/\s+/g, " ");
     if (lookupCache && lookupCacheKey === cacheKey) {
       applyLookupResult(lookupCache);
+      setLastResult(lookupCache);
       toast.success("Fund details applied", { description: "Used the same verified result as the previous fill." });
       return;
     }
