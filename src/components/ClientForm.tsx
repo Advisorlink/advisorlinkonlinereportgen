@@ -2,10 +2,62 @@ import { useState } from "react";
 import type { ClientInputs, IncomeFrequency } from "@/lib/calc";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Sparkles, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export function ClientForm({ value, onChange }: { value: ClientInputs; onChange: (v: ClientInputs) => void }) {
   const set = <K extends keyof ClientInputs>(k: K, v: ClientInputs[K]) => onChange({ ...value, [k]: v });
   const [collapsed, setCollapsed] = useState(false);
+  const [lookupText, setLookupText] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const runLookup = async () => {
+    if (lookupText.trim().length < 3) {
+      toast.error("Enter at least the fund name and investment option.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("lookup-fund", {
+        body: { query: lookupText.trim() },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const r = data?.data ?? {};
+      const next: ClientInputs = { ...value };
+      const numeric = (k: keyof ClientInputs, v: unknown) => {
+        if (typeof v === "number" && Number.isFinite(v)) (next[k] as number) = v;
+      };
+      const text = (k: keyof ClientInputs, v: unknown) => {
+        if (typeof v === "string" && v.trim()) (next[k] as string) = v.trim();
+      };
+
+      text("clientName", r.clientName);
+      text("fundName", r.fundName);
+      text("modelLabel", r.modelLabel);
+      numeric("age", r.age);
+      numeric("retirementAge", r.retirementAge);
+      numeric("annualIncome", r.annualIncome);
+      numeric("superBalance", r.superBalance);
+      numeric("adminFeeFlat", r.adminFeeFlat);
+      numeric("adminFeePct", r.adminFeePct);
+      numeric("grossReturn", r.grossReturn);
+      numeric("growthAssetsPct", r.growthAssetsPct);
+
+      onChange(next);
+      toast.success("Fund details applied", {
+        description: r.sourceNotes || "Review the figures and edit anything that's off.",
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Lookup failed";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-card rounded-xl border border-border p-5 shadow-card">
@@ -18,6 +70,34 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
       </button>
       {!collapsed && (
         <div className="space-y-5">
+          <Group title="AI Fund Lookup">
+            <div className="col-span-2 space-y-2">
+              <Label className="text-[11px] text-muted-foreground">
+                Describe the client's super (fund, option, age, balance, income…)
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="e.g. AustralianSuper Balanced, age 35, $80k balance, $95k salary"
+                  value={lookupText}
+                  onChange={e => setLookupText(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" && !loading) {
+                      e.preventDefault();
+                      runLookup();
+                    }
+                  }}
+                  disabled={loading}
+                />
+                <Button onClick={runLookup} disabled={loading} className="shrink-0">
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  <span className="ml-2">{loading ? "Searching…" : "Auto-fill"}</span>
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                AI searches the web for the latest fees & returns, then fills the fields below. Always review before sending.
+              </p>
+            </div>
+          </Group>
           <Group title="Personal">
             <Field label="Client name"><Input value={value.clientName} onChange={e => set("clientName", e.target.value)} /></Field>
             <Field label="Age"><NumInput v={value.age} on={n => set("age", n)} /></Field>
