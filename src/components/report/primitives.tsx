@@ -48,7 +48,7 @@ export function KpiCard({
   return (
     <div className="rounded-xl bg-white border border-border px-4 py-3 shadow-card">
       <div className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">{label}</div>
-      <div className={cn("mt-1 text-2xl font-extrabold tabular-nums", accent ? "text-cyan" : "text-navy")}>
+      <div className={cn("mt-1 text-2xl tabular-nums", accent ? "text-cyan font-bold" : "text-navy font-extrabold")}>
         {value}
       </div>
       {sub && <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>}
@@ -100,7 +100,7 @@ export function ComparisonBar({
       <div className="h-6 rounded-md bg-secondary overflow-hidden">
         <div className={cn("h-full rounded-md", fill)} style={{ width: `${pct * 100}%` }} />
       </div>
-      <div className="text-sm font-bold text-navy tabular-nums">{displayValue}</div>
+      <div className="text-sm text-navy tabular-nums font-semibold">{displayValue}</div>
     </div>
   );
 }
@@ -125,7 +125,7 @@ export function Gauge({ value, max = 100, label }: { value: number; max?: number
         />
       </svg>
       {label && (
-        <div className="absolute inset-x-0 bottom-1 text-center text-sm font-bold text-navy">
+        <div className="absolute inset-x-0 bottom-1 text-center text-sm font-semibold text-navy">
           {label}
         </div>
       )}
@@ -258,7 +258,7 @@ export function StatPill({ label, value, tone = "navy" }: { label: string; value
   return (
     <div className="flex items-center gap-2">
       <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase", map[tone])}>{label}</span>
-      <span className="text-sm font-bold text-navy tabular-nums">{value}</span>
+      <span className="text-sm font-semibold text-navy tabular-nums">{value}</span>
     </div>
   );
 }

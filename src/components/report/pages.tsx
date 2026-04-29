@@ -22,7 +22,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-baseline justify-between py-1.5 border-b border-border last:border-0">
       <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-sm font-bold text-navy tabular-nums">{value}</span>
+      <span className="text-sm font-semibold text-navy tabular-nums">{value}</span>
     </div>
   );
 }
@@ -92,7 +92,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
       <div className="mt-5 rounded-xl bg-white border border-border p-5 shadow-[0_20px_45px_-15px_hsl(215_60%_15%/0.25),0_8px_20px_-8px_hsl(215_60%_15%/0.15)]">
         <div className="flex items-center gap-2 mb-2">
           <span className="inline-block w-1.5 h-5 rounded-full bg-cyan" />
-          <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-navy">
+          <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-navy">
             Disclaimer
           </h3>
         </div>
@@ -111,7 +111,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
             loading="lazy"
           />
           <div>
-            <div className="text-[10px] tracking-[0.22em] font-bold text-cyan mb-1">100% ASIC REGULATED</div>
+            <div className="text-[10px] tracking-[0.22em] font-semibold text-cyan mb-1">100% ASIC REGULATED</div>
             <div className="text-lg text-navy leading-tight font-medium" style={{ fontFamily: "'Montserrat', system-ui, sans-serif" }}>
               ADVISORLINK PTY LTD &nbsp;·&nbsp; ACN 671 139 923
             </div>
@@ -148,7 +148,7 @@ export function WhoWeArePage() {
   return (
     <PageShell>
       <PageHeader pageLabel="WHO WE ARE" />
-      <h2 className="text-3xl font-heading">Who we are & why people choose us</h2>
+      <h2 className="text-3xl font-bold font-heading">Who we are & why people choose us</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Advisor Link is a 100% ASIC-regulated research and referral company. We don't sell
         products - we help you understand your super and, if you choose, connect you with a
@@ -206,7 +206,7 @@ export function WhoWeArePage() {
               <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
             </svg>
              <div>
-              <div className="text-sm font-bold text-navy leading-tight">Google Reviews</div>
+              <div className="text-sm font-semibold text-navy leading-tight">Google Reviews</div>
               <div className="flex flex-row items-center gap-1.5 mt-2 whitespace-nowrap">
                  <span className="inline-flex items-center">
                    {[0,1,2,3,4].map(i => (
@@ -254,7 +254,7 @@ export function WhoWeArePage() {
               </div>
               <p className="mt-2 text-[11px] leading-relaxed text-foreground">"{r.text}"</p>
               <div className="mt-3">
-                <div className="text-[11px] font-bold text-navy leading-tight">{r.name}</div>
+                <div className="text-[11px] font-bold text-navy leading-tight font-heading">{r.name}</div>
                 <div className="text-[9px] text-muted-foreground">{r.loc}</div>
               </div>
             </div>
@@ -276,7 +276,7 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="CLIENT SNAPSHOT" />
-      <h2 className="text-3xl font-heading">Executive snapshot</h2>
+      <h2 className="text-3xl font-bold font-heading">Executive snapshot</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Personal details, targets and the current super position at a glance.
       </p>
@@ -327,10 +327,10 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
           const yearNumber = new Date().getFullYear() + (r.age - s.inputs.age);
           return (
             <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-2 py-1.5 text-xs border-b border-border last:border-0">
-              <div className="font-semibold text-navy">{r.age}</div>
+              <div className="font-bold text-navy">{r.age}</div>
               <div className="text-right text-muted-foreground tabular-nums">{yearNumber}</div>
               <div className="text-right tabular-nums">{fmtMoney(r.existing)}</div>
-              <div className="text-right tabular-nums text-cyan font-semibold">{fmtMoney(r.comparison)}</div>
+              <div className="text-right tabular-nums text-cyan font-bold">{fmtMoney(r.comparison)}</div>
             </div>
           );
         })}
@@ -351,7 +351,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="FUND DETAILS" />
-      <h2 className="text-3xl font-heading">Current fund vs comparison</h2>
+      <h2 className="text-3xl font-bold font-heading">Current fund vs comparison</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Side-by-side view of the existing fund settings and the comparison scenario used throughout this report.
       </p>
@@ -387,7 +387,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
             <div
               key={p}
               className={
-                "rounded-lg border px-2 py-3 text-[11px] font-bold " +
+                "rounded-lg border px-2 py-3 text-[11px] font-semibold " +
                 (p === s.riskProfile
                   ? "bg-navy text-navy-foreground border-navy"
                   : "bg-secondary/50 text-muted-foreground border-border")
@@ -413,7 +413,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
         <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/10 to-transparent" />
         <div className="absolute bottom-5 left-6 right-6 text-navy-foreground">
           <div className="text-[10px] tracking-[0.25em] font-bold text-cyan mb-1">CLIMB, DON'T COAST</div>
-          <div className="text-lg font-black leading-tight max-w-sm">
+          <div className="text-lg leading-tight max-w-sm font-medium font-heading">
             Make sure you can still climb the mountain. Don't be the one stuck in the bus taking photos.
           </div>
         </div>
@@ -433,7 +433,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="ACCUMULATION" />
-      <h2 className="text-3xl font-heading">Projection to retirement</h2>
+      <h2 className="text-3xl font-bold font-heading">Projection to retirement</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Year-by-year projection of the current fund vs the comparison scenario, including periodic market dips.
       </p>
@@ -449,12 +449,12 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
         <div className="flex items-center gap-6">
           <div className="flex items-baseline gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">Current</span>
-            <span className="text-base font-black text-white tabular-nums">{(s.existingNetReturn * 100).toFixed(2)}%</span>
+            <span className="text-base font-bold text-white tabular-nums">{(s.existingNetReturn * 100).toFixed(2)}%</span>
           </div>
           <div className="h-4 w-px bg-white/30" />
           <div className="flex items-baseline gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">Comparison</span>
-            <span className="text-base font-black text-cyan tabular-nums">{(cmpAfterFees * 100).toFixed(2)}%</span>
+            <span className="text-base font-bold text-cyan tabular-nums">{(cmpAfterFees * 100).toFixed(2)}%</span>
           </div>
         </div>
       </div>
@@ -471,7 +471,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
         <div className="mt-2 flex justify-center">
           <div className="rounded-lg bg-cyan/10 px-8 py-4 text-center min-w-[260px]">
             <div className="text-xs text-muted-foreground">Potential uplift</div>
-            <div className="text-2xl font-black text-cyan tabular-nums mt-1">{fmtMoney(Math.max(0, s.potentialUplift))}</div>
+            <div className="text-2xl text-cyan tabular-nums mt-1 font-bold">{fmtMoney(Math.max(0, s.potentialUplift))}</div>
           </div>
         </div>
       </SectionCard>
@@ -480,7 +480,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-lg border border-border bg-secondary/40 p-4">
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">%</span>
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-bold">%</span>
               <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Inflation</div>
             </div>
             <div className="text-xs text-muted-foreground leading-relaxed">
@@ -489,7 +489,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
           </div>
           <div className="rounded-lg border border-border bg-secondary/40 p-4">
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">↗</span>
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-bold">↗</span>
               <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Performance</div>
             </div>
             <div className="text-xs text-muted-foreground leading-relaxed">
@@ -498,7 +498,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
           </div>
           <div className="rounded-lg border border-border bg-secondary/40 p-4">
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">⚠</span>
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-bold">⚠</span>
               <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Market crash</div>
             </div>
             <div className="text-xs text-muted-foreground leading-relaxed">
@@ -527,7 +527,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="RETIREMENT INCOME" />
-      <h2 className="text-3xl font-heading">Retirement income view</h2>
+      <h2 className="text-3xl font-bold font-heading">Retirement income view</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         How long will your money potentially last when you need it the most?
       </p>
@@ -546,7 +546,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
           <div className="flex items-center gap-4">
             <div>
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Money lasts to age</div>
-              <div className="text-4xl font-black text-navy tabular-nums">{s.ageMoneyLastsExisting}</div>
+              <div className="text-4xl text-navy tabular-nums font-bold">{s.ageMoneyLastsExisting}</div>
               <div className="mt-1 text-xs font-bold text-cyan">{s.yearsIncomeExisting} years of income</div>
             </div>
             <div className="ml-auto"><Gauge value={s.yearsIncomeExisting} max={30} label={`${s.yearsIncomeExisting} yrs`} /></div>
@@ -556,7 +556,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
           <div className="flex items-center gap-4">
             <div>
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Money lasts to age</div>
-              <div className="text-4xl font-black text-navy tabular-nums">{s.ageMoneyLastsComparison}</div>
+              <div className="text-4xl text-navy tabular-nums font-bold">{s.ageMoneyLastsComparison}</div>
               <div className="mt-1 text-xs font-bold text-cyan">{s.yearsIncomeComparison} years of income</div>
             </div>
             <div className="ml-auto"><Gauge value={s.yearsIncomeComparison} max={30} label={`${s.yearsIncomeComparison} yrs`} /></div>
@@ -569,7 +569,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
           {s.totalIncomeComparison - s.totalIncomeExisting > 0 && (
             <div className="rounded-md bg-cyan/10 border border-cyan/30 px-4 py-3">
               <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Additional retirement income</div>
-              <div className="mt-1 text-2xl font-black text-cyan tabular-nums">
+              <div className="mt-1 text-2xl text-cyan tabular-nums font-bold">
                 +{fmtMoney(s.totalIncomeComparison - s.totalIncomeExisting)}
               </div>
               <div className="text-[10px] text-muted-foreground mt-0.5">Extra income provided over retirement</div>
@@ -578,7 +578,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
           {s.yearsIncomeComparison - s.yearsIncomeExisting > 0 && (
             <div className="rounded-md bg-cyan/10 border border-cyan/30 px-4 py-3">
               <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Additional years of income</div>
-              <div className="mt-1 text-2xl font-black text-cyan tabular-nums">
+              <div className="mt-1 text-2xl text-cyan tabular-nums font-bold">
                 +{s.yearsIncomeComparison - s.yearsIncomeExisting} yrs
               </div>
               <div className="text-[10px] text-muted-foreground mt-0.5">Longer your money lasts</div>
@@ -591,7 +591,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border border-border bg-secondary/40 p-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-black">↘</span>
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-bold">↘</span>
               <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Returns</div>
             </div>
             <div className="text-[11px] text-muted-foreground leading-relaxed">
@@ -600,7 +600,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
           </div>
           <div className="rounded-lg border border-border bg-secondary/40 p-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-black">%</span>
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-bold">%</span>
               <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Inflation</div>
             </div>
             <div className="text-[11px] text-muted-foreground leading-relaxed">
@@ -609,7 +609,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
           </div>
           <div className="rounded-lg border border-border bg-secondary/40 p-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-black">↗</span>
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-bold">↗</span>
               <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Performance</div>
             </div>
             <div className="text-[11px] text-muted-foreground leading-relaxed">
@@ -618,7 +618,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
           </div>
           <div className="rounded-lg border border-border bg-secondary/40 p-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-black">⚠</span>
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-bold">⚠</span>
               <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Market crash</div>
             </div>
             <div className="text-[11px] text-muted-foreground leading-relaxed">
@@ -646,7 +646,7 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="POTENTIAL IMPROVEMENT" />
-      <h2 className="text-3xl font-heading">Potential improvement summary</h2>
+      <h2 className="text-3xl font-bold font-heading">Potential improvement summary</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         A consolidated view of the projected uplift if the comparison scenario were implemented, and your eligibility for an adviser referral.
       </p>
@@ -663,14 +663,14 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
             <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               Balance uplift + additional retirement income
             </div>
-            <div className="mt-1 text-4xl font-black text-cyan tabular-nums">{fmtMoney(totalBenefit)}</div>
+            <div className="mt-1 text-4xl text-cyan tabular-nums font-bold">{fmtMoney(totalBenefit)}</div>
             <div className="text-[11px] text-muted-foreground mt-1">
               Potential Combined lifetime benefit after receiving licenced financial advice.
             </div>
           </div>
           <div className={cnTone(eligible)}>
             <div className="text-[10px] font-bold uppercase tracking-wider">{eligible ? "Eligible for referral" : "Not currently eligible"}</div>
-            <div className="text-base font-black mt-0.5">{eligible ? "✓ $100,000+ threshold met" : "Below $100,000 threshold"}</div>
+            <div className="text-base mt-0.5 font-medium">{eligible ? "✓ $100,000+ threshold met" : "Below $100,000 threshold"}</div>
           </div>
         </div>
       </SectionCard>
@@ -703,9 +703,9 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
         </p>
         <div className="rounded-lg border border-cyan/30 bg-cyan/5 p-4">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan text-cyan-foreground text-xs font-black">1</span>
+            <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan text-cyan-foreground text-xs font-bold">1</span>
             <div>
-              <div className="text-sm font-bold text-navy">Total projected extra benefit must exceed $100,000</div>
+              <div className="text-sm font-bold text-navy font-heading">Total projected extra benefit must exceed $100,000</div>
               <div className="text-[11px] text-muted-foreground mt-1">
                 Calculated as the balance uplift at retirement plus the additional retirement income generated by the comparison scenario over the drawdown phase.
               </div>
@@ -764,7 +764,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="WHAT'S NEXT" />
-      <h2 className="text-3xl font-heading">What's next</h2>
+      <h2 className="text-3xl font-bold font-heading">What's next</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         How to act on the findings in this report and access personal financial advice if you choose to.
       </p>
@@ -777,14 +777,14 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
         <div className="relative flex items-center justify-between gap-4 flex-wrap">
           <div>
             <div className="text-[10px] font-bold uppercase tracking-wider opacity-70">Your eligibility</div>
-            <div className="mt-1 text-2xl font-black">
+            <div className="mt-1 text-2xl font-bold font-heading">
               {eligible ? "You qualify for an adviser referral" : "Referral threshold not met"}
             </div>
             <div className="mt-1 text-xs opacity-80">
               Total projected extra benefit: <span className="font-bold tabular-nums">{fmtMoney(totalBenefit)}</span> · Threshold: $100,000
             </div>
           </div>
-          <div className={`px-4 py-2 rounded-md text-sm font-black ${eligible ? "bg-online text-white" : "bg-white/10 text-white/80"}`}>
+          <div className={`px-4 py-2 rounded-md text-sm font-bold ${eligible ? "bg-online text-white" : "bg-white/10 text-white/80"}`}>
             {eligible ? "ELIGIBLE" : "NOT ELIGIBLE"}
           </div>
         </div>
@@ -806,10 +806,10 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
             <div key={c.title} className="relative rounded-xl border border-border bg-card p-4 overflow-hidden group">
               <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-cyan/5 group-hover:bg-cyan/10 transition-colors" />
               <div className="relative">
-                <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-cyan/10 text-cyan text-base font-black mb-2.5">
+                <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-cyan/10 text-cyan text-base font-bold mb-2.5">
                   {c.icon}
                 </div>
-                <div className="text-[12px] font-black text-navy mb-1">{c.title}</div>
+                <div className="text-navy mb-1 text-sm font-bold font-heading">{c.title}</div>
                 <div className="text-[10.5px] text-muted-foreground leading-relaxed">{c.body}</div>
               </div>
             </div>
@@ -826,9 +826,9 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
             { n: "03", title: "Paid from super", body: "If you choose to engage an adviser, fees are deducted from your superannuation balance - not paid out of pocket." },
           ].map((c) => (
             <div key={c.n} className="relative">
-              <div className="text-3xl font-black text-cyan/30 leading-none mb-1.5 tabular-nums">{c.n}</div>
+              <div className="text-3xl font-bold text-cyan/30 leading-none mb-1.5 tabular-nums">{c.n}</div>
               <div className="h-px w-8 bg-cyan mb-2" />
-              <div className="text-[12px] font-black text-navy mb-1">{c.title}</div>
+              <div className="text-navy mb-1 text-sm font-bold font-heading">{c.title}</div>
               <div className="text-[10.5px] text-muted-foreground leading-relaxed">{c.body}</div>
             </div>
           ))}
@@ -860,11 +860,11 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
-              <div className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan">
+              <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-cyan">
                 Ready to take the next step?
               </div>
             </div>
-            <div className="text-2xl font-black leading-tight">
+            <div className="text-2xl leading-tight font-bold font-heading">
               Call your <span className="text-cyan">Senior Research Consultant</span> today<br />
               for a no-obligation chat.
             </div>
@@ -874,12 +874,12 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
           <div className="rounded-xl bg-white/[0.06] backdrop-blur border border-white/15 px-5 py-4 min-w-[260px]">
             <div className="flex items-start justify-between gap-4 mb-2">
               <div>
-                <div className="text-base font-black leading-tight">Travis Seckod</div>
+                <div className="text-base font-bold leading-tight font-heading">Travis Seckod</div>
                 <div className="text-[10px] uppercase tracking-wider text-white/70 font-bold mt-0.5">
                   Director · Senior Research
                 </div>
               </div>
-              <div className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan whitespace-nowrap pt-1">
+              <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan whitespace-nowrap pt-1">
                 Your Consultant
               </div>
             </div>
@@ -934,7 +934,7 @@ export function FeesAndDisclosurePage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="FEES & ASSUMPTIONS" />
-      <h2 className="text-3xl font-heading">Fees & assumptions</h2>
+      <h2 className="text-3xl font-bold font-heading">Fees & assumptions</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         A line-by-line view of fees, the assumptions powering the projection, and important disclaimers.
       </p>
