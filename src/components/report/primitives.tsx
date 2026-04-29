@@ -13,16 +13,21 @@ export function PageHeader({ pageLabel = "SUPER HEALTH CHECK", flush = false }: 
   return (
     <header
       className={cn(
-        "relative -mx-14 -mt-[16mm] px-14 pt-6 pb-5 bg-gradient-to-br from-navy to-[hsl(215_60%_18%)] text-navy-foreground overflow-hidden",
+        "relative -mx-14 -mt-[16mm] px-14 pt-6 pb-6 text-navy-foreground overflow-hidden",
         flush ? "mb-0" : "mb-6"
       )}
+      style={{
+        background:
+          "linear-gradient(160deg, hsl(215 65% 14%) 0%, hsl(215 60% 18%) 45%, hsl(210 55% 24%) 100%)",
+      }}
     >
-      <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-cyan/15 blur-2xl pointer-events-none" />
+      <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/15 blur-3xl pointer-events-none" />
+      <div className="absolute -left-20 -bottom-20 w-64 h-64 rounded-full bg-[hsl(225_85%_60%)]/10 blur-3xl pointer-events-none" />
       <div className="relative flex items-center justify-between gap-4">
         <img
           src={logoUrl}
           alt="Advisor Link Online"
-          className="h-7 w-auto brightness-0 invert"
+          className="h-8 w-auto"
         />
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-bold text-online tracking-wider">● ONLINE</span>
