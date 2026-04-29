@@ -891,14 +891,14 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
             <div className="mt-3 space-y-1.5">
               <a
                 href="tel:0485991688"
-                className="flex items-center gap-2.5 text-[12px] font-bold"
+                className="flex items-center gap-2.5 text-[12px] font-bold text-white"
               >
                 <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">☎</span>
                 <span className="tabular-nums">0485 991 688</span>
               </a>
               <a
                 href="mailto:admin@advisorlinkonline.com.au"
-                className="flex items-center gap-2.5 text-[12px] font-semibold"
+                className="flex items-center gap-2.5 text-[12px] font-semibold text-white"
               >
                 <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">✉</span>
                 <span>admin@advisorlinkonline.com.au</span>
