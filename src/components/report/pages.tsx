@@ -92,7 +92,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
       <div className="mt-5 rounded-xl bg-white border border-border p-5 shadow-[0_20px_45px_-15px_hsl(215_60%_15%/0.25),0_8px_20px_-8px_hsl(215_60%_15%/0.15)]">
         <div className="flex items-center gap-2 mb-2">
           <span className="inline-block w-1.5 h-5 rounded-full bg-cyan" />
-          <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-navy">
+          <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-navy">
             Disclaimer
           </h3>
         </div>
