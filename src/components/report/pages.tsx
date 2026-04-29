@@ -512,16 +512,18 @@ export function IncomePage({ s }: { s: ReportSummary }) {
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Money lasts to age</div>
               <div className="text-4xl font-black text-navy tabular-nums">{s.ageMoneyLastsComparison}</div>
               <div className="mt-1 text-xs font-bold text-cyan">{s.yearsIncomeComparison} years of income</div>
-              {s.yearsIncomeComparison - s.yearsIncomeExisting > 0 && (
-                <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-navy">
-                  +{s.yearsIncomeComparison - s.yearsIncomeExisting} additional yrs
-                </div>
-              )}
             </div>
             <div className="ml-auto"><Gauge value={s.yearsIncomeComparison} max={30} label={`${s.yearsIncomeComparison} yrs`} /></div>
           </div>
         </SectionCard>
       </div>
+
+      {s.yearsIncomeComparison - s.yearsIncomeExisting > 0 && (
+        <div className="mt-4 flex items-center justify-between rounded-md bg-cyan/10 px-4 py-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-navy">Additional years of income</span>
+          <span className="text-lg font-black text-cyan tabular-nums">+{s.yearsIncomeComparison - s.yearsIncomeExisting} yrs</span>
+        </div>
+      )}
 
       <PageFooter />
     </PageShell>
