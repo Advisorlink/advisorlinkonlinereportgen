@@ -212,25 +212,25 @@ export function WhoWeArePage() {
         <div className="grid grid-cols-3 gap-3">
           {[
             {
-              name: "Sarah M.",
-              loc: "Brisbane, QLD",
-              initials: "SM",
+              name: "Gay Tooze",
+              loc: "Verified Google Review",
+              initials: "GT",
               color: "bg-[hsl(210_70%_55%)]",
-              text: "Honest, no-pressure review of my super. They explained everything in plain English and connected me with a great adviser.",
+              text: "Travis was very professional & knowledgeable as we looked at my superannuation statement together, pointing out things I had never noticed or realised before. I have not been happy with my Superannuation's performance and now I am taking steps to do something about this. Thank you Travis.",
             },
             {
-              name: "David T.",
-              loc: "Sydney, NSW",
-              initials: "DT",
+              name: "Kim Homersham",
+              loc: "Verified Google Review",
+              initials: "KH",
               color: "bg-[hsl(150_55%_42%)]",
-              text: "I finally understand what my fund is doing. The report was clear and the referral process was seamless. Highly recommend.",
+              text: "Travis made it very easy to understand and clear how the changes will make a huge difference to my super in years to come. You really can't go wrong by making the appointment with the financial advisor. Thanks for your help and friendly nature Travis.",
             },
             {
-              name: "Linda P.",
-              loc: "Melbourne, VIC",
-              initials: "LP",
+              name: "Michael Kelly",
+              loc: "Verified Google Review",
+              initials: "MK",
               color: "bg-[hsl(15_80%_55%)]",
-              text: "Saved me thousands in fees I didn't know I was paying. The team is professional and genuinely helpful.",
+              text: "Travis was very helpful and explained the entire process to me in an easy to understand way. It was a pleasure dealing with someone who came across as friendly, knowledgeable and willing to assist. Most notably though was Travis' patience and professional approach.",
             },
           ].map(r => (
             <div key={r.name} className="rounded-xl border border-border bg-secondary/30 p-3.5">
