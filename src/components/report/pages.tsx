@@ -11,6 +11,8 @@ import {
   FeeRow, FeeTableHeader, Disclaimer,
 } from "./primitives";
 import riskIllustration from "@/assets/risk-illustration.jpg";
+import asicRegistered from "@/assets/asic-registered.png";
+import trustedAdvisers from "@/assets/trusted-advisers.png";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -85,6 +87,101 @@ export function CoverPage({ s }: { s: ReportSummary }) {
         <p className="text-[11px] leading-relaxed text-muted-foreground">
           Advisor Link Online is an independent education and referral service and is not licensed to provide financial advice. This Super Performance Report contains factual information only, based on publicly available data (e.g. RateCity, APRA reports, or your fund's website). It does not constitute personal or general financial product advice and does not consider your specific objectives, financial situation, or needs. All comparisons, projections, and illustrations are for information purposes only and are based on current public data. Past performance is not a reliable indicator of future results. If you believe an improvement may be possible, we can introduce you to a licensed financial adviser at your request from our referral network to contact you and provide a Statement of Advice after assessing your circumstances.
         </p>
+      </div>
+
+      <PageFooter />
+    </PageShell>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* PAGE 1.5 — WHO WE ARE                                              */
+/* ------------------------------------------------------------------ */
+export function WhoWeArePage() {
+  const vetting = [
+    "ASIC Registered",
+    "RG146 Compliant",
+    "Meets our reputational standards",
+    "Aligns with our values",
+    "Minimum 5 years experience providing advice",
+  ];
+  const restrictions = [
+    "Due to ASIC regulations, only a licensed adviser can discuss recommended product names.",
+    "This report does not include your personal contributions.",
+    "This report does not include insurance considerations.",
+    "Tax strategies, estate planning and Centrelink interactions are out of scope.",
+    "Figures are illustrative — based on publicly available data, not personal advice.",
+  ];
+
+  return (
+    <PageShell>
+      <PageHeader pageLabel="WHO WE ARE" />
+      <h2 className="text-3xl font-black text-navy">Who we are & why people choose us</h2>
+      <p className="text-sm text-muted-foreground mt-1 mb-5">
+        Advisor Link is a 100% ASIC-regulated research and referral company. We don't sell
+        products — we help you understand your super and, if you choose, connect you with a
+        licensed adviser from our trusted network.
+      </p>
+
+      {/* ASIC trust strip */}
+      <div className="rounded-2xl border border-border bg-white p-5 shadow-card mb-5">
+        <div className="grid grid-cols-[auto_1fr] gap-5 items-center">
+          <img
+            src={asicRegistered}
+            alt="ASIC registered company extract for Advisorlink Pty Ltd"
+            className="h-24 w-auto object-contain"
+            loading="lazy"
+          />
+          <div>
+            <div className="text-[10px] tracking-[0.22em] font-bold text-cyan mb-1">100% ASIC REGULATED</div>
+            <div className="text-lg font-black text-navy leading-tight">
+              ADVISORLINK PTY LTD &nbsp;·&nbsp; ACN 671 139 923
+            </div>
+            <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+              Registered with the Australian Securities &amp; Investments Commission. We operate
+              as an independent education and referral service — never a product issuer.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Trusted advisers */}
+      <SectionCard title="Some of our trusted advisers" icon="◆" className="mb-5">
+        <p className="text-xs text-muted-foreground mb-3">
+          We only refer to licensed firms that meet a strict vetting standard.
+        </p>
+        <div className="rounded-xl bg-secondary/40 border border-border p-4 flex items-center justify-center">
+          <img
+            src={trustedAdvisers}
+            alt="Logos of trusted financial adviser partners"
+            className="max-h-40 w-auto object-contain"
+            loading="lazy"
+          />
+        </div>
+      </SectionCard>
+
+      {/* Two columns: vetting + restrictions */}
+      <div className="grid grid-cols-2 gap-4">
+        <SectionCard title="Advisor Link vetting" icon="✓">
+          <ul className="space-y-2">
+            {vetting.map(v => (
+              <li key={v} className="flex items-start gap-2 text-xs">
+                <span className="mt-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-cyan text-cyan-foreground text-[10px] font-black">✓</span>
+                <span className="text-foreground">{v}</span>
+              </li>
+            ))}
+          </ul>
+        </SectionCard>
+        <SectionCard title="Limits of this report" icon="!">
+          <ul className="space-y-2">
+            {restrictions.map(r => (
+              <li key={r} className="flex items-start gap-2 text-xs">
+                <span className="mt-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-navy text-navy-foreground text-[10px] font-black">!</span>
+                <span className="text-foreground leading-snug">{r}</span>
+              </li>
+            ))}
+          </ul>
+        </SectionCard>
       </div>
 
       <PageFooter />
