@@ -474,10 +474,19 @@ Deno.serve(async (req) => {
     }
 
     let candidateUrls: string[] = [];
-
-    // Augment with Firecrawl web search — finds the freshest performance pages
     const fundName = String(step1.fundName ?? "").trim();
     const optionLabel = String(step1.modelLabel ?? "").trim();
+    const aiUrls = urlsFrom(step1.sourceUrls).filter(isAllowedOfficialCandidate);
+    const fundTokens = fundHostTokens(fundName);
+    const officialHosts = Array.from(
+      new Set(
+        aiUrls.map(hostFrom).filter((h): h is string => Boolean(h)).filter((h) =>
+          fundTokens.some((token) => h.replace(/[^a-z0-9]/g, "").includes(token))
+        ),
+      ),
+    );
+
+    // Augment with Firecrawl web search — finds the freshest performance pages
     if (fundName) {
       const searchQueries = [
         `${fundName} ${optionLabel} 5 year performance ${CURRENT_YEAR}`,
@@ -487,14 +496,14 @@ Deno.serve(async (req) => {
       ];
       for (const q of searchQueries) {
         const found = (await firecrawlSearch(q, 5)).filter(
-          isAllowedOfficialCandidate,
+          (url) => isOfficialFundUrl(url, fundName, officialHosts),
         );
         candidateUrls.push(...found);
       }
     }
     if (!candidateUrls.length) {
-      candidateUrls = urlsFrom(step1.sourceUrls).filter(
-        isAllowedOfficialCandidate,
+      candidateUrls = aiUrls.filter(
+        (url) => isOfficialFundUrl(url, fundName, officialHosts),
       );
     }
     candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 8);
