@@ -48,7 +48,7 @@ export function KpiCard({
   return (
     <div className="rounded-xl bg-white border border-border px-4 py-3 shadow-card">
       <div className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">{label}</div>
-      <div className={cn("mt-1 text-2xl font-extrabold tabular-nums", accent ? "text-cyan" : "text-navy")}>
+      <div className={cn("mt-1 text-2xl tabular-nums", accent ? "text-cyan font-bold" : "text-navy font-extrabold")}>
         {value}
       </div>
       {sub && <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>}
