@@ -22,42 +22,61 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are a research assistant specialising in Australian superannuation funds.
-Given a user's description of their super (fund name, investment option, optionally age/balance/income), use web search to find the MOST RECENT publicly available figures from the fund's PDS, product dashboard, or official site.
-Return ONLY a tool call with the structured data. Use null for any field you cannot find with reasonable confidence. Do not guess.
+    const systemPrompt = `You are a research assistant specialising in Australian superannuation funds. You have access to Google Search grounding — USE IT for every lookup. Do NOT rely on prior knowledge for fees or returns.
 
-Field guidance (Australian context):
-- adminFeeFlat: annual flat administration fee in AUD (e.g. 117 means $117/yr)
-- adminFeePct: annual percentage admin/asset-based fee as DECIMAL (0.0035 = 0.35%)
-- grossReturn: most recent 5-year p.a. net investment return for the option, DECIMAL (0.078 = 7.8% p.a.). If only 10yr available, use that.
-- growthAssetsPct: strategic growth-asset allocation as DECIMAL (0.70 = 70%)
-- fundName: clean canonical name (e.g. "AustralianSuper")
-- modelLabel: investment option name (e.g. "Balanced", "High Growth")
-- age, annualIncome, superBalance, retirementAge: parse from user text if present, else null`;
+ACCURACY RULES (CRITICAL):
+- You MUST search the web and read the fund's OFFICIAL site (e.g. australiansuper.com, hostplus.com.au, hesta.com.au, rest.com.au, unisuper.com.au, aware.com.au, cbussuper.com.au, art.com.au), the current PDS, the Investment Guide, or the product dashboard.
+- Use the MOST RECENT figures available (prefer last completed financial year for returns, current PDS for fees).
+- If you cannot find a figure on an official source with confidence, return null for that field. NEVER guess, estimate, or interpolate.
+- In sourceNotes, list the exact URLs you used and the as-of date for the figures.
+
+PARSING RULES (from the user's free-text input):
+- clientName: extract the person's full name if present (e.g. "for John Smith", "client: Jane Doe", or a name at the start). Title-case it. Strip the fund name.
+- age: integer years.
+- retirementAge: integer years (look for "retire at 65", "retirement age 67").
+- annualIncome: salary in AUD (look for "earns 95k", "salary $120,000", "income 80000 p.a.").
+- superBalance: current super balance in AUD (look for "balance 80k", "$250,000 in super").
+- goalBalance: target/goal retirement balance if stated (look for "target $1m", "goal balance 1,500,000", "wants $800k at retirement").
+- desiredIncomeAmount + desiredIncomeFrequency: desired retirement income (look for "wants $60k/yr in retirement", "needs $1,500/week", "$5000 per month"). Frequency must be exactly "Weekly", "Monthly", or "Annually".
+- Convert "k" → thousands, "m" → millions. Strip $ and commas.
+
+FUND FIELDS (Australian context, from official sources):
+- fundName: clean canonical name (e.g. "AustralianSuper", "Hostplus", "Rest").
+- modelLabel: investment option name exactly as the fund names it (e.g. "Balanced", "High Growth", "Indexed Balanced").
+- adminFeeFlat: annual flat administration fee in AUD (e.g. 117 means $117/yr). If the fund only charges weekly, multiply by 52.
+- adminFeePct: annual percentage admin/asset-based fee as a DECIMAL (0.0035 = 0.35%). Include any asset-based admin or trustee fee. Exclude investment fees.
+- grossReturn: most recent 5-year p.a. NET investment return for the chosen option, as a DECIMAL (0.078 = 7.8% p.a.). If 5yr unavailable, use 10yr and note it.
+- growthAssetsPct: strategic growth-asset allocation as a DECIMAL (0.70 = 70%).`;
 
     const tools = [
       {
         type: "function",
         function: {
           name: "set_client_inputs",
-          description: "Populate the super health check client input form.",
+          description: "Populate the super health check client input form with verified fund data and parsed client details.",
           parameters: {
             type: "object",
             properties: {
+              clientName: { type: ["string", "null"] },
               fundName: { type: ["string", "null"] },
               modelLabel: { type: ["string", "null"] },
               adminFeeFlat: { type: ["number", "null"] },
               adminFeePct: { type: ["number", "null"], description: "Decimal e.g. 0.0035" },
-              grossReturn: { type: ["number", "null"], description: "Decimal e.g. 0.078" },
+              grossReturn: { type: ["number", "null"], description: "Decimal e.g. 0.078 — 5yr net p.a." },
               growthAssetsPct: { type: ["number", "null"], description: "Decimal e.g. 0.70" },
               age: { type: ["number", "null"] },
               retirementAge: { type: ["number", "null"] },
               annualIncome: { type: ["number", "null"] },
               superBalance: { type: ["number", "null"] },
-              clientName: { type: ["string", "null"] },
+              goalBalance: { type: ["number", "null"], description: "Target retirement balance in AUD" },
+              desiredIncomeAmount: { type: ["number", "null"], description: "Desired retirement income in AUD" },
+              desiredIncomeFrequency: {
+                type: ["string", "null"],
+                enum: ["Weekly", "Monthly", "Annually", null],
+              },
               sourceNotes: {
                 type: "string",
-                description: "1-2 sentences naming the sources used and the as-of date.",
+                description: "List the exact official URLs used and the as-of date. If a field is null, say which one and why it could not be verified.",
               },
             },
             required: ["sourceNotes"],

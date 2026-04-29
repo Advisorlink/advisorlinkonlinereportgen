@@ -42,6 +42,11 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
       numeric("retirementAge", r.retirementAge);
       numeric("annualIncome", r.annualIncome);
       numeric("superBalance", r.superBalance);
+      numeric("goalBalance", r.goalBalance);
+      numeric("desiredIncomeAmount", r.desiredIncomeAmount);
+      if (r.desiredIncomeFrequency === "Weekly" || r.desiredIncomeFrequency === "Monthly" || r.desiredIncomeFrequency === "Annually") {
+        next.desiredIncomeFrequency = r.desiredIncomeFrequency;
+      }
       numeric("adminFeeFlat", r.adminFeeFlat);
       numeric("adminFeePct", r.adminFeePct);
       numeric("grossReturn", r.grossReturn);
