@@ -164,7 +164,7 @@ async function callAI(messages: unknown[], tools: unknown[], toolName: string): 
 
 // ---------- STEP 1: parse client text + find official source URLs ----------
 
-const STEP1_SYSTEM = `You are a research assistant for Australian superannuation. You have Google Search grounding — USE IT for every lookup.
+const STEP1_SYSTEM = `You are a research assistant for Australian superannuation. You have Gemini 3 Google Search lookup enabled — USE IT for every lookup.
 
 For the named fund, you MUST locate the OFFICIAL fund website pages (and PDS / Investment Guide if needed) that publish:
   (a) the current investment performance / returns table for the allocated investment option (must show 5-year p.a. net return), and
@@ -173,8 +173,8 @@ For the named fund, you MUST locate the OFFICIAL fund website pages (and PDS / I
 
 Rules:
 - Identify WHICHEVER Australian super fund the user names — industry, retail, corporate, public sector, SMSF platform, etc. Never default to AustralianSuper or any specific fund.
-- Use ONLY the fund's own official domain (e.g. australiansuper.com, hostplus.com.au, hesta.com.au, rest.com.au, unisuper.com.au, aware.com.au, cbussuper.com.au, art.com.au, australianretirementtrust.com.au, caresuper.com.au, mlc.com.au, amp.com.au, colonialfirststate.com.au, mercersuper.com.au, vanguard.com.au, brightersuper.com.au, spiritsuper.com.au, equipsuper.com.au, csc.gov.au, qsuper.qld.gov.au, gesb.wa.gov.au, ngssuper.com.au, telstrasuper.com.au, etc.). Never use third-party comparison sites, news, blogs, SuperRatings, Canstar, Chant West, etc.
-- Return up to 4 URLs, ordered by likelihood of containing the 5-year p.a. net return for the allocated option (performance/returns/dashboard pages first, then PDS/Investment Guide).
+- Use ONLY URLs that Gemini 3 lookup finds on the fund's own official domain. Never invent URLs. Never use third-party comparison sites, news, blogs, SuperRatings, Canstar, Chant West, etc.
+- Return up to 6 URLs, ordered by likelihood of containing the 5-year p.a. return for the allocated option (performance/returns/dashboard pages first, then PDS/Investment Guide). The URLs must be real lookup results or pages clearly reached from real lookup results.
 - Also parse the client's personal details from the free-text input.
 
 Frequencies must be exactly "Weekly", "Monthly", or "Annually".
@@ -201,7 +201,7 @@ const STEP1_TOOL = [{
         sourceUrls: {
           type: "array",
           items: { type: "string" },
-          description: "Up to 4 official fund URLs, performance/returns pages first.",
+          description: "Up to 6 real official fund URLs found by Gemini 3 lookup, performance/returns pages first.",
         },
         notes: { type: "string" },
       },
