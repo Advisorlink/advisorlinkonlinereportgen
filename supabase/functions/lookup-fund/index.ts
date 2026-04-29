@@ -293,6 +293,51 @@ function returnAppearsNearOption(
   return false;
 }
 
+// Generic verification: a percentage figure (decimal) must literally appear
+// in the scraped page text, optionally near the allocated option label.
+function pctAppearsInText(
+  pageText: string,
+  decimal: unknown,
+  modelLabel?: unknown,
+): boolean {
+  const variants = pctVariants(decimal);
+  if (!variants.length) return false;
+  const tokens = modelLabel ? optionTokens(modelLabel) : [];
+  const normalized = pageText.toLowerCase().replace(/\s+/g, " ");
+  for (const v of variants) {
+    const re = new RegExp(`${escapeRegExp(v)}\\s*%`, "i");
+    const m = re.exec(normalized);
+    if (!m) continue;
+    if (!tokens.length) return true;
+    const ctx = normalized.slice(Math.max(0, m.index - 1200), m.index + 1200);
+    if (tokens.some((t) => ctx.includes(t))) return true;
+  }
+  return false;
+}
+
+// Verification for a flat AUD fee: the dollar amount must literally appear
+// in the page text (with $ prefix or "per year/annum/week" context).
+function flatFeeAppearsInText(pageText: string, amount: unknown): boolean {
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+    return false;
+  }
+  const normalized = pageText.toLowerCase().replace(/\s+/g, " ");
+  const annual = amount;
+  const weekly = amount / 52;
+  const candidates = new Set<string>();
+  for (const n of [annual, weekly]) {
+    candidates.add(stripTrailingZeros(n.toFixed(2)));
+    candidates.add(stripTrailingZeros(n.toFixed(0)));
+    candidates.add(stripTrailingZeros(n.toFixed(1)));
+  }
+  for (const c of candidates) {
+    if (!c) continue;
+    const re = new RegExp(`\\$\\s*${escapeRegExp(c)}\\b`, "i");
+    if (re.test(normalized)) return true;
+  }
+  return false;
+}
+
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
 async function callAI(
