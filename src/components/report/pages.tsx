@@ -216,7 +216,10 @@ export function WhoWeArePage() {
                </div>
             </div>
           </div>
-          <span className="text-[10px] tracking-[0.2em] font-bold text-cyan">VERIFIED</span>
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-[10px] tracking-[0.2em] font-bold text-cyan">VERIFIED</span>
+            <span className="text-[10px] font-medium text-muted-foreground italic">Just Google us and check yourself — 5.0 star rating on Google</span>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-3">
