@@ -109,8 +109,6 @@ export function WhoWeArePage() {
     "Due to ASIC regulations, only a licensed adviser can discuss recommended product names.",
     "This report does not include your personal contributions.",
     "This report does not include insurance considerations.",
-    "Tax strategies, estate planning and Centrelink interactions are out of scope.",
-    "Figures are illustrative — based on publicly available data, not personal advice.",
   ];
 
   return (
@@ -176,7 +174,7 @@ export function WhoWeArePage() {
           <ul className="space-y-2">
             {restrictions.map(r => (
               <li key={r} className="flex items-start gap-2 text-xs">
-                <span className="mt-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-navy text-navy-foreground text-[10px] font-black">!</span>
+                <span className="mt-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-navy text-navy-foreground text-[10px] font-black leading-none">i</span>
                 <span className="text-foreground leading-snug">{r}</span>
               </li>
             ))}
