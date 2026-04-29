@@ -809,56 +809,58 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
 
 
       <div
-        className="mb-4 rounded-2xl overflow-hidden relative text-navy-foreground shadow-elevated"
+        className="mb-3 rounded-2xl overflow-hidden relative text-navy-foreground shadow-elevated"
         style={{ background: "linear-gradient(120deg, hsl(215 65% 10%) 0%, hsl(210 60% 16%) 50%, hsl(200 70% 22%) 100%)" }}
       >
         {/* Decorative glow */}
-        <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/25 blur-3xl pointer-events-none" />
-        <div className="absolute -left-20 -bottom-24 w-64 h-64 rounded-full bg-cyan/10 blur-3xl pointer-events-none" />
+        <div className="absolute -right-20 -top-20 w-56 h-56 rounded-full bg-cyan/25 blur-3xl pointer-events-none" />
+        <div className="absolute -left-16 -bottom-16 w-48 h-48 rounded-full bg-cyan/10 blur-3xl pointer-events-none" />
         {/* Subtle grid pattern */}
         <div
           className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{
             backgroundImage:
               "linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
+            backgroundSize: "20px 20px",
           }}
         />
         {/* Accent bar */}
-        <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-cyan via-cyan/70 to-cyan/30" />
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan via-cyan/70 to-cyan/30" />
 
-        <div className="relative grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-6 px-7 py-6">
+        <div className="relative grid grid-cols-[1.15fr_1fr] gap-5 px-5 py-4">
           {/* Left: message */}
-          <div className="flex flex-col justify-center">
-            <div className="flex items-center gap-2 mb-2.5">
+          <div className="flex flex-col justify-center min-w-0">
+            <div className="flex items-center gap-2 mb-1.5">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan" />
-              <div className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan">
+              <div className="text-[9px] font-black uppercase tracking-[0.22em] text-cyan">
                 Ready to take the next step?
               </div>
             </div>
-            <div className="text-[22px] font-black leading-[1.15]">
+            <div className="text-[15px] font-black leading-[1.25]">
               Call your Senior Research Consultant today for a no-obligation chat.
             </div>
           </div>
 
           {/* Right: consultant card */}
-          <div className="rounded-xl bg-white/[0.06] border border-white/10 backdrop-blur-sm px-5 py-4">
-            <div className="text-[9.5px] font-black uppercase tracking-[0.22em] text-cyan/90 mb-1.5">
-              Your Consultant
+          <div className="rounded-xl bg-white/[0.07] border border-white/10 px-4 py-3 min-w-0">
+            <div className="flex items-baseline justify-between gap-2 mb-1">
+              <div className="text-[14px] font-black leading-tight truncate">Travis Seckod</div>
+              <div className="text-[8.5px] font-black uppercase tracking-[0.18em] text-cyan/90 flex-shrink-0">
+                Your Consultant
+              </div>
             </div>
-            <div className="text-lg font-black leading-tight">Travis Seckod</div>
-            <div className="text-[10.5px] uppercase tracking-wider text-navy-foreground/70 font-semibold mt-0.5">
+            <div className="text-[9.5px] uppercase tracking-wider text-navy-foreground/70 font-semibold mb-2">
               Director · Senior Research
             </div>
 
-            <div className="mt-3 pt-3 border-t border-white/10 space-y-2">
-              <a href="tel:0485991688" className="flex items-center gap-2.5 group">
-                <span className="flex-shrink-0 h-7 w-7 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-xs">☎</span>
-                <span className="text-[13px] font-black tabular-nums tracking-wide">0485 991 688</span>
+            <div className="pt-2 border-t border-white/10 space-y-1.5">
+              <a href="tel:0485991688" className="flex items-center gap-2">
+                <span className="flex-shrink-0 h-5 w-5 rounded-full bg-cyan/25 text-cyan flex items-center justify-center text-[10px]">☎</span>
+                <span className="text-[12px] font-black tabular-nums tracking-wide">0485 991 688</span>
               </a>
-              <a href="mailto:admin@advisorlinkonline.com.au" className="flex items-center gap-2.5 group">
-                <span className="flex-shrink-0 h-7 w-7 rounded-full bg-white/10 text-cyan flex items-center justify-center text-xs">✉</span>
-                <span className="text-[12px] font-semibold break-all">admin@advisorlinkonline.com.au</span>
+              <a href="mailto:admin@advisorlinkonline.com.au" className="flex items-center gap-2 min-w-0">
+                <span className="flex-shrink-0 h-5 w-5 rounded-full bg-white/10 text-cyan flex items-center justify-center text-[10px]">✉</span>
+                <span className="text-[10.5px] font-semibold truncate">admin@advisorlinkonline.com.au</span>
               </a>
             </div>
           </div>
