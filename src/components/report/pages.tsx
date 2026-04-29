@@ -305,6 +305,38 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
         </p>
       </SectionCard>
 
+      <SectionCard title="Projection assumptions" icon="◆" className="mt-5">
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-lg border border-border bg-secondary/40 p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">%</span>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Inflation</div>
+            </div>
+            <div className="text-xs text-muted-foreground leading-relaxed">
+              Set at <strong className="text-navy">2.5% p.a.</strong> for the rising cost of living. All results are shown in <strong className="text-navy">today's dollars</strong>.
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-secondary/40 p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">↗</span>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Performance</div>
+            </div>
+            <div className="text-xs text-muted-foreground leading-relaxed">
+              Employer contributions, rates of return and fees are assumed to remain <strong className="text-navy">consistent</strong> across the projection.
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-secondary/40 p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan/15 text-cyan text-xs font-black">⚠</span>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-navy">Market crash</div>
+            </div>
+            <div className="text-xs text-muted-foreground leading-relaxed">
+              A <strong className="text-navy">10% loss every 7 years</strong> is factored in to account for periodic market corrections.
+            </div>
+          </div>
+        </div>
+      </SectionCard>
+
       <PageFooter />
     </PageShell>
   );
