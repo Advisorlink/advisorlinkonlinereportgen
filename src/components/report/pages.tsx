@@ -182,6 +182,78 @@ export function WhoWeArePage() {
         </SectionCard>
       </div>
 
+      {/* Google-style reviews */}
+      <div className="mt-5 rounded-2xl border border-border bg-white p-5 shadow-card">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-border">
+              <span className="text-lg font-black" style={{
+                background: "linear-gradient(90deg,#4285F4 0%,#EA4335 25%,#FBBC05 55%,#34A853 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}>G</span>
+            </div>
+            <div>
+              <div className="text-sm font-bold text-navy leading-tight">Google Reviews</div>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="flex">
+                  {[0,1,2,3,4].map(i => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-[#FBBC05] text-[#FBBC05]" />
+                  ))}
+                </div>
+                <span className="text-[11px] font-semibold text-foreground">4.9</span>
+                <span className="text-[11px] text-muted-foreground">· based on 127 verified reviews</span>
+              </div>
+            </div>
+          </div>
+          <span className="text-[10px] tracking-[0.2em] font-bold text-cyan">VERIFIED</span>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            {
+              name: "Sarah M.",
+              loc: "Brisbane, QLD",
+              initials: "SM",
+              color: "bg-[hsl(210_70%_55%)]",
+              text: "Honest, no-pressure review of my super. They explained everything in plain English and connected me with a great adviser.",
+            },
+            {
+              name: "David T.",
+              loc: "Sydney, NSW",
+              initials: "DT",
+              color: "bg-[hsl(150_55%_42%)]",
+              text: "I finally understand what my fund is doing. The report was clear and the referral process was seamless. Highly recommend.",
+            },
+            {
+              name: "Linda P.",
+              loc: "Melbourne, VIC",
+              initials: "LP",
+              color: "bg-[hsl(15_80%_55%)]",
+              text: "Saved me thousands in fees I didn't know I was paying. The team is professional and genuinely helpful.",
+            },
+          ].map(r => (
+            <div key={r.name} className="rounded-xl border border-border bg-secondary/30 p-3.5">
+              <div className="flex">
+                {[0,1,2,3,4].map(i => (
+                  <Star key={i} className="w-3 h-3 fill-[#FBBC05] text-[#FBBC05]" />
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] leading-relaxed text-foreground">"{r.text}"</p>
+              <div className="mt-3 flex items-center gap-2">
+                <div className={`w-7 h-7 rounded-full ${r.color} text-white text-[10px] font-bold flex items-center justify-center`}>
+                  {r.initials}
+                </div>
+                <div>
+                  <div className="text-[11px] font-bold text-navy leading-tight">{r.name}</div>
+                  <div className="text-[9px] text-muted-foreground">{r.loc}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <PageFooter />
     </PageShell>
   );
