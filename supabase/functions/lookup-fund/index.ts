@@ -407,6 +407,7 @@ Strict rules:
 - investmentRiskProfile: official risk label exactly as the page calls it (e.g. "High", "Medium to High", "Growth"). Null if not in text.
 - returnEvidenceText: copy the exact short snippet from the page text that contains the 5-year return + option label + as-of date if shown.
 - sourceNotes: short explanation including which URL the 5yr return came from AND the as-of date.
+- Never use standard knowledge or memory. If a value is not literally in the provided text, return null for that field.
 - Be deterministic.`;
 
 const STEP2_TOOL = [{
