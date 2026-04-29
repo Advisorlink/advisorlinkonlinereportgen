@@ -73,10 +73,11 @@ async function fetchPageText(url: string, timeoutMs = 12000): Promise<string | n
       },
     });
     clearTimeout(t);
-    if (!resp.ok) return null;
-    const html = await resp.text();
-    const text = textFromHtml(html);
-    if (text.length > 300 && !/^#?\s*404\s+-\s+page not found/i.test(text)) return text;
+    if (resp.ok) {
+      const html = await resp.text();
+      const text = textFromHtml(html);
+      if (text.length > 300 && !/^#?\s*404\s+-\s+page not found/i.test(text)) return text;
+    }
   } catch (e) {
     console.warn("fetchPageText failed", url, e instanceof Error ? e.message : e);
   }
