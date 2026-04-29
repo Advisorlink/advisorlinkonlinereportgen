@@ -878,7 +878,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
           <div className="rounded-xl bg-white/[0.06] backdrop-blur border border-white/15 px-5 py-4 min-w-[260px]">
             <div className="flex items-start justify-between gap-4 mb-2">
               <div>
-                <div className="text-base font-bold leading-tight font-heading text-white">Travis Seckod</div>
+                <div className="text-base font-bold leading-tight font-heading !text-white drop-shadow-md">Travis Seckod</div>
                 <div className="text-[10px] uppercase tracking-wider text-white/70 font-bold mt-0.5">
                   Director · Senior Research
                 </div>
