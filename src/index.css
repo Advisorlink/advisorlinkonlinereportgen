@@ -11,6 +11,16 @@
   letter-spacing: -0.01em;
 }
 
+/* Apply Montserrat to all report pages... */
+.report-page {
+  font-family: 'Montserrat', system-ui, sans-serif;
+}
+
+/* ...except the hero/cover header, which keeps its original styling */
+.report-page header {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
 @layer base {
   :root {
     --background: 210 40% 98%;
