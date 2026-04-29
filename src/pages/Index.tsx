@@ -41,28 +41,31 @@ export default function Index() {
       });
 
       // Render all pages to canvases in parallel — massive speed win vs sequential.
-      // scale: 2 produces ~300 DPI on A4 (210mm wide → ~1654px), keeping text crisp
-      // while being ~2.25× faster than scale 3. JPEG at 0.95 quality is visually
-      // indistinguishable from PNG for this content but encodes/embeds far faster
-      // and yields a much smaller PDF.
+      // scale: 3 → ~450 DPI on A4 (210mm wide → ~2480px), giving razor-sharp,
+      // near-vector text clarity. PNG (lossless) preserves crisp edges on text and
+      // thin lines that JPEG would smear with compression artifacts. Combined with
+      // parallel rendering + jsPDF's internal flate compression, the result is a
+      // pixel-perfect PDF that still downloads quickly.
       const canvases = await Promise.all(
         pages.map((page) =>
           html2canvas(page, {
-            scale: 2,
+            scale: 3,
             backgroundColor: "#ffffff",
             useCORS: true,
             imageTimeout: 0,
             logging: false,
+            letterRendering: true,
             windowWidth: page.scrollWidth,
             windowHeight: page.scrollHeight,
-          })
+          } as Parameters<typeof html2canvas>[1])
         )
       );
 
       for (let i = 0; i < canvases.length; i++) {
-        const img = canvases[i].toDataURL("image/jpeg", 0.95);
+        const img = canvases[i].toDataURL("image/png");
         if (i > 0) pdf.addPage();
-        pdf.addImage(img, "JPEG", 0, 0, 210, 297, undefined, "FAST");
+        // "SLOW" enables jsPDF's better PNG compression — smaller file, same quality.
+        pdf.addImage(img, "PNG", 0, 0, 210, 297, undefined, "SLOW");
       }
       // Set the default open view to "Actual Size" (100% zoom) when the PDF is opened.
       // /XYZ null null null preserves position; the magnification "null" combined with
