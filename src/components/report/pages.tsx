@@ -414,8 +414,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           loading="lazy"
           className="absolute inset-0 w-full h-full object-cover opacity-95"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/10 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/40 to-navy/10" />
         <div className="absolute bottom-5 left-6 right-6 text-white">
           <div className="text-[10px] tracking-[0.25em] font-bold text-cyan mb-1 my-px">​</div>
           <div className="leading-tight max-w-sm font-medium font-heading py-[14px] text-xl !text-white drop-shadow-md">
