@@ -364,13 +364,6 @@ export function FundsPage({ s }: { s: ReportSummary }) {
               }
             >
               {p}
-              <div className="text-[9px] font-normal opacity-70 mt-0.5">
-                {p === "Conservative" && "5%"}
-                {p === "Moderate" && "7%"}
-                {p === "Balanced" && "10%"}
-                {p === "Growth" && "13%"}
-                {p === "High Growth" && "15%"}
-              </div>
             </div>
           ))}
         </div>
