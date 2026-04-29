@@ -703,7 +703,7 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
         </p>
         <div className="rounded-lg border border-cyan/30 bg-cyan/5 p-4">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan text-cyan-foreground text-xs font-black">1</span>
+            <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan text-cyan-foreground text-xs font-bold">1</span>
             <div>
               <div className="text-sm font-bold text-navy">Total projected extra benefit must exceed $100,000</div>
               <div className="text-[11px] text-muted-foreground mt-1">
