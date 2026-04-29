@@ -51,6 +51,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
       numeric("adminFeePct", r.adminFeePct);
       numeric("grossReturn", r.grossReturn);
       numeric("growthAssetsPct", r.growthAssetsPct);
+      text("investmentRiskProfile", r.investmentRiskProfile);
 
       onChange(next);
       toast.success("Fund details applied", {
@@ -130,6 +131,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
             <Field label="5-year net return %"><PctInput v={value.grossReturn} on={n => set("grossReturn", n)} /></Field>
             <Field label="Admin fee — flat $"><NumInput v={value.adminFeeFlat} on={n => set("adminFeeFlat", n)} /></Field>
             <Field label="Admin fee — %"><PctInput v={value.adminFeePct} on={n => set("adminFeePct", n)} /></Field>
+            <Field label="Investment risk profile"><Input value={value.investmentRiskProfile || ""} onChange={e => set("investmentRiskProfile", e.target.value)} /></Field>
           </Group>
         </div>
       )}
