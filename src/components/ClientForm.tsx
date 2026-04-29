@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ClientInputs, IncomeFrequency } from "@/lib/calc";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
@@ -81,20 +82,21 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
               <Label className="text-[11px] text-muted-foreground">
                 Describe the client's super (fund, option, age, balance, income…)
               </Label>
-              <div className="flex gap-2">
-                <Input
+              <div className="space-y-2">
+                <Textarea
+                  className="min-h-40 resize-y leading-relaxed"
                   placeholder="e.g. AustralianSuper Balanced, age 35, $80k balance, $95k salary"
                   value={lookupText}
                   onChange={e => setLookupText(e.target.value)}
                   onKeyDown={e => {
-                    if (e.key === "Enter" && !loading) {
+                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !loading) {
                       e.preventDefault();
                       runLookup();
                     }
                   }}
                   disabled={loading}
                 />
-                <Button onClick={runLookup} disabled={loading} className="shrink-0">
+                <Button onClick={runLookup} disabled={loading} className="w-full">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   <span className="ml-2">{loading ? "Searching…" : "Auto-fill"}</span>
                 </Button>
