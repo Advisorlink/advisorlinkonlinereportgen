@@ -157,6 +157,7 @@ ACCURACY RULES (CRITICAL):
 - If the exact 5-year p.a. net return for that exact option is not available on the official fund website/PDS, return null for grossReturn and explain that the 5-year net return could not be verified. NEVER substitute a different time period.
 - If you cannot find a figure on the named fund's official source with confidence, return null for that field. NEVER guess, estimate, substitute another fund's figures, or interpolate.
 - Return sourceUrls as a separate array of exact official URLs used. In sourceNotes, list the exact "5 year"/"5-year" return label copied from the page, the allocated option name, the risk profile label if shown, and the as-of date for the figures.
+- Return returnEvidenceText as the exact copied official website row/table snippet used for the 5-year return, including the header row with "5 years (p.a.)" and the allocated option row where possible.
 - Be deterministic: if the same client text is submitted again, return the same values unless the official website content has changed.
 
 PARSING RULES (from the user's free-text input):
@@ -213,6 +214,10 @@ FUND FIELDS (Australian context, from official sources):
                 type: "array",
                 items: { type: "string" },
                 description: "Exact official fund or official PDS URLs used to verify fees, growth allocation, risk profile, and 5-year net return.",
+              },
+              returnEvidenceText: {
+                type: ["string", "null"],
+                description: "Exact copied official table row/snippet showing the 5-year p.a. return for the allocated option.",
               },
             },
             required: ["sourceNotes", "sourceUrls"],
