@@ -365,23 +365,6 @@ export function FeesAndDisclosurePage({ s }: { s: ReportSummary }) {
         </p>
       </SectionCard>
 
-      <div className="grid grid-cols-2 gap-4 mb-5">
-        <SectionCard title="Accumulation assumptions" icon="◉">
-          <Row label="Net contribution rate" value="12% × 0.85 of salary" />
-          <Row label="Inflation drag" value="2.5% p.a." />
-          <Row label="Market dip cycle" value="× 0.9 every 7 years" />
-          <Row label="Existing net rate used" value={fmtPct(s.existingNetReturn - 0.025 - s.existingAdminPct)} />
-          <Row label="Comparison net rate used" value={fmtPct(s.comparisonReturn - 0.025 - s.comparisonAdminPct)} />
-        </SectionCard>
-        <SectionCard title="Retirement (drawdown) assumptions" icon="◉">
-          <Row label="Investment mix" value="More defensive — 50% of growth return" />
-          <Row label="Inflation drag" value="2.5% p.a." />
-          <Row label="Market dip cycle" value="× 0.95 every 7 years" />
-          <Row label="Withdrawal pattern" value="Fixed annual amount, end of year" />
-          <Row label="Maximum modelled age" value="100" />
-        </SectionCard>
-      </div>
-
       <Disclaimer>
         The information in this Super Health Check is general in nature only and does not take into account
         your personal objectives, financial situation or needs. It is based on the inputs provided and the
