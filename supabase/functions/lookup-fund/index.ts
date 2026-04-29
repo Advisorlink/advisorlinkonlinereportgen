@@ -107,14 +107,22 @@ function fundHostTokens(fundName: string): string[] {
       ].includes(w)
     );
   return Array.from(
-    new Set([compactName, words.join(""), ...words].filter((w) => w.length >= 4)),
+    new Set(
+      [compactName, words.join(""), ...words].filter((w) => w.length >= 4),
+    ),
   );
 }
 
-function isOfficialFundUrl(url: string, fundName: string, officialHosts: string[]): boolean {
+function isOfficialFundUrl(
+  url: string,
+  fundName: string,
+  officialHosts: string[],
+): boolean {
   const host = hostFrom(url);
   if (!host || !isAllowedOfficialCandidate(url)) return false;
-  if (officialHosts.length) return officialHosts.some((h) => host === h || host.endsWith(`.${h}`));
+  if (officialHosts.length) {
+    return officialHosts.some((h) => host === h || host.endsWith(`.${h}`));
+  }
   const compactHost = host.replace(/[^a-z0-9]/g, "");
   return fundHostTokens(fundName).some((token) => compactHost.includes(token));
 }
@@ -479,12 +487,18 @@ Deno.serve(async (req) => {
     let candidateUrls: string[] = [];
     const fundName = String(step1.fundName ?? "").trim();
     const optionLabel = String(step1.modelLabel ?? "").trim();
-    const aiUrls = urlsFrom(step1.sourceUrls).filter(isAllowedOfficialCandidate);
+    const aiUrls = urlsFrom(step1.sourceUrls).filter(
+      isAllowedOfficialCandidate,
+    );
     const fundTokens = fundHostTokens(fundName);
     const officialHosts = Array.from(
       new Set(
-        aiUrls.map(hostFrom).filter((h): h is string => Boolean(h)).filter((h) =>
-          fundTokens.some((token) => h.replace(/[^a-z0-9]/g, "").includes(token))
+        aiUrls.map(hostFrom).filter((h): h is string => Boolean(h)).filter((
+          h,
+        ) =>
+          fundTokens.some((token) =>
+            h.replace(/[^a-z0-9]/g, "").includes(token)
+          )
         ),
       ),
     );
