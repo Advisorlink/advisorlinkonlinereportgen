@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ClientForm } from "@/components/ClientForm";
-import { CoverPage, SnapshotPage, IncomePage } from "@/components/report/pages";
+import { CoverPage, SnapshotPage, FundsPage, ProjectionPage, IncomePage, FeesAndDisclosurePage } from "@/components/report/pages";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { DEFAULT_INPUTS, importFromFile } from "@/lib/xlsx-import";
 import { toast } from "sonner";
@@ -87,7 +87,10 @@ export default function Index() {
         <section ref={reportRef} className="space-y-0">
           <CoverPage s={summary} />
           <SnapshotPage s={summary} />
+          <FundsPage s={summary} />
+          <ProjectionPage s={summary} />
           <IncomePage s={summary} />
+          <FeesAndDisclosurePage s={summary} />
         </section>
       </main>
     </div>
