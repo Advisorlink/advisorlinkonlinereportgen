@@ -63,7 +63,7 @@ FUND FIELDS (Australian context, from official sources):
               modelLabel: { type: ["string", "null"] },
               adminFeeFlat: { type: ["number", "null"] },
               adminFeePct: { type: ["number", "null"], description: "Decimal e.g. 0.0035" },
-              grossReturn: { type: ["number", "null"], description: "Decimal e.g. 0.078 — 5yr net p.a." },
+              grossReturn: { type: ["number", "null"], description: "Decimal e.g. 0.078 — 5yr NET p.a. return (after investment fees and tax). Never gross." },
               growthAssetsPct: { type: ["number", "null"], description: "Decimal e.g. 0.70" },
               age: { type: ["number", "null"] },
               retirementAge: { type: ["number", "null"] },
