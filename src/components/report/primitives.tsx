@@ -125,7 +125,7 @@ export function Gauge({ value, max = 100, label }: { value: number; max?: number
         />
       </svg>
       {label && (
-        <div className="absolute inset-x-0 bottom-1 text-center text-sm font-bold text-navy">
+        <div className="absolute inset-x-0 bottom-1 text-center text-sm font-semibold text-navy">
           {label}
         </div>
       )}
