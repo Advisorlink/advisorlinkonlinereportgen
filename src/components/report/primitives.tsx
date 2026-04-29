@@ -30,7 +30,6 @@ export function PageHeader({ pageLabel = "SUPER PERFORMANCE REPORT", flush = fal
           className="h-8 w-auto"
         />
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-online tracking-wider">● ONLINE</span>
           <span className="px-3 py-1 rounded-md bg-white/10 backdrop-blur border border-white/15 text-[10px] font-bold tracking-wider">
             {pageLabel}
           </span>
