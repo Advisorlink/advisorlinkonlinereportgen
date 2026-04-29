@@ -128,7 +128,7 @@ function returnAppearsNearOption(pageText: string, grossReturn: unknown, modelLa
     const m = re.exec(normalized);
     if (!m) continue;
     const ctx = normalized.slice(Math.max(0, m.index - 800), m.index + 800);
-    const fiveYr = /(5|five)\s*[- ]?\s*(year|yr)/i.test(ctx);
+    const fiveYr = /(5|five)\s*[- ]?\s*(year|years|yr|yrs)/i.test(ctx);
     const optionMatch = tokens.length === 0 || tokens.some(t => ctx.includes(t));
     if (fiveYr && optionMatch) return true;
   }
