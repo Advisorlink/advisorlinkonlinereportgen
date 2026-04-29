@@ -13,7 +13,7 @@ const corsHeaders = {
 };
 
 const lookupCache = new Map<string, { expiresAt: number; data: Record<string, unknown> }>();
-const CACHE_MS = 30 * 60 * 1000;
+const CACHE_MS = 0; // disabled — every click must re-fetch the latest published figures
 
 const jsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
