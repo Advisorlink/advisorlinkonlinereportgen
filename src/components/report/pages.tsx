@@ -879,7 +879,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
                   Director · Senior Research
                 </div>
               </div>
-              <div className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan whitespace-nowrap pt-1">
+              <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan whitespace-nowrap pt-1">
                 Your Consultant
               </div>
             </div>
