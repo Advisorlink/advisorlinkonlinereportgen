@@ -221,31 +221,22 @@ FUND FIELDS (Australian context, from official sources):
     const aiJson = await aiResp.json();
     const toolCall = aiJson.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall?.function?.arguments) {
-      return new Response(
-        JSON.stringify({ error: "AI did not return structured data", raw: aiJson }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return jsonResponse({ error: "AI did not return structured data", raw: aiJson }, 502);
     }
 
     let parsed: Record<string, unknown>;
     try {
       parsed = JSON.parse(toolCall.function.arguments);
     } catch {
-      return new Response(JSON.stringify({ error: "Could not parse AI response" }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "Could not parse AI response" }, 502);
     }
 
-    return new Response(JSON.stringify({ data: parsed }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    const verified = await verifyReturnAgainstSources(parsed);
+    lookupCache.set(cacheKey, { data: verified, expiresAt: Date.now() + CACHE_MS });
+
+    return jsonResponse({ data: verified });
   } catch (e) {
     console.error("lookup-fund error:", e);
-    return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    return jsonResponse({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
 });
