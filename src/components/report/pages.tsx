@@ -10,6 +10,7 @@ import {
   AccumulationChart, WithdrawalChart,
   FeeRow, FeeTableHeader, Disclaimer,
 } from "./primitives";
+import riskIllustration from "@/assets/risk-illustration.jpg";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
