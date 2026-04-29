@@ -36,7 +36,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
       {/* Unified cover hero - logo + title in one cohesive block so the PDF
           renders a single, seamless header section. */}
       <header
-        className="relative -mx-14 -mt-[16mm] mb-6 px-14 pt-7 pb-10 rounded-b-[28px] text-navy-foreground overflow-hidden font-heading"
+        className="relative -mx-14 -mt-[16mm] mb-6 px-14 pt-7 pb-10 rounded-b-[28px] text-navy-foreground overflow-hidden"
         style={{
           background:
             "linear-gradient(160deg, hsl(215 65% 14%) 0%, hsl(215 60% 18%) 40%, hsl(205 60% 26%) 80%, hsl(195 75% 34%) 100%)",
