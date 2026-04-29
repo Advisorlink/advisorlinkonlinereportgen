@@ -934,7 +934,7 @@ export function FeesAndDisclosurePage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="FEES & ASSUMPTIONS" />
-      <h2 className="text-3xl font-heading">Fees & assumptions</h2>
+      <h2 className="text-3xl font-bold font-heading">Fees & assumptions</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         A line-by-line view of fees, the assumptions powering the projection, and important disclaimers.
       </p>
