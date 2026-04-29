@@ -13,7 +13,7 @@ const corsHeaders = {
 };
 
 const lookupCache = new Map<string, { expiresAt: number; data: Record<string, unknown> }>();
-const CACHE_MS = 30 * 60 * 1000;
+const CACHE_MS = 0; // disabled — every click must re-fetch the latest published figures
 
 const jsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -164,17 +164,22 @@ async function callAI(messages: unknown[], tools: unknown[], toolName: string): 
 
 // ---------- STEP 1: parse client text + find official source URLs ----------
 
-const STEP1_SYSTEM = `You are a research assistant for Australian superannuation. You have Gemini 3 Google Search lookup enabled — USE IT for every lookup.
+const NOW = new Date();
+const CURRENT_YEAR = NOW.getUTCFullYear();
+const PREV_YEAR = CURRENT_YEAR - 1;
+
+const STEP1_SYSTEM = `You are a research assistant for Australian superannuation. You have Gemini 3 Google Search lookup enabled — USE IT for every lookup. Today's date is ${NOW.toISOString().slice(0, 10)}.
 
 For the named fund, you MUST locate the OFFICIAL fund website pages (and PDS / Investment Guide if needed) that publish:
-  (a) the current investment performance / returns table for the allocated investment option (must show 5-year p.a. net return), and
+  (a) the MOST RECENTLY PUBLISHED investment performance / returns table for the allocated investment option (must show 5-year p.a. return, as recent as possible — ideally as at a ${CURRENT_YEAR} month-end, or otherwise the most recent ${PREV_YEAR} update), and
   (b) the current fees & costs (admin fee + asset-based admin fee), and
   (c) the strategic asset allocation / growth assets % and the official risk profile label.
 
 Rules:
 - Identify WHICHEVER Australian super fund the user names — industry, retail, corporate, public sector, SMSF platform, etc. Never default to AustralianSuper or any specific fund.
 - Use ONLY URLs that Gemini 3 lookup finds on the fund's own official domain. Never invent URLs. Never use third-party comparison sites, news, blogs, SuperRatings, Canstar, Chant West, etc.
-- Return up to 6 URLs, ordered by likelihood of containing the 5-year p.a. return for the allocated option (performance/returns/dashboard pages first, then PDS/Investment Guide). The URLs must be real lookup results or pages clearly reached from real lookup results.
+- Add search terms like "${CURRENT_YEAR}", "monthly returns", "performance update", "as at" to find the freshest performance page. Prefer the live performance dashboard / monthly update page over PDS PDFs (PDS data is usually stale).
+- Return up to 6 URLs, ordered by RECENCY of the published 5-year p.a. figure (newest performance/returns/dashboard pages first, then PDS/Investment Guide as fallback). The URLs must be real lookup results or pages clearly reached from real lookup results.
 - Also parse the client's personal details from the free-text input.
 
 Frequencies must be exactly "Weekly", "Monthly", or "Annually".
@@ -213,17 +218,18 @@ const STEP1_TOOL = [{
 
 // ---------- STEP 2: extract verified figures from REAL scraped page text ----------
 
-const STEP2_SYSTEM = `You extract Australian super fund figures from RAW WEBSITE TEXT that has been fetched from the official fund's website.
+const STEP2_SYSTEM = `You extract Australian super fund figures from RAW WEBSITE TEXT that has been fetched from the official fund's website. Today's date is ${NOW.toISOString().slice(0, 10)}.
 
 Strict rules:
 - ONLY use numbers that literally appear in the provided page text. Do NOT use prior knowledge, do NOT estimate, do NOT use other time periods.
 - grossReturn must be the 5-year p.a. return for the EXACT allocated investment option, copied straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
+- If MULTIPLE pages each show a 5-year p.a. figure for the option, ALWAYS pick the one with the most recent "as at" date (e.g. prefer "as at 31 ${CURRENT_YEAR}" over a PDS dated ${PREV_YEAR - 1}). State the as-of date in sourceNotes.
 - adminFeeFlat: annual flat admin fee in AUD (multiply weekly fees by 52). Null if not in text.
 - adminFeePct: annual asset-based admin/trustee fee as a DECIMAL (0.0035 = 0.35%). Exclude investment fees. Null if not in text.
 - growthAssetsPct: strategic growth-asset allocation as DECIMAL (0.70 = 70%). Null if not in text.
 - investmentRiskProfile: official risk label exactly as the page calls it (e.g. "High", "Medium to High", "Growth"). Null if not in text.
-- returnEvidenceText: copy the exact short snippet from the page text that contains the 5-year return + option label.
-- sourceNotes: short explanation including which URL the 5yr return came from and the as-of date if visible.
+- returnEvidenceText: copy the exact short snippet from the page text that contains the 5-year return + option label + as-of date if shown.
+- sourceNotes: short explanation including which URL the 5yr return came from AND the as-of date.
 - Be deterministic.`;
 
 const STEP2_TOOL = [{
