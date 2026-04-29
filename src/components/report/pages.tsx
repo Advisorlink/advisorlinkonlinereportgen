@@ -111,7 +111,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
             loading="lazy"
           />
           <div>
-            <div className="text-[10px] tracking-[0.22em] font-bold text-cyan mb-1">100% ASIC REGULATED</div>
+            <div className="text-[10px] tracking-[0.22em] font-semibold text-cyan mb-1">100% ASIC REGULATED</div>
             <div className="text-lg text-navy leading-tight font-medium" style={{ fontFamily: "'Montserrat', system-ui, sans-serif" }}>
               ADVISORLINK PTY LTD &nbsp;·&nbsp; ACN 671 139 923
             </div>
