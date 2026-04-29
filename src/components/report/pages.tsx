@@ -83,14 +83,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
           </h3>
         </div>
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          The information in this Super Performance Report is general in nature only and does not take into
-          account your personal objectives, financial situation or needs. It is based on the inputs
-          provided and the assumptions stated above. Investment returns are not guaranteed; past
-          performance is not a reliable indicator of future performance. All figures are illustrative
-          only and should not be relied upon as personal financial advice. Before acting on any
-          information you should consider its appropriateness having regard to your own circumstances
-          and obtain personal advice from a licensed financial adviser. Fees, returns, contribution
-          rates and tax settings used in this report are simplified for illustration.
+          Advisor Link Online is an independent education and referral service and is not licensed to provide financial advice. This Super Performance Report contains factual information only, based on publicly available data (e.g. RateCity, APRA reports, or your fund's website). It does not constitute personal or general financial product advice and does not consider your specific objectives, financial situation, or needs. All comparisons, projections, and illustrations are for information purposes only and are based on current public data. Past performance is not a reliable indicator of future results. If you believe an improvement may be possible, we can introduce you to a licensed financial adviser at your request from our referral network to contact you and provide a Statement of Advice after assessing your circumstances.
         </p>
       </div>
 
