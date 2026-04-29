@@ -100,11 +100,6 @@ function extractFiveYearReturnFromEvidence(evidence: unknown, modelLabel: unknow
 }
 
 async function verifyReturnAgainstSources(parsed: Record<string, unknown>): Promise<Record<string, unknown>> {
-  const evidenceReturn = extractFiveYearReturnFromEvidence(parsed.returnEvidenceText, parsed.modelLabel);
-  if (evidenceReturn != null) {
-    return { ...parsed, grossReturn: evidenceReturn };
-  }
-
   if (parsed.grossReturn == null) return parsed;
   const urls = urlsFrom(parsed.sourceUrls).concat(urlsFrom(parsed.sourceNotes));
   if (!urls.length) {
