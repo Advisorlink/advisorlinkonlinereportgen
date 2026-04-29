@@ -22,7 +22,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-baseline justify-between py-1.5 border-b border-border last:border-0">
       <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-sm font-bold text-navy tabular-nums">{value}</span>
+      <span className="text-sm font-semibold text-navy tabular-nums">{value}</span>
     </div>
   );
 }
