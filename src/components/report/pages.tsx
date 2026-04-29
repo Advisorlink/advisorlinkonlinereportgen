@@ -28,7 +28,13 @@ export function CoverPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader flush />
-      <div className="relative -mx-14 -mt-px mb-6 px-14 pt-6 pb-10 rounded-b-[28px] bg-gradient-to-br from-navy to-[hsl(215_60%_18%)] text-navy-foreground overflow-hidden">
+      <div
+        className="relative -mx-14 -mt-px mb-6 px-14 pt-6 pb-10 rounded-b-[28px] text-navy-foreground overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(165deg, hsl(215 60% 18%) 0%, hsl(210 55% 24%) 55%, hsl(200 70% 32%) 100%)",
+        }}
+      >
         <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-cyan/20 blur-2xl" />
         <div className="absolute -right-8 top-8 w-40 h-40 rounded-full bg-cyan/30" />
         <h1 className="relative text-[44px] leading-[1.05] font-black tracking-tight">
