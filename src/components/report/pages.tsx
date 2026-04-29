@@ -207,7 +207,7 @@ export function WhoWeArePage() {
             </svg>
              <div>
               <div className="text-sm font-bold text-navy leading-tight">Google Reviews</div>
-              <div className="flex items-center gap-1.5 mt-1">
+              <div className="flex items-center gap-1.5 mt-2">
                 <div className="flex items-center">
                   {[0,1,2,3,4].map(i => (
                     <Star key={i} className="w-3.5 h-3.5 fill-[#FBBC05] text-[#FBBC05] block" />
