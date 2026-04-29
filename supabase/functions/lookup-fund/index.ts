@@ -60,6 +60,7 @@ const BLOCKED_SOURCE_DOMAINS = [
   "finder.com.au",
   "mozo.com.au",
   "stockspot.com.au",
+  "livewiremarkets.com",
   "wikipedia.org",
   "reddit.com",
   "facebook.com",
@@ -76,6 +77,43 @@ function isAllowedOfficialCandidate(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+function hostFrom(url: string): string | null {
+  try {
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+function fundHostTokens(fundName: string): string[] {
+  const words = fundName
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .split(/[^a-z0-9]+/)
+    .filter((w) =>
+      w.length >= 3 && ![
+        "super",
+        "superannuation",
+        "fund",
+        "funds",
+        "trust",
+        "australia",
+        "australian",
+        "the",
+        "and",
+      ].includes(w)
+    );
+  return Array.from(new Set([words.join(""), ...words].filter((w) => w.length >= 4)));
+}
+
+function isOfficialFundUrl(url: string, fundName: string, officialHosts: string[]): boolean {
+  const host = hostFrom(url);
+  if (!host || !isAllowedOfficialCandidate(url)) return false;
+  if (officialHosts.length) return officialHosts.some((h) => host === h || host.endsWith(`.${h}`));
+  const compactHost = host.replace(/[^a-z0-9]/g, "");
+  return fundHostTokens(fundName).some((token) => compactHost.includes(token));
 }
 
 const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
