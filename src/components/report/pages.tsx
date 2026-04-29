@@ -777,7 +777,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
         <div className="relative flex items-center justify-between gap-4 flex-wrap">
           <div>
             <div className="text-[10px] font-bold uppercase tracking-wider opacity-70">Your eligibility</div>
-            <div className="mt-1 text-2xl font-black">
+            <div className="mt-1 text-2xl font-bold">
               {eligible ? "You qualify for an adviser referral" : "Referral threshold not met"}
             </div>
             <div className="mt-1 text-xs opacity-80">
