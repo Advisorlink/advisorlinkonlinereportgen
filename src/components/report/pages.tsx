@@ -865,7 +865,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
             <div className="flex items-center gap-2 mb-3">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
               <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-cyan">
-                Ready to take the next step?
+                Ready to finally get some help?
               </div>
             </div>
             <div className="text-2xl leading-tight font-bold font-heading !text-white drop-shadow-md">
