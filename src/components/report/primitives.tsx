@@ -3,23 +3,34 @@ import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Legend,
 } from "recharts";
+import logoUrl from "@/assets/logo.svg";
 
 export function PageShell({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn("report-page", className)}>{children}</div>;
 }
 
-export function PageHeader({ pageLabel = "SUPER HEALTH CHECK" }: { pageLabel?: string }) {
+export function PageHeader({ pageLabel = "SUPER HEALTH CHECK", flush = false }: { pageLabel?: string; flush?: boolean }) {
   return (
-    <header className="flex items-center justify-between mb-8">
-      <div className="flex items-center gap-2">
-        <span className="px-2.5 py-1 rounded-md bg-navy text-navy-foreground text-[10px] font-bold tracking-wide">
-          Advisor Link
-        </span>
-        <span className="text-[10px] font-bold text-online tracking-wider">● ONLINE</span>
+    <header
+      className={cn(
+        "relative -mx-14 -mt-[16mm] px-14 pt-6 pb-5 bg-gradient-to-br from-navy to-[hsl(215_60%_18%)] text-navy-foreground overflow-hidden",
+        flush ? "mb-0" : "mb-6"
+      )}
+    >
+      <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-cyan/15 blur-2xl pointer-events-none" />
+      <div className="relative flex items-center justify-between gap-4">
+        <img
+          src={logoUrl}
+          alt="Advisor Link Online"
+          className="h-7 w-auto brightness-0 invert"
+        />
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold text-online tracking-wider">● ONLINE</span>
+          <span className="px-3 py-1 rounded-md bg-white/10 backdrop-blur border border-white/15 text-[10px] font-bold tracking-wider">
+            {pageLabel}
+          </span>
+        </div>
       </div>
-      <span className="px-3 py-1 rounded-md border border-navy/15 bg-white text-navy text-[10px] font-bold tracking-wider">
-        {pageLabel}
-      </span>
     </header>
   );
 }
