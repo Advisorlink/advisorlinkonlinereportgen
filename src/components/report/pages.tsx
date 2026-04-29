@@ -864,7 +864,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
                 Ready to take the next step?
               </div>
             </div>
-            <div className="text-2xl leading-tight font-bold">
+            <div className="text-2xl leading-tight font-bold font-heading">
               Call your <span className="text-cyan">Senior Research Consultant</span> today<br />
               for a no-obligation chat.
             </div>
