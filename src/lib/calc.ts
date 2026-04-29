@@ -22,6 +22,7 @@ export interface ClientInputs {
   adminFeeFlat: number; // K21
   adminFeePct: number; // O21
   grossReturn: number; // J25 (0.066)
+  investmentRiskProfile?: string;
 
   // Optional second account (R columns) — keep zeroed if not used
   secondBalance?: number; // R16

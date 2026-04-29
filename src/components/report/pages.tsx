@@ -331,8 +331,8 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           <Row label="Fund name" value={i.fundName} />
           <Row label="Investment option" value={i.modelLabel} />
           <Row label="Growth assets" value={fmtPct(i.growthAssetsPct, 0)} />
-          <Row label="Risk profile" value={s.riskProfile} />
-          <Row label="Gross return (assumed)" value={fmtPct(i.grossReturn)} />
+          <Row label="Investment risk profile" value={i.investmentRiskProfile || s.riskProfile} />
+          <Row label="5-year net return" value={fmtPct(i.grossReturn)} />
           <Row label="Admin fee — flat" value={fmtMoney(i.adminFeeFlat)} />
           <Row label="Admin fee — % of balance" value={fmtPct(i.adminFeePct, 2)} />
           <Row label="Effective admin fee %" value={fmtPct(s.existingAdminPct, 2)} />
