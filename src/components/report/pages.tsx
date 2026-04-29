@@ -180,11 +180,6 @@ export function WhoWeArePage() {
             ))}
           </ul>
         </SectionCard>
-                <span className="text-foreground leading-snug">{r}</span>
-              </li>
-            ))}
-          </ul>
-        </SectionCard>
       </div>
 
       <PageFooter />
