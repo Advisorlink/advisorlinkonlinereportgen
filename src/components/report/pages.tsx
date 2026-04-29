@@ -609,7 +609,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
           </div>
           <div className="rounded-lg border border-border bg-secondary/40 p-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-black">↗</span>
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan/15 text-cyan text-[10px] font-bold">↗</span>
               <div className="text-[10px] font-bold uppercase tracking-wider text-navy">Performance</div>
             </div>
             <div className="text-[11px] text-muted-foreground leading-relaxed">
