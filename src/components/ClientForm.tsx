@@ -15,6 +15,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
   const [loading, setLoading] = useState(false);
   const [lookupCache, setLookupCache] = useState<Record<string, unknown> | null>(null);
   const [lookupCacheKey, setLookupCacheKey] = useState("");
+  const [lastResult, setLastResult] = useState<Record<string, unknown> | null>(null);
 
   const applyLookupResult = (r: Record<string, unknown>) => {
     const next: ClientInputs = { ...value };
