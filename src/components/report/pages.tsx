@@ -343,7 +343,7 @@ export function FeesAndDisclosurePage({ s }: { s: ReportSummary }) {
   const cmpAdmin = comparisonAdminPct(i.superBalance) * i.superBalance;
   const cmpAnnual = comparisonAnnualFee(i.superBalance);
   const cmpAdvice = comparisonAdviceFee(i.superBalance);
-  const cmpTotalFee = cmpFlat + cmpAdmin + cmpAnnual + cmpAdvice;
+  const cmpTotalFee = cmpFlat + cmpAdmin + cmpAdvice;
 
   return (
     <PageShell>
@@ -357,11 +357,11 @@ export function FeesAndDisclosurePage({ s }: { s: ReportSummary }) {
         <FeeTableHeader />
         <FeeRow label="Admin fee — flat" current={exFlat} comparison={cmpFlat} />
         <FeeRow label="Admin fee — % of balance" current={exPctFee} comparison={cmpAdmin} />
-        <FeeRow label="Annual product fee" current={0} comparison={cmpAnnual} />
+        
         <FeeRow label="Advice fee (one-off, year 1)" current={0} comparison={cmpAdvice} />
         <FeeRow label="Total" current={exTotalFee} comparison={cmpTotalFee} highlight />
         <p className="text-[10px] text-muted-foreground mt-2">
-          Comparison fees include a tiered admin %, a 1.76% annual product fee capped at $5,000, and a 4.4% advice fee capped at $6,500 (deducted upfront).
+          Comparison fees include a tiered admin %, and a 4.4% advice fee capped at $6,500 (deducted upfront).
         </p>
       </SectionCard>
 
