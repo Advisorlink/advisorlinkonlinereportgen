@@ -762,19 +762,6 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
         </div>
       </div>
 
-      <SectionCard title="Your next steps" icon="◆" className="mb-5">
-        <div className="grid grid-cols-2 gap-3">
-          {steps.map((st) => (
-            <div key={st.n} className="rounded-lg border border-border bg-secondary/40 p-4">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-cyan text-cyan-foreground text-xs font-black">{st.n}</span>
-                <div className="text-sm font-bold text-navy">{st.title}</div>
-              </div>
-              <div className="text-[11px] text-muted-foreground leading-relaxed">{st.body}</div>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
 
       <SectionCard title="How a referral works" icon="◉" className="mb-5">
         <div className="grid grid-cols-3 gap-3 text-[11px]">
