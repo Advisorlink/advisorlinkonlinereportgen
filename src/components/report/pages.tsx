@@ -764,7 +764,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="WHAT'S NEXT" />
-      <h2 className="text-3xl font-heading">What's next</h2>
+      <h2 className="text-3xl font-bold font-heading">What's next</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         How to act on the findings in this report and access personal financial advice if you choose to.
       </p>
