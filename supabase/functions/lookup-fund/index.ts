@@ -27,9 +27,11 @@ Deno.serve(async (req) => {
 ACCURACY RULES (CRITICAL):
 - Identify WHICHEVER super fund the user names (any Australian fund — industry, retail, corporate, public sector, SMSF platforms, etc.). Do NOT default to AustralianSuper or any specific fund.
 - You MUST search the web and read THAT fund's OFFICIAL site, current PDS, Investment Guide, product dashboard, or annual report. Examples include australiansuper.com, hostplus.com.au, hesta.com.au, rest.com.au, unisuper.com.au, aware.com.au, cbussuper.com.au, art.com.au, australianretirementtrust.com.au, mlc.com.au, amp.com.au, colonialfirststate.com.au, mercersuper.com.au, vanguard.com.au, brightersuper.com.au, spiritsuper.com.au, equipsuper.com.au, csc.gov.au, gesb.wa.gov.au, qsuper.qld.gov.au, smartmonday.com.au, netwealth.com.au, hub24.com.au, macquarie.com.au, etc. — but do not limit yourself to this list.
-- Use the MOST RECENT figures available (prefer last completed financial year for returns, current PDS for fees).
+- Use the MOST RECENT figures available directly from the official fund website page for that EXACT fund and investment option. Prefer the public "investment performance", "performance", "returns", "dashboard", or current PDS page that shows the exact percentage currently on the fund website.
+- The return percentage must be the NET return figure currently published for the exact option. Do NOT use a generic fund average, another option, an older cached result, a gross/before-fee return, or a figure from a comparison/third-party website.
+- If the official website shows multiple net return periods, choose the return period that is visibly presented as the current/primary return for that option. If the user specifies a period, use that period. If unsure which displayed net return is the fund's primary current figure, return null and explain the ambiguity in sourceNotes.
 - If you cannot find a figure on the named fund's official source with confidence, return null for that field. NEVER guess, estimate, substitute another fund's figures, or interpolate.
-- In sourceNotes, list the exact URLs you used (must be from the named fund's domain or its official PDS host) and the as-of date for the figures.
+- In sourceNotes, list the exact URLs you used (must be from the named fund's domain or its official PDS host), the exact return label/period copied from the page, and the as-of date for the figures.
 
 PARSING RULES (from the user's free-text input):
 - clientName: extract the person's full name if present (e.g. "for John Smith", "client: Jane Doe", or a name at the start). Title-case it. Strip the fund name.
@@ -46,7 +48,7 @@ FUND FIELDS (Australian context, from official sources):
 - modelLabel: investment option name exactly as the fund names it (e.g. "Balanced", "High Growth", "Indexed Balanced").
 - adminFeeFlat: annual flat administration fee in AUD (e.g. 117 means $117/yr). If the fund only charges weekly, multiply by 52.
 - adminFeePct: annual percentage admin/asset-based fee as a DECIMAL (0.0035 = 0.35%). Include any asset-based admin or trustee fee. Exclude investment fees.
-- grossReturn: most recent 5-year p.a. NET investment return (after investment fees and tax, as published by the fund) for the chosen option, as a DECIMAL (0.078 = 7.8% p.a.). DO NOT use gross/before-fee returns. If the fund only publishes a "net of investment fees and tax" return, use that. If 5yr unavailable, use 10yr and note it in sourceNotes.
+- grossReturn: the current/primary NET investment return percentage shown on the official fund website for the exact chosen option, as a DECIMAL (6.33% = 0.0633). It must be after investment fees and tax where the fund labels it net. DO NOT use gross/before-fee returns. DO NOT default to 5-year if the fund website's current displayed net return is a different period. Copy the official website percentage exactly.
 - growthAssetsPct: strategic growth-asset allocation as a DECIMAL (0.70 = 70%).`;
 
     const tools = [
