@@ -826,7 +826,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
             { n: "03", title: "Paid from super", body: "If you choose to engage an adviser, fees are deducted from your superannuation balance - not paid out of pocket." },
           ].map((c) => (
             <div key={c.n} className="relative">
-              <div className="text-3xl font-black text-cyan/30 leading-none mb-1.5 tabular-nums">{c.n}</div>
+              <div className="text-3xl font-bold text-cyan/30 leading-none mb-1.5 tabular-nums">{c.n}</div>
               <div className="h-px w-8 bg-cyan mb-2" />
               <div className="text-navy mb-1 text-sm font-bold">{c.title}</div>
               <div className="text-[10.5px] text-muted-foreground leading-relaxed">{c.body}</div>
