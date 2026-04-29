@@ -83,8 +83,15 @@ async function fetchPageText(url: string, timeoutMs = 45000): Promise<string | n
       clearTimeout(t);
       if (resp.ok) {
         const j = await resp.json();
+        const statusCode = j?.data?.metadata?.statusCode ?? j?.metadata?.statusCode;
         const md: string = j?.data?.markdown ?? j?.markdown ?? "";
-        if (md && md.length > 200) return md.replace(/\s+/g, " ").trim();
+        const normalized = md.replace(/\s+/g, " ").trim();
+        const missingPage = /\b(404|page not found|doesn[’']?t seem to exist|couldn[’']?t find this page)\b/i.test(normalized.slice(0, 1200));
+        if (Number(statusCode) >= 400 || missingPage) {
+          console.warn("Firecrawl scrape rejected missing page", url, statusCode ?? "unknown");
+          return null;
+        }
+        if (normalized.length > 200) return normalized;
       } else {
         console.warn("Firecrawl scrape non-ok", url, resp.status, await resp.text().catch(() => ""));
       }
@@ -110,6 +117,8 @@ async function fetchPageText(url: string, timeoutMs = 45000): Promise<string | n
     if (resp.ok) {
       const html = await resp.text();
       const text = textFromHtml(html);
+      const missingPage = /\b(404|page not found|doesn[’']?t seem to exist|couldn[’']?t find this page)\b/i.test(text.slice(0, 1200));
+      if (missingPage) return null;
       if (text.length > 300) return text;
     }
   } catch (e) {
