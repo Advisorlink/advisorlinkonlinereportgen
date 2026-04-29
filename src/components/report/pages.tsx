@@ -327,7 +327,7 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
           const yearNumber = new Date().getFullYear() + (r.age - s.inputs.age);
           return (
             <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-2 py-1.5 text-xs border-b border-border last:border-0">
-              <div className="font-semibold text-navy">{r.age}</div>
+              <div className="font-bold text-navy">{r.age}</div>
               <div className="text-right text-muted-foreground tabular-nums">{yearNumber}</div>
               <div className="text-right tabular-nums">{fmtMoney(r.existing)}</div>
               <div className="text-right tabular-nums text-cyan font-semibold">{fmtMoney(r.comparison)}</div>
