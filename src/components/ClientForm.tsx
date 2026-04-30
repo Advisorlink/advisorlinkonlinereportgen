@@ -156,14 +156,33 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                 AI searches the web for the latest fees & returns, then fills the fields below. Always review before sending.
               </p>
               {lastResult && (
-                <div className="mt-2 rounded-md border border-border bg-muted/40 p-2 space-y-1">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sources</div>
+                <div className="mt-3 rounded-lg border border-border bg-gradient-to-br from-card to-muted/30 p-3 shadow-sm space-y-2.5">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Verified sources</span>
+                  </div>
                   {Array.isArray(lastResult.sourceUrls) && (lastResult.sourceUrls as string[]).length > 0 ? (
-                    <ul className="space-y-1">
+                    <ul className="space-y-1.5">
                       {(lastResult.sourceUrls as string[]).map((u, i) => (
-                        <li key={i} className="text-[11px] break-all">
-                          <a href={u} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:no-underline">
-                            {u}
+                        <li key={i}>
+                          <a
+                            href={u}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group flex items-center gap-2 rounded-md border border-border bg-background/60 px-2 py-1.5 text-[11px] hover:border-primary hover:bg-primary/5 transition-colors"
+                          >
+                            <img
+                              src={faviconFor(u)}
+                              alt=""
+                              className="w-4 h-4 rounded-sm shrink-0"
+                              loading="lazy"
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }}
+                            />
+                            <span className="flex-1 min-w-0">
+                              <span className="block font-medium text-foreground truncate">{pageLabel(u)}</span>
+                              <span className="block text-[10px] text-muted-foreground truncate">{prettyDomain(u)}</span>
+                            </span>
+                            <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-primary shrink-0" />
                           </a>
                         </li>
                       ))}
@@ -172,13 +191,13 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                     <p className="text-[11px] text-muted-foreground">No source URL was returned.</p>
                   )}
                   {typeof lastResult.sourceNotes === "string" && lastResult.sourceNotes.trim() && (
-                    <p className="text-[10px] text-muted-foreground whitespace-pre-line pt-1 border-t border-border/60">
-                      {lastResult.sourceNotes}
+                    <p className="text-[10px] text-muted-foreground whitespace-pre-line pt-2 border-t border-border/60">
+                      <span className="font-semibold">Notes: </span>{lastResult.sourceNotes}
                     </p>
                   )}
                   {typeof lastResult.returnEvidenceText === "string" && lastResult.returnEvidenceText.trim() && (
-                    <p className="text-[10px] italic text-muted-foreground pt-1 border-t border-border/60">
-                      Return evidence: “{lastResult.returnEvidenceText}”
+                    <p className="text-[10px] italic text-muted-foreground pt-2 border-t border-border/60">
+                      <span className="not-italic font-semibold">Evidence: </span>“{lastResult.returnEvidenceText}”
                     </p>
                   )}
                 </div>
