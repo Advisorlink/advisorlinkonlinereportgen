@@ -142,6 +142,9 @@ export default function Index() {
             <Button onClick={exportPDF} disabled={exporting} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
               {exporting ? "Exporting…" : "Download PDF"}
             </Button>
+            <Button variant="outline" size="icon" className="bg-transparent text-navy-foreground border-white/20 hover:bg-white/10" onClick={openFullScreen} title="Full screen (actual size)">
+              <Maximize2 className="w-4 h-4" />
+            </Button>
             <Button variant="outline" size="icon" className="bg-transparent text-navy-foreground border-white/20 hover:bg-white/10" onClick={() => nav("/admin")} title="Admin">
               <Settings className="w-4 h-4" />
             </Button>
