@@ -93,6 +93,7 @@ export type Database = {
           email: string | null
           id: string
           inputs: Json
+          pdf_path: string | null
           summary: Json | null
           user_id: string
         }
@@ -102,6 +103,7 @@ export type Database = {
           email?: string | null
           id?: string
           inputs: Json
+          pdf_path?: string | null
           summary?: Json | null
           user_id: string
         }
@@ -111,6 +113,7 @@ export type Database = {
           email?: string | null
           id?: string
           inputs?: Json
+          pdf_path?: string | null
           summary?: Json | null
           user_id?: string
         }
