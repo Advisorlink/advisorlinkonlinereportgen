@@ -149,7 +149,7 @@ async function fetchPageText(
           url,
           formats: ["markdown"],
           onlyMainContent: true,
-          waitFor: 2500,
+          waitFor: 800,
         }),
       });
       clearTimeout(t);
