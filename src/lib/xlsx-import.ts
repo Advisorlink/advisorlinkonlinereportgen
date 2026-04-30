@@ -46,6 +46,7 @@ export async function importFromFile(file: File): Promise<ClientInputs> {
 
 export const DEFAULT_INPUTS: ClientInputs = {
   clientName: "Darren John Grainger",
+  clientEmail: "",
   age: 59,
   annualIncome: 0,
   retirementAge: 67,

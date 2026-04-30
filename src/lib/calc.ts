@@ -7,6 +7,7 @@ export type RiskProfile = "High Growth" | "Growth" | "Balanced" | "Moderate" | "
 export interface ClientInputs {
   // Personal
   clientName: string;
+  clientEmail?: string;
   age: number;
   retirementAge: number; // N8
   goalBalance: number; // N9
