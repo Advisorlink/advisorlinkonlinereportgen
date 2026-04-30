@@ -56,6 +56,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
     };
 
     text("clientName", r.clientName);
+    text("clientEmail", r.clientEmail);
     text("fundName", r.fundName);
     text("modelLabel", r.modelLabel);
     numeric("age", r.age);
@@ -72,6 +73,14 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
     numeric("grossReturn", r.grossReturn);
     numeric("growthAssetsPct", r.growthAssetsPct);
     text("investmentRiskProfile", r.investmentRiskProfile);
+
+    // Fallback: pull an email straight out of the pasted lookup text if the
+    // result didn't include one.
+    if (!next.clientEmail || !next.clientEmail.trim()) {
+      const match = lookupText.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
+      if (match) next.clientEmail = match[0];
+    }
+
     onChange(next);
   };
 
