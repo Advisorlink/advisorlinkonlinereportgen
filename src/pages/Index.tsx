@@ -8,7 +8,7 @@ import { importFromFile } from "@/lib/xlsx-import";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { supabase } from "@/integrations/supabase/client";
-import { Settings, LogOut } from "lucide-react";
+import { Settings, LogOut, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Index() {
@@ -87,10 +87,19 @@ export default function Index() {
         .setDisplayMode(1, "continuous", "UseNone");
       pdf.save(`${inputs.clientName.trim()} Performance Report.pdf`);
       if (user) {
-        await supabase.from("activity_log").insert({
-          user_id: user.id, email: user.email, event_type: "report_generated",
-          details: { client: inputs.clientName },
-        });
+        await Promise.all([
+          supabase.from("activity_log").insert({
+            user_id: user.id, email: user.email, event_type: "report_generated",
+            details: { client: inputs.clientName },
+          }),
+          supabase.from("reports").insert({
+            user_id: user.id,
+            email: user.email,
+            client_name: inputs.clientName.trim() || "Unnamed client",
+            inputs: JSON.parse(JSON.stringify(inputs)),
+            summary: JSON.parse(JSON.stringify(summary)),
+          } as never),
+        ]);
       }
       toast.success("PDF exported");
     } catch (e) {
@@ -98,6 +107,16 @@ export default function Index() {
       toast.error("PDF export failed");
     } finally {
       setExporting(false);
+    }
+  };
+
+  const openFullScreen = () => {
+    const el = reportRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    } else {
+      el.requestFullscreen?.().catch(() => toast.error("Full screen not available"));
     }
   };
 
@@ -122,6 +141,9 @@ export default function Index() {
             </Button>
             <Button onClick={exportPDF} disabled={exporting} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
               {exporting ? "Exporting…" : "Download PDF"}
+            </Button>
+            <Button variant="outline" size="icon" className="bg-transparent text-navy-foreground border-white/20 hover:bg-white/10" onClick={openFullScreen} title="Full screen (actual size)">
+              <Maximize2 className="w-4 h-4" />
             </Button>
             <Button variant="outline" size="icon" className="bg-transparent text-navy-foreground border-white/20 hover:bg-white/10" onClick={() => nav("/admin")} title="Admin">
               <Settings className="w-4 h-4" />

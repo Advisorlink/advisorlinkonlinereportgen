@@ -1,6 +1,8 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import type { ClientInputs } from "@/lib/calc";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const STORAGE_KEY = "advisor-link:client-inputs:v1";
 const LOOKUP_KEY = "advisor-link:lookup-state:v1";
@@ -18,6 +20,11 @@ interface Ctx {
   reset: () => void;
   lookup: LookupState;
   setLookup: (v: LookupState | ((prev: LookupState) => LookupState)) => void;
+  lookupLoading: boolean;
+  runLookup: (
+    text: string,
+    onApply: (r: Record<string, unknown>) => void,
+  ) => Promise<void>;
 }
 
 const ClientInputsCtx = createContext<Ctx | null>(null);
@@ -39,6 +46,13 @@ export function ClientInputsProvider({ children }: { children: ReactNode }) {
     return DEFAULT_LOOKUP;
   });
 
+  const [lookupLoading, setLookupLoading] = useState(false);
+  // Cache last successful result keyed by query so re-running with the same
+  // text is instant.
+  const cacheRef = useRef<{ key: string; result: Record<string, unknown> } | null>(null);
+  // Track in-flight request so navigation doesn't cancel it.
+  const inFlightRef = useRef<Promise<void> | null>(null);
+
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(inputs)); } catch { /* ignore */ }
   }, [inputs]);
@@ -51,6 +65,52 @@ export function ClientInputsProvider({ children }: { children: ReactNode }) {
   const setLookup: Ctx["setLookup"] = (v) =>
     setLookupState((prev) => (typeof v === "function" ? (v as (p: LookupState) => LookupState)(prev) : v));
 
+  const runLookup: Ctx["runLookup"] = async (text, onApply) => {
+    if (text.trim().length < 3) {
+      toast.error("Enter at least the fund name and investment option.");
+      return;
+    }
+    if (inFlightRef.current) {
+      toast.info("A search is already running — it will keep going in the background.");
+      return inFlightRef.current;
+    }
+
+    const cacheKey = text.trim().toLowerCase().replace(/\s+/g, " ");
+    if (cacheRef.current && cacheRef.current.key === cacheKey) {
+      const r = cacheRef.current.result;
+      onApply(r);
+      setLookupState((prev) => ({ ...prev, result: r }));
+      toast.success("Fund details applied", { description: "Used the same verified result as the previous fill." });
+      return;
+    }
+
+    setLookupLoading(true);
+    const promise = (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("lookup-fund", {
+          body: { query: text.trim() },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        const r = (data?.data ?? {}) as Record<string, unknown>;
+        cacheRef.current = { key: cacheKey, result: r };
+        onApply(r);
+        setLookupState((prev) => ({ ...prev, result: r }));
+        toast.success("Fund details applied", {
+          description: "Review the figures and source links below.",
+        });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Lookup failed";
+        toast.error(msg);
+      } finally {
+        setLookupLoading(false);
+        inFlightRef.current = null;
+      }
+    })();
+    inFlightRef.current = promise;
+    return promise;
+  };
+
   const reset = () => {
     setInputsState(DEFAULT_INPUTS);
     setLookupState(DEFAULT_LOOKUP);
@@ -61,7 +121,7 @@ export function ClientInputsProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ClientInputsCtx.Provider value={{ inputs, setInputs, reset, lookup, setLookup }}>
+    <ClientInputsCtx.Provider value={{ inputs, setInputs, reset, lookup, setLookup, lookupLoading, runLookup }}>
       {children}
     </ClientInputsCtx.Provider>
   );
