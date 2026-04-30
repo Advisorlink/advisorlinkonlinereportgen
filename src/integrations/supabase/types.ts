@@ -14,13 +14,85 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_log: {
+        Row: {
+          created_at: string
+          details: Json | null
+          email: string | null
+          event_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          email?: string | null
+          event_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          email?: string | null
+          event_type?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      app_config: {
+        Row: {
+          id: number
+          owner_claimed_at: string | null
+          owner_user_id: string | null
+        }
+        Insert: {
+          id?: number
+          owner_claimed_at?: string | null
+          owner_user_id?: string | null
+        }
+        Update: {
+          id?: number
+          owner_claimed_at?: string | null
+          owner_user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_blocked: boolean
+          is_owner: boolean
+          last_login_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          is_blocked?: boolean
+          is_owner?: boolean
+          last_login_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_blocked?: boolean
+          is_owner?: boolean
+          last_login_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_blocked: { Args: { _uid: string }; Returns: boolean }
+      is_owner: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
