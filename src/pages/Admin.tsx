@@ -40,6 +40,7 @@ interface ReportRow {
   inputs: Record<string, unknown> | null;
   summary: Record<string, unknown> | null;
   created_at: string;
+  pdf_path: string | null;
 }
 
 export default function Admin() {
