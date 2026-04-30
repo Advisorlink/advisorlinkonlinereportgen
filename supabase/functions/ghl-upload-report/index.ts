@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
     }
 
     const fd = new FormData();
-    fd.append(fieldId, new Blob([bin], { type: "application/pdf" }), fileName);
+    fd.append(`${fieldId}_${crypto.randomUUID()}`, new Blob([bin], { type: "application/pdf" }), fileName);
 
     const up = await fetch(`${GHL_API}/forms/upload-custom-files?contactId=${encodeURIComponent(contactId)}&locationId=${encodeURIComponent(locationId)}`, {
       method: "POST",
