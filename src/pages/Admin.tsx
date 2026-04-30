@@ -340,62 +340,28 @@ export default function Admin() {
         </section>
       </main>
 
-      {/* View report dialog */}
-      <Dialog open={!!viewing} onOpenChange={(o) => { if (!o) setViewing(null); }}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{viewing?.client_name}</DialogTitle>
-            <DialogDescription>
-              Generated {viewing ? new Date(viewing.created_at).toLocaleString() : ""}
-              {viewing?.email ? ` • by ${viewing.email}` : ""}
-            </DialogDescription>
-          </DialogHeader>
-          {viewing && (() => {
-            const inputs = resolveInputs(viewing);
-            const summary = buildSummary(inputs);
-            return (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-secondary/40 rounded-lg text-sm">
-                  <Info label="Client" value={inputs.clientName} />
-                  <Info label="Age" value={String(inputs.age)} />
-                  <Info label="Retirement age" value={String(inputs.retirementAge)} />
-                  <Info label="Annual income" value={`$${inputs.annualIncome.toLocaleString()}`} />
-                  <Info label="Super balance" value={`$${inputs.superBalance.toLocaleString()}`} />
-                  <Info label="Fund" value={inputs.fundName || "—"} />
-                  <Info label="Option" value={inputs.modelLabel || "—"} />
-                  <Info label="Goal balance" value={`$${inputs.goalBalance.toLocaleString()}`} />
-                  <Info label="Desired income" value={`$${inputs.desiredIncomeAmount.toLocaleString()} / ${inputs.desiredIncomeFrequency}`} />
-                </div>
-                <div ref={reportRenderRef} className="bg-white">
-                  <CoverPage s={summary} />
-                  <WhoWeArePage />
-                  <SnapshotPage s={summary} />
-                  <ProjectionPage s={summary} />
-                  <FundsPage s={summary} />
-                  <IncomePage s={summary} />
-                  <ImprovementSummaryPage s={summary} />
-                  <WhatsNextPage s={summary} />
-                </div>
-                <div className="flex justify-end gap-2 pt-2 border-t border-border">
-                  <Button variant="outline" onClick={() => setViewing(null)}>Close</Button>
-                  <Button onClick={() => downloadReportPdf(viewing)} disabled={pdfBusyId === viewing.id}>
-                    <Download className="w-4 h-4 mr-1" /> {pdfBusyId === viewing.id ? "Exporting…" : "Download PDF"}
-                  </Button>
-                </div>
-              </div>
-            );
-          })()}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-function Info({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="text-sm font-semibold text-navy truncate">{value}</div>
+      {/* Offscreen stage used to render a saved report into a PDF without
+          showing it to the user. */}
+      {pdfStageInputs && (() => {
+        const summary = buildSummary(pdfStageInputs);
+        return (
+          <div
+            aria-hidden
+            style={{ position: "fixed", left: -100000, top: 0, width: 794, pointerEvents: "none" }}
+          >
+            <div ref={pdfStageRef} className="bg-white">
+              <CoverPage s={summary} />
+              <WhoWeArePage />
+              <SnapshotPage s={summary} />
+              <ProjectionPage s={summary} />
+              <FundsPage s={summary} />
+              <IncomePage s={summary} />
+              <ImprovementSummaryPage s={summary} />
+              <WhatsNextPage s={summary} />
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
