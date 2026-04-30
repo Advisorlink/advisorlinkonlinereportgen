@@ -5,9 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2, ExternalLink, FileText } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useClientInputs } from "@/hooks/useClientInputs";
-import { toast } from "sonner";
 
 function prettyDomain(url: string): string {
   try {
