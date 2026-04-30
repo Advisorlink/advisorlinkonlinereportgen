@@ -70,18 +70,19 @@ Deno.serve(async (req) => {
     }
 
     // 2) Decode base64 → blob and upload via multipart
+    // GHL v2 endpoint: POST /contacts/upload-file-attachments
     const bin = Uint8Array.from(atob(pdfBase64), (c) => c.charCodeAt(0));
     const fd = new FormData();
+    fd.append("conversationId", "");
     fd.append("locationId", locationId);
-    fd.append("id", contactId);
-    fd.append("maxFileSize", "25");
+    fd.append("contactId", contactId);
     fd.append(
-      "file",
+      fileName,
       new Blob([bin], { type: "application/pdf" }),
       fileName,
     );
 
-    const up = await fetch(`${GHL_API}/contacts/${contactId}/upload-files`, {
+    const up = await fetch(`${GHL_API}/contacts/upload-file-attachments`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
