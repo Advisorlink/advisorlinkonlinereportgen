@@ -125,6 +125,30 @@ export default function Admin() {
   };
 
   const downloadReportPdf = async (r: ReportRow) => {
+    // Prefer the originally-uploaded PDF stored in client-reports if available.
+    if (r.pdf_path) {
+      setPdfBusyId(r.id);
+      try {
+        const { data, error } = await supabase.storage
+          .from("client-reports")
+          .download(r.pdf_path);
+        if (error) throw error;
+        const url = URL.createObjectURL(data);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${r.client_name.trim()} Performance Report.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        toast.success("PDF downloaded");
+        setPdfBusyId(null);
+        return;
+      } catch (e) {
+        console.error("Stored PDF download failed, regenerating:", e);
+        // fall through to regenerate
+      }
+    }
     setPdfBusyId(r.id);
     setPdfStageInputs(resolveInputs(r));
     try {
