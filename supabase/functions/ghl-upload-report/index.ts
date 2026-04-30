@@ -80,17 +80,17 @@ Deno.serve(async (req) => {
         sizeBytes: bin.byteLength,
       }, 200);
     }
-    const fieldKey = configuredDocumentsFieldKey || await findDocumentsFieldKey(apiKey, locationId);
-    if (!fieldKey) {
+    const fieldId = await resolveDocumentsFieldId(apiKey, locationId, configuredDocumentsFieldKey);
+    if (!fieldId) {
       return json({
         skipped: true,
         reason: "documents_field_not_found",
-        message: "No Go High Level File Upload custom field was found. Add the Documents field Unique Key as GHL_DOCUMENTS_FIELD_KEY in Lovable Cloud secrets.",
+        message: "No Go High Level File Upload custom field was found. Add the Documents field Unique Key or field ID as GHL_DOCUMENTS_FIELD_KEY in Lovable Cloud secrets.",
       }, 200);
     }
 
     const fd = new FormData();
-    fd.append(`${fieldKey}_${crypto.randomUUID()}`, new Blob([bin], { type: "application/pdf" }), fileName);
+    fd.append(fieldId, new Blob([bin], { type: "application/pdf" }), fileName);
 
     const up = await fetch(`${GHL_API}/forms/upload-custom-files?contactId=${encodeURIComponent(contactId)}&locationId=${encodeURIComponent(locationId)}`, {
       method: "POST",
@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
     }
 
     const upJson = await up.json().catch(() => ({}));
-    const uploadedUrl = extractUploadedFileUrl(upJson, fileName);
+    const uploadedUrl = extractUploadedFileUrl(upJson, fileName, fieldId);
 
     let noteResult: { created: boolean; status?: number; response?: string } = { created: false };
     if (uploadedUrl) {
@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       };
     }
 
-    return json({ success: true, contactId, uploadedUrl, documentsFieldKey: fieldKey, note: noteResult, ghl: upJson }, 200);
+    return json({ success: true, contactId, uploadedUrl, documentsFieldId: fieldId, note: noteResult, ghl: upJson }, 200);
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
