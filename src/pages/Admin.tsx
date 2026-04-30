@@ -116,14 +116,40 @@ export default function Admin() {
     else { toast.success("Report deleted"); refresh(); }
   };
 
-  const downloadReportJson = (r: ReportRow) => {
-    const blob = new Blob([JSON.stringify(r, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${r.client_name.replace(/[^\w-]+/g, "_")}-${new Date(r.created_at).toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const downloadReportPdf = async (r: ReportRow) => {
+    setPdfBusyId(r.id);
+    // Render the report into the hidden container, then snapshot each page.
+    setViewing(r); // reuse the same in-memory inputs path
+    try {
+      // Wait one frame for the dialog/hidden render to mount.
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+      const root = reportRenderRef.current;
+      if (!root) throw new Error("Report not ready");
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+      const pages = Array.from(root.querySelectorAll(".report-page")) as HTMLElement[];
+      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+      const canvases = await Promise.all(
+        pages.map(p => html2canvas(p, {
+          scale: 3, backgroundColor: "#ffffff", useCORS: true, imageTimeout: 0, logging: false,
+          windowWidth: p.scrollWidth, windowHeight: p.scrollHeight,
+        } as Parameters<typeof html2canvas>[1]))
+      );
+      for (let i = 0; i < canvases.length; i++) {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(canvases[i].toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "SLOW");
+      }
+      pdf.save(`${r.client_name.trim()} Performance Report.pdf`);
+      toast.success("PDF exported");
+    } catch (e) {
+      console.error(e);
+      toast.error("PDF export failed");
+    } finally {
+      setPdfBusyId(null);
+    }
   };
 
   const filteredReports = useMemo(() => {
