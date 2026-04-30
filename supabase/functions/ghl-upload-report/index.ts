@@ -167,11 +167,14 @@ async function findDocumentsFieldKey(apiKey: string, locationId: string): Promis
   if (!res.ok) return null;
   const data = await res.json().catch(() => ({}));
   const fields = Array.isArray(data?.customFields) ? data.customFields : Array.isArray(data) ? data : [];
-  const docsField = fields.find((field: Record<string, unknown>) => {
-    const name = String(field.name ?? field.label ?? field.fieldName ?? "").toLowerCase();
+  const fileFields = fields.filter((field: Record<string, unknown>) => {
     const type = String(field.dataType ?? field.fieldType ?? field.type ?? "").toLowerCase();
-    return name.includes("document") && (type.includes("file") || type.includes("upload"));
+    return type.includes("file") || type.includes("upload");
   });
+  const docsField = fileFields.find((field: Record<string, unknown>) => {
+    const name = String(field.name ?? field.label ?? field.fieldName ?? "").toLowerCase();
+    return name.includes("document") || name.includes("review") || name.includes("super health");
+  }) ?? fileFields[0];
 
   return String(docsField?.fieldKey ?? docsField?.key ?? docsField?.id ?? "") || null;
 }
