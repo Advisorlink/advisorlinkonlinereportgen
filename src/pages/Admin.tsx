@@ -1,11 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, FileDown } from "lucide-react";
+import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download } from "lucide-react";
+import { buildSummary, type ClientInputs } from "@/lib/calc";
+import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
+import {
+  CoverPage, WhoWeArePage, SnapshotPage, FundsPage,
+  ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage,
+} from "@/components/report/pages";
 
 interface ProfileRow {
   id: string;
@@ -43,6 +50,16 @@ export default function Admin() {
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportSearch, setReportSearch] = useState("");
   const [busy, setBusy] = useState(false);
+  const [viewing, setViewing] = useState<ReportRow | null>(null);
+  const [pdfBusyId, setPdfBusyId] = useState<string | null>(null);
+  const reportRenderRef = useRef<HTMLDivElement>(null);
+
+  // Resolve a usable inputs object — fall back to defaults so demo rows still
+  // render a complete-looking report.
+  const resolveInputs = (r: ReportRow): ClientInputs => {
+    const saved = (r.inputs && typeof r.inputs === "object" ? r.inputs : {}) as Partial<ClientInputs>;
+    return { ...DEFAULT_INPUTS, ...saved, clientName: saved.clientName || r.client_name } as ClientInputs;
+  };
 
   useEffect(() => {
     if (!loading && !profile?.is_owner) {
@@ -99,14 +116,40 @@ export default function Admin() {
     else { toast.success("Report deleted"); refresh(); }
   };
 
-  const downloadReportJson = (r: ReportRow) => {
-    const blob = new Blob([JSON.stringify(r, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${r.client_name.replace(/[^\w-]+/g, "_")}-${new Date(r.created_at).toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const downloadReportPdf = async (r: ReportRow) => {
+    setPdfBusyId(r.id);
+    // Render the report into the hidden container, then snapshot each page.
+    setViewing(r); // reuse the same in-memory inputs path
+    try {
+      // Wait one frame for the dialog/hidden render to mount.
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+      const root = reportRenderRef.current;
+      if (!root) throw new Error("Report not ready");
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+      const pages = Array.from(root.querySelectorAll(".report-page")) as HTMLElement[];
+      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+      const canvases = await Promise.all(
+        pages.map(p => html2canvas(p, {
+          scale: 3, backgroundColor: "#ffffff", useCORS: true, imageTimeout: 0, logging: false,
+          windowWidth: p.scrollWidth, windowHeight: p.scrollHeight,
+        } as Parameters<typeof html2canvas>[1]))
+      );
+      for (let i = 0; i < canvases.length; i++) {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(canvases[i].toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "SLOW");
+      }
+      pdf.save(`${r.client_name.trim()} Performance Report.pdf`);
+      toast.success("PDF exported");
+    } catch (e) {
+      console.error(e);
+      toast.error("PDF export failed");
+    } finally {
+      setPdfBusyId(null);
+    }
   };
 
   const filteredReports = useMemo(() => {
@@ -224,13 +267,18 @@ export default function Admin() {
                     <td className="py-2 pr-4 font-medium">{r.client_name}</td>
                     <td className="py-2 pr-4 text-xs text-muted-foreground">{r.email ?? "—"}</td>
                     <td className="py-2 pr-4 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</td>
-                    <td className="py-2 flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => downloadReportJson(r)}>
-                        <FileDown className="w-3.5 h-3.5 mr-1" /> Data
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={() => deleteReport(r.id)}>
-                        <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
-                      </Button>
+                    <td className="py-2">
+                      <div className="flex gap-1.5">
+                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => setViewing(r)}>
+                          <Eye className="w-3.5 h-3.5 mr-1" /> View
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => downloadReportPdf(r)} disabled={pdfBusyId === r.id}>
+                          <Download className="w-3.5 h-3.5 mr-1" /> {pdfBusyId === r.id ? "…" : "PDF"}
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => deleteReport(r.id)}>
+                          <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -284,6 +332,63 @@ export default function Admin() {
           </div>
         </section>
       </main>
+
+      {/* View report dialog */}
+      <Dialog open={!!viewing} onOpenChange={(o) => { if (!o) setViewing(null); }}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{viewing?.client_name}</DialogTitle>
+            <DialogDescription>
+              Generated {viewing ? new Date(viewing.created_at).toLocaleString() : ""}
+              {viewing?.email ? ` • by ${viewing.email}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          {viewing && (() => {
+            const inputs = resolveInputs(viewing);
+            const summary = buildSummary(inputs);
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-secondary/40 rounded-lg text-sm">
+                  <Info label="Client" value={inputs.clientName} />
+                  <Info label="Age" value={String(inputs.age)} />
+                  <Info label="Retirement age" value={String(inputs.retirementAge)} />
+                  <Info label="Annual income" value={`$${inputs.annualIncome.toLocaleString()}`} />
+                  <Info label="Super balance" value={`$${inputs.superBalance.toLocaleString()}`} />
+                  <Info label="Fund" value={inputs.fundName || "—"} />
+                  <Info label="Option" value={inputs.modelLabel || "—"} />
+                  <Info label="Goal balance" value={`$${inputs.goalBalance.toLocaleString()}`} />
+                  <Info label="Desired income" value={`$${inputs.desiredIncomeAmount.toLocaleString()} / ${inputs.desiredIncomeFrequency}`} />
+                </div>
+                <div ref={reportRenderRef} className="bg-white">
+                  <CoverPage s={summary} />
+                  <WhoWeArePage />
+                  <SnapshotPage s={summary} />
+                  <ProjectionPage s={summary} />
+                  <FundsPage s={summary} />
+                  <IncomePage s={summary} />
+                  <ImprovementSummaryPage s={summary} />
+                  <WhatsNextPage s={summary} />
+                </div>
+                <div className="flex justify-end gap-2 pt-2 border-t border-border">
+                  <Button variant="outline" onClick={() => setViewing(null)}>Close</Button>
+                  <Button onClick={() => downloadReportPdf(viewing)} disabled={pdfBusyId === viewing.id}>
+                    <Download className="w-4 h-4 mr-1" /> {pdfBusyId === viewing.id ? "Exporting…" : "Download PDF"}
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="text-sm font-semibold text-navy truncate">{value}</div>
     </div>
   );
 }
