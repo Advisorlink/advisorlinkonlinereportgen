@@ -156,7 +156,7 @@ function json(data: unknown, status = 200) {
   });
 }
 
-async function resolveDocumentsFieldId(apiKey: string, locationId: string, configuredKey?: string): Promise<string | null> {
+async function resolveDocumentsFieldId(apiKey: string, locationId: string, contactId: string, configuredKey?: string): Promise<string | null> {
   const res = await fetch(`${GHL_API}/locations/${encodeURIComponent(locationId)}/customFields`, {
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -165,7 +165,7 @@ async function resolveDocumentsFieldId(apiKey: string, locationId: string, confi
     },
   });
 
-  if (!res.ok) return null;
+  if (!res.ok) return await findExistingContactFileFieldId(apiKey, contactId);
   const data = await res.json().catch(() => ({}));
   const fields = Array.isArray(data?.customFields) ? data.customFields : Array.isArray(data) ? data : [];
   const normalizedConfiguredKey = normalizeFieldKey(configuredKey);
@@ -188,7 +188,26 @@ async function resolveDocumentsFieldId(apiKey: string, locationId: string, confi
     return name.includes("document") || name.includes("review") || name.includes("super health");
   }) ?? fileFields[0];
 
-  return String(docsField?.id ?? "") || null;
+  return String(docsField?.id ?? "") || await findExistingContactFileFieldId(apiKey, contactId);
+}
+
+async function findExistingContactFileFieldId(apiKey: string, contactId: string): Promise<string | null> {
+  const res = await fetch(`${GHL_API}/contacts/${encodeURIComponent(contactId)}`, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Version: GHL_VERSION,
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => ({}));
+  const fields = Array.isArray(data?.contact?.customFields) ? data.contact.customFields : [];
+  const fileField = fields.find((field: Record<string, unknown>) => {
+    const value = field.value;
+    return Boolean(value && typeof value === "object" && JSON.stringify(value).includes("documentId"));
+  });
+  return String(fileField?.id ?? "") || null;
 }
 
 function normalizeFieldKey(value?: string): string {
