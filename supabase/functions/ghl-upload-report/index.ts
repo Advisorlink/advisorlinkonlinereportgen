@@ -15,6 +15,7 @@ Deno.serve(async (req) => {
   try {
     const apiKey = Deno.env.get("GHL_API_KEY");
     const locationId = Deno.env.get("GHL_LOCATION_ID");
+    const configuredDocumentsFieldKey = Deno.env.get("GHL_DOCUMENTS_FIELD_KEY");
     if (!apiKey || !locationId) {
       return json({ error: "GHL credentials not configured" }, 500);
     }
@@ -79,12 +80,12 @@ Deno.serve(async (req) => {
         sizeBytes: bin.byteLength,
       }, 200);
     }
-    const fieldKey = await findDocumentsFieldKey(apiKey, locationId);
+    const fieldKey = configuredDocumentsFieldKey || await findDocumentsFieldKey(apiKey, locationId);
     if (!fieldKey) {
       return json({
         skipped: true,
         reason: "documents_field_not_found",
-        message: "No Go High Level File Upload custom field named Documents was found for this location.",
+        message: "No Go High Level File Upload custom field was found. Add the Documents field Unique Key as GHL_DOCUMENTS_FIELD_KEY in Lovable Cloud secrets.",
       }, 200);
     }
 
