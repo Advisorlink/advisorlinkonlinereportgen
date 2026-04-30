@@ -27,35 +27,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const loadProfile = async (uid: string): Promise<Profile | null> => {
+    // Retry a few times — the profile row is created by a trigger on signup
+    // and may briefly be unavailable on the very first login after claim.
+    for (let i = 0; i < 5; i++) {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id,email,is_owner,is_blocked")
+        .eq("id", uid)
+        .maybeSingle();
+      if (data) {
+        setProfile(data as Profile);
+        return data as Profile;
+      }
+      await new Promise(r => setTimeout(r, 300));
+    }
+    setProfile(null);
+    return null;
+  };
+
   useEffect(() => {
+    let mounted = true;
+
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+      if (!mounted) return;
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
-        setTimeout(() => loadProfile(sess.user.id), 0);
+        // Defer profile lookup off the auth callback to avoid deadlocks
+        setTimeout(() => {
+          if (mounted) loadProfile(sess.user.id);
+        }, 0);
       } else {
         setProfile(null);
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    // Initial load — wait for profile before unblocking the UI
+    (async () => {
+      const { data: { session: s } } = await supabase.auth.getSession();
+      if (!mounted) return;
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) loadProfile(s.user.id).finally(() => setLoading(false));
-      else setLoading(false);
-    });
+      if (s?.user) await loadProfile(s.user.id);
+      if (mounted) setLoading(false);
+    })();
 
-    return () => sub.subscription.unsubscribe();
+    return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, []);
-
-  const loadProfile = async (uid: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("id,email,is_owner,is_blocked")
-      .eq("id", uid)
-      .maybeSingle();
-    setProfile(data as Profile | null);
-  };
 
   const signOut = async () => {
     if (user) {
