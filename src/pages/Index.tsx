@@ -96,9 +96,9 @@ export default function Index() {
             user_id: user.id,
             email: user.email,
             client_name: inputs.clientName.trim() || "Unnamed client",
-            inputs: inputs as unknown as Record<string, unknown>,
-            summary: summary as unknown as Record<string, unknown>,
-          }),
+            inputs: JSON.parse(JSON.stringify(inputs)),
+            summary: JSON.parse(JSON.stringify(summary)),
+          } as never),
         ]);
       }
       toast.success("PDF exported");
