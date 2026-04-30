@@ -102,12 +102,12 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                   onKeyDown={e => {
                     if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !loading) {
                       e.preventDefault();
-                      runLookup();
+                      handleSearch();
                     }
                   }}
                   disabled={loading}
                 />
-                <Button onClick={runLookup} disabled={loading} className="w-full">
+                <Button onClick={handleSearch} disabled={loading} className="w-full">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   <span className="ml-2">{loading ? "Searching…" : "START SEARCH"}</span>
                 </Button>
