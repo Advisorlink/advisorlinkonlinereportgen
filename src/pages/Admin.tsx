@@ -50,6 +50,16 @@ export default function Admin() {
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportSearch, setReportSearch] = useState("");
   const [busy, setBusy] = useState(false);
+  const [viewing, setViewing] = useState<ReportRow | null>(null);
+  const [pdfBusyId, setPdfBusyId] = useState<string | null>(null);
+  const reportRenderRef = useRef<HTMLDivElement>(null);
+
+  // Resolve a usable inputs object — fall back to defaults so demo rows still
+  // render a complete-looking report.
+  const resolveInputs = (r: ReportRow): ClientInputs => {
+    const saved = (r.inputs && typeof r.inputs === "object" ? r.inputs : {}) as Partial<ClientInputs>;
+    return { ...DEFAULT_INPUTS, ...saved, clientName: saved.clientName || r.client_name } as ClientInputs;
+  };
 
   useEffect(() => {
     if (!loading && !profile?.is_owner) {
