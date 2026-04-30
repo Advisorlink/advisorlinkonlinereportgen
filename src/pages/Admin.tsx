@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useClientInputs } from "@/hooks/useClientInputs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download } from "lucide-react";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
@@ -45,20 +45,27 @@ interface ReportRow {
 export default function Admin() {
   const nav = useNavigate();
   const { profile, loading } = useAuth();
+  const { setInputs } = useClientInputs();
   const [users, setUsers] = useState<ProfileRow[]>([]);
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportSearch, setReportSearch] = useState("");
   const [busy, setBusy] = useState(false);
-  const [viewing, setViewing] = useState<ReportRow | null>(null);
   const [pdfBusyId, setPdfBusyId] = useState<string | null>(null);
-  const reportRenderRef = useRef<HTMLDivElement>(null);
+  const pdfStageRef = useRef<HTMLDivElement>(null);
+  const [pdfStageInputs, setPdfStageInputs] = useState<ClientInputs | null>(null);
 
   // Resolve a usable inputs object — fall back to defaults so demo rows still
   // render a complete-looking report.
   const resolveInputs = (r: ReportRow): ClientInputs => {
     const saved = (r.inputs && typeof r.inputs === "object" ? r.inputs : {}) as Partial<ClientInputs>;
     return { ...DEFAULT_INPUTS, ...saved, clientName: saved.clientName || r.client_name } as ClientInputs;
+  };
+
+  const viewReport = (r: ReportRow) => {
+    setInputs(resolveInputs(r));
+    toast.success(`Loaded ${r.client_name}`);
+    nav("/");
   };
 
   useEffect(() => {
@@ -118,13 +125,12 @@ export default function Admin() {
 
   const downloadReportPdf = async (r: ReportRow) => {
     setPdfBusyId(r.id);
-    // Render the report into the hidden container, then snapshot each page.
-    setViewing(r); // reuse the same in-memory inputs path
+    setPdfStageInputs(resolveInputs(r));
     try {
-      // Wait one frame for the dialog/hidden render to mount.
+      // Wait two frames for the hidden offscreen render to mount.
       await new Promise(requestAnimationFrame);
       await new Promise(requestAnimationFrame);
-      const root = reportRenderRef.current;
+      const root = pdfStageRef.current;
       if (!root) throw new Error("Report not ready");
       const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
         import("html2canvas"),
@@ -149,6 +155,7 @@ export default function Admin() {
       toast.error("PDF export failed");
     } finally {
       setPdfBusyId(null);
+      setPdfStageInputs(null);
     }
   };
 
@@ -269,7 +276,7 @@ export default function Admin() {
                     <td className="py-2 pr-4 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</td>
                     <td className="py-2">
                       <div className="flex gap-1.5">
-                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => setViewing(r)}>
+                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => viewReport(r)}>
                           <Eye className="w-3.5 h-3.5 mr-1" /> View
                         </Button>
                         <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => downloadReportPdf(r)} disabled={pdfBusyId === r.id}>
@@ -333,62 +340,28 @@ export default function Admin() {
         </section>
       </main>
 
-      {/* View report dialog */}
-      <Dialog open={!!viewing} onOpenChange={(o) => { if (!o) setViewing(null); }}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{viewing?.client_name}</DialogTitle>
-            <DialogDescription>
-              Generated {viewing ? new Date(viewing.created_at).toLocaleString() : ""}
-              {viewing?.email ? ` • by ${viewing.email}` : ""}
-            </DialogDescription>
-          </DialogHeader>
-          {viewing && (() => {
-            const inputs = resolveInputs(viewing);
-            const summary = buildSummary(inputs);
-            return (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-secondary/40 rounded-lg text-sm">
-                  <Info label="Client" value={inputs.clientName} />
-                  <Info label="Age" value={String(inputs.age)} />
-                  <Info label="Retirement age" value={String(inputs.retirementAge)} />
-                  <Info label="Annual income" value={`$${inputs.annualIncome.toLocaleString()}`} />
-                  <Info label="Super balance" value={`$${inputs.superBalance.toLocaleString()}`} />
-                  <Info label="Fund" value={inputs.fundName || "—"} />
-                  <Info label="Option" value={inputs.modelLabel || "—"} />
-                  <Info label="Goal balance" value={`$${inputs.goalBalance.toLocaleString()}`} />
-                  <Info label="Desired income" value={`$${inputs.desiredIncomeAmount.toLocaleString()} / ${inputs.desiredIncomeFrequency}`} />
-                </div>
-                <div ref={reportRenderRef} className="bg-white">
-                  <CoverPage s={summary} />
-                  <WhoWeArePage />
-                  <SnapshotPage s={summary} />
-                  <ProjectionPage s={summary} />
-                  <FundsPage s={summary} />
-                  <IncomePage s={summary} />
-                  <ImprovementSummaryPage s={summary} />
-                  <WhatsNextPage s={summary} />
-                </div>
-                <div className="flex justify-end gap-2 pt-2 border-t border-border">
-                  <Button variant="outline" onClick={() => setViewing(null)}>Close</Button>
-                  <Button onClick={() => downloadReportPdf(viewing)} disabled={pdfBusyId === viewing.id}>
-                    <Download className="w-4 h-4 mr-1" /> {pdfBusyId === viewing.id ? "Exporting…" : "Download PDF"}
-                  </Button>
-                </div>
-              </div>
-            );
-          })()}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-function Info({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="text-sm font-semibold text-navy truncate">{value}</div>
+      {/* Offscreen stage used to render a saved report into a PDF without
+          showing it to the user. */}
+      {pdfStageInputs && (() => {
+        const summary = buildSummary(pdfStageInputs);
+        return (
+          <div
+            aria-hidden
+            style={{ position: "fixed", left: -100000, top: 0, width: 794, pointerEvents: "none" }}
+          >
+            <div ref={pdfStageRef} className="bg-white">
+              <CoverPage s={summary} />
+              <WhoWeArePage />
+              <SnapshotPage s={summary} />
+              <ProjectionPage s={summary} />
+              <FundsPage s={summary} />
+              <IncomePage s={summary} />
+              <ImprovementSummaryPage s={summary} />
+              <WhatsNextPage s={summary} />
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
