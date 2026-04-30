@@ -101,6 +101,15 @@ Deno.serve(async (req) => {
 
     if (!up.ok) {
       const t = await up.text();
+      if (up.status === 401 && t.toLowerCase().includes("scope")) {
+        return json({
+          skipped: true,
+          reason: "ghl_scope_missing",
+          message: "Your Go High Level token is missing permission to upload conversation message attachments. Add the Conversations / Messages write scope to the Private Integration token, then update the GHL_API_KEY secret if GHL issues a new token.",
+          ghlStatus: up.status,
+          ghlResponse: t,
+        }, 200);
+      }
       return json({ error: `GHL upload failed: ${up.status} ${t}` }, 502);
     }
 
