@@ -154,3 +154,39 @@ function json(data: unknown, status = 200) {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
+
+async function findDocumentsFieldKey(apiKey: string, locationId: string): Promise<string | null> {
+  const res = await fetch(`${GHL_API}/locations/${encodeURIComponent(locationId)}/customFields`, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Version: "2023-02-21",
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => ({}));
+  const fields = Array.isArray(data?.customFields) ? data.customFields : Array.isArray(data) ? data : [];
+  const docsField = fields.find((field: Record<string, unknown>) => {
+    const name = String(field.name ?? field.label ?? field.fieldName ?? "").toLowerCase();
+    const type = String(field.dataType ?? field.fieldType ?? field.type ?? "").toLowerCase();
+    return name.includes("document") && (type.includes("file") || type.includes("upload"));
+  });
+
+  return String(docsField?.fieldKey ?? docsField?.key ?? docsField?.id ?? "") || null;
+}
+
+function extractUploadedFileUrl(data: unknown, fileName: string): string | null {
+  const walk = (value: unknown): string | null => {
+    if (typeof value === "string") return value.startsWith("http") ? value : null;
+    if (!value || typeof value !== "object") return null;
+    const record = value as Record<string, unknown>;
+    if (typeof record[fileName] === "string") return record[fileName] as string;
+    for (const nested of Object.values(record)) {
+      const found = walk(nested);
+      if (found) return found;
+    }
+    return null;
+  };
+  return walk(data);
+}
