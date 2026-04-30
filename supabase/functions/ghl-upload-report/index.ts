@@ -80,17 +80,17 @@ Deno.serve(async (req) => {
         sizeBytes: bin.byteLength,
       }, 200);
     }
-    const fieldKey = configuredDocumentsFieldKey || await findDocumentsFieldKey(apiKey, locationId);
-    if (!fieldKey) {
+    const fieldId = await resolveDocumentsFieldId(apiKey, locationId, contactId, configuredDocumentsFieldKey);
+    if (!fieldId) {
       return json({
         skipped: true,
         reason: "documents_field_not_found",
-        message: "No Go High Level File Upload custom field was found. Add the Documents field Unique Key as GHL_DOCUMENTS_FIELD_KEY in Lovable Cloud secrets.",
+        message: "No Go High Level File Upload custom field was found. Add the Documents field Unique Key or field ID as GHL_DOCUMENTS_FIELD_KEY in Lovable Cloud secrets.",
       }, 200);
     }
 
     const fd = new FormData();
-    fd.append(`${fieldKey}_${crypto.randomUUID()}`, new Blob([bin], { type: "application/pdf" }), fileName);
+    fd.append(fieldId, new Blob([bin], { type: "application/pdf" }), fileName);
 
     const up = await fetch(`${GHL_API}/forms/upload-custom-files?contactId=${encodeURIComponent(contactId)}&locationId=${encodeURIComponent(locationId)}`, {
       method: "POST",
@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
     }
 
     const upJson = await up.json().catch(() => ({}));
-    const uploadedUrl = extractUploadedFileUrl(upJson, fileName);
+    const uploadedUrl = extractUploadedFileUrl(upJson, fileName, fieldId);
 
     let noteResult: { created: boolean; status?: number; response?: string } = { created: false };
     if (uploadedUrl) {
@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       };
     }
 
-    return json({ success: true, contactId, uploadedUrl, documentsFieldKey: fieldKey, note: noteResult, ghl: upJson }, 200);
+    return json({ success: true, contactId, uploadedUrl, documentsFieldId: fieldId, note: noteResult, ghl: upJson }, 200);
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
@@ -156,7 +156,7 @@ function json(data: unknown, status = 200) {
   });
 }
 
-async function findDocumentsFieldKey(apiKey: string, locationId: string): Promise<string | null> {
+async function resolveDocumentsFieldId(apiKey: string, locationId: string, contactId: string, configuredKey?: string): Promise<string | null> {
   const res = await fetch(`${GHL_API}/locations/${encodeURIComponent(locationId)}/customFields`, {
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -165,9 +165,20 @@ async function findDocumentsFieldKey(apiKey: string, locationId: string): Promis
     },
   });
 
-  if (!res.ok) return null;
+  if (!res.ok) return await findExistingContactFileFieldId(apiKey, contactId);
   const data = await res.json().catch(() => ({}));
   const fields = Array.isArray(data?.customFields) ? data.customFields : Array.isArray(data) ? data : [];
+  const normalizedConfiguredKey = normalizeFieldKey(configuredKey);
+  if (normalizedConfiguredKey) {
+    const configuredField = fields.find((field: Record<string, unknown>) => {
+      const keys = [field.id, field.fieldKey, field.key, field.uniqueKey]
+        .map((value) => normalizeFieldKey(String(value ?? "")));
+      return keys.includes(normalizedConfiguredKey);
+    });
+    if (configuredField?.id) return String(configuredField.id);
+    if (/^[A-Za-z0-9]{12,}$/.test(normalizedConfiguredKey)) return normalizedConfiguredKey;
+  }
+
   const fileFields = fields.filter((field: Record<string, unknown>) => {
     const type = String(field.dataType ?? field.fieldType ?? field.type ?? "").toLowerCase();
     return type.includes("file") || type.includes("upload");
@@ -177,15 +188,45 @@ async function findDocumentsFieldKey(apiKey: string, locationId: string): Promis
     return name.includes("document") || name.includes("review") || name.includes("super health");
   }) ?? fileFields[0];
 
-  return String(docsField?.fieldKey ?? docsField?.key ?? docsField?.id ?? "") || null;
+  return String(docsField?.id ?? "") || await findExistingContactFileFieldId(apiKey, contactId);
 }
 
-function extractUploadedFileUrl(data: unknown, fileName: string): string | null {
+async function findExistingContactFileFieldId(apiKey: string, contactId: string): Promise<string | null> {
+  const res = await fetch(`${GHL_API}/contacts/${encodeURIComponent(contactId)}`, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Version: GHL_VERSION,
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => ({}));
+  const fields = Array.isArray(data?.contact?.customFields) ? data.contact.customFields : [];
+  const fileField = fields.find((field: Record<string, unknown>) => {
+    const value = field.value;
+    return Boolean(value && typeof value === "object" && JSON.stringify(value).includes("documentId"));
+  });
+  return String(fileField?.id ?? "") || null;
+}
+
+function normalizeFieldKey(value?: string): string {
+  return String(value ?? "")
+    .replace(/[{}]/g, "")
+    .replace(/^contact\./i, "")
+    .trim()
+    .toLowerCase();
+}
+
+function extractUploadedFileUrl(data: unknown, fileName: string, fieldId: string): string | null {
   const walk = (value: unknown): string | null => {
     if (typeof value === "string") return value.startsWith("http") ? value : null;
     if (!value || typeof value !== "object") return null;
     const record = value as Record<string, unknown>;
     if (typeof record[fileName] === "string") return record[fileName] as string;
+    const customFields = Array.isArray(record.customFields) ? record.customFields : [];
+    const uploadedField = customFields.find((field: Record<string, unknown>) => field.id === fieldId);
+    if (uploadedField?.value) return walk(uploadedField.value);
     for (const nested of Object.values(record)) {
       const found = walk(nested);
       if (found) return found;
