@@ -114,7 +114,33 @@ Deno.serve(async (req) => {
     }
 
     const upJson = await up.json().catch(() => ({}));
-    return json({ success: true, contactId, ghl: upJson }, 200);
+    const uploadedUrl = upJson?.uploadedFiles?.[fileName] ?? Object.values(upJson?.uploadedFiles ?? {})[0] ?? null;
+
+    let noteResult: { created: boolean; status?: number; response?: string } = { created: false };
+    if (uploadedUrl) {
+      const noteRes = await fetch(`${GHL_API}/contacts/${encodeURIComponent(contactId)}/notes`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Version: GHL_VERSION,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          body: `Performance report uploaded: ${uploadedUrl}`,
+          title: fileName,
+          pinned: false,
+        }),
+      });
+
+      noteResult = {
+        created: noteRes.ok,
+        status: noteRes.status,
+        response: await noteRes.text().catch(() => ""),
+      };
+    }
+
+    return json({ success: true, contactId, uploadedUrl, note: noteResult, ghl: upJson }, 200);
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
