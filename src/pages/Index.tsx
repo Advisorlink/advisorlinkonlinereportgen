@@ -85,6 +85,12 @@ export default function Index() {
       (pdf as unknown as { setDisplayMode: (zoom: string | number, layout?: string, pmode?: string) => void })
         .setDisplayMode(1, "continuous", "UseNone");
       pdf.save(`${inputs.clientName.trim()} Performance Report.pdf`);
+      if (user) {
+        await supabase.from("activity_log").insert({
+          user_id: user.id, email: user.email, event_type: "report_generated",
+          details: { client: inputs.clientName },
+        });
+      }
       toast.success("PDF exported");
     } catch (e) {
       console.error(e);
@@ -115,6 +121,12 @@ export default function Index() {
             </Button>
             <Button onClick={exportPDF} disabled={exporting} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
               {exporting ? "Exporting…" : "Download PDF"}
+            </Button>
+            <Button variant="outline" size="icon" className="bg-transparent text-navy-foreground border-white/20 hover:bg-white/10" onClick={() => nav("/admin")} title="Admin">
+              <Settings className="w-4 h-4" />
+            </Button>
+            <Button variant="outline" size="icon" className="bg-transparent text-navy-foreground border-white/20 hover:bg-white/10" onClick={signOut} title="Sign out">
+              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
