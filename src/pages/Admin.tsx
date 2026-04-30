@@ -1,11 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, FileDown } from "lucide-react";
+import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download } from "lucide-react";
+import { buildSummary, type ClientInputs } from "@/lib/calc";
+import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
+import {
+  CoverPage, WhoWeArePage, SnapshotPage, FundsPage,
+  ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage,
+} from "@/components/report/pages";
 
 interface ProfileRow {
   id: string;
