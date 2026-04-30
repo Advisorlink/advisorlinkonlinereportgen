@@ -15,6 +15,7 @@ Deno.serve(async (req) => {
   try {
     const apiKey = Deno.env.get("GHL_API_KEY");
     const locationId = Deno.env.get("GHL_LOCATION_ID");
+    const configuredDocumentsFieldKey = Deno.env.get("GHL_DOCUMENTS_FIELD_KEY");
     if (!apiKey || !locationId) {
       return json({ error: "GHL credentials not configured" }, 500);
     }
@@ -69,27 +70,29 @@ Deno.serve(async (req) => {
       return json({ skipped: true, reason: "no_contact" }, 200);
     }
 
-    // 2) Decode base64 → blob and upload via multipart
-    // GHL v2 endpoint: POST /conversations/messages/upload
-    // Required field key: "fileAttachment". Max 5MB per file.
+    // 2) Decode base64 → blob and upload into the contact's Documents/File Upload custom field.
+    // GHL powers the contact "Documents" area with a File Upload custom field, not conversation attachments.
     const bin = Uint8Array.from(atob(pdfBase64), (c) => c.charCodeAt(0));
-    if (bin.byteLength > 5 * 1024 * 1024) {
+    if (bin.byteLength > 50 * 1024 * 1024) {
       return json({
         skipped: true,
         reason: "file_too_large",
         sizeBytes: bin.byteLength,
       }, 200);
     }
-    const fd = new FormData();
-    fd.append("locationId", locationId);
-    fd.append("contactId", contactId);
-    fd.append(
-      "fileAttachment",
-      new Blob([bin], { type: "application/pdf" }),
-      fileName,
-    );
+    const fieldKey = configuredDocumentsFieldKey || await findDocumentsFieldKey(apiKey, locationId);
+    if (!fieldKey) {
+      return json({
+        skipped: true,
+        reason: "documents_field_not_found",
+        message: "No Go High Level File Upload custom field was found. Add the Documents field Unique Key as GHL_DOCUMENTS_FIELD_KEY in Lovable Cloud secrets.",
+      }, 200);
+    }
 
-    const up = await fetch(`${GHL_API}/conversations/messages/upload`, {
+    const fd = new FormData();
+    fd.append(`${fieldKey}_${crypto.randomUUID()}`, new Blob([bin], { type: "application/pdf" }), fileName);
+
+    const up = await fetch(`${GHL_API}/forms/upload-custom-files?contactId=${encodeURIComponent(contactId)}&locationId=${encodeURIComponent(locationId)}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -105,16 +108,16 @@ Deno.serve(async (req) => {
         return json({
           skipped: true,
           reason: "ghl_scope_missing",
-          message: "Your Go High Level token is missing permission to upload conversation message attachments. Add the Conversations / Messages write scope to the Private Integration token, then update the GHL_API_KEY secret if GHL issues a new token.",
+          message: "Your Go High Level token needs Forms: Write and Locations Custom Fields: Read permissions to upload into the contact Documents section.",
           ghlStatus: up.status,
           ghlResponse: t,
         }, 200);
       }
-      return json({ error: `GHL upload failed: ${up.status} ${t}` }, 502);
+      return json({ error: `GHL documents upload failed: ${up.status} ${t}` }, 502);
     }
 
     const upJson = await up.json().catch(() => ({}));
-    const uploadedUrl = upJson?.uploadedFiles?.[fileName] ?? Object.values(upJson?.uploadedFiles ?? {})[0] ?? null;
+    const uploadedUrl = extractUploadedFileUrl(upJson, fileName);
 
     let noteResult: { created: boolean; status?: number; response?: string } = { created: false };
     if (uploadedUrl) {
@@ -140,7 +143,7 @@ Deno.serve(async (req) => {
       };
     }
 
-    return json({ success: true, contactId, uploadedUrl, note: noteResult, ghl: upJson }, 200);
+    return json({ success: true, contactId, uploadedUrl, documentsFieldKey: fieldKey, note: noteResult, ghl: upJson }, 200);
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
@@ -151,4 +154,43 @@ function json(data: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+async function findDocumentsFieldKey(apiKey: string, locationId: string): Promise<string | null> {
+  const res = await fetch(`${GHL_API}/locations/${encodeURIComponent(locationId)}/customFields`, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Version: "2023-02-21",
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => ({}));
+  const fields = Array.isArray(data?.customFields) ? data.customFields : Array.isArray(data) ? data : [];
+  const fileFields = fields.filter((field: Record<string, unknown>) => {
+    const type = String(field.dataType ?? field.fieldType ?? field.type ?? "").toLowerCase();
+    return type.includes("file") || type.includes("upload");
+  });
+  const docsField = fileFields.find((field: Record<string, unknown>) => {
+    const name = String(field.name ?? field.label ?? field.fieldName ?? "").toLowerCase();
+    return name.includes("document") || name.includes("review") || name.includes("super health");
+  }) ?? fileFields[0];
+
+  return String(docsField?.fieldKey ?? docsField?.key ?? docsField?.id ?? "") || null;
+}
+
+function extractUploadedFileUrl(data: unknown, fileName: string): string | null {
+  const walk = (value: unknown): string | null => {
+    if (typeof value === "string") return value.startsWith("http") ? value : null;
+    if (!value || typeof value !== "object") return null;
+    const record = value as Record<string, unknown>;
+    if (typeof record[fileName] === "string") return record[fileName] as string;
+    for (const nested of Object.values(record)) {
+      const found = walk(nested);
+      if (found) return found;
+    }
+    return null;
+  };
+  return walk(data);
 }
