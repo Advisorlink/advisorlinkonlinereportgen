@@ -416,6 +416,7 @@ const STEP1_TOOL = [{
       type: "object",
       properties: {
         clientName: { type: ["string", "null"] },
+        clientEmail: { type: ["string", "null"], description: "Client's email address if present in the input text" },
         fundName: { type: ["string", "null"] },
         modelLabel: {
           type: ["string", "null"],
