@@ -156,7 +156,7 @@ export function WhoWeArePage() {
   return (
     <PageShell>
       <PageHeader pageLabel="WHO WE ARE" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-white">Who we are & why people choose us</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Who we are & why people choose us</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Advisor Link is a 100% ASIC-regulated research and referral company. We don't sell
         products - we help you understand your super and, if you choose, connect you with a
@@ -284,7 +284,7 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="CLIENT SNAPSHOT" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-white">Executive snapshot</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Executive snapshot</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Personal details, targets and the current super position at a glance.
       </p>
@@ -359,7 +359,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="FUND DETAILS" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-white">Current fund vs comparison</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Current fund vs comparison</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Side-by-side view of the existing fund settings and the comparison scenario used throughout this report.
       </p>
@@ -441,7 +441,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="ACCUMULATION" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-white">Projection to retirement</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Projection to retirement</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         Year-by-year projection of the current fund vs the comparison scenario, including periodic market dips.
       </p>
@@ -535,7 +535,7 @@ export function IncomePage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="RETIREMENT INCOME" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-white">Retirement income view</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Retirement income view</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         How long will your money potentially last when you need it the most?
       </p>
@@ -654,7 +654,7 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="POTENTIAL IMPROVEMENT" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-white">Potential improvement summary</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Potential improvement summary</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         A consolidated view of the projected uplift if the comparison scenario were implemented, and your eligibility for an adviser referral.
       </p>
@@ -772,7 +772,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="WHAT'S NEXT" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-white">What's next</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">What's next</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         How to act on the findings in this report and access personal financial advice if you choose to.
       </p>
@@ -942,7 +942,7 @@ export function FeesAndDisclosurePage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="FEES & ASSUMPTIONS" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-white">Fees & assumptions</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Fees & assumptions</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         A line-by-line view of fees, the assumptions powering the projection, and important disclaimers.
       </p>
