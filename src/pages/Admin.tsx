@@ -267,13 +267,18 @@ export default function Admin() {
                     <td className="py-2 pr-4 font-medium">{r.client_name}</td>
                     <td className="py-2 pr-4 text-xs text-muted-foreground">{r.email ?? "—"}</td>
                     <td className="py-2 pr-4 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</td>
-                    <td className="py-2 flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => downloadReportJson(r)}>
-                        <FileDown className="w-3.5 h-3.5 mr-1" /> Data
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={() => deleteReport(r.id)}>
-                        <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
-                      </Button>
+                    <td className="py-2">
+                      <div className="flex gap-1.5">
+                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => setViewing(r)}>
+                          <Eye className="w-3.5 h-3.5 mr-1" /> View
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => downloadReportPdf(r)} disabled={pdfBusyId === r.id}>
+                          <Download className="w-3.5 h-3.5 mr-1" /> {pdfBusyId === r.id ? "…" : "PDF"}
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => deleteReport(r.id)}>
+                          <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
