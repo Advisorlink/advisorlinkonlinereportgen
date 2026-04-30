@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
         sizeBytes: bin.byteLength,
       }, 200);
     }
-    const fieldId = await resolveDocumentsFieldId(apiKey, locationId, configuredDocumentsFieldKey);
+    const fieldId = await resolveDocumentsFieldId(apiKey, locationId, contactId, configuredDocumentsFieldKey);
     if (!fieldId) {
       return json({
         skipped: true,
