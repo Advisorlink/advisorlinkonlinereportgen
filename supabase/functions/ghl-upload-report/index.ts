@@ -70,19 +70,26 @@ Deno.serve(async (req) => {
     }
 
     // 2) Decode base64 → blob and upload via multipart
-    // GHL v2 endpoint: POST /contacts/upload-file-attachments
+    // GHL v2 endpoint: POST /conversations/messages/upload
+    // Required field key: "fileAttachment". Max 5MB per file.
     const bin = Uint8Array.from(atob(pdfBase64), (c) => c.charCodeAt(0));
+    if (bin.byteLength > 5 * 1024 * 1024) {
+      return json({
+        skipped: true,
+        reason: "file_too_large",
+        sizeBytes: bin.byteLength,
+      }, 200);
+    }
     const fd = new FormData();
-    fd.append("conversationId", "");
     fd.append("locationId", locationId);
     fd.append("contactId", contactId);
     fd.append(
-      fileName,
+      "fileAttachment",
       new Blob([bin], { type: "application/pdf" }),
       fileName,
     );
 
-    const up = await fetch(`${GHL_API}/contacts/upload-file-attachments`, {
+    const up = await fetch(`${GHL_API}/conversations/messages/upload`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
