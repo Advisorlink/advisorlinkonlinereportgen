@@ -664,8 +664,10 @@ Deno.serve(async (req) => {
         "No official fund pages could be scraped — fees and 5-year net return were not auto-filled. Please fill manually.";
     }
 
+    const emailMatch = typeof query === "string" ? query.match(/[\w.+-]+@[\w-]+\.[\w.-]+/) : null;
     const data: Record<string, unknown> = {
       clientName: step1.clientName ?? null,
+      clientEmail: (step1 as { clientEmail?: string | null }).clientEmail ?? (emailMatch ? emailMatch[0] : null),
       fundName: step1.fundName ?? null,
       modelLabel: step1.modelLabel ?? null,
       age: step1.age ?? null,
