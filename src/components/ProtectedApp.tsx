@@ -30,6 +30,11 @@ export function ProtectedApp({ children }: { children: ReactNode }) {
 
   if (!user) return <Navigate to="/auth" replace />;
 
+  // User exists but profile hasn't loaded yet — keep waiting instead of denying.
+  if (!profile) {
+    return <div className="min-h-screen grid place-items-center bg-secondary/40 text-sm text-muted-foreground">Verifying owner…</div>;
+  }
+
   if (profile?.is_blocked) {
     return (
       <div className="min-h-screen grid place-items-center bg-navy text-navy-foreground p-6">
