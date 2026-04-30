@@ -8,7 +8,7 @@ import { importFromFile } from "@/lib/xlsx-import";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { supabase } from "@/integrations/supabase/client";
-import { Settings, LogOut } from "lucide-react";
+import { Settings, LogOut, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Index() {
