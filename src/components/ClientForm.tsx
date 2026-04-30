@@ -166,6 +166,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
           </Group>
           <Group title="Personal">
             <Field label="Client name"><Input value={value.clientName} onChange={e => set("clientName", e.target.value)} /></Field>
+            <Field label="Client's email"><Input type="email" placeholder="client@example.com" value={value.clientEmail ?? ""} onChange={e => set("clientEmail", e.target.value)} /></Field>
             <Field label="Age"><NumInput v={value.age} on={n => set("age", n)} /></Field>
             <Field label="Retirement age"><NumInput v={value.retirementAge} on={n => set("retirementAge", n)} /></Field>
             <Field label="Annual income"><NumInput v={value.annualIncome} on={n => set("annualIncome", n)} /></Field>
