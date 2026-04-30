@@ -14,11 +14,19 @@ interface AuthCtx {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  authError: string | null;
+  refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
 const Ctx = createContext<AuthCtx>({
-  user: null, session: null, profile: null, loading: true, signOut: async () => {},
+  user: null,
+  session: null,
+  profile: null,
+  loading: true,
+  authError: null,
+  refreshProfile: async () => {},
+  signOut: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -26,23 +34,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const loadProfile = async (uid: string): Promise<Profile | null> => {
     // Retry a few times — the profile row is created by a trigger on signup
     // and may briefly be unavailable on the very first login after claim.
-    for (let i = 0; i < 5; i++) {
-      const { data } = await supabase
+    let lastError: string | null = null;
+    setAuthError(null);
+    for (let i = 0; i < 8; i++) {
+      const { data, error } = await supabase
         .from("profiles")
         .select("id,email,is_owner,is_blocked")
         .eq("id", uid)
         .maybeSingle();
+      if (error) lastError = error.message;
       if (data) {
         setProfile(data as Profile);
+        setAuthError(null);
         return data as Profile;
       }
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 750));
     }
     setProfile(null);
+    setAuthError(lastError ?? "Owner profile could not be found.");
     return null;
   };
 
@@ -54,12 +68,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
+        setProfile(null);
+        setAuthError(null);
         // Defer profile lookup off the auth callback to avoid deadlocks
         setTimeout(() => {
           if (mounted) loadProfile(sess.user.id);
         }, 0);
       } else {
         setProfile(null);
+        setAuthError(null);
       }
     });
 
@@ -76,6 +93,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, []);
 
+  const refreshProfile = async () => {
+    if (user) await loadProfile(user.id);
+  };
+
   const signOut = async () => {
     if (user) {
       await supabase.from("activity_log").insert({
@@ -85,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
-  return <Ctx.Provider value={{ user, session, profile, loading, signOut }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ user, session, profile, loading, authError, refreshProfile, signOut }}>{children}</Ctx.Provider>;
 }
 
 export const useAuth = () => useContext(Ctx);

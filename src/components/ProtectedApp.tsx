@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 export function ProtectedApp({ children }: { children: ReactNode }) {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, authError, refreshProfile } = useAuth();
 
   // Domain lock — refuse to render on unauthorized hosts
   if (!isHostAllowed()) {
@@ -30,7 +30,23 @@ export function ProtectedApp({ children }: { children: ReactNode }) {
 
   if (!user) return <Navigate to="/auth" replace />;
 
-  // User exists but profile hasn't loaded yet — keep waiting instead of denying.
+  if (authError) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-navy text-navy-foreground p-6">
+        <div className="max-w-md text-center">
+          <ShieldAlert className="w-16 h-16 mx-auto mb-4 text-cyan" />
+          <h1 className="text-2xl font-bold font-heading mb-2">Owner Check Failed</h1>
+          <p className="text-sm opacity-80 mb-4">{authError}</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button variant="outline" className="bg-transparent border-white/20 text-navy-foreground hover:bg-white/10" onClick={refreshProfile}>Try Again</Button>
+            <Button variant="outline" className="bg-transparent border-white/20 text-navy-foreground hover:bg-white/10" onClick={() => supabase.auth.signOut()}>Sign Out</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // User exists but profile hasn't loaded yet — keep waiting briefly instead of denying.
   if (!profile) {
     return <div className="min-h-screen grid place-items-center bg-secondary/40 text-sm text-muted-foreground">Verifying owner…</div>;
   }
