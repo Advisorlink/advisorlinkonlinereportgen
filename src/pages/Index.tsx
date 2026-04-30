@@ -87,14 +87,15 @@ export default function Index() {
         .setDisplayMode(1, "continuous", "UseNone");
       pdf.save(`${inputs.clientName.trim()} Performance Report.pdf`);
       if (user) {
+        const clientEmail = (inputs.clientEmail ?? "").trim() || null;
         await Promise.all([
           supabase.from("activity_log").insert({
             user_id: user.id, email: user.email, event_type: "report_generated",
-            details: { client: inputs.clientName },
+            details: { client: inputs.clientName, client_email: clientEmail },
           }),
           supabase.from("reports").insert({
             user_id: user.id,
-            email: user.email,
+            email: clientEmail,
             client_name: inputs.clientName.trim() || "Unnamed client",
             inputs: JSON.parse(JSON.stringify(inputs)),
             summary: JSON.parse(JSON.stringify(summary)),
