@@ -40,14 +40,11 @@ function pageLabel(url: string): string {
 export function ClientForm({ value, onChange }: { value: ClientInputs; onChange: (v: ClientInputs) => void }) {
   const set = <K extends keyof ClientInputs>(k: K, v: ClientInputs[K]) => onChange({ ...value, [k]: v });
   const [collapsed, setCollapsed] = useState(false);
-  const { lookup, setLookup } = useClientInputs();
+  const { lookup, setLookup, lookupLoading, runLookup } = useClientInputs();
   const lookupText = lookup.text;
   const setLookupText = (t: string) => setLookup(prev => ({ ...prev, text: t }));
   const lastResult = lookup.result;
-  const setLastResult = (r: Record<string, unknown> | null) => setLookup(prev => ({ ...prev, result: r }));
-  const [loading, setLoading] = useState(false);
-  const [lookupCache, setLookupCache] = useState<Record<string, unknown> | null>(null);
-  const [lookupCacheKey, setLookupCacheKey] = useState("");
+  const loading = lookupLoading;
 
   const applyLookupResult = (r: Record<string, unknown>) => {
     const next: ClientInputs = { ...value };
@@ -78,42 +75,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
     onChange(next);
   };
 
-  const runLookup = async () => {
-    if (lookupText.trim().length < 3) {
-      toast.error("Enter at least the fund name and investment option.");
-      return;
-    }
-    const cacheKey = lookupText.trim().toLowerCase().replace(/\s+/g, " ");
-    if (lookupCache && lookupCacheKey === cacheKey) {
-      applyLookupResult(lookupCache);
-      setLastResult(lookupCache);
-      toast.success("Fund details applied", { description: "Used the same verified result as the previous fill." });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("lookup-fund", {
-        body: { query: lookupText.trim() },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      const r = data?.data ?? {};
-      applyLookupResult(r);
-      setLookupCache(r);
-      setLookupCacheKey(cacheKey);
-      setLastResult(r);
-      toast.success("Fund details applied", {
-        description: "Review the figures and source links below.",
-      });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Lookup failed";
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleSearch = () => runLookup(lookupText, applyLookupResult);
 
   return (
     <div className="bg-card rounded-xl border border-border p-5 shadow-card">
