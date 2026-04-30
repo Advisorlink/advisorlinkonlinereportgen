@@ -125,13 +125,12 @@ export default function Admin() {
 
   const downloadReportPdf = async (r: ReportRow) => {
     setPdfBusyId(r.id);
-    // Render the report into the hidden container, then snapshot each page.
-    setViewing(r); // reuse the same in-memory inputs path
+    setPdfStageInputs(resolveInputs(r));
     try {
-      // Wait one frame for the dialog/hidden render to mount.
+      // Wait two frames for the hidden offscreen render to mount.
       await new Promise(requestAnimationFrame);
       await new Promise(requestAnimationFrame);
-      const root = reportRenderRef.current;
+      const root = pdfStageRef.current;
       if (!root) throw new Error("Report not ready");
       const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
         import("html2canvas"),
@@ -156,6 +155,7 @@ export default function Admin() {
       toast.error("PDF export failed");
     } finally {
       setPdfBusyId(null);
+      setPdfStageInputs(null);
     }
   };
 
