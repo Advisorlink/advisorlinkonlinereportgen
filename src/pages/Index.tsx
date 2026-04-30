@@ -92,6 +92,22 @@ export default function Index() {
       if (user) {
         const clientEmail = (inputs.clientEmail ?? "").trim() || null;
         const pdfBlob: Blob = pdf.output("blob");
+        let ghlBlob: Blob = pdfBlob;
+
+        // GHL rejects uploads over ~5MB. Keep the user's downloaded/stored PDF
+        // lossless, but send GHL a compressed copy if the original is too large.
+        if (pdfBlob.size > 4.8 * 1024 * 1024) {
+          for (const quality of [0.72, 0.58, 0.45, 0.34]) {
+            const crmPdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+            for (let i = 0; i < canvases.length; i++) {
+              if (i > 0) crmPdf.addPage();
+              crmPdf.addImage(canvases[i].toDataURL("image/jpeg", quality), "JPEG", 0, 0, 210, 297, undefined, "FAST");
+            }
+            const candidate: Blob = crmPdf.output("blob");
+            ghlBlob = candidate;
+            if (candidate.size <= 4.8 * 1024 * 1024) break;
+          }
+        }
 
         // 1) Upload PDF to client's storage folder
         let pdfPath: string | null = null;
@@ -126,7 +142,7 @@ export default function Index() {
         // 3) Push to Go High Level if we have an email
         if (clientEmail) {
           try {
-            const buf = await pdfBlob.arrayBuffer();
+            const buf = await ghlBlob.arrayBuffer();
             // base64 encode in chunks to avoid stack overflow
             const bytes = new Uint8Array(buf);
             let binary = "";
@@ -140,8 +156,10 @@ export default function Index() {
             });
             if (ghlErr) throw ghlErr;
             if (ghl?.skipped) {
-              toast.warning("No matching contact in Go High Level — skipped CRM upload", {
-                description: `No GHL contact found for ${clientEmail}.`,
+              toast.warning("Go High Level upload skipped", {
+                description: ghl.reason === "file_too_large"
+                  ? "The CRM copy is still over Go High Level's file limit."
+                  : `No GHL contact found for ${clientEmail}.`,
               });
             } else if (ghl?.success) {
               toast.success("Uploaded to Go High Level contact");
