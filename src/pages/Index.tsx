@@ -85,13 +85,33 @@ export default function Index() {
       // jsPDF exposes setDisplayMode for this purpose
       (pdf as unknown as { setDisplayMode: (zoom: string | number, layout?: string, pmode?: string) => void })
         .setDisplayMode(1, "continuous", "UseNone");
-      pdf.save(`${inputs.clientName.trim()} Performance Report.pdf`);
+      const safeClient = (inputs.clientName.trim() || "Unnamed client").replace(/[/\\?%*:|"<>]/g, "-");
+      const fileName = `${safeClient} Performance Report.pdf`;
+      pdf.save(fileName);
+
       if (user) {
         const clientEmail = (inputs.clientEmail ?? "").trim() || null;
+        const pdfBlob: Blob = pdf.output("blob");
+
+        // 1) Upload PDF to client's storage folder
+        let pdfPath: string | null = null;
+        const ts = new Date().toISOString().replace(/[:.]/g, "-");
+        const path = `${user.id}/${safeClient}/${ts} - ${fileName}`;
+        const { error: upErr } = await supabase.storage
+          .from("client-reports")
+          .upload(path, pdfBlob, { contentType: "application/pdf", upsert: false });
+        if (upErr) {
+          console.error("Storage upload failed:", upErr);
+          toast.error("Saved locally, but cloud storage failed");
+        } else {
+          pdfPath = path;
+        }
+
+        // 2) Log + insert report row
         await Promise.all([
           supabase.from("activity_log").insert({
             user_id: user.id, email: user.email, event_type: "report_generated",
-            details: { client: inputs.clientName, client_email: clientEmail },
+            details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath },
           }),
           supabase.from("reports").insert({
             user_id: user.id,
@@ -99,8 +119,40 @@ export default function Index() {
             client_name: inputs.clientName.trim() || "Unnamed client",
             inputs: JSON.parse(JSON.stringify(inputs)),
             summary: JSON.parse(JSON.stringify(summary)),
+            pdf_path: pdfPath,
           } as never),
         ]);
+
+        // 3) Push to Go High Level if we have an email
+        if (clientEmail) {
+          try {
+            const buf = await pdfBlob.arrayBuffer();
+            // base64 encode in chunks to avoid stack overflow
+            const bytes = new Uint8Array(buf);
+            let binary = "";
+            const chunk = 0x8000;
+            for (let i = 0; i < bytes.length; i += chunk) {
+              binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+            }
+            const pdfBase64 = btoa(binary);
+            const { data: ghl, error: ghlErr } = await supabase.functions.invoke("ghl-upload-report", {
+              body: { email: clientEmail, fileName, pdfBase64 },
+            });
+            if (ghlErr) throw ghlErr;
+            if (ghl?.skipped) {
+              toast.warning("No matching contact in Go High Level — skipped CRM upload", {
+                description: `No GHL contact found for ${clientEmail}.`,
+              });
+            } else if (ghl?.success) {
+              toast.success("Uploaded to Go High Level contact");
+            }
+          } catch (e) {
+            console.error("GHL upload failed:", e);
+            toast.error("Go High Level upload failed", {
+              description: e instanceof Error ? e.message : "Unknown error",
+            });
+          }
+        }
       }
       toast.success("PDF exported");
     } catch (e) {
