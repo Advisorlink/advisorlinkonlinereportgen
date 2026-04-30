@@ -4,18 +4,52 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, ExternalLink, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useClientInputs } from "@/hooks/useClientInputs";
 import { toast } from "sonner";
+
+function prettyDomain(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+function faviconFor(url: string): string {
+  try {
+    const host = new URL(url).hostname;
+    return `https://www.google.com/s2/favicons?domain=${host}&sz=32`;
+  } catch {
+    return "";
+  }
+}
+function pageLabel(url: string): string {
+  try {
+    const u = new URL(url);
+    const last = u.pathname.split("/").filter(Boolean).pop() ?? "";
+    if (!last) return "Home";
+    return decodeURIComponent(last)
+      .replace(/\.(pdf|html?|aspx?)$/i, "")
+      .replace(/[-_]+/g, " ")
+      .replace(/\b\w/g, c => c.toUpperCase())
+      .slice(0, 60);
+  } catch {
+    return url;
+  }
+}
 
 export function ClientForm({ value, onChange }: { value: ClientInputs; onChange: (v: ClientInputs) => void }) {
   const set = <K extends keyof ClientInputs>(k: K, v: ClientInputs[K]) => onChange({ ...value, [k]: v });
   const [collapsed, setCollapsed] = useState(false);
-  const [lookupText, setLookupText] = useState("");
+  const { lookup, setLookup } = useClientInputs();
+  const lookupText = lookup.text;
+  const setLookupText = (t: string) => setLookup(prev => ({ ...prev, text: t }));
+  const lastResult = lookup.result;
+  const setLastResult = (r: Record<string, unknown> | null) => setLookup(prev => ({ ...prev, result: r }));
   const [loading, setLoading] = useState(false);
   const [lookupCache, setLookupCache] = useState<Record<string, unknown> | null>(null);
   const [lookupCacheKey, setLookupCacheKey] = useState("");
-  const [lastResult, setLastResult] = useState<Record<string, unknown> | null>(null);
 
   const applyLookupResult = (r: Record<string, unknown>) => {
     const next: ClientInputs = { ...value };
