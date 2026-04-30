@@ -553,19 +553,17 @@ Deno.serve(async (req) => {
     if (fundName) {
       const searchQueries = [
         `${fundName} ${optionLabel} 5 year performance ${CURRENT_YEAR}`,
-        `${fundName} investment performance monthly update ${CURRENT_YEAR}`,
-        `${fundName} ${optionLabel} returns as at ${CURRENT_YEAR}`,
         `${fundName} ${optionLabel} fees and costs ${CURRENT_YEAR}`,
-        `${fundName} fees costs PDS ${CURRENT_YEAR}`,
-        `${fundName} ${optionLabel} asset allocation ${CURRENT_YEAR}`,
-        `${fundName} ${optionLabel} growth assets investment guide ${CURRENT_YEAR}`,
-        `${fundName} investment options strategic asset allocation ${CURRENT_YEAR}`,
+        `${fundName} ${optionLabel} asset allocation growth assets ${CURRENT_YEAR}`,
+        `${fundName} investment performance update ${CURRENT_YEAR}`,
       ];
-      for (const q of searchQueries) {
-        const found = (await firecrawlSearch(q, 5)).filter(
-          (url) => isOfficialFundUrl(url, fundName, officialHosts),
+      const searchResults = await Promise.all(
+        searchQueries.map((q) => firecrawlSearch(q, 5)),
+      );
+      for (const found of searchResults) {
+        candidateUrls.push(
+          ...found.filter((url) => isOfficialFundUrl(url, fundName, officialHosts)),
         );
-        candidateUrls.push(...found);
       }
     }
     if (!candidateUrls.length) {
@@ -573,17 +571,20 @@ Deno.serve(async (req) => {
         (url) => isOfficialFundUrl(url, fundName, officialHosts),
       );
     }
-    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 12);
+    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 6);
 
-    // ---- Step 2: actually scrape those pages and extract figures ----
-    const pages: { url: string; text: string }[] = [];
-    for (const url of candidateUrls) {
-      const text = await fetchPageText(url);
-      if (text && text.length > 200) {
-        pages.push({ url, text: text.slice(0, 22000) });
-      }
-      if (pages.length >= 8) break;
-    }
+    // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
+    const scraped = await Promise.all(
+      candidateUrls.map(async (url) => {
+        const text = await fetchPageText(url);
+        return text && text.length > 200
+          ? { url, text: text.slice(0, 22000) }
+          : null;
+      }),
+    );
+    const pages: { url: string; text: string }[] = scraped.filter(
+      (p): p is { url: string; text: string } => p !== null,
+    ).slice(0, 6);
 
     let figures: Record<string, unknown> = {
       adminFeeFlat: null,
