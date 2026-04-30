@@ -1,12 +1,18 @@
 import { useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ClientForm } from "@/components/ClientForm";
 import { CoverPage, WhoWeArePage, SnapshotPage, FundsPage, ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage } from "@/components/report/pages";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { DEFAULT_INPUTS, importFromFile } from "@/lib/xlsx-import";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Settings, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Index() {
+  const nav = useNavigate();
+  const { user, signOut } = useAuth();
   const [inputs, setInputs] = useState<ClientInputs>(DEFAULT_INPUTS);
   const summary = useMemo(() => buildSummary(inputs), [inputs]);
   const fileRef = useRef<HTMLInputElement>(null);
