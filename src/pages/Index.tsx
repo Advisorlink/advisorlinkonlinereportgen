@@ -87,10 +87,19 @@ export default function Index() {
         .setDisplayMode(1, "continuous", "UseNone");
       pdf.save(`${inputs.clientName.trim()} Performance Report.pdf`);
       if (user) {
-        await supabase.from("activity_log").insert({
-          user_id: user.id, email: user.email, event_type: "report_generated",
-          details: { client: inputs.clientName },
-        });
+        await Promise.all([
+          supabase.from("activity_log").insert({
+            user_id: user.id, email: user.email, event_type: "report_generated",
+            details: { client: inputs.clientName },
+          }),
+          supabase.from("reports").insert({
+            user_id: user.id,
+            email: user.email,
+            client_name: inputs.clientName.trim() || "Unnamed client",
+            inputs: inputs as unknown as Record<string, unknown>,
+            summary: summary as unknown as Record<string, unknown>,
+          }),
+        ]);
       }
       toast.success("PDF exported");
     } catch (e) {
@@ -98,6 +107,16 @@ export default function Index() {
       toast.error("PDF export failed");
     } finally {
       setExporting(false);
+    }
+  };
+
+  const openFullScreen = () => {
+    const el = reportRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    } else {
+      el.requestFullscreen?.().catch(() => toast.error("Full screen not available"));
     }
   };
 
