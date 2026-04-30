@@ -92,6 +92,32 @@ export default function Admin() {
     else { toast.success("Logs cleared"); refresh(); }
   };
 
+  const deleteReport = async (id: string) => {
+    if (!confirm("Delete this saved report?")) return;
+    const { error } = await supabase.from("reports").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Report deleted"); refresh(); }
+  };
+
+  const downloadReportJson = (r: ReportRow) => {
+    const blob = new Blob([JSON.stringify(r, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${r.client_name.replace(/[^\w-]+/g, "_")}-${new Date(r.created_at).toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const filteredReports = useMemo(() => {
+    const q = reportSearch.trim().toLowerCase();
+    if (!q) return reports;
+    return reports.filter(r =>
+      r.client_name.toLowerCase().includes(q) ||
+      (r.email ?? "").toLowerCase().includes(q),
+    );
+  }, [reports, reportSearch]);
+
   if (loading || !profile?.is_owner) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Verifying…</div>;
   }
