@@ -45,20 +45,27 @@ interface ReportRow {
 export default function Admin() {
   const nav = useNavigate();
   const { profile, loading } = useAuth();
+  const { setInputs } = useClientInputs();
   const [users, setUsers] = useState<ProfileRow[]>([]);
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportSearch, setReportSearch] = useState("");
   const [busy, setBusy] = useState(false);
-  const [viewing, setViewing] = useState<ReportRow | null>(null);
   const [pdfBusyId, setPdfBusyId] = useState<string | null>(null);
-  const reportRenderRef = useRef<HTMLDivElement>(null);
+  const pdfStageRef = useRef<HTMLDivElement>(null);
+  const [pdfStageInputs, setPdfStageInputs] = useState<ClientInputs | null>(null);
 
   // Resolve a usable inputs object — fall back to defaults so demo rows still
   // render a complete-looking report.
   const resolveInputs = (r: ReportRow): ClientInputs => {
     const saved = (r.inputs && typeof r.inputs === "object" ? r.inputs : {}) as Partial<ClientInputs>;
     return { ...DEFAULT_INPUTS, ...saved, clientName: saved.clientName || r.client_name } as ClientInputs;
+  };
+
+  const viewReport = (r: ReportRow) => {
+    setInputs(resolveInputs(r));
+    toast.success(`Loaded ${r.client_name}`);
+    nav("/");
   };
 
   useEffect(() => {
