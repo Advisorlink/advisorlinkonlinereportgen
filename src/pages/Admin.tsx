@@ -276,7 +276,7 @@ export default function Admin() {
                     <td className="py-2 pr-4 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</td>
                     <td className="py-2">
                       <div className="flex gap-1.5">
-                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => setViewing(r)}>
+                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => viewReport(r)}>
                           <Eye className="w-3.5 h-3.5 mr-1" /> View
                         </Button>
                         <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => downloadReportPdf(r)} disabled={pdfBusyId === r.id}>
