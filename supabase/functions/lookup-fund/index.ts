@@ -217,17 +217,20 @@ async function fetchPageText(
   return null;
 }
 
-async function firecrawlSearch(query: string, limit = 6): Promise<string[]> {
+async function firecrawlSearch(query: string, limit = 6, timeoutMs = 8000): Promise<string[]> {
   if (!FIRECRAWL_API_KEY) return [];
   try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
     const resp = await fetch("https://api.firecrawl.dev/v2/search", {
       method: "POST",
+      signal: ctrl.signal,
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ query, limit }),
-    });
+    }).finally(() => clearTimeout(t));
     if (!resp.ok) {
       console.warn(
         "Firecrawl search non-ok",
@@ -344,11 +347,15 @@ async function callAI(
   messages: unknown[],
   tools: unknown[],
   toolName: string,
+  timeoutMs = 45000,
 ): Promise<Record<string, unknown> | null> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   const resp = await fetch(
     "https://ai.gateway.lovable.dev/v1/chat/completions",
     {
       method: "POST",
+      signal: ctrl.signal,
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -361,7 +368,7 @@ async function callAI(
         tool_choice: { type: "function", function: { name: toolName } },
       }),
     },
-  );
+  ).finally(() => clearTimeout(timer));
   if (!resp.ok) {
     const t = await resp.text();
     console.error("AI gateway error", resp.status, t);
@@ -505,6 +512,10 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startedAt = Date.now();
+  const HARD_BUDGET_MS = 130_000;
+  const remaining = () => HARD_BUDGET_MS - (Date.now() - startedAt);
+
   try {
     const { query } = await req.json();
     if (!query || typeof query !== "string" || query.trim().length < 2) {
@@ -526,6 +537,7 @@ Deno.serve(async (req) => {
       }],
       STEP1_TOOL,
       "find_sources",
+      60000,
     );
     if (!step1) {
       return jsonResponse({ error: "AI did not return source URLs" }, 502);
@@ -573,9 +585,10 @@ Deno.serve(async (req) => {
     candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 4);
 
     // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
+    const scrapeBudget = Math.max(8000, Math.min(45000, remaining() - 25000));
     const scraped = await Promise.all(
       candidateUrls.map(async (url) => {
-        const text = await fetchPageText(url);
+        const text = await fetchPageText(url, Math.min(scrapeBudget, 12000));
         return text && text.length > 200
           ? { url, text: text.slice(0, 18000) }
           : null;
@@ -595,7 +608,7 @@ Deno.serve(async (req) => {
       sourceNotes: "",
     };
 
-    if (pages.length) {
+    if (pages.length && remaining() > 15000) {
       const userBlock =
         `Fund: ${step1.fundName}\nAllocated investment option: ${step1.modelLabel}\n\n` +
         pages.map((p, i) => `===== SOURCE ${i + 1}: ${p.url} =====\n${p.text}`)
@@ -608,6 +621,7 @@ Deno.serve(async (req) => {
         }],
         STEP2_TOOL,
         "extract_fund_figures",
+        Math.min(remaining() - 5000, 40000),
       );
       if (step2) figures = step2;
 
