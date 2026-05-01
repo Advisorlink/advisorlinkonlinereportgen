@@ -191,7 +191,7 @@ async function fetchPageText(
   // Fallback: plain fetch
   try {
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 12000);
+    const t = setTimeout(() => ctrl.abort(), 7000);
     const resp = await fetch(url, {
       redirect: "follow",
       signal: ctrl.signal,
