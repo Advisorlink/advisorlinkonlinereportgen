@@ -131,7 +131,7 @@ const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
 
 async function fetchPageText(
   url: string,
-  timeoutMs = 10000,
+  timeoutMs = 7000,
 ): Promise<string | null> {
   // Use Firecrawl for full JS rendering — same content Gemini.google.com sees
   if (FIRECRAWL_API_KEY) {
@@ -220,14 +220,18 @@ async function fetchPageText(
 async function firecrawlSearch(query: string, limit = 6): Promise<string[]> {
   if (!FIRECRAWL_API_KEY) return [];
   try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
     const resp = await fetch("https://api.firecrawl.dev/v2/search", {
       method: "POST",
+      signal: ctrl.signal,
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ query, limit }),
     });
+    clearTimeout(t);
     if (!resp.ok) {
       console.warn(
         "Firecrawl search non-ok",
@@ -570,20 +574,24 @@ Deno.serve(async (req) => {
         (url) => isOfficialFundUrl(url, fundName, officialHosts),
       );
     }
-    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 4);
+    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 3);
 
     // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
     const scraped = await Promise.all(
       candidateUrls.map(async (url) => {
-        const text = await fetchPageText(url);
-        return text && text.length > 200
-          ? { url, text: text.slice(0, 18000) }
-          : null;
+        try {
+          const text = await fetchPageText(url);
+          return text && text.length > 200
+            ? { url, text: text.slice(0, 18000) }
+            : null;
+        } catch {
+          return null;
+        }
       }),
     );
     const pages: { url: string; text: string }[] = scraped.filter(
       (p): p is { url: string; text: string } => p !== null,
-    ).slice(0, 4);
+    ).slice(0, 3);
 
     let figures: Record<string, unknown> = {
       adminFeeFlat: null,
