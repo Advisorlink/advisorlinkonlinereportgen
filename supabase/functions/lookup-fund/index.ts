@@ -554,12 +554,10 @@ Deno.serve(async (req) => {
     if (fundName) {
       const searchQueries = [
         `${fundName} ${optionLabel} 5 year performance ${CURRENT_YEAR}`,
-        `${fundName} ${optionLabel} fees and costs ${CURRENT_YEAR}`,
-        `${fundName} ${optionLabel} asset allocation growth assets ${CURRENT_YEAR}`,
-        `${fundName} investment performance update ${CURRENT_YEAR}`,
+        `${fundName} ${optionLabel} fees asset allocation ${CURRENT_YEAR}`,
       ];
       const searchResults = await Promise.all(
-        searchQueries.map((q) => firecrawlSearch(q, 5)),
+        searchQueries.map((q) => firecrawlSearch(q, 4)),
       );
       for (const found of searchResults) {
         candidateUrls.push(
@@ -572,20 +570,20 @@ Deno.serve(async (req) => {
         (url) => isOfficialFundUrl(url, fundName, officialHosts),
       );
     }
-    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 6);
+    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 4);
 
     // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
     const scraped = await Promise.all(
       candidateUrls.map(async (url) => {
         const text = await fetchPageText(url);
         return text && text.length > 200
-          ? { url, text: text.slice(0, 22000) }
+          ? { url, text: text.slice(0, 18000) }
           : null;
       }),
     );
     const pages: { url: string; text: string }[] = scraped.filter(
       (p): p is { url: string; text: string } => p !== null,
-    ).slice(0, 6);
+    ).slice(0, 4);
 
     let figures: Record<string, unknown> = {
       adminFeeFlat: null,
