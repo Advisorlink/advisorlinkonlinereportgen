@@ -217,17 +217,20 @@ async function fetchPageText(
   return null;
 }
 
-async function firecrawlSearch(query: string, limit = 6): Promise<string[]> {
+async function firecrawlSearch(query: string, limit = 6, timeoutMs = 8000): Promise<string[]> {
   if (!FIRECRAWL_API_KEY) return [];
   try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
     const resp = await fetch("https://api.firecrawl.dev/v2/search", {
       method: "POST",
+      signal: ctrl.signal,
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ query, limit }),
-    });
+    }).finally(() => clearTimeout(t));
     if (!resp.ok) {
       console.warn(
         "Firecrawl search non-ok",
