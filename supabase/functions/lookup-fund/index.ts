@@ -347,11 +347,15 @@ async function callAI(
   messages: unknown[],
   tools: unknown[],
   toolName: string,
+  timeoutMs = 45000,
 ): Promise<Record<string, unknown> | null> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   const resp = await fetch(
     "https://ai.gateway.lovable.dev/v1/chat/completions",
     {
       method: "POST",
+      signal: ctrl.signal,
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -364,7 +368,7 @@ async function callAI(
         tool_choice: { type: "function", function: { name: toolName } },
       }),
     },
-  );
+  ).finally(() => clearTimeout(timer));
   if (!resp.ok) {
     const t = await resp.text();
     console.error("AI gateway error", resp.status, t);
