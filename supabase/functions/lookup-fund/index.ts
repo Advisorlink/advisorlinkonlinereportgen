@@ -607,7 +607,7 @@ Deno.serve(async (req) => {
       sourceNotes: "",
     };
 
-    if (pages.length) {
+    if (pages.length && remaining() > 15000) {
       const userBlock =
         `Fund: ${step1.fundName}\nAllocated investment option: ${step1.modelLabel}\n\n` +
         pages.map((p, i) => `===== SOURCE ${i + 1}: ${p.url} =====\n${p.text}`)
@@ -620,6 +620,7 @@ Deno.serve(async (req) => {
         }],
         STEP2_TOOL,
         "extract_fund_figures",
+        Math.min(remaining() - 5000, 40000),
       );
       if (step2) figures = step2;
 
