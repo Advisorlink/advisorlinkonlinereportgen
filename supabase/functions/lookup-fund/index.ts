@@ -512,6 +512,10 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startedAt = Date.now();
+  const HARD_BUDGET_MS = 130_000;
+  const remaining = () => HARD_BUDGET_MS - (Date.now() - startedAt);
+
   try {
     const { query } = await req.json();
     if (!query || typeof query !== "string" || query.trim().length < 2) {
