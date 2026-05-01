@@ -584,9 +584,10 @@ Deno.serve(async (req) => {
     candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 4);
 
     // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
+    const scrapeBudget = Math.max(8000, Math.min(45000, remaining() - 25000));
     const scraped = await Promise.all(
       candidateUrls.map(async (url) => {
-        const text = await fetchPageText(url);
+        const text = await fetchPageText(url, Math.min(scrapeBudget, 12000));
         return text && text.length > 200
           ? { url, text: text.slice(0, 18000) }
           : null;
