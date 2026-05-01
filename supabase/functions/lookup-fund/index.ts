@@ -537,6 +537,7 @@ Deno.serve(async (req) => {
       }],
       STEP1_TOOL,
       "find_sources",
+      60000,
     );
     if (!step1) {
       return jsonResponse({ error: "AI did not return source URLs" }, 502);
