@@ -131,7 +131,7 @@ const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
 
 async function fetchPageText(
   url: string,
-  timeoutMs = 20000,
+  timeoutMs = 10000,
 ): Promise<string | null> {
   // Use Firecrawl for full JS rendering — same content Gemini.google.com sees
   if (FIRECRAWL_API_KEY) {
@@ -149,7 +149,7 @@ async function fetchPageText(
           url,
           formats: ["markdown"],
           onlyMainContent: true,
-          waitFor: 800,
+          waitFor: 0,
         }),
       });
       clearTimeout(t);
