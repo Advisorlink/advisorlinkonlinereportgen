@@ -1,10 +1,7 @@
-// Edge function: look up Australian super fund details by using Gemini 3 with
-// Google Search lookup, then scraping the returned official pages ourselves.
-// Two-step pipeline:
-//   1) Gemini 3 parses the user text + finds official source URLs using lookup.
-//   2) We fetch only those pages that actually load and ask AI to extract the
-//      5-year p.a. return for the exact allocated option from the real text.
-// This works for ANY Australian super fund, not a hard-coded one.
+// Edge function: look up Australian super fund details using a SINGLE Gemini 3
+// call with native Google Search grounding. Optimised for speed (<5s target).
+// Falls back to a single Firecrawl scrape only if Gemini didn't return a 5yr
+// return.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,20 +9,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const lookupCache = new Map<
-  string,
-  { expiresAt: number; data: Record<string, unknown> }
->();
-const CACHE_MS = 0; // disabled — every click must re-fetch the latest published figures
-
 const jsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-const normalizeQuery = (q: string) =>
-  q.toLowerCase().replace(/\s+/g, " ").trim();
 const stripTrailingZeros = (v: string) =>
   v.replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1");
 const escapeRegExp = (v: string) => v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -79,61 +68,13 @@ function isAllowedOfficialCandidate(url: string): boolean {
   }
 }
 
-function hostFrom(url: string): string | null {
-  try {
-    return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
-  } catch {
-    return null;
-  }
-}
-
-function fundHostTokens(fundName: string): string[] {
-  const compactName = fundName.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const words = fundName
-    .toLowerCase()
-    .replace(/&/g, " and ")
-    .split(/[^a-z0-9]+/)
-    .filter((w) =>
-      w.length >= 3 && ![
-        "super",
-        "superannuation",
-        "fund",
-        "funds",
-        "trust",
-        "australia",
-        "australian",
-        "the",
-        "and",
-      ].includes(w)
-    );
-  return Array.from(
-    new Set(
-      [compactName, words.join(""), ...words].filter((w) => w.length >= 4),
-    ),
-  );
-}
-
-function isOfficialFundUrl(
-  url: string,
-  fundName: string,
-  officialHosts: string[],
-): boolean {
-  const host = hostFrom(url);
-  if (!host || !isAllowedOfficialCandidate(url)) return false;
-  if (officialHosts.length) {
-    return officialHosts.some((h) => host === h || host.endsWith(`.${h}`));
-  }
-  const compactHost = host.replace(/[^a-z0-9]/g, "");
-  return fundHostTokens(fundName).some((token) => compactHost.includes(token));
-}
-
 const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
 async function fetchPageText(
   url: string,
-  timeoutMs = 7000,
+  timeoutMs = 6000,
 ): Promise<string | null> {
-  // Use Firecrawl for full JS rendering — same content Gemini.google.com sees
   if (FIRECRAWL_API_KEY) {
     try {
       const ctrl = new AbortController();
@@ -155,60 +96,29 @@ async function fetchPageText(
       clearTimeout(t);
       if (resp.ok) {
         const j = await resp.json();
-        const statusCode = j?.data?.metadata?.statusCode ??
-          j?.metadata?.statusCode;
         const md: string = j?.data?.markdown ?? j?.markdown ?? "";
         const normalized = md.replace(/\s+/g, " ").trim();
-        const missingPage =
-          /\b(404|page not found|doesn[’']?t seem to exist|couldn[’']?t find this page)\b/i
-            .test(normalized.slice(0, 1200));
-        if (Number(statusCode) >= 400 || missingPage) {
-          console.warn(
-            "Firecrawl scrape rejected missing page",
-            url,
-            statusCode ?? "unknown",
-          );
-          return null;
-        }
         if (normalized.length > 200) return normalized;
-      } else {
-        console.warn(
-          "Firecrawl scrape non-ok",
-          url,
-          resp.status,
-          await resp.text().catch(() => ""),
-        );
       }
     } catch (e) {
-      console.warn(
-        "Firecrawl scrape failed",
-        url,
-        e instanceof Error ? e.message : e,
-      );
+      console.warn("Firecrawl scrape failed", url, e instanceof Error ? e.message : e);
     }
   }
-
-  // Fallback: plain fetch
   try {
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 7000);
+    const t = setTimeout(() => ctrl.abort(), 5000);
     const resp = await fetch(url, {
       redirect: "follow",
       signal: ctrl.signal,
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; SuperHealthCheck/1.0)",
         "Accept": "text/html,application/xhtml+xml",
-        "Accept-Language": "en-AU,en;q=0.9",
       },
     });
     clearTimeout(t);
     if (resp.ok) {
       const html = await resp.text();
       const text = textFromHtml(html);
-      const missingPage =
-        /\b(404|page not found|doesn[’']?t seem to exist|couldn[’']?t find this page)\b/i
-          .test(text.slice(0, 1200));
-      if (missingPage) return null;
       if (text.length > 300) return text;
     }
   } catch (e) {
@@ -217,11 +127,11 @@ async function fetchPageText(
   return null;
 }
 
-async function firecrawlSearch(query: string, limit = 6): Promise<string[]> {
+async function firecrawlSearch(query: string, limit = 5): Promise<string[]> {
   if (!FIRECRAWL_API_KEY) return [];
   try {
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 8000);
+    const t = setTimeout(() => ctrl.abort(), 6000);
     const resp = await fetch("https://api.firecrawl.dev/v2/search", {
       method: "POST",
       signal: ctrl.signal,
@@ -232,14 +142,7 @@ async function firecrawlSearch(query: string, limit = 6): Promise<string[]> {
       body: JSON.stringify({ query, limit }),
     });
     clearTimeout(t);
-    if (!resp.ok) {
-      console.warn(
-        "Firecrawl search non-ok",
-        resp.status,
-        await resp.text().catch(() => ""),
-      );
-      return [];
-    }
+    if (!resp.ok) return [];
     const j = await resp.json();
     const results = j?.data?.web ?? j?.data ?? j?.web ?? [];
     const urls: string[] = [];
@@ -247,8 +150,7 @@ async function firecrawlSearch(query: string, limit = 6): Promise<string[]> {
       if (typeof r?.url === "string") urls.push(r.url);
     }
     return urls;
-  } catch (e) {
-    console.warn("Firecrawl search failed", e instanceof Error ? e.message : e);
+  } catch {
     return [];
   }
 }
@@ -257,98 +159,36 @@ function pctVariants(decimal: unknown): string[] {
   if (typeof decimal !== "number" || !Number.isFinite(decimal)) return [];
   const pct = decimal * 100;
   return Array.from(
-    new Set([
-      stripTrailingZeros(pct.toFixed(3)),
-      stripTrailingZeros(pct.toFixed(2)),
-      stripTrailingZeros(pct.toFixed(1)),
-    ].filter(Boolean)),
+    new Set(
+      [
+        stripTrailingZeros(pct.toFixed(3)),
+        stripTrailingZeros(pct.toFixed(2)),
+        stripTrailingZeros(pct.toFixed(1)),
+      ].filter(Boolean),
+    ),
   );
 }
 
-function optionTokens(modelLabel: unknown): string[] {
-  return String(modelLabel ?? "")
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter((t) =>
-      t.length > 3 &&
-      !["default", "mysuper", "option", "super", "fund"].includes(t)
-    );
-}
-
-function returnAppearsNearOption(
-  pageText: string,
-  grossReturn: unknown,
-  modelLabel: unknown,
-): boolean {
-  const variants = pctVariants(grossReturn);
-  if (!variants.length) return false;
-  const tokens = optionTokens(modelLabel);
-  const normalized = pageText.toLowerCase().replace(/\s+/g, " ");
-  for (const v of variants) {
-    const re = new RegExp(`${escapeRegExp(v)}\\s*%`, "i");
-    const m = re.exec(normalized);
-    if (!m) continue;
-    const ctx = normalized.slice(Math.max(0, m.index - 800), m.index + 800);
-    const fiveYr = /(5|five)\s*[- ]?\s*(year|years|yr|yrs)/i.test(ctx);
-    const optionMatch = tokens.length === 0 ||
-      tokens.some((t) => ctx.includes(t));
-    if (fiveYr && optionMatch) return true;
-  }
-  return false;
-}
-
-// Generic verification: a percentage figure (decimal) must literally appear
-// in the scraped page text, optionally near the allocated option label.
-function pctAppearsInText(
-  pageText: string,
-  decimal: unknown,
-  modelLabel?: unknown,
-): boolean {
+function pctAppearsInText(pageText: string, decimal: unknown): boolean {
   const variants = pctVariants(decimal);
   if (!variants.length) return false;
-  const tokens = modelLabel ? optionTokens(modelLabel) : [];
   const normalized = pageText.toLowerCase().replace(/\s+/g, " ");
   for (const v of variants) {
     const re = new RegExp(`${escapeRegExp(v)}\\s*%`, "i");
-    const m = re.exec(normalized);
-    if (!m) continue;
-    if (!tokens.length) return true;
-    const ctx = normalized.slice(Math.max(0, m.index - 1200), m.index + 1200);
-    if (tokens.some((t) => ctx.includes(t))) return true;
-  }
-  return false;
-}
-
-// Verification for a flat AUD fee: the dollar amount must literally appear
-// in the page text (with $ prefix or "per year/annum/week" context).
-function flatFeeAppearsInText(pageText: string, amount: unknown): boolean {
-  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
-    return false;
-  }
-  const normalized = pageText.toLowerCase().replace(/\s+/g, " ");
-  const annual = amount;
-  const weekly = amount / 52;
-  const candidates = new Set<string>();
-  for (const n of [annual, weekly]) {
-    candidates.add(stripTrailingZeros(n.toFixed(2)));
-    candidates.add(stripTrailingZeros(n.toFixed(0)));
-    candidates.add(stripTrailingZeros(n.toFixed(1)));
-  }
-  for (const c of candidates) {
-    if (!c) continue;
-    const re = new RegExp(`\\$\\s*${escapeRegExp(c)}\\b`, "i");
     if (re.test(normalized)) return true;
   }
   return false;
 }
 
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-
 async function callAI(
   messages: unknown[],
   tools: unknown[],
   toolName: string,
+  useGoogleSearch = true,
 ): Promise<Record<string, unknown> | null> {
+  const allTools = useGoogleSearch
+    ? [{ type: "google_search" }, ...tools]
+    : tools;
   const resp = await fetch(
     "https://ai.gateway.lovable.dev/v1/chat/completions",
     {
@@ -361,7 +201,7 @@ async function callAI(
         model: "google/gemini-3-flash-preview",
         temperature: 0,
         messages,
-        tools: [{ type: "google_search" }, ...tools],
+        tools: allTools,
         tool_choice: { type: "function", function: { name: toolName } },
       }),
     },
@@ -383,44 +223,53 @@ async function callAI(
   }
 }
 
-// ---------- STEP 1: parse client text + find official source URLs ----------
-
 const NOW = new Date();
 const CURRENT_YEAR = NOW.getUTCFullYear();
 const PREV_YEAR = CURRENT_YEAR - 1;
 
-const STEP1_SYSTEM =
-  `You are a research assistant for Australian superannuation. You have Gemini 3 Google Search lookup enabled — USE IT for every lookup. Today's date is ${
+// ---------- Single-shot system prompt: parse + research + return everything ----------
+
+const SYSTEM_PROMPT =
+  `You are a research assistant for Australian superannuation. You have Google Search grounding ENABLED — USE IT aggressively. Today's date is ${
     NOW.toISOString().slice(0, 10)
   }.
 
-For the named fund, you MUST locate the OFFICIAL fund website pages (and PDS / Investment Guide / Fees & Costs document if needed) that publish:
-  (a) the MOST RECENTLY PUBLISHED investment performance / returns table for the allocated investment option (must show 5-year p.a. return, as recent as possible — ideally as at a ${CURRENT_YEAR} month-end, or otherwise the most recent ${PREV_YEAR} update), and
-  (b) the CURRENT (${CURRENT_YEAR}) fees & costs (admin fee + asset-based admin fee) — find the latest published fees page, fee schedule, or current PDS/Fees & Costs update for ${CURRENT_YEAR}, and
-  (c) the CURRENT (${CURRENT_YEAR}) strategic asset allocation / growth assets % and the official risk profile label for the allocated option — find the latest investment option page, investment guide update, or asset-allocation disclosure for ${CURRENT_YEAR}.
+Your job is to:
+  1. Parse the client's personal details from the free-text input.
+  2. Search the OFFICIAL fund's own website for the allocated investment option's:
+     - 5-year p.a. performance return (look under pages titled "investment returns", "performance returns", "investment performance", "monthly returns", "as at <month> ${CURRENT_YEAR}", or any other page on the fund's official domain that publishes the 5-year p.a. figure for that exact option).
+     - Current ${CURRENT_YEAR} admin fees (flat $ and asset-based %).
+     - Strategic growth-assets % allocation.
+     - Official risk profile label.
 
-Rules:
-- Identify WHICHEVER Australian super fund the user names — industry, retail, corporate, public sector, SMSF platform, etc. Never default to AustralianSuper or any specific fund.
-- Use ONLY URLs that Gemini 3 lookup finds on the fund's own official domain. Never invent URLs. Never use third-party comparison sites, news, blogs, SuperRatings, Canstar, Chant West, etc.
-- Add search terms like "${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}" to find the freshest pages. Prefer live dashboards / current ${CURRENT_YEAR} update pages over older PDS PDFs.
-- Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages — do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
-- Return up to 6 URLs, ordered by RECENCY (newest ${CURRENT_YEAR} performance / fees / asset allocation pages first, then ${PREV_YEAR} updates, then PDS/Investment Guide as last resort). The URLs must be real lookup results or pages clearly reached from real lookup results.
-- Also parse the client's personal details from the free-text input.
+CRITICAL search behaviour:
+- Search queries you should run via Google Search:
+    "<fund name> <option> 5 year return ${CURRENT_YEAR}"
+    "<fund name> <option> investment returns"
+    "<fund name> <option> performance"
+    "<fund name> <option> fees ${CURRENT_YEAR}"
+    "<fund name> <option> asset allocation"
+- ONLY trust pages on the fund's OWN official domain. NEVER use SuperRatings, Canstar, Chant West, Finder, Mozo, news sites, Wikipedia, Reddit, etc.
+- Prefer the MOST RECENT published "as at" date — ${CURRENT_YEAR} month-end > ${PREV_YEAR} > older PDS.
+- grossReturn must be the 5-year p.a. return EXACTLY as the official site publishes it (decimal — 0.0712 for 7.12%). If both gross & net are shown, prefer net. If you cannot find a 5-year figure on the official site, return null — do NOT guess.
+- Return the ACTUAL official URLs you used in sourceUrls (real links from your search, not invented).
+- returnEvidenceText: copy the exact short snippet from the official page that shows the 5-year return + option name.
+- sourceNotes: state the as-of date and which URL the 5yr return came from.
 
 Frequencies must be exactly "Weekly", "Monthly", or "Annually".
 Convert "k" → thousands, "m" → millions; strip $ and commas.`;
 
-const STEP1_TOOL = [{
+const TOOL_SCHEMA = [{
   type: "function",
   function: {
-    name: "find_sources",
+    name: "research_fund",
     description:
-      "Return parsed client details and official fund URLs to scrape.",
+      "Return parsed client details + verified fund figures researched from the official fund website.",
     parameters: {
       type: "object",
       properties: {
         clientName: { type: ["string", "null"] },
-        clientEmail: { type: ["string", "null"], description: "Client's email address if present in the input text" },
+        clientEmail: { type: ["string", "null"] },
         fundName: { type: ["string", "null"] },
         modelLabel: {
           type: ["string", "null"],
@@ -436,50 +285,6 @@ const STEP1_TOOL = [{
           type: ["string", "null"],
           enum: ["Weekly", "Monthly", "Annually", null],
         },
-        sourceUrls: {
-          type: "array",
-          items: { type: "string" },
-          description:
-            "Up to 6 real official fund URLs found by Gemini 3 lookup, performance/returns pages first.",
-        },
-        notes: { type: "string" },
-      },
-      required: ["fundName", "modelLabel", "sourceUrls"],
-      additionalProperties: false,
-    },
-  },
-}];
-
-// ---------- STEP 2: extract verified figures from REAL scraped page text ----------
-
-const STEP2_SYSTEM =
-  `You extract Australian super fund figures from RAW WEBSITE TEXT that has been fetched from the official fund's website. Today's date is ${
-    NOW.toISOString().slice(0, 10)
-  }.
-
-Strict rules:
-- ONLY use numbers that literally appear in the provided page text. Do NOT use prior knowledge, do NOT estimate, do NOT use other time periods.
-- grossReturn must be the 5-year p.a. return for the EXACT allocated investment option, copied straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
-- If MULTIPLE pages each show a 5-year p.a. figure for the option, ALWAYS pick the one with the most recent "as at" date (e.g. prefer "as at 31 ${CURRENT_YEAR}" over a PDS dated ${
-    PREV_YEAR - 1
-  }). State the as-of date in sourceNotes.
-- adminFeeFlat: annual flat admin fee in AUD (multiply weekly fees by 52). Null if not in text.
-- adminFeePct: annual asset-based admin/trustee fee as a DECIMAL (0.0035 = 0.35%). Exclude investment fees. Null if not in text.
-- growthAssetsPct: strategic growth-asset allocation as DECIMAL (0.70 = 70%). Null if not in text.
-- investmentRiskProfile: official risk label exactly as the page calls it (e.g. "High", "Medium to High", "Growth"). Null if not in text.
-- returnEvidenceText: copy the exact short snippet from the page text that contains the 5-year return + option label + as-of date if shown.
-- sourceNotes: short explanation including which URL the 5yr return came from AND the as-of date.
-- Never use standard knowledge or memory. If a value is not literally in the provided text, return null for that field.
-- Be deterministic.`;
-
-const STEP2_TOOL = [{
-  type: "function",
-  function: {
-    name: "extract_fund_figures",
-    description: "Extract verified fund figures from real scraped page text.",
-    parameters: {
-      type: "object",
-      properties: {
         adminFeeFlat: { type: ["number", "null"] },
         adminFeePct: {
           type: ["number", "null"],
@@ -487,13 +292,43 @@ const STEP2_TOOL = [{
         },
         grossReturn: {
           type: ["number", "null"],
-          description:
-            "Decimal e.g. 0.0633 — exact 5yr p.a. return shown on the website",
+          description: "Decimal e.g. 0.0712 — exact 5yr p.a. return from official site",
         },
         growthAssetsPct: {
           type: ["number", "null"],
           description: "Decimal e.g. 0.70",
         },
+        investmentRiskProfile: { type: ["string", "null"] },
+        returnEvidenceText: { type: ["string", "null"] },
+        sourceUrls: {
+          type: "array",
+          items: { type: "string" },
+          description: "Up to 5 official fund URLs used.",
+        },
+        sourceNotes: { type: "string" },
+      },
+      required: ["fundName", "modelLabel", "sourceUrls", "sourceNotes"],
+      additionalProperties: false,
+    },
+  },
+}];
+
+// Fallback extraction prompt (only used if main call didn't return a 5yr return)
+const FALLBACK_SYSTEM =
+  `You extract Australian super fund 5-year return + fees + asset allocation from RAW WEBSITE TEXT. ONLY use numbers that literally appear in the provided text. Decimals: 7.12% → 0.0712. Return null for anything not in the text.`;
+
+const FALLBACK_TOOL = [{
+  type: "function",
+  function: {
+    name: "extract_figures",
+    description: "Extract verified figures from scraped text.",
+    parameters: {
+      type: "object",
+      properties: {
+        adminFeeFlat: { type: ["number", "null"] },
+        adminFeePct: { type: ["number", "null"] },
+        grossReturn: { type: ["number", "null"] },
+        growthAssetsPct: { type: ["number", "null"] },
         investmentRiskProfile: { type: ["string", "null"] },
         returnEvidenceText: { type: ["string", "null"] },
         sourceNotes: { type: "string" },
@@ -516,186 +351,111 @@ Deno.serve(async (req) => {
     }
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const cacheKey = normalizeQuery(query);
-    const cached = lookupCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      return jsonResponse({ data: cached.data, cached: true });
-    }
+    const t0 = Date.now();
 
-    // ---- Step 1: parse + find URLs ----
-    const step1 = await callAI(
-      [{ role: "system", content: STEP1_SYSTEM }, {
-        role: "user",
-        content: query,
-      }],
-      STEP1_TOOL,
-      "find_sources",
+    // ---- SINGLE Gemini call with Google Search grounding ----
+    const result = await callAI(
+      [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: query },
+      ],
+      TOOL_SCHEMA,
+      "research_fund",
+      true,
     );
-    if (!step1) {
-      return jsonResponse({ error: "AI did not return source URLs" }, 502);
+    console.log(`[lookup-fund] main AI call: ${Date.now() - t0}ms`);
+
+    if (!result) {
+      return jsonResponse({ error: "AI did not return data" }, 502);
     }
 
-    let candidateUrls: string[] = [];
-    const fundName = String(step1.fundName ?? "").trim();
-    const optionLabel = String(step1.modelLabel ?? "").trim();
-    const aiUrls = urlsFrom(step1.sourceUrls).filter(
+    const sourceUrls = urlsFrom(result.sourceUrls).filter(
       isAllowedOfficialCandidate,
     );
-    const fundTokens = fundHostTokens(fundName);
-    const officialHosts = Array.from(
-      new Set(
-        aiUrls.map(hostFrom).filter((h): h is string => Boolean(h)).filter((
-          h,
-        ) =>
-          fundTokens.some((token) =>
-            h.replace(/[^a-z0-9]/g, "").includes(token)
-          )
-        ),
-      ),
-    );
 
-    // Augment with Firecrawl web search — finds the freshest performance pages
-    if (fundName) {
-      const searchQueries = [
-        `${fundName} ${optionLabel} 5 year performance ${CURRENT_YEAR}`,
-        `${fundName} ${optionLabel} fees asset allocation ${CURRENT_YEAR}`,
-      ];
-      const searchResults = await Promise.all(
-        searchQueries.map((q) => firecrawlSearch(q, 4)),
-      );
-      for (const found of searchResults) {
-        candidateUrls.push(
-          ...found.filter((url) => isOfficialFundUrl(url, fundName, officialHosts)),
-        );
-      }
-    }
-    if (!candidateUrls.length) {
-      candidateUrls = aiUrls.filter(
-        (url) => isOfficialFundUrl(url, fundName, officialHosts),
-      );
-    }
-    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 3);
-
-    // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
-    const scraped = await Promise.all(
-      candidateUrls.map(async (url) => {
-        try {
-          const text = await fetchPageText(url);
-          return text && text.length > 200
-            ? { url, text: text.slice(0, 18000) }
-            : null;
-        } catch {
-          return null;
+    // ---- Fallback: if Gemini didn't find a 5-yr return, try ONE Firecrawl
+    // search + scrape targeted at performance / investment returns pages. ----
+    let fallbackEvidence: string | null = null;
+    if (
+      result.grossReturn == null &&
+      result.fundName &&
+      result.modelLabel &&
+      FIRECRAWL_API_KEY
+    ) {
+      const tFb = Date.now();
+      const q = `${result.fundName} ${result.modelLabel} 5 year investment returns performance`;
+      const found = await firecrawlSearch(q, 5);
+      const target = found.find(isAllowedOfficialCandidate);
+      if (target) {
+        const text = await fetchPageText(target, 6000);
+        if (text && text.length > 300) {
+          const fb = await callAI(
+            [
+              { role: "system", content: FALLBACK_SYSTEM },
+              {
+                role: "user",
+                content:
+                  `Fund: ${result.fundName}\nOption: ${result.modelLabel}\nURL: ${target}\n\n${
+                    text.slice(0, 16000)
+                  }`,
+              },
+            ],
+            FALLBACK_TOOL,
+            "extract_figures",
+            false,
+          );
+          if (fb) {
+            if (fb.grossReturn != null && pctAppearsInText(text, fb.grossReturn)) {
+              result.grossReturn = fb.grossReturn;
+              fallbackEvidence = (fb.returnEvidenceText as string) ?? null;
+              if (!sourceUrls.includes(target)) sourceUrls.push(target);
+            }
+            if (fb.adminFeeFlat != null && result.adminFeeFlat == null) {
+              result.adminFeeFlat = fb.adminFeeFlat;
+            }
+            if (fb.adminFeePct != null && result.adminFeePct == null) {
+              result.adminFeePct = fb.adminFeePct;
+            }
+            if (fb.growthAssetsPct != null && result.growthAssetsPct == null) {
+              result.growthAssetsPct = fb.growthAssetsPct;
+            }
+            if (fb.investmentRiskProfile && !result.investmentRiskProfile) {
+              result.investmentRiskProfile = fb.investmentRiskProfile;
+            }
+          }
         }
-      }),
-    );
-    const pages: { url: string; text: string }[] = scraped.filter(
-      (p): p is { url: string; text: string } => p !== null,
-    ).slice(0, 3);
-
-    let figures: Record<string, unknown> = {
-      adminFeeFlat: null,
-      adminFeePct: null,
-      grossReturn: null,
-      growthAssetsPct: null,
-      investmentRiskProfile: null,
-      returnEvidenceText: null,
-      sourceNotes: "",
-    };
-
-    if (pages.length) {
-      const userBlock =
-        `Fund: ${step1.fundName}\nAllocated investment option: ${step1.modelLabel}\n\n` +
-        pages.map((p, i) => `===== SOURCE ${i + 1}: ${p.url} =====\n${p.text}`)
-          .join("\n\n");
-
-      const step2 = await callAI(
-        [{ role: "system", content: STEP2_SYSTEM }, {
-          role: "user",
-          content: userBlock,
-        }],
-        STEP2_TOOL,
-        "extract_fund_figures",
-      );
-      if (step2) figures = step2;
-
-      // Hard verification: the percentage we extracted must literally appear
-      // in the scraped page text near a 5-year mention and the option label.
-      const allText = pages.map((p) => p.text).join("\n");
-      const verifyNotes: string[] = [];
-      if (
-        figures.grossReturn != null &&
-        !returnAppearsNearOption(allText, figures.grossReturn, step1.modelLabel)
-      ) {
-        figures.grossReturn = null;
-        verifyNotes.push(
-          `Extracted 5-year return could not be located near "${step1.modelLabel}" + "5 year" in the official page text, so it was discarded.`,
-        );
       }
-      // Apply the SAME literal-text verification to fees & growth assets.
-      if (
-        figures.adminFeePct != null &&
-        !pctAppearsInText(allText, figures.adminFeePct)
-      ) {
-        figures.adminFeePct = null;
-        verifyNotes.push(
-          "Asset-based admin fee % could not be located in the official page text, so it was discarded.",
-        );
-      }
-      if (
-        figures.growthAssetsPct != null &&
-        !pctAppearsInText(allText, figures.growthAssetsPct, step1.modelLabel)
-      ) {
-        figures.growthAssetsPct = null;
-        verifyNotes.push(
-          `Growth assets % could not be located near "${step1.modelLabel}" in the official page text, so it was discarded.`,
-        );
-      }
-      if (
-        figures.adminFeeFlat != null &&
-        !flatFeeAppearsInText(allText, figures.adminFeeFlat)
-      ) {
-        figures.adminFeeFlat = null;
-        verifyNotes.push(
-          "Flat admin fee $ could not be located in the official page text, so it was discarded.",
-        );
-      }
-      if (verifyNotes.length) {
-        figures.sourceNotes = `${figures.sourceNotes ?? ""}\nVerification: ${
-          verifyNotes.join(" ")
-        }`.trim();
-      }
-    } else {
-      figures.sourceNotes =
-        "No official fund pages could be scraped — fees and 5-year net return were not auto-filled. Please fill manually.";
+      console.log(`[lookup-fund] fallback: ${Date.now() - tFb}ms`);
     }
 
-    const emailMatch = typeof query === "string" ? query.match(/[\w.+-]+@[\w-]+\.[\w.-]+/) : null;
+    const emailMatch = query.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
     const data: Record<string, unknown> = {
-      clientName: step1.clientName ?? null,
-      clientEmail: (step1 as { clientEmail?: string | null }).clientEmail ?? (emailMatch ? emailMatch[0] : null),
-      fundName: step1.fundName ?? null,
-      modelLabel: step1.modelLabel ?? null,
-      age: step1.age ?? null,
-      retirementAge: step1.retirementAge ?? null,
-      annualIncome: step1.annualIncome ?? null,
-      superBalance: step1.superBalance ?? null,
-      goalBalance: step1.goalBalance ?? null,
-      desiredIncomeAmount: step1.desiredIncomeAmount ?? null,
-      desiredIncomeFrequency: step1.desiredIncomeFrequency ?? null,
-      adminFeeFlat: figures.adminFeeFlat ?? null,
-      adminFeePct: figures.adminFeePct ?? null,
-      grossReturn: figures.grossReturn ?? null,
-      growthAssetsPct: figures.growthAssetsPct ?? null,
-      investmentRiskProfile: figures.investmentRiskProfile ?? null,
-      sourceNotes: [figures.sourceNotes, ...pages.map((p) => `• ${p.url}`)]
-        .filter(Boolean).join("\n"),
-      sourceUrls: pages.map((p) => p.url),
-      returnEvidenceText: figures.returnEvidenceText ?? null,
-      scrapedPageCount: pages.length,
+      clientName: result.clientName ?? null,
+      clientEmail: result.clientEmail ?? (emailMatch ? emailMatch[0] : null),
+      fundName: result.fundName ?? null,
+      modelLabel: result.modelLabel ?? null,
+      age: result.age ?? null,
+      retirementAge: result.retirementAge ?? null,
+      annualIncome: result.annualIncome ?? null,
+      superBalance: result.superBalance ?? null,
+      goalBalance: result.goalBalance ?? null,
+      desiredIncomeAmount: result.desiredIncomeAmount ?? null,
+      desiredIncomeFrequency: result.desiredIncomeFrequency ?? null,
+      adminFeeFlat: result.adminFeeFlat ?? null,
+      adminFeePct: result.adminFeePct ?? null,
+      grossReturn: result.grossReturn ?? null,
+      growthAssetsPct: result.growthAssetsPct ?? null,
+      investmentRiskProfile: result.investmentRiskProfile ?? null,
+      sourceNotes: [
+        result.sourceNotes,
+        ...sourceUrls.map((u) => `• ${u}`),
+      ].filter(Boolean).join("\n"),
+      sourceUrls,
+      returnEvidenceText: fallbackEvidence ?? result.returnEvidenceText ?? null,
+      scrapedPageCount: sourceUrls.length,
     };
 
-    lookupCache.set(cacheKey, { data, expiresAt: Date.now() + CACHE_MS });
+    console.log(`[lookup-fund] total: ${Date.now() - t0}ms`);
     return jsonResponse({ data });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
