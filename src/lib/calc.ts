@@ -304,15 +304,17 @@ export function buildSummary(i: ClientInputs): ReportSummary {
   const annual = annualDesiredIncome(i.desiredIncomeAmount, i.desiredIncomeFrequency);
   const yrsEx = Math.max(0, ageEx - i.retirementAge);
   const yrsCmp = Math.max(0, ageCmp - i.retirementAge);
-  const profile = inferRiskProfile(i.growthAssetsPct);
+  const wGrowth = weightedGrowthPct(i);
+  const profile = inferRiskProfile(wGrowth);
   const exAdmin = existingAdminPct(i);
   const exReturn = existingReturnPct(i);
+  const total = totalBalance(i);
   const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdmin = COMPARISON_ADMIN_FLAT / i.superBalance + comparisonAdminPct(i.superBalance);
+  const cmpAdmin = total > 0 ? COMPARISON_ADMIN_FLAT / total + comparisonAdminPct(total) : 0;
 
   return {
     inputs: i,
-    startingBalance: i.superBalance + (i.secondBalance ?? 0),
+    startingBalance: total,
     retirementAge: i.retirementAge,
     yearsRemaining: Math.max(0, i.retirementAge - i.age),
     goalBalance: i.goalBalance,
