@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2, ExternalLink, FileText } from "lucide-react";
+import { Sparkles, Loader2, ExternalLink, FileText, Plus, Trash2 } from "lucide-react";
 import { useClientInputs } from "@/hooks/useClientInputs";
 
 function prettyDomain(url: string): string {
