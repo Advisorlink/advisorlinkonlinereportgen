@@ -274,7 +274,7 @@ function optionTokens(modelLabel: unknown): string[] {
     .split(/[^a-z0-9]+/)
     .filter((t) =>
       t.length > 3 &&
-      !["default", "mysuper", "option", "super", "fund"].includes(t)
+      !["default", "defult", "mysuper", "option", "super", "fund"].includes(t)
     );
 }
 
@@ -427,7 +427,12 @@ For the named fund, you MUST locate the OFFICIAL fund website pages (and PDS / I
 
 Rules:
 - Identify WHICHEVER Australian super fund the user names — industry, retail, corporate, public sector, SMSF platform, etc. Never default to AustralianSuper or any specific fund.
-- CRITICAL: Match the EXACT investment option name the user specifies. If the user says "Balanced", you must find the option named "Balanced" — do NOT substitute a different option like "Growth" or "Core Strategy" even if the fund considers them related. If the user says "default" or similar, identify the fund's MySuper/default option and use THE EXACT NAME AS IT APPEARS IN THE FUND'S PERFORMANCE TABLE on their website (e.g. if REST Super's default is listed as "Growth" on their performance page, set modelLabel to "Growth"; if AustralianSuper's default is "Balanced", set modelLabel to "Balanced"). The modelLabel MUST match the row label in the fund's performance table so we can verify the extracted figure against the scraped text.
+- CRITICAL: Match the EXACT investment option name the user specifies. If the user says "Balanced", you must find the option named "Balanced" — do NOT substitute a different option like "Growth" or "Core Strategy" even if the fund considers them related.
+- CRITICAL — "DEFAULT" / "DEFULT" / "MYSUPER" HANDLING: If the user writes "default", "defult", "Default", "MySuper", "my super", or any similar misspelling/synonym that means "the fund's default option", you MUST:
+  1. Look up the fund's official website to find which investment option is their MySuper / default product.
+  2. Find the EXACT ROW LABEL for that option as it appears in the fund's performance table on their website.
+  3. Set modelLabel to that exact label (e.g. REST Super's default is listed as "Core Strategy" on their performance page → modelLabel = "Core Strategy"; AustralianSuper's default is "Balanced" → modelLabel = "Balanced"; Hostplus default is "Balanced" → modelLabel = "Balanced").
+  The modelLabel MUST match the row label in the fund's performance table so we can verify the extracted figure against the scraped text. NEVER set modelLabel to "default" or "defult" — always resolve it to the real option name.
 - Use ONLY URLs that Gemini 3 lookup finds on the fund's own official domain. Never invent URLs. Never use third-party comparison sites, news, blogs, SuperRatings, Canstar, Chant West, etc.
 - Add search terms like "${PREV_MONTH_NAME} ${CURRENT_YEAR}", "${PREV2_MONTH_NAME} ${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}" to find the freshest pages. Prefer live dashboards / current ${CURRENT_YEAR} update pages over older PDS PDFs.
 - Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages — do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
