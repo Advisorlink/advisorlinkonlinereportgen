@@ -189,15 +189,17 @@ export function projectAccumulation(i: ClientInputs): YearRow[] {
   const exAdmin = existingAdminPct(i);
   const exRate = exReturn - 0.025 - exAdmin;
 
-  const profile = inferRiskProfile(i.growthAssetsPct);
+  const wGrowth = weightedGrowthPct(i);
+  const profile = inferRiskProfile(wGrowth);
+  const total = totalBalance(i);
   const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdminPct = COMPARISON_ADMIN_FLAT / i.superBalance + comparisonAdminPct(i.superBalance);
-  const cmpAnnualPct = comparisonAnnualFeePct(i.superBalance);
+  const cmpAdminPct = total > 0 ? COMPARISON_ADMIN_FLAT / total + comparisonAdminPct(total) : 0;
+  const cmpAnnualPct = total > 0 ? comparisonAnnualFeePct(total) : 0;
   const cmpRate = cmpReturn - 0.025 - cmpAdminPct - cmpAnnualPct;
 
-  // P59 = (J16+R16) - N37 (advice fee deducted upfront)
-  const startEx = i.superBalance + (i.secondBalance ?? 0);
-  const startCmp = startEx - comparisonAdviceFee(i.superBalance);
+  // P59 = total balance - N37 (advice fee deducted upfront)
+  const startEx = total;
+  const startCmp = startEx - comparisonAdviceFee(total);
 
   const rows: YearRow[] = [{ age: startAge, existing: startEx, comparison: startCmp }];
   let age = startAge;
