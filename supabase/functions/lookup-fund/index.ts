@@ -610,7 +610,7 @@ Deno.serve(async (req) => {
         }],
         STEP2_TOOL,
         "extract_fund_figures",
-        Math.min(remaining() - 5000, 40000),
+        Math.min(remaining() - 5000, 35000),
       );
       if (step2) figures = step2;
 
