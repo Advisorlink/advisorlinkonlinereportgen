@@ -586,10 +586,16 @@ Deno.serve(async (req) => {
       ),
     );
 
+    // Always include AI-provided URLs first (they usually include the main performance page)
+    const officialAiUrls = aiUrls.filter(
+      (url) => isOfficialFundUrl(url, fundName, officialHosts),
+    );
+    candidateUrls.push(...officialAiUrls);
+
     // Augment with Firecrawl web search — finds the freshest performance pages
     if (fundName) {
       const searchQueries = [
-        `${fundName} ${optionLabel} 5 year performance ${CURRENT_YEAR}`,
+        `${fundName} ${optionLabel} investment performance ${PREV_MONTH_NAME} ${CURRENT_YEAR}`,
         `${fundName} ${optionLabel} fees asset allocation ${CURRENT_YEAR}`,
       ];
       const searchResults = await Promise.all(
@@ -601,12 +607,7 @@ Deno.serve(async (req) => {
         );
       }
     }
-    if (!candidateUrls.length) {
-      candidateUrls = aiUrls.filter(
-        (url) => isOfficialFundUrl(url, fundName, officialHosts),
-      );
-    }
-    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 4);
+    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 5);
 
     // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
     const scrapeBudget = Math.max(8000, Math.min(45000, remaining() - 25000));
