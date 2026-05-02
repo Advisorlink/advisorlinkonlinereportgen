@@ -530,68 +530,56 @@ Deno.serve(async (req) => {
       return jsonResponse({ data: cached.data, cached: true });
     }
 
-    // ---- Step 1: parse + find URLs ----
-    const step1 = await callAI(
+    // ---- Step 1 + Firecrawl search in PARALLEL ----
+    const step1Promise = callAI(
       [{ role: "system", content: STEP1_SYSTEM }, {
         role: "user",
         content: query,
       }],
       STEP1_TOOL,
       "find_sources",
-      60000,
+      40000,
     );
+
+    // Start firecrawl searches immediately using raw query (don't wait for step1)
+    const rawSearchPromise = FIRECRAWL_API_KEY
+      ? firecrawlSearch(`${query} 5 year performance returns ${CURRENT_YEAR}`, 3, 6000)
+      : Promise.resolve([]);
+
+    const [step1, rawSearchUrls] = await Promise.all([step1Promise, rawSearchPromise]);
+
     if (!step1) {
       return jsonResponse({ error: "AI did not return source URLs" }, 502);
     }
 
-    let candidateUrls: string[] = [];
     const fundName = String(step1.fundName ?? "").trim();
     const optionLabel = String(step1.modelLabel ?? "").trim();
-    const aiUrls = urlsFrom(step1.sourceUrls).filter(
-      isAllowedOfficialCandidate,
-    );
+    const aiUrls = urlsFrom(step1.sourceUrls).filter(isAllowedOfficialCandidate);
     const fundTokens = fundHostTokens(fundName);
     const officialHosts = Array.from(
       new Set(
-        aiUrls.map(hostFrom).filter((h): h is string => Boolean(h)).filter((
-          h,
-        ) =>
-          fundTokens.some((token) =>
-            h.replace(/[^a-z0-9]/g, "").includes(token)
-          )
+        aiUrls.map(hostFrom).filter((h): h is string => Boolean(h)).filter((h) =>
+          fundTokens.some((token) => h.replace(/[^a-z0-9]/g, "").includes(token))
         ),
       ),
     );
 
-    // Augment with Firecrawl web search — finds the freshest performance pages
-    if (fundName) {
-      const searchQueries = [
-        `${fundName} ${optionLabel} 5 year performance ${CURRENT_YEAR}`,
-        `${fundName} ${optionLabel} fees asset allocation ${CURRENT_YEAR}`,
-      ];
-      const searchResults = await Promise.all(
-        searchQueries.map((q) => firecrawlSearch(q, 4)),
-      );
-      for (const found of searchResults) {
-        candidateUrls.push(
-          ...found.filter((url) => isOfficialFundUrl(url, fundName, officialHosts)),
-        );
-      }
-    }
-    if (!candidateUrls.length) {
-      candidateUrls = aiUrls.filter(
-        (url) => isOfficialFundUrl(url, fundName, officialHosts),
-      );
-    }
-    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 4);
+    // AI URLs first (performance page is typically first), then firecrawl results
+    const officialAiUrls = aiUrls.filter((url) => isOfficialFundUrl(url, fundName, officialHosts));
+    const officialSearchUrls = rawSearchUrls.filter((url) => isOfficialFundUrl(url, fundName, officialHosts));
+    let candidateUrls = Array.from(new Set([...officialAiUrls, ...officialSearchUrls])).slice(0, 4);
 
-    // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
-    const scrapeBudget = Math.max(8000, Math.min(45000, remaining() - 25000));
+    if (!candidateUrls.length) {
+      candidateUrls = aiUrls.slice(0, 3);
+    }
+
+    // ---- Step 2: scrape pages and extract figures (in parallel) ----
+    const scrapeBudget = Math.max(6000, Math.min(30000, remaining() - 20000));
     const scraped = await Promise.all(
       candidateUrls.map(async (url) => {
-        const text = await fetchPageText(url, Math.min(scrapeBudget, 12000));
+        const text = await fetchPageText(url, Math.min(scrapeBudget, 8000));
         return text && text.length > 200
-          ? { url, text: text.slice(0, 18000) }
+          ? { url, text: text.slice(0, 16000) }
           : null;
       }),
     );
