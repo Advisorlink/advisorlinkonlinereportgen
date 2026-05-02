@@ -421,7 +421,7 @@ const STEP1_SYSTEM =
   }.
 
 For the named fund, you MUST locate the OFFICIAL fund website pages (and PDS / Investment Guide / Fees & Costs document if needed) that publish:
-  (a) the MOST RECENTLY PUBLISHED investment performance / returns table for the allocated investment option (must show 5-year p.a. return, as recent as possible — ideally as at a ${CURRENT_YEAR} month-end, or otherwise the most recent ${PREV_YEAR} update), and
+  (a) the MOST RECENTLY PUBLISHED investment performance / returns table for the allocated investment option (must show 5-year p.a. return). IMPORTANT: Always find the LATEST month-end data available — right now that is likely "as at 30 ${PREV_MONTH_NAME} ${CURRENT_YEAR}" or "as at 30 ${PREV2_MONTH_NAME} ${CURRENT_YEAR}". Do NOT use older month-end data if a newer month is published. Search for "${PREV_MONTH_NAME} ${CURRENT_YEAR} performance" and "${PREV2_MONTH_NAME} ${CURRENT_YEAR} performance" to find the freshest page.), and
   (b) the CURRENT (${CURRENT_YEAR}) fees & costs (admin fee + asset-based admin fee) — find the latest published fees page, fee schedule, or current PDS/Fees & Costs update for ${CURRENT_YEAR}, and
   (c) the CURRENT (${CURRENT_YEAR}) strategic asset allocation / growth assets % and the official risk profile label for the allocated option — find the latest investment option page, investment guide update, or asset-allocation disclosure for ${CURRENT_YEAR}.
 
