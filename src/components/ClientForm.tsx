@@ -255,9 +255,18 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
             </div>
           ))}
 
-          <Button variant="outline" onClick={addFund} className="w-full gap-2">
-            <Plus className="w-4 h-4" /> Add another fund
-          </Button>
+          {funds.length > 1 ? (
+            <Button variant="outline" onClick={addFund} className="w-full gap-2">
+              <Plus className="w-4 h-4" /> Add another fund
+            </Button>
+          ) : (
+            <button
+              onClick={addFund}
+              className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Plus className="w-3 h-3" /> Add another fund
+            </button>
+          )}
 
           {/* Weighted average summary */}
           {funds.length > 1 && (
