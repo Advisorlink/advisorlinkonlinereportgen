@@ -424,6 +424,7 @@ For the named fund, you MUST locate the OFFICIAL fund website pages (and PDS / I
 
 Rules:
 - Identify WHICHEVER Australian super fund the user names — industry, retail, corporate, public sector, SMSF platform, etc. Never default to AustralianSuper or any specific fund.
+- CRITICAL: Match the EXACT investment option name the user specifies. If the user says "Balanced", you must find the option named "Balanced" — do NOT substitute a different option like "Growth" or "Core Strategy" even if the fund considers them related. If the user says "default" or similar, identify the fund's MySuper/default option and use THE EXACT NAME AS IT APPEARS IN THE FUND'S PERFORMANCE TABLE on their website (e.g. if REST Super's default is listed as "Growth" on their performance page, set modelLabel to "Growth"; if AustralianSuper's default is "Balanced", set modelLabel to "Balanced"). The modelLabel MUST match the row label in the fund's performance table so we can verify the extracted figure against the scraped text.
 - Use ONLY URLs that Gemini 3 lookup finds on the fund's own official domain. Never invent URLs. Never use third-party comparison sites, news, blogs, SuperRatings, Canstar, Chant West, etc.
 - Add search terms like "${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}" to find the freshest pages. Prefer live dashboards / current ${CURRENT_YEAR} update pages over older PDS PDFs.
 - Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages — do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
@@ -482,7 +483,7 @@ const STEP2_SYSTEM =
 
 Strict rules:
 - ONLY use numbers that literally appear in the provided page text. Do NOT use prior knowledge, do NOT estimate, do NOT use other time periods.
-- grossReturn must be the 5-year p.a. return for the EXACT allocated investment option, copied straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
+- grossReturn must be the 5-year p.a. return for the allocated investment option. Some funds use a different label on their performance table than the option's marketing name (e.g. REST Super's "Core Strategy" is listed as "Growth" in the performance table). Match the option by its meaning — use the row that corresponds to the allocated option even if the table label differs slightly. Copy the 5-year p.a. figure straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
 - If MULTIPLE pages each show a 5-year p.a. figure for the option, ALWAYS pick the one with the most recent "as at" date (e.g. prefer "as at 31 ${CURRENT_YEAR}" over a PDS dated ${
     PREV_YEAR - 1
   }). State the as-of date in sourceNotes.
@@ -647,11 +648,17 @@ Deno.serve(async (req) => {
 
       // Hard verification: the percentage we extracted must literally appear
       // in the scraped page text near a 5-year mention and the option label.
+      // Also try the evidence text tokens as a fallback label (the AI may use
+      // the website's row label which differs from modelLabel, e.g. "Growth"
+      // vs "Core Strategy").
       const allText = pages.map((p) => p.text).join("\n");
       const verifyNotes: string[] = [];
+      const evidenceLabel = typeof figures.returnEvidenceText === "string"
+        ? figures.returnEvidenceText : "";
       if (
         figures.grossReturn != null &&
-        !returnAppearsNearOption(allText, figures.grossReturn, step1.modelLabel)
+        !returnAppearsNearOption(allText, figures.grossReturn, step1.modelLabel) &&
+        !returnAppearsNearOption(allText, figures.grossReturn, evidenceLabel)
       ) {
         figures.grossReturn = null;
         verifyNotes.push(
@@ -670,7 +677,8 @@ Deno.serve(async (req) => {
       }
       if (
         figures.growthAssetsPct != null &&
-        !pctAppearsInText(allText, figures.growthAssetsPct, step1.modelLabel)
+        !pctAppearsInText(allText, figures.growthAssetsPct, step1.modelLabel) &&
+        !pctAppearsInText(allText, figures.growthAssetsPct, evidenceLabel)
       ) {
         figures.growthAssetsPct = null;
         verifyNotes.push(
