@@ -255,8 +255,12 @@ async function firecrawlSearch(query: string, limit = 6, timeoutMs = 8000): Prom
 function pctVariants(decimal: unknown): string[] {
   if (typeof decimal !== "number" || !Number.isFinite(decimal)) return [];
   const pct = decimal * 100;
+  // Keep BOTH stripped and unstripped variants so we match "7.50%" and "7.5%"
   return Array.from(
     new Set([
+      pct.toFixed(3),
+      pct.toFixed(2),
+      pct.toFixed(1),
       stripTrailingZeros(pct.toFixed(3)),
       stripTrailingZeros(pct.toFixed(2)),
       stripTrailingZeros(pct.toFixed(1)),
@@ -283,16 +287,32 @@ function returnAppearsNearOption(
   if (!variants.length) return false;
   const tokens = optionTokens(modelLabel);
   const normalized = pageText.toLowerCase().replace(/\s+/g, " ");
+
+  // Check 1 (strict): percentage near both "5 year" and option label within 2000 chars
   for (const v of variants) {
-    const re = new RegExp(`${escapeRegExp(v)}\\s*%`, "i");
-    const m = re.exec(normalized);
-    if (!m) continue;
-    const ctx = normalized.slice(Math.max(0, m.index - 800), m.index + 800);
-    const fiveYr = /(5|five)\s*[- ]?\s*(year|years|yr|yrs)/i.test(ctx);
-    const optionMatch = tokens.length === 0 ||
-      tokens.some((t) => ctx.includes(t));
-    if (fiveYr && optionMatch) return true;
+    const re = new RegExp(`${escapeRegExp(v)}\\s*%`, "gi");
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(normalized)) !== null) {
+      const ctx = normalized.slice(Math.max(0, m.index - 2000), m.index + 2000);
+      const fiveYr = /(5|five)\s*[- ]?\s*(year|years|yr|yrs|y)\b/i.test(ctx);
+      const optionMatch = tokens.length === 0 ||
+        tokens.some((t) => ctx.includes(t));
+      if (fiveYr && optionMatch) return true;
+    }
   }
+
+  // Check 2 (relaxed for table layouts): if the ENTIRE page contains all three
+  // signals — the percentage, "5 year", and the option label — accept it.
+  // Many fund websites render performance tables where headers are far from values.
+  const pageFiveYr = /(5|five)\s*[- ]?\s*(year|years|yr|yrs|y)\b/i.test(normalized);
+  const pageOption = tokens.length === 0 || tokens.some((t) => normalized.includes(t));
+  if (pageFiveYr && pageOption) {
+    for (const v of variants) {
+      const re = new RegExp(`${escapeRegExp(v)}\\s*%`, "i");
+      if (re.test(normalized)) return true;
+    }
+  }
+
   return false;
 }
 
