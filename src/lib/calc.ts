@@ -4,6 +4,17 @@
 export type IncomeFrequency = "Weekly" | "Monthly" | "Annually";
 export type RiskProfile = "High Growth" | "Growth" | "Balanced" | "Moderate" | "Conservative";
 
+export interface FundEntry {
+  fundName: string;
+  modelLabel: string;
+  superBalance: number;
+  growthAssetsPct: number;
+  grossReturn: number;
+  adminFeeFlat: number;
+  adminFeePct: number;
+  investmentRiskProfile?: string;
+}
+
 export interface ClientInputs {
   // Personal
   clientName: string;
@@ -31,6 +42,9 @@ export interface ClientInputs {
   secondAdminFlat?: number; // S21
   secondAdminPct?: number; // W21
   secondReturn?: number; // R25
+
+  // Multiple funds support
+  additionalFunds?: FundEntry[];
 }
 
 // Risk profile lookup (mirrors XLSX J27/J28 array formulas via growth-assets %)
@@ -95,18 +109,60 @@ export function annualDesiredIncome(amount: number, freq: IncomeFrequency): numb
   return amount;
 }
 
+// Gather all funds into an array for unified calculations
+export function getAllFunds(i: ClientInputs): FundEntry[] {
+  const primary: FundEntry = {
+    fundName: i.fundName,
+    modelLabel: i.modelLabel,
+    superBalance: i.superBalance,
+    growthAssetsPct: i.growthAssetsPct,
+    grossReturn: i.grossReturn,
+    adminFeeFlat: i.adminFeeFlat,
+    adminFeePct: i.adminFeePct,
+    investmentRiskProfile: i.investmentRiskProfile,
+  };
+  const funds = [primary];
+  if (i.additionalFunds) {
+    funds.push(...i.additionalFunds.filter(f => f.superBalance > 0));
+  }
+  return funds;
+}
+
+// Total balance across all funds
+export function totalBalance(i: ClientInputs): number {
+  return getAllFunds(i).reduce((sum, f) => sum + f.superBalance, 0) + (i.secondBalance ?? 0);
+}
+
+// Weighted average growth assets % across all funds
+export function weightedGrowthPct(i: ClientInputs): number {
+  const funds = getAllFunds(i);
+  const total = funds.reduce((s, f) => s + f.superBalance, 0) + (i.secondBalance ?? 0);
+  if (total === 0) return 0;
+  let weighted = funds.reduce((s, f) => s + f.superBalance * f.growthAssetsPct, 0);
+  weighted += (i.secondBalance ?? 0) * (i.secondGrowthPct ?? 0);
+  return weighted / total;
+}
+
 // Existing scenario: weighted gross return (J26) and weighted admin fee % (J24)
 export function existingReturnPct(i: ClientInputs): number {
-  const a = i.superBalance, b = i.secondBalance ?? 0;
-  if (a + b === 0) return 0;
-  return (a * i.grossReturn + b * (i.secondReturn ?? 0)) / (a + b);
+  const funds = getAllFunds(i);
+  const total = funds.reduce((s, f) => s + f.superBalance, 0) + (i.secondBalance ?? 0);
+  if (total === 0) return 0;
+  let weighted = funds.reduce((s, f) => s + f.superBalance * f.grossReturn, 0);
+  weighted += (i.secondBalance ?? 0) * (i.secondReturn ?? 0);
+  return weighted / total;
 }
 export function existingAdminPct(i: ClientInputs): number {
-  const a = i.superBalance, b = i.secondBalance ?? 0;
-  const pa = (a > 0 ? i.adminFeeFlat / a + i.adminFeePct : 0);
-  const pb = (b > 0 ? (i.secondAdminFlat ?? 0) / b + (i.secondAdminPct ?? 0) : 0);
-  if (a + b === 0) return 0;
-  return (a * pa + b * pb) / (a + b);
+  const funds = getAllFunds(i);
+  const total = funds.reduce((s, f) => s + f.superBalance, 0) + (i.secondBalance ?? 0);
+  if (total === 0) return 0;
+  let weighted = funds.reduce((s, f) => {
+    const pct = f.superBalance > 0 ? f.adminFeeFlat / f.superBalance + f.adminFeePct : 0;
+    return s + f.superBalance * pct;
+  }, 0);
+  const b = i.secondBalance ?? 0;
+  if (b > 0) weighted += b * ((i.secondAdminFlat ?? 0) / b + (i.secondAdminPct ?? 0));
+  return weighted / total;
 }
 
 // Year cycle for ×0.9 / ×0.95 dips: every 7 years from year index 1.
@@ -133,15 +189,17 @@ export function projectAccumulation(i: ClientInputs): YearRow[] {
   const exAdmin = existingAdminPct(i);
   const exRate = exReturn - 0.025 - exAdmin;
 
-  const profile = inferRiskProfile(i.growthAssetsPct);
+  const wGrowth = weightedGrowthPct(i);
+  const profile = inferRiskProfile(wGrowth);
+  const total = totalBalance(i);
   const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdminPct = COMPARISON_ADMIN_FLAT / i.superBalance + comparisonAdminPct(i.superBalance);
-  const cmpAnnualPct = comparisonAnnualFeePct(i.superBalance);
+  const cmpAdminPct = total > 0 ? COMPARISON_ADMIN_FLAT / total + comparisonAdminPct(total) : 0;
+  const cmpAnnualPct = total > 0 ? comparisonAnnualFeePct(total) : 0;
   const cmpRate = cmpReturn - 0.025 - cmpAdminPct - cmpAnnualPct;
 
-  // P59 = (J16+R16) - N37 (advice fee deducted upfront)
-  const startEx = i.superBalance + (i.secondBalance ?? 0);
-  const startCmp = startEx - comparisonAdviceFee(i.superBalance);
+  // P59 = total balance - N37 (advice fee deducted upfront)
+  const startEx = total;
+  const startCmp = startEx - comparisonAdviceFee(total);
 
   const rows: YearRow[] = [{ age: startAge, existing: startEx, comparison: startCmp }];
   let age = startAge;
@@ -171,12 +229,15 @@ export function projectWithdrawal(i: ClientInputs): { existing: YearRow[]; compa
   const annualWithdraw = annualDesiredIncome(i.desiredIncomeAmount, i.desiredIncomeFrequency);
 
   const exAdmin = existingAdminPct(i);
-  const profile = inferRiskProfile(i.growthAssetsPct);
+  const exReturn = existingReturnPct(i);
+  const wGrowth = weightedGrowthPct(i);
+  const profile = inferRiskProfile(wGrowth);
+  const total = totalBalance(i);
   const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdminPct = COMPARISON_ADMIN_FLAT / i.superBalance + comparisonAdminPct(i.superBalance);
+  const cmpAdminPct = total > 0 ? COMPARISON_ADMIN_FLAT / total + comparisonAdminPct(total) : 0;
 
-  // Existing growth in withdrawal: J25*0.5 - J22 (defensive mix, half return, full fees)
-  const exFactor = (1 + i.grossReturn * 0.5 - exAdmin);
+  // Existing growth in withdrawal: weighted return * 0.5 - admin (defensive mix, half return, full fees)
+  const exFactor = (1 + exReturn * 0.5 - exAdmin);
   const cmpFactor = (1 + cmpReturn * 0.5 - cmpAdminPct);
 
   const buildSeries = (startBal: number, factor: number): YearRow[] => {
@@ -246,15 +307,17 @@ export function buildSummary(i: ClientInputs): ReportSummary {
   const annual = annualDesiredIncome(i.desiredIncomeAmount, i.desiredIncomeFrequency);
   const yrsEx = Math.max(0, ageEx - i.retirementAge);
   const yrsCmp = Math.max(0, ageCmp - i.retirementAge);
-  const profile = inferRiskProfile(i.growthAssetsPct);
+  const wGrowth = weightedGrowthPct(i);
+  const profile = inferRiskProfile(wGrowth);
   const exAdmin = existingAdminPct(i);
   const exReturn = existingReturnPct(i);
+  const total = totalBalance(i);
   const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdmin = COMPARISON_ADMIN_FLAT / i.superBalance + comparisonAdminPct(i.superBalance);
+  const cmpAdmin = total > 0 ? COMPARISON_ADMIN_FLAT / total + comparisonAdminPct(total) : 0;
 
   return {
     inputs: i,
-    startingBalance: i.superBalance + (i.secondBalance ?? 0),
+    startingBalance: total,
     retirementAge: i.retirementAge,
     yearsRemaining: Math.max(0, i.retirementAge - i.age),
     goalBalance: i.goalBalance,

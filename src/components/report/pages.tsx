@@ -1,9 +1,11 @@
 import { Check, Info, Star } from "lucide-react";
-import type { ReportSummary } from "@/lib/calc";
+import type { ReportSummary, FundEntry } from "@/lib/calc";
 import {
   fmtMoney, fmtPct,
   comparisonAdminPct, COMPARISON_ADMIN_FLAT,
   comparisonAnnualFee, comparisonAdviceFee,
+  getAllFunds, totalBalance, weightedGrowthPct,
+  existingReturnPct, inferRiskProfile,
 } from "@/lib/calc";
 import {
   PageShell, PageHeader, PageFooter, KpiCard, SectionCard,
@@ -73,7 +75,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
       </header>
 
       <div className="grid grid-cols-3 gap-3 mb-5">
-        <KpiCard label="Current Balance" value={fmtMoney(s.startingBalance)} sub={s.inputs.fundName} accent />
+        <KpiCard label="Current Balance" value={fmtMoney(s.startingBalance)} sub={getAllFunds(s.inputs).length > 1 ? `${getAllFunds(s.inputs).length} funds combined` : s.inputs.fundName} accent />
         <KpiCard label="Years to Retirement" value={String(s.yearsRemaining)} sub={`Age ${s.inputs.age} → ${s.retirementAge}`} />
         <KpiCard label="Potential Extra" value={fmtMoney(Math.max(0, s.potentialUplift))} sub="At retirement vs current" />
       </div>
@@ -317,8 +319,8 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
 
       <SectionCard title="Position summary" icon="✦">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Based on {s.inputs.clientName.split(" ")[0]}'s current balance of <strong className="text-navy">{fmtMoney(s.startingBalance)}</strong>,
-          continued contributions of <strong className="text-navy">{fmtMoney(sgContrib)}</strong> per year and the existing fund's net return,
+          Based on {s.inputs.clientName.split(" ")[0]}'s current {getAllFunds(s.inputs).length > 1 ? "combined " : ""}balance of <strong className="text-navy">{fmtMoney(s.startingBalance)}</strong>{getAllFunds(s.inputs).length > 1 ? ` across ${getAllFunds(s.inputs).length} funds` : ""},
+          continued contributions of <strong className="text-navy">{fmtMoney(sgContrib)}</strong> per year and the existing fund{getAllFunds(s.inputs).length > 1 ? "s'" : "'s"} net return,
           the projected balance at age {s.retirementAge} is <strong className="text-navy">{fmtMoney(s.projectedExisting)}</strong>.
           The reference target of {fmtMoney(s.goalBalance)} is included for context only.
         </p>
@@ -354,40 +356,84 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
 /* ------------------------------------------------------------------ */
 export function FundsPage({ s }: { s: ReportSummary }) {
   const i = s.inputs;
-  const cmpAdminFlatPct = COMPARISON_ADMIN_FLAT / i.superBalance;
-  const cmpAdminBalPct = comparisonAdminPct(i.superBalance);
+  const funds = getAllFunds(i);
+  const total = totalBalance(i);
+  const hasMultiple = funds.length > 1;
+  const wGrowth = weightedGrowthPct(i);
+  const wReturn = existingReturnPct(i);
+  const cmpAdminFlatPct = total > 0 ? COMPARISON_ADMIN_FLAT / total : 0;
+  const cmpAdminBalPct = comparisonAdminPct(total);
   return (
     <PageShell>
       <PageHeader pageLabel="FUND DETAILS" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Current fund vs comparison</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Current fund{hasMultiple ? "s" : ""} vs comparison</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
-        Side-by-side view of the existing fund settings and the comparison scenario used throughout this report.
+        {hasMultiple
+          ? "Combined view of all existing funds and the comparison scenario used throughout this report."
+          : "Side-by-side view of the existing fund settings and the comparison scenario used throughout this report."}
       </p>
 
-      <div className="grid grid-cols-2 gap-4 mb-5">
-        <SectionCard title="Current fund" icon="◆">
-          <Row label="Fund name" value={i.fundName} />
-          <Row label="Investment option" value={i.modelLabel} />
-          <Row label="Growth assets" value={fmtPct(i.growthAssetsPct, 0)} />
-          <Row label="Investment risk profile" value={i.investmentRiskProfile || s.riskProfile} />
-          <Row label="5-year net return" value={fmtPct(i.grossReturn)} />
-          <Row label="Admin fee - flat" value={fmtMoney(i.adminFeeFlat)} />
-          <Row label="Admin fee - % of balance" value={fmtPct(i.adminFeePct, 2)} />
-          <Row label="Effective admin fee %" value={fmtPct(s.existingAdminPct, 2)} />
-          
-        </SectionCard>
-        <SectionCard title="Comparison scenario" icon="◉">
-          <Row label="Scenario" value="Aligned to risk profile" />
-          <Row label="Risk profile" value={s.riskProfile} />
-          <Row label="Net return (tiered by profile)" value={fmtPct(s.comparisonReturn - s.comparisonAdminPct - (Math.min(i.superBalance * 0.0176, 5000) / i.superBalance))} />
-          <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
-          <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
-          <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
-          <Row label="Optional annual advice fee" value="1.76%" />
-          <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(i.superBalance))} />
-          
-        </SectionCard>
-      </div>
+      {hasMultiple ? (
+        <>
+          {/* Individual fund cards */}
+          <div className={`grid gap-4 mb-4 ${funds.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+            {funds.map((f, idx) => (
+              <SectionCard key={idx} title={`Fund ${idx + 1}: ${f.fundName}`} icon="◆">
+                <Row label="Investment option" value={f.modelLabel} />
+                <Row label="Balance" value={fmtMoney(f.superBalance)} />
+                <Row label="Growth assets" value={fmtPct(f.growthAssetsPct, 0)} />
+                <Row label="Investment risk profile" value={f.investmentRiskProfile || inferRiskProfile(f.growthAssetsPct)} />
+                <Row label="5-year net return" value={fmtPct(f.grossReturn)} />
+                <Row label="Admin fee - flat" value={fmtMoney(f.adminFeeFlat)} />
+                <Row label="Admin fee - %" value={fmtPct(f.adminFeePct, 2)} />
+                <Row label="Effective admin fee %" value={fmtPct(f.superBalance > 0 ? f.adminFeeFlat / f.superBalance + f.adminFeePct : 0, 2)} />
+              </SectionCard>
+            ))}
+          </div>
+          {/* Combined weighted summary */}
+          <div className="grid grid-cols-2 gap-4 mb-5">
+            <SectionCard title="Combined / weighted" icon="✦">
+              <Row label="Total balance" value={fmtMoney(total)} />
+              <Row label="Weighted growth assets" value={fmtPct(wGrowth, 0)} />
+              <Row label="Weighted 5-year return" value={fmtPct(wReturn)} />
+              <Row label="Risk profile (weighted)" value={s.riskProfile} />
+            </SectionCard>
+            <SectionCard title="Comparison scenario" icon="◉">
+              <Row label="Scenario" value="Aligned to risk profile" />
+              <Row label="Risk profile" value={s.riskProfile} />
+              <Row label="Net return (tiered by profile)" value={fmtPct(s.comparisonReturn - s.comparisonAdminPct - (Math.min(total * 0.0176, 5000) / (total || 1)))} />
+              <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
+              <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
+              <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
+              <Row label="Optional annual advice fee" value="1.76%" />
+              <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(total))} />
+            </SectionCard>
+          </div>
+        </>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 mb-5">
+          <SectionCard title="Current fund" icon="◆">
+            <Row label="Fund name" value={i.fundName} />
+            <Row label="Investment option" value={i.modelLabel} />
+            <Row label="Growth assets" value={fmtPct(i.growthAssetsPct, 0)} />
+            <Row label="Investment risk profile" value={i.investmentRiskProfile || s.riskProfile} />
+            <Row label="5-year net return" value={fmtPct(i.grossReturn)} />
+            <Row label="Admin fee - flat" value={fmtMoney(i.adminFeeFlat)} />
+            <Row label="Admin fee - % of balance" value={fmtPct(i.adminFeePct, 2)} />
+            <Row label="Effective admin fee %" value={fmtPct(s.existingAdminPct, 2)} />
+          </SectionCard>
+          <SectionCard title="Comparison scenario" icon="◉">
+            <Row label="Scenario" value="Aligned to risk profile" />
+            <Row label="Risk profile" value={s.riskProfile} />
+            <Row label="Net return (tiered by profile)" value={fmtPct(s.comparisonReturn - s.comparisonAdminPct - (Math.min(i.superBalance * 0.0176, 5000) / i.superBalance))} />
+            <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
+            <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
+            <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
+            <Row label="Optional annual advice fee" value="1.76%" />
+            <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(i.superBalance))} />
+          </SectionCard>
+        </div>
+      )}
 
       <SectionCard title="Risk profile band" icon="✦">
         <div className="grid grid-cols-5 gap-2 text-center">
@@ -406,8 +452,10 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           ))}
         </div>
         <p className="text-[10px] text-muted-foreground mt-3">
-          Profile is determined by the <strong>growth assets %</strong> of the current investment option.
-          Comparison gross returns are illustrative tiered figures.
+          {hasMultiple
+            ? "Profile is determined by the weighted average growth assets % across all funds."
+            : "Profile is determined by the growth assets % of the current investment option."}
+          {" "}Comparison gross returns are illustrative tiered figures.
         </p>
       </SectionCard>
 
