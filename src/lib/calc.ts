@@ -42,6 +42,9 @@ export interface ClientInputs {
   secondAdminFlat?: number; // S21
   secondAdminPct?: number; // W21
   secondReturn?: number; // R25
+
+  // Multiple funds support
+  additionalFunds?: FundEntry[];
 }
 
 // Risk profile lookup (mirrors XLSX J27/J28 array formulas via growth-assets %)
