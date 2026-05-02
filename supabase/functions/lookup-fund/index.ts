@@ -489,7 +489,7 @@ Strict rules:
 - grossReturn must be the 5-year p.a. return for the allocated investment option. Some funds use a different label on their performance table than the option's marketing name (e.g. REST Super's "Core Strategy" is listed as "Growth" in the performance table). Match the option by its meaning — use the row that corresponds to the allocated option even if the table label differs slightly. Copy the 5-year p.a. figure straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
 - If MULTIPLE pages each show a 5-year p.a. figure for the option, ALWAYS pick the one with the most recent "as at" date (e.g. prefer "as at 31 ${CURRENT_YEAR}" over a PDS dated ${
     PREV_YEAR - 1
-  }). State the as-of date in sourceNotes.
+  }). State the as-of date in sourceNotes. CRITICAL: if the page shows figures for multiple month-ends (e.g. both March and April ${CURRENT_YEAR}), you MUST use the LATEST/MOST RECENT month-end figures, not older ones.
 - adminFeeFlat: annual flat admin fee in AUD (multiply weekly fees by 52). Null if not in text.
 - adminFeePct: annual asset-based admin/trustee fee as a DECIMAL (0.0035 = 0.35%). Exclude investment fees. Null if not in text.
 - growthAssetsPct: strategic growth-asset allocation as DECIMAL (0.70 = 70%). Null if not in text.
