@@ -430,9 +430,16 @@ Rules:
 - CRITICAL: Match the EXACT investment option name the user specifies. If the user says "Balanced", you must find the option named "Balanced" — do NOT substitute a different option like "Growth" or "Core Strategy" even if the fund considers them related.
 - CRITICAL — "DEFAULT" / "DEFULT" / "MYSUPER" HANDLING: If the user writes "default", "defult", "Default", "MySuper", "my super", or any similar misspelling/synonym that means "the fund's default option", you MUST:
   1. Look up the fund's official website to find which investment option is their MySuper / default product.
-  2. Find the EXACT ROW LABEL for that option as it appears in the fund's performance table on their website.
-  3. Set modelLabel to that exact label (e.g. REST Super's default is listed as "Core Strategy" on their performance page → modelLabel = "Core Strategy"; AustralianSuper's default is "Balanced" → modelLabel = "Balanced"; Hostplus default is "Balanced" → modelLabel = "Balanced").
+  2. MANY FUNDS HAVE AGE-BASED / LIFECYCLE DEFAULT OPTIONS — the default option changes depending on the member's age. You MUST consider the client's AGE from the input text when determining which option is the default. Examples:
+     - Aware Super: MySuper Lifecycle. Under 55 → "High Growth" is the default. Age 55-64 → different allocation. 65+ → different again. You must use the age bracket that matches the client's age.
+     - HESTA: MySuper has age-based stages.
+     - UniSuper: Lifecycle options change at different ages.
+     - Many other funds use lifecycle/age-based MySuper products.
+     Search the fund's website for "MySuper lifecycle", "age-based", "lifestage", or "lifecycle" to find the correct age-dependent option.
+  3. Find the EXACT ROW LABEL for that age-appropriate option as it appears in the fund's performance table on their website.
+  4. Set modelLabel to that exact label (e.g. if client is age 52 and in Aware Super, the MySuper default is "High Growth" → modelLabel = "High Growth"; REST Super's default is "Core Strategy" → modelLabel = "Core Strategy"; AustralianSuper's default is "Balanced" → modelLabel = "Balanced").
   The modelLabel MUST match the row label in the fund's performance table so we can verify the extracted figure against the scraped text. NEVER set modelLabel to "default" or "defult" — always resolve it to the real option name.
+  If the fund has an age-based default but no age is provided in the input, use the youngest/accumulation-phase default and add a note explaining the age dependency.
 - Use ONLY URLs that Gemini 3 lookup finds on the fund's own official domain. Never invent URLs. Never use third-party comparison sites, news, blogs, SuperRatings, Canstar, Chant West, etc.
 - Add search terms like "${PREV_MONTH_NAME} ${CURRENT_YEAR}", "${PREV2_MONTH_NAME} ${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}" to find the freshest pages. Prefer live dashboards / current ${CURRENT_YEAR} update pages over older PDS PDFs.
 - Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages — do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
