@@ -1,9 +1,11 @@
 import { Check, Info, Star } from "lucide-react";
-import type { ReportSummary } from "@/lib/calc";
+import type { ReportSummary, FundEntry } from "@/lib/calc";
 import {
   fmtMoney, fmtPct,
   comparisonAdminPct, COMPARISON_ADMIN_FLAT,
   comparisonAnnualFee, comparisonAdviceFee,
+  getAllFunds, totalBalance, weightedGrowthPct,
+  existingReturnPct, inferRiskProfile,
 } from "@/lib/calc";
 import {
   PageShell, PageHeader, PageFooter, KpiCard, SectionCard,
