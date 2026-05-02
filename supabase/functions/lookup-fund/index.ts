@@ -361,7 +361,7 @@ async function callAI(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         temperature: 0,
         messages,
         tools: [{ type: "google_search" }, ...tools],
@@ -463,7 +463,6 @@ const STEP2_SYSTEM =
 Strict rules:
 - ONLY use numbers that literally appear in the provided page text. Do NOT use prior knowledge, do NOT estimate, do NOT use other time periods.
 - grossReturn must be the 5-year p.a. return for the EXACT allocated investment option, copied straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
-- CRITICAL: When multiple SOURCEs are provided, ALWAYS take the grossReturn (5-year p.a. return) from SOURCE 1 first. SOURCE 1 is the primary performance page. Only fall back to other sources if SOURCE 1 does not contain a 5-year figure for the option.
 - If MULTIPLE pages each show a 5-year p.a. figure for the option, ALWAYS pick the one with the most recent "as at" date (e.g. prefer "as at 31 ${CURRENT_YEAR}" over a PDS dated ${
     PREV_YEAR - 1
   }). State the as-of date in sourceNotes.
@@ -472,7 +471,7 @@ Strict rules:
 - growthAssetsPct: strategic growth-asset allocation as DECIMAL (0.70 = 70%). Null if not in text.
 - investmentRiskProfile: official risk label exactly as the page calls it (e.g. "High", "Medium to High", "Growth"). Null if not in text.
 - returnEvidenceText: copy the exact short snippet from the page text that contains the 5-year return + option label + as-of date if shown.
-- sourceNotes: short explanation including which URL the 5yr return came from AND the as-of date. Always mention which SOURCE number it came from.
+- sourceNotes: short explanation including which URL the 5yr return came from AND the as-of date.
 - Never use standard knowledge or memory. If a value is not literally in the provided text, return null for that field.
 - Be deterministic.`;
 
@@ -530,56 +529,68 @@ Deno.serve(async (req) => {
       return jsonResponse({ data: cached.data, cached: true });
     }
 
-    // ---- Step 1 + Firecrawl search in PARALLEL ----
-    const step1Promise = callAI(
+    // ---- Step 1: parse + find URLs ----
+    const step1 = await callAI(
       [{ role: "system", content: STEP1_SYSTEM }, {
         role: "user",
         content: query,
       }],
       STEP1_TOOL,
       "find_sources",
-      40000,
+      60000,
     );
-
-    // Start firecrawl searches immediately using raw query (don't wait for step1)
-    const rawSearchPromise = FIRECRAWL_API_KEY
-      ? firecrawlSearch(`${query} 5 year performance returns ${CURRENT_YEAR}`, 3, 6000)
-      : Promise.resolve([]);
-
-    const [step1, rawSearchUrls] = await Promise.all([step1Promise, rawSearchPromise]);
-
     if (!step1) {
       return jsonResponse({ error: "AI did not return source URLs" }, 502);
     }
 
+    let candidateUrls: string[] = [];
     const fundName = String(step1.fundName ?? "").trim();
     const optionLabel = String(step1.modelLabel ?? "").trim();
-    const aiUrls = urlsFrom(step1.sourceUrls).filter(isAllowedOfficialCandidate);
+    const aiUrls = urlsFrom(step1.sourceUrls).filter(
+      isAllowedOfficialCandidate,
+    );
     const fundTokens = fundHostTokens(fundName);
     const officialHosts = Array.from(
       new Set(
-        aiUrls.map(hostFrom).filter((h): h is string => Boolean(h)).filter((h) =>
-          fundTokens.some((token) => h.replace(/[^a-z0-9]/g, "").includes(token))
+        aiUrls.map(hostFrom).filter((h): h is string => Boolean(h)).filter((
+          h,
+        ) =>
+          fundTokens.some((token) =>
+            h.replace(/[^a-z0-9]/g, "").includes(token)
+          )
         ),
       ),
     );
 
-    // AI URLs first (performance page is typically first), then firecrawl results
-    const officialAiUrls = aiUrls.filter((url) => isOfficialFundUrl(url, fundName, officialHosts));
-    const officialSearchUrls = rawSearchUrls.filter((url) => isOfficialFundUrl(url, fundName, officialHosts));
-    let candidateUrls = Array.from(new Set([...officialAiUrls, ...officialSearchUrls])).slice(0, 4);
-
-    if (!candidateUrls.length) {
-      candidateUrls = aiUrls.slice(0, 3);
+    // Augment with Firecrawl web search — finds the freshest performance pages
+    if (fundName) {
+      const searchQueries = [
+        `${fundName} ${optionLabel} 5 year performance ${CURRENT_YEAR}`,
+        `${fundName} ${optionLabel} fees asset allocation ${CURRENT_YEAR}`,
+      ];
+      const searchResults = await Promise.all(
+        searchQueries.map((q) => firecrawlSearch(q, 4)),
+      );
+      for (const found of searchResults) {
+        candidateUrls.push(
+          ...found.filter((url) => isOfficialFundUrl(url, fundName, officialHosts)),
+        );
+      }
     }
+    if (!candidateUrls.length) {
+      candidateUrls = aiUrls.filter(
+        (url) => isOfficialFundUrl(url, fundName, officialHosts),
+      );
+    }
+    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 4);
 
-    // ---- Step 2: scrape pages and extract figures (in parallel) ----
-    const scrapeBudget = Math.max(6000, Math.min(30000, remaining() - 20000));
+    // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
+    const scrapeBudget = Math.max(8000, Math.min(45000, remaining() - 25000));
     const scraped = await Promise.all(
       candidateUrls.map(async (url) => {
-        const text = await fetchPageText(url, Math.min(scrapeBudget, 8000));
+        const text = await fetchPageText(url, Math.min(scrapeBudget, 12000));
         return text && text.length > 200
-          ? { url, text: text.slice(0, 16000) }
+          ? { url, text: text.slice(0, 18000) }
           : null;
       }),
     );
@@ -610,7 +621,7 @@ Deno.serve(async (req) => {
         }],
         STEP2_TOOL,
         "extract_fund_figures",
-        Math.min(remaining() - 5000, 35000),
+        Math.min(remaining() - 5000, 40000),
       );
       if (step2) figures = step2;
 
