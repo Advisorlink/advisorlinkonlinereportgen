@@ -483,7 +483,8 @@ const STEP2_SYSTEM =
 
 Strict rules:
 - ONLY use numbers that literally appear in the provided page text. Do NOT use prior knowledge, do NOT estimate, do NOT use other time periods.
-- grossReturn must be the 5-year p.a. return for the EXACT allocated investment option, copied straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
+- CRITICAL: grossReturn must be the 5-year p.a. return for the EXACT allocated investment option name specified in the user message. If the user says "Balanced", extract the figure from the ROW labelled "Balanced" — NOT from "Growth", "Core Strategy", or any other option, even if the fund considers them related or equivalent. The option name must match EXACTLY as it appears in the performance table. If the exact option name does not appear in the page text, return null for grossReturn.
+- grossReturn: copy the 5-year p.a. figure straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
 - If MULTIPLE pages each show a 5-year p.a. figure for the option, ALWAYS pick the one with the most recent "as at" date (e.g. prefer "as at 31 ${CURRENT_YEAR}" over a PDS dated ${
     PREV_YEAR - 1
   }). State the as-of date in sourceNotes.
