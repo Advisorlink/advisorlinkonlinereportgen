@@ -678,7 +678,8 @@ Deno.serve(async (req) => {
       }
       if (
         figures.growthAssetsPct != null &&
-        !pctAppearsInText(allText, figures.growthAssetsPct, step1.modelLabel)
+        !pctAppearsInText(allText, figures.growthAssetsPct, step1.modelLabel) &&
+        !pctAppearsInText(allText, figures.growthAssetsPct, evidenceLabel)
       ) {
         figures.growthAssetsPct = null;
         verifyNotes.push(
