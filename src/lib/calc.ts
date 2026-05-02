@@ -4,66 +4,33 @@
 export type IncomeFrequency = "Weekly" | "Monthly" | "Annually";
 export type RiskProfile = "High Growth" | "Growth" | "Balanced" | "Moderate" | "Conservative";
 
-/** A single super fund / investment option entry */
-export interface FundEntry {
-  id: string; // unique key for React
-  fundName: string;
-  modelLabel: string; // investment option
-  superBalance: number;
-  growthAssetsPct: number; // 0.7 = 70%
-  adminFeeFlat: number;
-  adminFeePct: number;
-  grossReturn: number; // 5-year net return e.g. 0.066
-  investmentRiskProfile?: string;
-  // lookup result metadata (not used in calcs)
-  sourceUrls?: string[];
-  sourceNotes?: string;
-  returnEvidenceText?: string;
-}
-
-export function createEmptyFund(): FundEntry {
-  return {
-    id: crypto.randomUUID(),
-    fundName: "",
-    modelLabel: "",
-    superBalance: 0,
-    growthAssetsPct: 0.7,
-    adminFeeFlat: 0,
-    adminFeePct: 0,
-    grossReturn: 0,
-  };
-}
-
 export interface ClientInputs {
   // Personal
   clientName: string;
   clientEmail?: string;
   age: number;
-  retirementAge: number;
-  goalBalance: number;
-  desiredIncomeAmount: number;
-  desiredIncomeFrequency: IncomeFrequency;
-  annualIncome: number;
+  retirementAge: number; // N8
+  goalBalance: number; // N9
+  desiredIncomeAmount: number; // N11
+  desiredIncomeFrequency: IncomeFrequency; // N10
+  annualIncome: number; // N6 (salary)
 
-  // Primary fund (kept for backward compat — used when funds[] is empty)
-  fundName: string;
-  superBalance: number;
-  modelLabel: string;
-  growthAssetsPct: number;
-  adminFeeFlat: number;
-  adminFeePct: number;
-  grossReturn: number;
+  // Existing fund
+  fundName: string; // J15
+  superBalance: number; // J16
+  modelLabel: string; // J17 e.g. "Growth (Default)"
+  growthAssetsPct: number; // J18 (0.7 = 70%)
+  adminFeeFlat: number; // K21
+  adminFeePct: number; // O21
+  grossReturn: number; // J25 (0.066)
   investmentRiskProfile?: string;
 
-  // Multiple funds — the modern way. If non-empty, calcs use this instead of the single fields above.
-  funds?: FundEntry[];
-
-  // Legacy second account fields (still supported for XLSX import)
-  secondBalance?: number;
-  secondGrowthPct?: number;
-  secondAdminFlat?: number;
-  secondAdminPct?: number;
-  secondReturn?: number;
+  // Optional second account (R columns) — keep zeroed if not used
+  secondBalance?: number; // R16
+  secondGrowthPct?: number; // R18
+  secondAdminFlat?: number; // S21
+  secondAdminPct?: number; // W21
+  secondReturn?: number; // R25
 }
 
 // Risk profile lookup (mirrors XLSX J27/J28 array formulas via growth-assets %)
@@ -128,67 +95,18 @@ export function annualDesiredIncome(amount: number, freq: IncomeFrequency): numb
   return amount;
 }
 
-// Resolve all fund entries — use funds[] if present, else build from legacy fields
-export function resolveFunds(i: ClientInputs): FundEntry[] {
-  if (i.funds && i.funds.length > 0) return i.funds;
-  // Legacy: build from single + optional second account
-  const entries: FundEntry[] = [{
-    id: "primary",
-    fundName: i.fundName,
-    modelLabel: i.modelLabel,
-    superBalance: i.superBalance,
-    growthAssetsPct: i.growthAssetsPct,
-    adminFeeFlat: i.adminFeeFlat,
-    adminFeePct: i.adminFeePct,
-    grossReturn: i.grossReturn,
-    investmentRiskProfile: i.investmentRiskProfile,
-  }];
-  if ((i.secondBalance ?? 0) > 0) {
-    entries.push({
-      id: "secondary",
-      fundName: i.fundName,
-      modelLabel: "Second Account",
-      superBalance: i.secondBalance ?? 0,
-      growthAssetsPct: i.secondGrowthPct ?? 0,
-      adminFeeFlat: i.secondAdminFlat ?? 0,
-      adminFeePct: i.secondAdminPct ?? 0,
-      grossReturn: i.secondReturn ?? 0,
-    });
-  }
-  return entries;
-}
-
-// Total balance across all funds
-export function totalBalance(i: ClientInputs): number {
-  const funds = resolveFunds(i);
-  return funds.reduce((s, f) => s + f.superBalance, 0);
-}
-
-// Weighted average growth assets % across all funds
-export function weightedGrowthPct(i: ClientInputs): number {
-  const funds = resolveFunds(i);
-  const total = funds.reduce((s, f) => s + f.superBalance, 0);
-  if (total === 0) return 0;
-  return funds.reduce((s, f) => s + f.superBalance * f.growthAssetsPct, 0) / total;
-}
-
-// Existing scenario: weighted gross return across all funds
+// Existing scenario: weighted gross return (J26) and weighted admin fee % (J24)
 export function existingReturnPct(i: ClientInputs): number {
-  const funds = resolveFunds(i);
-  const total = funds.reduce((s, f) => s + f.superBalance, 0);
-  if (total === 0) return 0;
-  return funds.reduce((s, f) => s + f.superBalance * f.grossReturn, 0) / total;
+  const a = i.superBalance, b = i.secondBalance ?? 0;
+  if (a + b === 0) return 0;
+  return (a * i.grossReturn + b * (i.secondReturn ?? 0)) / (a + b);
 }
-
-// Existing scenario: weighted admin fee % across all funds
 export function existingAdminPct(i: ClientInputs): number {
-  const funds = resolveFunds(i);
-  const total = funds.reduce((s, f) => s + f.superBalance, 0);
-  if (total === 0) return 0;
-  return funds.reduce((s, f) => {
-    const pct = f.superBalance > 0 ? f.adminFeeFlat / f.superBalance + f.adminFeePct : 0;
-    return s + f.superBalance * pct;
-  }, 0) / total;
+  const a = i.superBalance, b = i.secondBalance ?? 0;
+  const pa = (a > 0 ? i.adminFeeFlat / a + i.adminFeePct : 0);
+  const pb = (b > 0 ? (i.secondAdminFlat ?? 0) / b + (i.secondAdminPct ?? 0) : 0);
+  if (a + b === 0) return 0;
+  return (a * pa + b * pb) / (a + b);
 }
 
 // Year cycle for ×0.9 / ×0.95 dips: every 7 years from year index 1.
@@ -215,16 +133,15 @@ export function projectAccumulation(i: ClientInputs): YearRow[] {
   const exAdmin = existingAdminPct(i);
   const exRate = exReturn - 0.025 - exAdmin;
 
-  const gPct = weightedGrowthPct(i);
-  const profile = inferRiskProfile(gPct);
-  const bal = totalBalance(i);
+  const profile = inferRiskProfile(i.growthAssetsPct);
   const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdminPct = COMPARISON_ADMIN_FLAT / bal + comparisonAdminPct(bal);
-  const cmpAnnualPct = comparisonAnnualFeePct(bal);
+  const cmpAdminPct = COMPARISON_ADMIN_FLAT / i.superBalance + comparisonAdminPct(i.superBalance);
+  const cmpAnnualPct = comparisonAnnualFeePct(i.superBalance);
   const cmpRate = cmpReturn - 0.025 - cmpAdminPct - cmpAnnualPct;
 
-  const startEx = bal;
-  const startCmp = startEx - comparisonAdviceFee(bal);
+  // P59 = (J16+R16) - N37 (advice fee deducted upfront)
+  const startEx = i.superBalance + (i.secondBalance ?? 0);
+  const startCmp = startEx - comparisonAdviceFee(i.superBalance);
 
   const rows: YearRow[] = [{ age: startAge, existing: startEx, comparison: startCmp }];
   let age = startAge;
@@ -254,14 +171,12 @@ export function projectWithdrawal(i: ClientInputs): { existing: YearRow[]; compa
   const annualWithdraw = annualDesiredIncome(i.desiredIncomeAmount, i.desiredIncomeFrequency);
 
   const exAdmin = existingAdminPct(i);
-  const gPct = weightedGrowthPct(i);
-  const bal = totalBalance(i);
-  const profile = inferRiskProfile(gPct);
+  const profile = inferRiskProfile(i.growthAssetsPct);
   const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdminPct = COMPARISON_ADMIN_FLAT / bal + comparisonAdminPct(bal);
+  const cmpAdminPct = COMPARISON_ADMIN_FLAT / i.superBalance + comparisonAdminPct(i.superBalance);
 
-  const exReturn = existingReturnPct(i);
-  const exFactor = (1 + exReturn * 0.5 - exAdmin);
+  // Existing growth in withdrawal: J25*0.5 - J22 (defensive mix, half return, full fees)
+  const exFactor = (1 + i.grossReturn * 0.5 - exAdmin);
   const cmpFactor = (1 + cmpReturn * 0.5 - cmpAdminPct);
 
   const buildSeries = (startBal: number, factor: number): YearRow[] => {
@@ -295,7 +210,6 @@ export function ageMoneyLasts(series: { age: number; balance: number }[]): numbe
 
 export interface ReportSummary {
   inputs: ClientInputs;
-  funds: FundEntry[]; // resolved funds for display
   startingBalance: number;
   retirementAge: number;
   yearsRemaining: number;
@@ -332,19 +246,15 @@ export function buildSummary(i: ClientInputs): ReportSummary {
   const annual = annualDesiredIncome(i.desiredIncomeAmount, i.desiredIncomeFrequency);
   const yrsEx = Math.max(0, ageEx - i.retirementAge);
   const yrsCmp = Math.max(0, ageCmp - i.retirementAge);
-  const gPct = weightedGrowthPct(i);
-  const profile = inferRiskProfile(gPct);
-  const bal = totalBalance(i);
+  const profile = inferRiskProfile(i.growthAssetsPct);
   const exAdmin = existingAdminPct(i);
   const exReturn = existingReturnPct(i);
   const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdmin = COMPARISON_ADMIN_FLAT / bal + comparisonAdminPct(bal);
-  const funds = resolveFunds(i);
+  const cmpAdmin = COMPARISON_ADMIN_FLAT / i.superBalance + comparisonAdminPct(i.superBalance);
 
   return {
     inputs: i,
-    funds,
-    startingBalance: bal,
+    startingBalance: i.superBalance + (i.secondBalance ?? 0),
     retirementAge: i.retirementAge,
     yearsRemaining: Math.max(0, i.retirementAge - i.age),
     goalBalance: i.goalBalance,

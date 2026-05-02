@@ -354,66 +354,38 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
 /* ------------------------------------------------------------------ */
 export function FundsPage({ s }: { s: ReportSummary }) {
   const i = s.inputs;
-  const funds = s.funds;
-  const bal = s.startingBalance;
-  const cmpAdminFlatPct = COMPARISON_ADMIN_FLAT / bal;
-  const cmpAdminBalPct = comparisonAdminPct(bal);
-  const weightedReturn = s.existingNetReturn;
-  const weightedGrowth = funds.reduce((acc, f) => acc + f.superBalance * f.growthAssetsPct, 0) / (bal || 1);
-
+  const cmpAdminFlatPct = COMPARISON_ADMIN_FLAT / i.superBalance;
+  const cmpAdminBalPct = comparisonAdminPct(i.superBalance);
   return (
     <PageShell>
       <PageHeader pageLabel="FUND DETAILS" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Current fund{funds.length > 1 ? "s" : ""} vs comparison</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Current fund vs comparison</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
-        {funds.length > 1
-          ? `You have ${funds.length} super funds. We show each fund's details and the combined weighted average used in projections.`
-          : "Side-by-side view of the existing fund settings and the comparison scenario used throughout this report."}
+        Side-by-side view of the existing fund settings and the comparison scenario used throughout this report.
       </p>
 
-      {/* Individual fund cards */}
-      {funds.map((fund, idx) => (
-        <SectionCard key={fund.id} title={funds.length > 1 ? `Fund ${idx + 1}: ${fund.fundName}` : "Current fund"} icon="◆" className="mb-4">
-          <Row label="Fund name" value={fund.fundName} />
-          <Row label="Investment option" value={fund.modelLabel} />
-          <Row label="Balance" value={fmtMoney(fund.superBalance)} />
-          {funds.length > 1 && <Row label="Weight" value={fmtPct(bal > 0 ? fund.superBalance / bal : 0, 1)} />}
-          <Row label="Growth assets" value={fmtPct(fund.growthAssetsPct, 0)} />
-          <Row label="Investment risk profile" value={fund.investmentRiskProfile || s.riskProfile} />
-          <Row label="5-year net return" value={fmtPct(fund.grossReturn)} />
-          <Row label="Admin fee - flat" value={fmtMoney(fund.adminFeeFlat)} />
-          <Row label="Admin fee - % of balance" value={fmtPct(fund.adminFeePct, 2)} />
-        </SectionCard>
-      ))}
-
-      {/* Weighted average summary for multi-fund */}
-      {funds.length > 1 && (
-        <SectionCard title="Combined weighted average" icon="★" className="mb-4">
-          <Row label="Total balance" value={fmtMoney(bal)} />
-          <Row label="Weighted 5-year net return" value={fmtPct(weightedReturn)} />
-          <Row label="Weighted growth assets" value={fmtPct(weightedGrowth, 0)} />
-          <Row label="Weighted admin fee %" value={fmtPct(s.existingAdminPct, 2)} />
-          <p className="text-[10px] text-muted-foreground mt-2">
-            Returns and fees are weighted by each fund's balance as a proportion of the total.
-          </p>
-        </SectionCard>
-      )}
-
       <div className="grid grid-cols-2 gap-4 mb-5">
-        {funds.length === 1 && (
-          <SectionCard title="Current fund" icon="◆">
-            <Row label="Effective admin fee %" value={fmtPct(s.existingAdminPct, 2)} />
-          </SectionCard>
-        )}
-        <SectionCard title="Comparison scenario" icon="◉" className={funds.length > 1 ? "col-span-2" : ""}>
+        <SectionCard title="Current fund" icon="◆">
+          <Row label="Fund name" value={i.fundName} />
+          <Row label="Investment option" value={i.modelLabel} />
+          <Row label="Growth assets" value={fmtPct(i.growthAssetsPct, 0)} />
+          <Row label="Investment risk profile" value={i.investmentRiskProfile || s.riskProfile} />
+          <Row label="5-year net return" value={fmtPct(i.grossReturn)} />
+          <Row label="Admin fee - flat" value={fmtMoney(i.adminFeeFlat)} />
+          <Row label="Admin fee - % of balance" value={fmtPct(i.adminFeePct, 2)} />
+          <Row label="Effective admin fee %" value={fmtPct(s.existingAdminPct, 2)} />
+          
+        </SectionCard>
+        <SectionCard title="Comparison scenario" icon="◉">
           <Row label="Scenario" value="Aligned to risk profile" />
           <Row label="Risk profile" value={s.riskProfile} />
-          <Row label="Net return (tiered by profile)" value={fmtPct(s.comparisonReturn - s.comparisonAdminPct - (Math.min(bal * 0.0176, 5000) / bal))} />
+          <Row label="Net return (tiered by profile)" value={fmtPct(s.comparisonReturn - s.comparisonAdminPct - (Math.min(i.superBalance * 0.0176, 5000) / i.superBalance))} />
           <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
           <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
           <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
           <Row label="Optional annual advice fee" value="1.76%" />
-          <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(bal))} />
+          <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(i.superBalance))} />
+          
         </SectionCard>
       </div>
 
@@ -434,7 +406,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           ))}
         </div>
         <p className="text-[10px] text-muted-foreground mt-3">
-          Profile is determined by the <strong>weighted growth assets %</strong> across all investment options.
+          Profile is determined by the <strong>growth assets %</strong> of the current investment option.
           Comparison gross returns are illustrative tiered figures.
         </p>
       </SectionCard>
