@@ -649,11 +649,17 @@ Deno.serve(async (req) => {
 
       // Hard verification: the percentage we extracted must literally appear
       // in the scraped page text near a 5-year mention and the option label.
+      // Also try the evidence text tokens as a fallback label (the AI may use
+      // the website's row label which differs from modelLabel, e.g. "Growth"
+      // vs "Core Strategy").
       const allText = pages.map((p) => p.text).join("\n");
       const verifyNotes: string[] = [];
+      const evidenceLabel = typeof figures.returnEvidenceText === "string"
+        ? figures.returnEvidenceText : "";
       if (
         figures.grossReturn != null &&
-        !returnAppearsNearOption(allText, figures.grossReturn, step1.modelLabel)
+        !returnAppearsNearOption(allText, figures.grossReturn, step1.modelLabel) &&
+        !returnAppearsNearOption(allText, figures.grossReturn, evidenceLabel)
       ) {
         figures.grossReturn = null;
         verifyNotes.push(
