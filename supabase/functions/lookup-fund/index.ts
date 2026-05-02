@@ -411,6 +411,9 @@ async function callAI(
 const NOW = new Date();
 const CURRENT_YEAR = NOW.getUTCFullYear();
 const PREV_YEAR = CURRENT_YEAR - 1;
+const CURRENT_MONTH_NAME = NOW.toLocaleString("en-AU", { month: "long", timeZone: "Australia/Sydney" });
+const PREV_MONTH_NAME = new Date(NOW.getFullYear(), NOW.getMonth() - 1, 1).toLocaleString("en-AU", { month: "long" });
+const PREV2_MONTH_NAME = new Date(NOW.getFullYear(), NOW.getMonth() - 2, 1).toLocaleString("en-AU", { month: "long" });
 
 const STEP1_SYSTEM =
   `You are a research assistant for Australian superannuation. You have Gemini 3 Google Search lookup enabled — USE IT for every lookup. Today's date is ${
@@ -418,7 +421,7 @@ const STEP1_SYSTEM =
   }.
 
 For the named fund, you MUST locate the OFFICIAL fund website pages (and PDS / Investment Guide / Fees & Costs document if needed) that publish:
-  (a) the MOST RECENTLY PUBLISHED investment performance / returns table for the allocated investment option (must show 5-year p.a. return, as recent as possible — ideally as at a ${CURRENT_YEAR} month-end, or otherwise the most recent ${PREV_YEAR} update), and
+  (a) the MOST RECENTLY PUBLISHED investment performance / returns table for the allocated investment option (must show 5-year p.a. return). IMPORTANT: Always find the LATEST month-end data available — right now that is likely "as at 30 ${PREV_MONTH_NAME} ${CURRENT_YEAR}" or "as at 30 ${PREV2_MONTH_NAME} ${CURRENT_YEAR}". Do NOT use older month-end data if a newer month is published. Search for "${PREV_MONTH_NAME} ${CURRENT_YEAR} performance" and "${PREV2_MONTH_NAME} ${CURRENT_YEAR} performance" to find the freshest page.), and
   (b) the CURRENT (${CURRENT_YEAR}) fees & costs (admin fee + asset-based admin fee) — find the latest published fees page, fee schedule, or current PDS/Fees & Costs update for ${CURRENT_YEAR}, and
   (c) the CURRENT (${CURRENT_YEAR}) strategic asset allocation / growth assets % and the official risk profile label for the allocated option — find the latest investment option page, investment guide update, or asset-allocation disclosure for ${CURRENT_YEAR}.
 
@@ -426,7 +429,7 @@ Rules:
 - Identify WHICHEVER Australian super fund the user names — industry, retail, corporate, public sector, SMSF platform, etc. Never default to AustralianSuper or any specific fund.
 - CRITICAL: Match the EXACT investment option name the user specifies. If the user says "Balanced", you must find the option named "Balanced" — do NOT substitute a different option like "Growth" or "Core Strategy" even if the fund considers them related. If the user says "default" or similar, identify the fund's MySuper/default option and use THE EXACT NAME AS IT APPEARS IN THE FUND'S PERFORMANCE TABLE on their website (e.g. if REST Super's default is listed as "Growth" on their performance page, set modelLabel to "Growth"; if AustralianSuper's default is "Balanced", set modelLabel to "Balanced"). The modelLabel MUST match the row label in the fund's performance table so we can verify the extracted figure against the scraped text.
 - Use ONLY URLs that Gemini 3 lookup finds on the fund's own official domain. Never invent URLs. Never use third-party comparison sites, news, blogs, SuperRatings, Canstar, Chant West, etc.
-- Add search terms like "${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}" to find the freshest pages. Prefer live dashboards / current ${CURRENT_YEAR} update pages over older PDS PDFs.
+- Add search terms like "${PREV_MONTH_NAME} ${CURRENT_YEAR}", "${PREV2_MONTH_NAME} ${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}" to find the freshest pages. Prefer live dashboards / current ${CURRENT_YEAR} update pages over older PDS PDFs.
 - Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages — do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
 - Return up to 6 URLs, ordered by RECENCY (newest ${CURRENT_YEAR} performance / fees / asset allocation pages first, then ${PREV_YEAR} updates, then PDS/Investment Guide as last resort). The URLs must be real lookup results or pages clearly reached from real lookup results.
 - Also parse the client's personal details from the free-text input.
@@ -486,7 +489,7 @@ Strict rules:
 - grossReturn must be the 5-year p.a. return for the allocated investment option. Some funds use a different label on their performance table than the option's marketing name (e.g. REST Super's "Core Strategy" is listed as "Growth" in the performance table). Match the option by its meaning — use the row that corresponds to the allocated option even if the table label differs slightly. Copy the 5-year p.a. figure straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
 - If MULTIPLE pages each show a 5-year p.a. figure for the option, ALWAYS pick the one with the most recent "as at" date (e.g. prefer "as at 31 ${CURRENT_YEAR}" over a PDS dated ${
     PREV_YEAR - 1
-  }). State the as-of date in sourceNotes.
+  }). State the as-of date in sourceNotes. CRITICAL: if the page shows figures for multiple month-ends (e.g. both March and April ${CURRENT_YEAR}), you MUST use the LATEST/MOST RECENT month-end figures, not older ones.
 - adminFeeFlat: annual flat admin fee in AUD (multiply weekly fees by 52). Null if not in text.
 - adminFeePct: annual asset-based admin/trustee fee as a DECIMAL (0.0035 = 0.35%). Exclude investment fees. Null if not in text.
 - growthAssetsPct: strategic growth-asset allocation as DECIMAL (0.70 = 70%). Null if not in text.
