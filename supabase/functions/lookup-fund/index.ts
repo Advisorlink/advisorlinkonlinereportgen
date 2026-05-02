@@ -621,7 +621,7 @@ Deno.serve(async (req) => {
     );
     const pages: { url: string; text: string }[] = scraped.filter(
       (p): p is { url: string; text: string } => p !== null,
-    ).slice(0, 4);
+    ).slice(0, 5);
 
     let figures: Record<string, unknown> = {
       adminFeeFlat: null,
