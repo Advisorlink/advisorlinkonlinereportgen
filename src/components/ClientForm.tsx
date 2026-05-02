@@ -116,10 +116,17 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                   }}
                   disabled={loading}
                 />
-                <Button onClick={handleSearch} disabled={loading} className="w-full">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  <span className="ml-2">{loading ? "Searching…" : "START SEARCH"}</span>
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={handleSearch} disabled={loading} className="flex-1">
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    <span className="ml-2">{loading ? "Searching…" : "START SEARCH"}</span>
+                  </Button>
+                  {lookupText && !loading && (
+                    <Button variant="outline" size="icon" onClick={() => setLookupText("")} title="Clear text">
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
               <p className="text-[10px] text-muted-foreground">
                 AI searches the web for the latest fees & returns, then fills the fields below. Always review before sending.
