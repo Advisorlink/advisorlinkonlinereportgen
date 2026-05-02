@@ -411,6 +411,9 @@ async function callAI(
 const NOW = new Date();
 const CURRENT_YEAR = NOW.getUTCFullYear();
 const PREV_YEAR = CURRENT_YEAR - 1;
+const CURRENT_MONTH_NAME = NOW.toLocaleString("en-AU", { month: "long", timeZone: "Australia/Sydney" });
+const PREV_MONTH_NAME = new Date(NOW.getFullYear(), NOW.getMonth() - 1, 1).toLocaleString("en-AU", { month: "long" });
+const PREV2_MONTH_NAME = new Date(NOW.getFullYear(), NOW.getMonth() - 2, 1).toLocaleString("en-AU", { month: "long" });
 
 const STEP1_SYSTEM =
   `You are a research assistant for Australian superannuation. You have Gemini 3 Google Search lookup enabled — USE IT for every lookup. Today's date is ${
