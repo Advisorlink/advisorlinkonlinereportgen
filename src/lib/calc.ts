@@ -295,6 +295,7 @@ export function ageMoneyLasts(series: { age: number; balance: number }[]): numbe
 
 export interface ReportSummary {
   inputs: ClientInputs;
+  funds: FundEntry[]; // resolved funds for display
   startingBalance: number;
   retirementAge: number;
   yearsRemaining: number;
