@@ -229,12 +229,15 @@ export function projectWithdrawal(i: ClientInputs): { existing: YearRow[]; compa
   const annualWithdraw = annualDesiredIncome(i.desiredIncomeAmount, i.desiredIncomeFrequency);
 
   const exAdmin = existingAdminPct(i);
-  const profile = inferRiskProfile(i.growthAssetsPct);
+  const exReturn = existingReturnPct(i);
+  const wGrowth = weightedGrowthPct(i);
+  const profile = inferRiskProfile(wGrowth);
+  const total = totalBalance(i);
   const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdminPct = COMPARISON_ADMIN_FLAT / i.superBalance + comparisonAdminPct(i.superBalance);
+  const cmpAdminPct = total > 0 ? COMPARISON_ADMIN_FLAT / total + comparisonAdminPct(total) : 0;
 
-  // Existing growth in withdrawal: J25*0.5 - J22 (defensive mix, half return, full fees)
-  const exFactor = (1 + i.grossReturn * 0.5 - exAdmin);
+  // Existing growth in withdrawal: weighted return * 0.5 - admin (defensive mix, half return, full fees)
+  const exFactor = (1 + exReturn * 0.5 - exAdmin);
   const cmpFactor = (1 + cmpReturn * 0.5 - cmpAdminPct);
 
   const buildSeries = (startBal: number, factor: number): YearRow[] => {
