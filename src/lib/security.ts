@@ -4,6 +4,8 @@ const ALLOWED_HOSTS = [
   "localhost",
   "127.0.0.1",
   "report-reimagine-pro.lovable.app",
+  "advisorlinkonlinereportgen.lovable.app",
+  "report.advisorlinkonline.com.au",
 ];
 
 export function isHostAllowed(): boolean {
