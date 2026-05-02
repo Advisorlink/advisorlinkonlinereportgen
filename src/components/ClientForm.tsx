@@ -127,7 +127,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                 )}
               </div>
               <p className="text-[10px] text-muted-foreground">
-                AI searches the web for the latest fees & returns, then fills the fields below. Always review before sending.
+                The search feature in this portal is only used to search the funds website. Always manually search the performance figures and growth assets.
               </p>
               {lastResult && (
                 <div className="mt-3 rounded-lg border border-border bg-gradient-to-br from-card to-muted/30 p-3 shadow-sm space-y-2.5">
