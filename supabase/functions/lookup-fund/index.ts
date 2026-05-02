@@ -274,7 +274,7 @@ function optionTokens(modelLabel: unknown): string[] {
     .split(/[^a-z0-9]+/)
     .filter((t) =>
       t.length > 3 &&
-      !["default", "mysuper", "option", "super", "fund"].includes(t)
+      !["default", "defult", "mysuper", "option", "super", "fund"].includes(t)
     );
 }
 
