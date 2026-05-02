@@ -128,18 +128,67 @@ export function annualDesiredIncome(amount: number, freq: IncomeFrequency): numb
   return amount;
 }
 
-// Existing scenario: weighted gross return (J26) and weighted admin fee % (J24)
-export function existingReturnPct(i: ClientInputs): number {
-  const a = i.superBalance, b = i.secondBalance ?? 0;
-  if (a + b === 0) return 0;
-  return (a * i.grossReturn + b * (i.secondReturn ?? 0)) / (a + b);
+// Resolve all fund entries — use funds[] if present, else build from legacy fields
+export function resolveFunds(i: ClientInputs): FundEntry[] {
+  if (i.funds && i.funds.length > 0) return i.funds;
+  // Legacy: build from single + optional second account
+  const entries: FundEntry[] = [{
+    id: "primary",
+    fundName: i.fundName,
+    modelLabel: i.modelLabel,
+    superBalance: i.superBalance,
+    growthAssetsPct: i.growthAssetsPct,
+    adminFeeFlat: i.adminFeeFlat,
+    adminFeePct: i.adminFeePct,
+    grossReturn: i.grossReturn,
+    investmentRiskProfile: i.investmentRiskProfile,
+  }];
+  if ((i.secondBalance ?? 0) > 0) {
+    entries.push({
+      id: "secondary",
+      fundName: i.fundName,
+      modelLabel: "Second Account",
+      superBalance: i.secondBalance ?? 0,
+      growthAssetsPct: i.secondGrowthPct ?? 0,
+      adminFeeFlat: i.secondAdminFlat ?? 0,
+      adminFeePct: i.secondAdminPct ?? 0,
+      grossReturn: i.secondReturn ?? 0,
+    });
+  }
+  return entries;
 }
+
+// Total balance across all funds
+export function totalBalance(i: ClientInputs): number {
+  const funds = resolveFunds(i);
+  return funds.reduce((s, f) => s + f.superBalance, 0);
+}
+
+// Weighted average growth assets % across all funds
+export function weightedGrowthPct(i: ClientInputs): number {
+  const funds = resolveFunds(i);
+  const total = funds.reduce((s, f) => s + f.superBalance, 0);
+  if (total === 0) return 0;
+  return funds.reduce((s, f) => s + f.superBalance * f.growthAssetsPct, 0) / total;
+}
+
+// Existing scenario: weighted gross return across all funds
+export function existingReturnPct(i: ClientInputs): number {
+  const funds = resolveFunds(i);
+  const total = funds.reduce((s, f) => s + f.superBalance, 0);
+  if (total === 0) return 0;
+  return funds.reduce((s, f) => s + f.superBalance * f.grossReturn, 0) / total;
+}
+
+// Existing scenario: weighted admin fee % across all funds
 export function existingAdminPct(i: ClientInputs): number {
-  const a = i.superBalance, b = i.secondBalance ?? 0;
-  const pa = (a > 0 ? i.adminFeeFlat / a + i.adminFeePct : 0);
-  const pb = (b > 0 ? (i.secondAdminFlat ?? 0) / b + (i.secondAdminPct ?? 0) : 0);
-  if (a + b === 0) return 0;
-  return (a * pa + b * pb) / (a + b);
+  const funds = resolveFunds(i);
+  const total = funds.reduce((s, f) => s + f.superBalance, 0);
+  if (total === 0) return 0;
+  return funds.reduce((s, f) => {
+    const pct = f.superBalance > 0 ? f.adminFeeFlat / f.superBalance + f.adminFeePct : 0;
+    return s + f.superBalance * pct;
+  }, 0) / total;
 }
 
 // Year cycle for ×0.9 / ×0.95 dips: every 7 years from year index 1.
