@@ -120,6 +120,11 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   <span className="ml-2">{loading ? "Searching…" : "START SEARCH"}</span>
                 </Button>
+                {lookupText.trim() && (
+                  <Button variant="outline" onClick={() => setLookupText("")} disabled={loading} className="w-full">
+                    Clear Text
+                  </Button>
+                )}
               </div>
               <p className="text-[10px] text-muted-foreground">
                 AI searches the web for the latest fees & returns, then fills the fields below. Always review before sending.
