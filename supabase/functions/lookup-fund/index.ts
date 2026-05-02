@@ -255,8 +255,12 @@ async function firecrawlSearch(query: string, limit = 6, timeoutMs = 8000): Prom
 function pctVariants(decimal: unknown): string[] {
   if (typeof decimal !== "number" || !Number.isFinite(decimal)) return [];
   const pct = decimal * 100;
+  // Keep BOTH stripped and unstripped variants so we match "7.50%" and "7.5%"
   return Array.from(
     new Set([
+      pct.toFixed(3),
+      pct.toFixed(2),
+      pct.toFixed(1),
       stripTrailingZeros(pct.toFixed(3)),
       stripTrailingZeros(pct.toFixed(2)),
       stripTrailingZeros(pct.toFixed(1)),
