@@ -75,7 +75,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
       </header>
 
       <div className="grid grid-cols-3 gap-3 mb-5">
-        <KpiCard label="Current Balance" value={fmtMoney(s.startingBalance)} sub={s.inputs.fundName} accent />
+        <KpiCard label="Current Balance" value={fmtMoney(s.startingBalance)} sub={getAllFunds(s.inputs).length > 1 ? `${getAllFunds(s.inputs).length} funds combined` : s.inputs.fundName} accent />
         <KpiCard label="Years to Retirement" value={String(s.yearsRemaining)} sub={`Age ${s.inputs.age} → ${s.retirementAge}`} />
         <KpiCard label="Potential Extra" value={fmtMoney(Math.max(0, s.potentialUplift))} sub="At retirement vs current" />
       </div>
