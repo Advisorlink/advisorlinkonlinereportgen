@@ -86,6 +86,12 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
 
   const handleSearch = () => runLookup(lookupText, applyLookupResult);
 
+  const updateFund = (idx: number, key: keyof FundEntry, val: string | number) => {
+    const funds = [...(value.additionalFunds ?? [])];
+    funds[idx] = { ...funds[idx], [key]: val };
+    onChange({ ...value, additionalFunds: funds });
+  };
+
   return (
     <div className="bg-card rounded-xl border border-border p-5 shadow-card">
       <button
