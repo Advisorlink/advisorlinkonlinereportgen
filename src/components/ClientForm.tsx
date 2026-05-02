@@ -220,7 +220,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
               <div className="col-span-2 flex justify-end -mt-1 -mb-1">
                 <Button
                   variant="ghost" size="sm"
-                  className="text-destructive hover:text-destructive h-7 text-[11px]"
+                  className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 h-7 text-[11px]"
                   onClick={() => {
                     const next = [...(value.additionalFunds ?? [])];
                     next.splice(idx, 1);
