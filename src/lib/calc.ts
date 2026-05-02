@@ -4,6 +4,17 @@
 export type IncomeFrequency = "Weekly" | "Monthly" | "Annually";
 export type RiskProfile = "High Growth" | "Growth" | "Balanced" | "Moderate" | "Conservative";
 
+export interface FundEntry {
+  fundName: string;
+  modelLabel: string;
+  superBalance: number;
+  growthAssetsPct: number;
+  grossReturn: number;
+  adminFeeFlat: number;
+  adminFeePct: number;
+  investmentRiskProfile?: string;
+}
+
 export interface ClientInputs {
   // Personal
   clientName: string;
