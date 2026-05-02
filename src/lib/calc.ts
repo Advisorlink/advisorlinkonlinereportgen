@@ -4,33 +4,66 @@
 export type IncomeFrequency = "Weekly" | "Monthly" | "Annually";
 export type RiskProfile = "High Growth" | "Growth" | "Balanced" | "Moderate" | "Conservative";
 
+/** A single super fund / investment option entry */
+export interface FundEntry {
+  id: string; // unique key for React
+  fundName: string;
+  modelLabel: string; // investment option
+  superBalance: number;
+  growthAssetsPct: number; // 0.7 = 70%
+  adminFeeFlat: number;
+  adminFeePct: number;
+  grossReturn: number; // 5-year net return e.g. 0.066
+  investmentRiskProfile?: string;
+  // lookup result metadata (not used in calcs)
+  sourceUrls?: string[];
+  sourceNotes?: string;
+  returnEvidenceText?: string;
+}
+
+export function createEmptyFund(): FundEntry {
+  return {
+    id: crypto.randomUUID(),
+    fundName: "",
+    modelLabel: "",
+    superBalance: 0,
+    growthAssetsPct: 0.7,
+    adminFeeFlat: 0,
+    adminFeePct: 0,
+    grossReturn: 0,
+  };
+}
+
 export interface ClientInputs {
   // Personal
   clientName: string;
   clientEmail?: string;
   age: number;
-  retirementAge: number; // N8
-  goalBalance: number; // N9
-  desiredIncomeAmount: number; // N11
-  desiredIncomeFrequency: IncomeFrequency; // N10
-  annualIncome: number; // N6 (salary)
+  retirementAge: number;
+  goalBalance: number;
+  desiredIncomeAmount: number;
+  desiredIncomeFrequency: IncomeFrequency;
+  annualIncome: number;
 
-  // Existing fund
-  fundName: string; // J15
-  superBalance: number; // J16
-  modelLabel: string; // J17 e.g. "Growth (Default)"
-  growthAssetsPct: number; // J18 (0.7 = 70%)
-  adminFeeFlat: number; // K21
-  adminFeePct: number; // O21
-  grossReturn: number; // J25 (0.066)
+  // Primary fund (kept for backward compat — used when funds[] is empty)
+  fundName: string;
+  superBalance: number;
+  modelLabel: string;
+  growthAssetsPct: number;
+  adminFeeFlat: number;
+  adminFeePct: number;
+  grossReturn: number;
   investmentRiskProfile?: string;
 
-  // Optional second account (R columns) — keep zeroed if not used
-  secondBalance?: number; // R16
-  secondGrowthPct?: number; // R18
-  secondAdminFlat?: number; // S21
-  secondAdminPct?: number; // W21
-  secondReturn?: number; // R25
+  // Multiple funds — the modern way. If non-empty, calcs use this instead of the single fields above.
+  funds?: FundEntry[];
+
+  // Legacy second account fields (still supported for XLSX import)
+  secondBalance?: number;
+  secondGrowthPct?: number;
+  secondAdminFlat?: number;
+  secondAdminPct?: number;
+  secondReturn?: number;
 }
 
 // Risk profile lookup (mirrors XLSX J27/J28 array formulas via growth-assets %)
