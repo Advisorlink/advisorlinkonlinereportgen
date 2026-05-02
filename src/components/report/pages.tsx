@@ -319,8 +319,8 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
 
       <SectionCard title="Position summary" icon="✦">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Based on {s.inputs.clientName.split(" ")[0]}'s current balance of <strong className="text-navy">{fmtMoney(s.startingBalance)}</strong>,
-          continued contributions of <strong className="text-navy">{fmtMoney(sgContrib)}</strong> per year and the existing fund's net return,
+          Based on {s.inputs.clientName.split(" ")[0]}'s current {getAllFunds(s.inputs).length > 1 ? "combined " : ""}balance of <strong className="text-navy">{fmtMoney(s.startingBalance)}</strong>{getAllFunds(s.inputs).length > 1 ? ` across ${getAllFunds(s.inputs).length} funds` : ""},
+          continued contributions of <strong className="text-navy">{fmtMoney(sgContrib)}</strong> per year and the existing fund{getAllFunds(s.inputs).length > 1 ? "s'" : "'s"} net return,
           the projected balance at age {s.retirementAge} is <strong className="text-navy">{fmtMoney(s.projectedExisting)}</strong>.
           The reference target of {fmtMoney(s.goalBalance)} is included for context only.
         </p>
