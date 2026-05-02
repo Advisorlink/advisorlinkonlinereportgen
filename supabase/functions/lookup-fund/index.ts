@@ -463,6 +463,7 @@ const STEP2_SYSTEM =
 Strict rules:
 - ONLY use numbers that literally appear in the provided page text. Do NOT use prior knowledge, do NOT estimate, do NOT use other time periods.
 - grossReturn must be the 5-year p.a. return for the EXACT allocated investment option, copied straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
+- CRITICAL: When multiple SOURCEs are provided, ALWAYS take the grossReturn (5-year p.a. return) from SOURCE 1 first. SOURCE 1 is the primary performance page. Only fall back to other sources if SOURCE 1 does not contain a 5-year figure for the option.
 - If MULTIPLE pages each show a 5-year p.a. figure for the option, ALWAYS pick the one with the most recent "as at" date (e.g. prefer "as at 31 ${CURRENT_YEAR}" over a PDS dated ${
     PREV_YEAR - 1
   }). State the as-of date in sourceNotes.
@@ -471,7 +472,7 @@ Strict rules:
 - growthAssetsPct: strategic growth-asset allocation as DECIMAL (0.70 = 70%). Null if not in text.
 - investmentRiskProfile: official risk label exactly as the page calls it (e.g. "High", "Medium to High", "Growth"). Null if not in text.
 - returnEvidenceText: copy the exact short snippet from the page text that contains the 5-year return + option label + as-of date if shown.
-- sourceNotes: short explanation including which URL the 5yr return came from AND the as-of date.
+- sourceNotes: short explanation including which URL the 5yr return came from AND the as-of date. Always mention which SOURCE number it came from.
 - Never use standard knowledge or memory. If a value is not literally in the provided text, return null for that field.
 - Be deterministic.`;
 
