@@ -310,6 +310,7 @@ export default function Presentations() {
         {showSlideshow && activeMeeting && (
           <PresentationSlideshow
             clientName={activeMeeting.client_name}
+            meetingId={activeMeeting.meeting_id}
             onClose={() => { setShowSlideshow(false); setPausedSlide(null); }}
             onShareReport={handleShareReport}
             initialSlide={pausedSlide ?? 0}
