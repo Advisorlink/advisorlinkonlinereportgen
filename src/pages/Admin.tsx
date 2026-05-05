@@ -254,11 +254,12 @@ export default function Admin() {
     setSelectedTemplate(templateKey);
     const firstName = getFirstName(emailDialog.report.client_name);
     const isReferral = templateKey === "referral";
+    const logoUrl = `${window.location.origin}/logo-email.png`;
     setEmailDialog(prev => ({
       ...prev,
       body: getTemplateBody(templateKey, prev.report!),
-      subject: isReferral ? "🎁 Get a $50 Gift Card – Referral Offer" : "Super Performance Report",
-      htmlBody: isReferral ? buildReferralEmailHtml(firstName) : undefined,
+      subject: isReferral ? "Get a $50 Gift Card – Referral Offer" : "Super Performance Report",
+      htmlBody: isReferral ? buildReferralEmailHtml(firstName, logoUrl) : undefined,
       isHtml: isReferral,
     }));
   };
@@ -271,15 +272,16 @@ export default function Admin() {
     closeEmailDialog();
     setSendBusyId(r.id);
     try {
+      const shouldAttachPdf = !emailDialog.isHtml;
       // Get the PDF blob — prefer stored copy, fall back to regeneration
       let pdfBlob: Blob | null = null;
-      if (r.pdf_path) {
+      if (shouldAttachPdf && r.pdf_path) {
         const { data, error } = await supabase.storage
           .from("client-reports")
           .download(r.pdf_path);
         if (!error && data) pdfBlob = data;
       }
-      if (!pdfBlob) {
+      if (shouldAttachPdf && !pdfBlob) {
         // Regenerate PDF on the fly
         setPdfStageInputs(resolveInputs(r));
         await new Promise(requestAnimationFrame);
@@ -306,17 +308,21 @@ export default function Admin() {
         setPdfStageInputs(null);
       }
 
-      // Convert blob to base64
-      const buf = await pdfBlob.arrayBuffer();
-      const bytes = new Uint8Array(buf);
-      let binary = "";
-      const chunk = 0x8000;
-      for (let i = 0; i < bytes.length; i += chunk) {
-        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      let pdfBase64: string | undefined;
+      let fileName: string | undefined;
+      if (shouldAttachPdf && pdfBlob) {
+        // Convert blob to base64
+        const buf = await pdfBlob.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let binary = "";
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+        }
+        pdfBase64 = btoa(binary);
+        fileName = `${(r.client_name.trim() || "Client")} Performance Report.pdf`;
       }
-      const pdfBase64 = btoa(binary);
 
-      const fileName = `${(r.client_name.trim() || "Client")} Performance Report.pdf`;
       const { data, error } = await supabase.functions.invoke("send-report-email", {
         body: {
           recipientEmail: emailDialog.to,
@@ -330,7 +336,7 @@ export default function Admin() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success(`Email sent to ${emailDialog.to} with PDF attached`);
+      toast.success(shouldAttachPdf ? `Email sent to ${emailDialog.to} with PDF attached` : `Gift card email sent to ${emailDialog.to}`);
     } catch (e) {
       console.error("Send email failed:", e);
       toast.error("Failed to send email", {
