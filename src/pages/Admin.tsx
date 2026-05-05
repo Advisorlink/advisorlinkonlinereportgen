@@ -195,6 +195,8 @@ export default function Admin() {
     to: string;
     subject: string;
     body: string;
+    htmlBody?: string;
+    isHtml?: boolean;
   }>({ open: false, report: null, to: "", subject: "", body: "" });
 
   const getFirstName = (fullName: string) => {
