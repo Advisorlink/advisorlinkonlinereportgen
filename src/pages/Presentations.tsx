@@ -151,7 +151,7 @@ export default function Presentations() {
         setInputs(data.inputs as any);
       }
     }
-    navigate("/", { state: { fromPresentation: true, pausedSlide: currentSlide } });
+    navigate("/admin", { state: { fromPresentation: true, pausedSlide: currentSlide } });
   };
 
   const deleteMeeting = async (id: string) => {
