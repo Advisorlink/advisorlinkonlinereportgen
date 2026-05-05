@@ -48,6 +48,7 @@ export default function Presentations() {
     recording,
     meetingJoinUrl,
     meetingVersion,
+    setPausedSlide: setGlobalPausedSlide,
     startMeeting,
     startScreenShare,
     stopScreenShare,
