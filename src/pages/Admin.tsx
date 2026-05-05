@@ -184,23 +184,81 @@ export default function Admin() {
     }
   };
 
-  const sendReportEmail = (r: ReportRow) => {
+  const [sendBusyId, setSendBusyId] = useState<string | null>(null);
+
+  const sendReportEmail = async (r: ReportRow) => {
     const clientEmail = (r.email ?? "").trim();
     if (!clientEmail) {
       toast.error("No email address on file for this client");
       return;
     }
-    const clientName = r.client_name.trim() || "there";
-    const subject = encodeURIComponent("Super Performance Report");
-    const body = encodeURIComponent(
-      `Hi ${clientName}\n\nHere is your Free performance report. Please note that this document is NOT to be taken as financial advice. It is just to help you understand if there is potential improvements you could be missing out on.\n\n`
-    );
-    // Open Gmail compose — user's signature is preserved automatically
-    window.open(
-      `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(clientEmail)}&su=${subject}&body=${body}`,
-      "_blank"
-    );
-    toast.info("Gmail opened — please attach the PDF before sending");
+    setSendBusyId(r.id);
+    try {
+      // Get the PDF blob — prefer stored copy, fall back to regeneration
+      let pdfBlob: Blob | null = null;
+      if (r.pdf_path) {
+        const { data, error } = await supabase.storage
+          .from("client-reports")
+          .download(r.pdf_path);
+        if (!error && data) pdfBlob = data;
+      }
+      if (!pdfBlob) {
+        // Regenerate PDF on the fly
+        setPdfStageInputs(resolveInputs(r));
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+        const root = pdfStageRef.current;
+        if (!root) throw new Error("Report not ready");
+        const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+          import("html2canvas"),
+          import("jspdf"),
+        ]);
+        const pages = Array.from(root.querySelectorAll(".report-page")) as HTMLElement[];
+        const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+        const canvases = await Promise.all(
+          pages.map(p => html2canvas(p, {
+            scale: 3, backgroundColor: "#ffffff", useCORS: true, imageTimeout: 0, logging: false,
+            windowWidth: p.scrollWidth, windowHeight: p.scrollHeight,
+          } as Parameters<typeof html2canvas>[1]))
+        );
+        for (let i = 0; i < canvases.length; i++) {
+          if (i > 0) pdf.addPage();
+          pdf.addImage(canvases[i].toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "SLOW");
+        }
+        pdfBlob = pdf.output("blob");
+        setPdfStageInputs(null);
+      }
+
+      // Convert blob to base64
+      const buf = await pdfBlob.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      let binary = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      const pdfBase64 = btoa(binary);
+
+      const fileName = `${(r.client_name.trim() || "Client")} Performance Report.pdf`;
+      const { data, error } = await supabase.functions.invoke("send-report-email", {
+        body: {
+          recipientEmail: clientEmail,
+          clientName: r.client_name.trim(),
+          pdfBase64,
+          fileName,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Email sent to ${clientEmail} with PDF attached`);
+    } catch (e) {
+      console.error("Send email failed:", e);
+      toast.error("Failed to send email", {
+        description: e instanceof Error ? e.message : "Unknown error",
+      });
+    } finally {
+      setSendBusyId(null);
+    }
   };
 
   const filteredReports = useMemo(() => {
@@ -326,8 +384,8 @@ export default function Admin() {
                         <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => downloadReportPdf(r)} disabled={pdfBusyId === r.id}>
                           <Download className="w-3.5 h-3.5 mr-1" /> {pdfBusyId === r.id ? "…" : "PDF"}
                         </Button>
-                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => sendReportEmail(r)}>
-                          <Send className="w-3.5 h-3.5 mr-1" /> Send
+                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => sendReportEmail(r)} disabled={sendBusyId === r.id}>
+                          <Send className="w-3.5 h-3.5 mr-1" /> {sendBusyId === r.id ? "Sending…" : "Send"}
                         </Button>
                         <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => deleteReport(r.id)}>
                           <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
