@@ -172,12 +172,7 @@ export default function MeetingJoin() {
     });
 
     ch.on("broadcast", { event: "meeting-ended" }, () => {
-      pcRef.current?.close();
-      pcRef.current = null;
-      remoteStreamRef.current = null;
-      setRemoteStream(null);
-      setStatus("ended");
-      clearSession();
+      markMeetingEnded();
       toast.info("The host has ended the meeting");
     });
 
@@ -189,7 +184,7 @@ export default function MeetingJoin() {
     });
     channelRef.current = ch;
     setStatus("waiting");
-  }, [setupPeerConnection]);
+  }, [markMeetingEnded, setupPeerConnection]);
 
   const joinMeeting = useCallback(async () => {
     const mid = meetingId.trim();
