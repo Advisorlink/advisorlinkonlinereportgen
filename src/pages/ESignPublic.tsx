@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { PDFDocument } from "pdf-lib";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, FileText, Loader2, AlertCircle, PenTool } from "lucide-react";
 import { toast } from "sonner";
@@ -15,6 +16,16 @@ interface ESignDoc {
   status: string;
   original_pdf_path: string | null;
   signing_token: string;
+  client_data?: any;
+}
+
+interface SigningField {
+  kind: "text" | "signature";
+  pageIndex: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 type PageState = "loading" | "ready" | "signing" | "submitted" | "already-signed" | "error";
@@ -117,6 +128,39 @@ export default function ESignPublic() {
     if (!doc || !signatureData) return;
     setSubmitting(true);
     try {
+      const signingFields: SigningField[] = (doc.client_data?.signing_fields || []).filter(
+        (field: SigningField) => field.kind === "signature"
+      );
+
+      let signedPdfPath: string | null = null;
+      if (doc.original_pdf_path && pdfUrl && signingFields.length > 0) {
+        const pdfBytes = await fetch(pdfUrl).then((res) => res.arrayBuffer());
+        const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+        const signatureImage = await pdfDoc.embedPng(signatureData);
+        const pages = pdfDoc.getPages();
+
+        for (const field of signingFields) {
+          const page = pages[field.pageIndex];
+          if (!page) continue;
+          const pageWidth = page.getWidth();
+          const pageHeight = page.getHeight();
+          const width = field.width * pageWidth;
+          const height = field.height * pageHeight;
+          page.drawImage(signatureImage, {
+            x: field.x * pageWidth + 6,
+            y: pageHeight - field.y * pageHeight - height + 4,
+            width: width - 12,
+            height: height - 8,
+          });
+        }
+
+        const completedBytes = await pdfDoc.save();
+        signedPdfPath = doc.original_pdf_path.replace(/\.pdf$/i, "_signed.pdf");
+        await supabase.storage
+          .from("esign-documents")
+          .upload(signedPdfPath, new Blob([completedBytes as BlobPart], { type: "application/pdf" }), { upsert: true });
+      }
+
       // Save signature (field 1)
       await supabase.from("esign_signatures").insert({
         document_id: doc.id,
@@ -138,7 +182,7 @@ export default function ESignPublic() {
       // Update document status
       await supabase
         .from("esign_documents")
-        .update({ status: "signed", signed_at: new Date().toISOString() })
+        .update({ status: "signed", signed_at: new Date().toISOString(), signed_pdf_path: signedPdfPath })
         .eq("id", doc.id);
 
       // Notify host
