@@ -18,7 +18,7 @@ interface Props {
   initialSlide?: number;
 }
 
-export function PresentationSlideshow({ clientName, meetingId, onClose, onShareReport, initialSlide = 0 }: Props) {
+export function PresentationSlideshow({ clientName, meetingId, clientConnected, clientCount = 0, screenSharePaused, onTogglePauseShare, onClose, onShareReport, initialSlide = 0 }: Props) {
   const [current, setCurrent] = useState(initialSlide);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
