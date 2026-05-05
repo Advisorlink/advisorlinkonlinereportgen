@@ -138,6 +138,22 @@ export default function Presentations() {
     if (created) loadData();
   };
 
+  const handleShareReport = async (currentSlide: number) => {
+    if (!activeMeeting) return;
+    setPausedSlide(currentSlide);
+    setShowSlideshow(false);
+
+    // Try to load the client's report inputs if we have a report_id
+    const meetingData = activeMeeting as any;
+    if (meetingData.report_id) {
+      const { data } = await supabase.from("reports").select("inputs").eq("id", meetingData.report_id).single();
+      if (data?.inputs) {
+        setInputs(data.inputs as any);
+      }
+    }
+    navigate("/", { state: { fromPresentation: true, pausedSlide: currentSlide } });
+  };
+
   const deleteMeeting = async (id: string) => {
     if (!confirm("Delete this meeting?")) return;
     const { error } = await supabase.from("meetings").delete().eq("id", id);
