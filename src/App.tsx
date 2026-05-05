@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ClientInputsProvider } from "@/hooks/useClientInputs";
+import { MeetingHostProvider } from "@/hooks/useMeetingHost";
 import { ProtectedApp } from "@/components/ProtectedApp";
 import Auth from "./pages/Auth.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
@@ -27,18 +28,20 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ClientInputsProvider>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<ProtectedApp><Dashboard /></ProtectedApp>} />
-              <Route path="/presentations" element={<ProtectedApp><Presentations /></ProtectedApp>} />
-              <Route path="/" element={<ProtectedApp><Index /></ProtectedApp>} />
-              <Route path="/admin" element={<ProtectedApp><Admin /></ProtectedApp>} />
-              <Route path="/referrals" element={<ProtectedApp><Referrals /></ProtectedApp>} />
-              <Route path="/refer" element={<ReferralForm />} />
-              <Route path="/refer/claim" element={<ReferralLanding />} />
-              <Route path="/meeting/join" element={<MeetingJoin />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <MeetingHostProvider>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/dashboard" element={<ProtectedApp><Dashboard /></ProtectedApp>} />
+                <Route path="/presentations" element={<ProtectedApp><Presentations /></ProtectedApp>} />
+                <Route path="/" element={<ProtectedApp><Index /></ProtectedApp>} />
+                <Route path="/admin" element={<ProtectedApp><Admin /></ProtectedApp>} />
+                <Route path="/referrals" element={<ProtectedApp><Referrals /></ProtectedApp>} />
+                <Route path="/refer" element={<ReferralForm />} />
+                <Route path="/refer/claim" element={<ReferralLanding />} />
+                <Route path="/meeting/join" element={<MeetingJoin />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </MeetingHostProvider>
           </ClientInputsProvider>
         </AuthProvider>
       </BrowserRouter>
