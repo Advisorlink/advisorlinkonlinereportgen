@@ -579,7 +579,8 @@ export default function Admin() {
                 (lead?.referrer_name ?? "").toLowerCase().includes(q) ||
                 (lead?.referrer_email ?? "").toLowerCase().includes(q)
               );
-              const matchesReferrer = !referrerFilter || (lead?.referrer_email?.toLowerCase() === referrerFilter);
+              const rf = referrerFilter.trim().toLowerCase();
+              const matchesReferrer = !rf || (lead?.referrer_name ?? "").toLowerCase().includes(rf) || (lead?.referrer_email ?? "").toLowerCase().includes(rf);
               return matchesSearch && matchesReferrer;
             });
 
