@@ -131,16 +131,6 @@ export default function ReferralForm() {
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Hero Card */}
         <div className="bg-white rounded-2xl border border-[#e5e9e8] shadow-sm overflow-hidden mb-6">
-          {/* Top banner */}
-          <div className="bg-[#29B6F6] px-5 sm:px-8 py-6 sm:py-8">
-            <p className="text-white/80 text-sm font-medium tracking-wide uppercase mb-1">
-              Referral Reward Program
-            </p>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white leading-snug">
-              Hey {clientFirstName || "there"}, want to earn a{" "}
-              <span className="text-[#FFD700]">$100 Gift Card</span>?
-            </h1>
-          </div>
 
           {/* Steps */}
           <div className="px-5 sm:px-8 py-6 sm:py-8 space-y-4">
