@@ -151,7 +151,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
       <tr>
         <td style="border-radius:14px;background: linear-gradient(135deg, ${teal}, #089e8c);">
           <a href="${referralFormUrl}" style="display:inline-block;padding:18px 48px;color:#ffffff;font-size:20px;font-weight:bold;text-decoration:none;letter-spacing:0.5px;">
-            ✨ Refer Now &amp; Earn $50 ✨
+            ✨ Refer Now &amp; Earn $100 ✨
           </a>
         </td>
       </tr>
