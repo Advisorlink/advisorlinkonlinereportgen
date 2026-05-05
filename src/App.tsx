@@ -38,9 +38,11 @@ const App = () => (
                 <Route path="/" element={<ProtectedApp><Index /></ProtectedApp>} />
                 <Route path="/admin" element={<ProtectedApp><Admin /></ProtectedApp>} />
                 <Route path="/referrals" element={<ProtectedApp><Referrals /></ProtectedApp>} />
+                <Route path="/esign" element={<ProtectedApp><ESign /></ProtectedApp>} />
                 <Route path="/refer" element={<ReferralForm />} />
                 <Route path="/refer/claim" element={<ReferralLanding />} />
                 <Route path="/meeting/join" element={<MeetingJoin />} />
+                <Route path="/esign/sign" element={<ESignPublic />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </MeetingHostProvider>
