@@ -314,10 +314,10 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
             </p>
           </div>
 
-          <div className="flex justify-between">
+           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep("select-client")}>Back</Button>
-            <Button onClick={handleProceedToEdit} className="gap-2">
-              Review Document <ArrowRight className="w-4 h-4" />
+            <Button onClick={handleProceedToSend} className="gap-2">
+              Send Document <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
