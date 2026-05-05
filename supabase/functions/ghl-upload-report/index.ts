@@ -185,7 +185,10 @@ async function resolveDocumentsFieldId(apiKey: string, locationId: string, conta
     return name.includes("document") || name.includes("review") || name.includes("super health");
   }) ?? fileFields[0];
 
-  return String(docsField?.id ?? "") || await findExistingContactFileFieldId(apiKey, contactId);
+  const existingFieldId = String(docsField?.id ?? "") || await findExistingContactFileFieldId(apiKey, contactId);
+  if (existingFieldId) return existingFieldId;
+
+  return await createDocumentsField(apiKey, locationId);
 }
 
 async function getLocationCustomFields(apiKey: string, locationId: string): Promise<Record<string, unknown>[]> {
@@ -228,6 +231,33 @@ async function findExistingContactFileFieldId(apiKey: string, contactId: string)
     return Boolean(value && typeof value === "object" && JSON.stringify(value).includes("documentId"));
   });
   return String(fileField?.id ?? "") || null;
+}
+
+async function createDocumentsField(apiKey: string, locationId: string): Promise<string | null> {
+  const res = await fetch(`${GHL_API}/locations/${encodeURIComponent(locationId)}/customFields`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Version: "2023-02-21",
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      name: "Documents",
+      dataType: "FILE_UPLOAD",
+      placeholder: "Upload client documents",
+      acceptedFormat: [".pdf"],
+      isMultipleFile: true,
+      maxNumberOfFiles: 10,
+      model: "contact",
+    }),
+  });
+
+  const text = await res.text().catch(() => "");
+  console.log("[ghl-upload] Create Documents field status:", res.status, text.slice(0, 300));
+  if (!res.ok) return null;
+  const data = text ? JSON.parse(text) : {};
+  return String(data?.customField?.id ?? data?.id ?? "") || null;
 }
 
 function normalizeFieldKey(value?: string): string {
