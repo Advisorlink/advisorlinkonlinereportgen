@@ -254,12 +254,11 @@ export default function Admin() {
     setSelectedTemplate(templateKey);
     const firstName = getFirstName(emailDialog.report.client_name);
     const isReferral = templateKey === "referral";
-    const logoUrl = `${window.location.origin}/logo-email.png`;
     setEmailDialog(prev => ({
       ...prev,
       body: getTemplateBody(templateKey, prev.report!),
       subject: isReferral ? "Get a $50 Gift Card - Referral Offer" : "Super Performance Report",
-      htmlBody: isReferral ? buildReferralEmailHtml(firstName, logoUrl) : undefined,
+      htmlBody: isReferral ? buildReferralEmailHtml(firstName) : undefined,
       isHtml: isReferral,
     }));
   };
