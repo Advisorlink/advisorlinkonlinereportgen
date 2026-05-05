@@ -323,7 +323,9 @@ export default function Admin() {
           clientName: r.client_name.trim(),
           pdfBase64,
           fileName,
-          customBody: emailDialog.body,
+          customBody: emailDialog.isHtml ? emailDialog.htmlBody : emailDialog.body,
+          isHtml: emailDialog.isHtml ?? false,
+          customSubject: emailDialog.subject,
         },
       });
       if (error) throw error;
