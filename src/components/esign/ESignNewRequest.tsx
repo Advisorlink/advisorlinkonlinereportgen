@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { ESignPdfEditor } from "./ESignPdfEditor";
 
 interface ReportRow {
   id: string;
@@ -15,7 +16,7 @@ interface ReportRow {
   inputs: Record<string, any> | null;
 }
 
-type Step = "upload" | "select-client" | "fill-details" | "confirm-send";
+type Step = "upload" | "select-client" | "fill-details" | "edit-pdf" | "confirm-send";
 
 export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   const { user } = useAuth();
