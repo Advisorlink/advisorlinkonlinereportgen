@@ -135,11 +135,11 @@ export default function ReferralForm() {
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Users className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-bold mb-2 font-heading">
-            Refer Friends & Family
+          <h1 className="text-3xl font-bold mb-3 font-heading">
+            Know 5 People Who'd Love a Free Report?
           </h1>
-          <p className="text-white/90 text-lg">
-            Share the gift of financial clarity — and earn a <strong>$50 Gift Card</strong> for yourself!
+          <p className="text-white/90 text-lg leading-relaxed">
+            Do you know 5 people that would like a free performance report like you got? Give them a call and ask if they'd like us to send them one. If you can get 5, you'll get a <strong>$100 Gift Card</strong>!! It's that simple.
           </p>
         </div>
 
