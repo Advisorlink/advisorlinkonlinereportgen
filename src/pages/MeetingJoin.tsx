@@ -299,16 +299,27 @@ export default function MeetingJoin() {
   if (status === "connected") {
     return (
       <div ref={viewingRef} className="min-h-screen min-h-[100dvh] bg-black flex flex-col relative">
-        <header className="px-4 py-3 bg-black/80 backdrop-blur-sm flex items-center justify-between shrink-0">
+        <header className="px-4 py-3 bg-black/80 backdrop-blur-sm flex items-center justify-between shrink-0 fullscreen-hide">
           <img src={logoSvg} alt="Advisor Link Online" className="h-7 sm:h-8" />
-          <span className="text-white/50 text-xs font-mono">ID: {meetingId}</span>
+          <div className="flex items-center gap-3">
+            <span className="text-white/50 text-xs font-mono">ID: {meetingId}</span>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-white/60 hover:text-white hover:bg-white/10 h-8 px-2"
+              onClick={openFullscreen}
+            >
+              <Maximize2 className="w-4 h-4" />
+            </Button>
+          </div>
         </header>
-        <main className="flex-1 flex items-center justify-center p-2 sm:p-4">
+        <main className="flex-1 flex items-center justify-center">
           <video
             ref={videoRef}
             autoPlay
             playsInline
-            className="w-full max-h-[calc(100dvh-80px)] rounded-lg bg-black shadow-2xl object-contain"
+            className="w-full h-full object-contain bg-black"
+            style={{ maxHeight: "100dvh" }}
           />
         </main>
         {showFullscreenPrompt && (
@@ -345,7 +356,7 @@ export default function MeetingJoin() {
             </div>
           </div>
         )}
-        <p className="text-white/30 text-[10px] text-center pb-2">You are viewing your consultant's screen</p>
+        <p className="text-white/30 text-[10px] text-center pb-2 fullscreen-hide">You are viewing your consultant's screen</p>
       </div>
     );
   }

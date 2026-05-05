@@ -121,3 +121,11 @@
     min-height: 297mm;
   }
 }
+
+/* Hide UI chrome when in native fullscreen */
+:fullscreen .fullscreen-hide {
+  display: none !important;
+}
+:-webkit-full-screen .fullscreen-hide {
+  display: none !important;
+}
