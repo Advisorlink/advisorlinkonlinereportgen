@@ -141,7 +141,8 @@ export function CoverPage({ s }: { s: ReportSummary }) {
 /* ------------------------------------------------------------------ */
 /* PAGE 1.5 - WHO WE ARE                                              */
 /* ------------------------------------------------------------------ */
-export function WhoWeArePage() {
+export function WhoWeArePage({ s }: { s: ReportSummary }) {
+  const hasPersonalContrib = annualPersonalContrib(s.inputs) > 0;
   const vetting = [
     "ASIC Registered",
     "RG146 Compliant",
@@ -151,7 +152,9 @@ export function WhoWeArePage() {
   ];
   const restrictions = [
     "Due to ASIC regulations, only a licensed adviser can discuss recommended product names.",
-    "This report does not include your personal contributions.",
+    ...(hasPersonalContrib
+      ? ["This report includes your personal contributions in projections."]
+      : ["This report does not include your personal contributions."]),
     "This report does not include insurance considerations.",
   ];
 
