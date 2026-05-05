@@ -22,6 +22,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   const { user } = useAuth();
   const [step, setStep] = useState<Step>("upload");
   const [file, setFile] = useState<File | null>(null);
+  const [editedFile, setEditedFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState("");
 
   // Client selection
