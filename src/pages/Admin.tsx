@@ -472,6 +472,56 @@ export default function Admin() {
         </section>
       </main>
 
+      {/* ---- Email compose dialog ---- */}
+      {emailDialog.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 p-6 space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold font-heading text-navy">Compose Email</h3>
+              <button onClick={closeEmailDialog} className="text-muted-foreground hover:text-foreground">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">To</label>
+                <Input
+                  value={emailDialog.to}
+                  onChange={e => setEmailDialog(prev => ({ ...prev, to: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Subject</label>
+                <Input
+                  value={emailDialog.subject}
+                  onChange={e => setEmailDialog(prev => ({ ...prev, subject: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Message</label>
+                <Textarea
+                  value={emailDialog.body}
+                  onChange={e => setEmailDialog(prev => ({ ...prev, body: e.target.value }))}
+                  rows={8}
+                  className="resize-y"
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground italic">
+                📎 PDF report will be attached automatically &bull; Your Gmail signature will be appended
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" size="sm" onClick={closeEmailDialog}>Cancel</Button>
+              <Button size="sm" onClick={confirmSendEmail} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
+                <Send className="w-3.5 h-3.5 mr-1" /> Send Email
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Offscreen stage used to render a saved report into a PDF without
           showing it to the user. */}
       {pdfStageInputs && (() => {
