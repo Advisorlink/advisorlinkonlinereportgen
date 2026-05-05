@@ -22,6 +22,7 @@ interface MeetingHostContextValue {
   clientConnected: boolean;
   clientCount: number;
   sharing: boolean;
+  screenSharePaused: boolean;
   stream: MediaStream | null;
   micOn: boolean;
   recording: boolean;
@@ -32,6 +33,7 @@ interface MeetingHostContextValue {
   startMeeting: (report: StartMeetingInput) => Promise<boolean>;
   startScreenShare: () => Promise<void>;
   stopScreenShare: () => void;
+  togglePauseScreenShare: () => void;
   endMeeting: () => Promise<void>;
   toggleMic: () => Promise<void>;
   toggleRecording: () => void;
@@ -59,6 +61,7 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
   const [clientCount, setClientCount] = useState(0);
   const [meetingVersion, setMeetingVersion] = useState(0);
   const [pausedSlide, setPausedSlide] = useState<number | null>(null);
+  const [screenSharePaused, setScreenSharePaused] = useState(false);
 
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
@@ -84,6 +87,7 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
     streamRef.current = null;
     setStream(null);
     setSharing(false);
+    setScreenSharePaused(false);
     cleanupPeerConnections();
     toast.info("Screen sharing stopped");
   }, [cleanupPeerConnections]);
@@ -375,11 +379,22 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
     toast.success("Meeting ID copied!");
   }, []);
 
+  const togglePauseScreenShare = useCallback(() => {
+    if (!streamRef.current) return;
+    const videoTrack = streamRef.current.getVideoTracks()[0];
+    if (!videoTrack) return;
+    const newPaused = !screenSharePaused;
+    videoTrack.enabled = !newPaused;
+    setScreenSharePaused(newPaused);
+    toast.info(newPaused ? "Screen share paused — client sees last frame" : "Screen share resumed");
+  }, [screenSharePaused]);
+
   const value = useMemo<MeetingHostContextValue>(() => ({
     activeMeeting,
     clientConnected: clientCount > 0,
     clientCount,
     sharing,
+    screenSharePaused,
     stream,
     micOn,
     recording,
@@ -390,12 +405,13 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
     startMeeting,
     startScreenShare,
     stopScreenShare,
+    togglePauseScreenShare,
     endMeeting,
     toggleMic,
     toggleRecording,
     copyMeetingLink,
     copyMeetingId,
-  }), [activeMeeting, clientCount, sharing, stream, micOn, recording, meetingJoinUrl, meetingVersion, pausedSlide, startMeeting, startScreenShare, stopScreenShare, endMeeting, toggleMic, toggleRecording, copyMeetingLink, copyMeetingId]);
+  }), [activeMeeting, clientCount, sharing, screenSharePaused, stream, micOn, recording, meetingJoinUrl, meetingVersion, pausedSlide, startMeeting, startScreenShare, stopScreenShare, togglePauseScreenShare, endMeeting, toggleMic, toggleRecording, copyMeetingLink, copyMeetingId]);
 
   return <MeetingHostContext.Provider value={value}>{children}</MeetingHostContext.Provider>;
 }

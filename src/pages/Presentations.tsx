@@ -52,6 +52,8 @@ export default function Presentations() {
     startMeeting,
     startScreenShare,
     stopScreenShare,
+    screenSharePaused,
+    togglePauseScreenShare,
     endMeeting,
     toggleMic,
     toggleRecording,
@@ -311,6 +313,10 @@ export default function Presentations() {
           <PresentationSlideshow
             clientName={activeMeeting.client_name}
             meetingId={activeMeeting.meeting_id}
+            clientConnected={clientConnected}
+            clientCount={clientCount}
+            screenSharePaused={screenSharePaused}
+            onTogglePauseShare={togglePauseScreenShare}
             onClose={() => { setShowSlideshow(false); setPausedSlide(null); }}
             onShareReport={handleShareReport}
             initialSlide={pausedSlide ?? 0}
