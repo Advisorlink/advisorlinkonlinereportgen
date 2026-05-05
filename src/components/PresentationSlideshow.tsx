@@ -96,41 +96,72 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
     >
       {/* Top bar — hidden by default, shows on hover */}
       <div
-        className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-2 bg-black/80 backdrop-blur z-10 transition-opacity duration-300 opacity-0 hover:opacity-100"
+        className="absolute top-0 left-0 right-0 z-10 transition-opacity duration-300 opacity-0 hover:opacity-100"
       >
-        <div className="flex items-center gap-3">
-          <span className="text-white/70 text-sm font-medium">
-            Presenting to <span className="text-white font-bold">{clientName}</span>
-          </span>
-          {meetingId && (
-            <span className="text-white/50 text-xs font-mono bg-white/10 px-2 py-0.5 rounded">
-              ID {meetingId}
+        <div className="flex items-center justify-between px-5 py-3 bg-black/85 backdrop-blur-md border-b border-white/10">
+          {/* Left: Client info */}
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-1">
+              <span className="text-white text-base font-bold tracking-wide">
+                {clientName}
+              </span>
+              {meetingId && (
+                <span className="text-white text-sm font-mono font-semibold tracking-wider">
+                  ID: {meetingId}
+                </span>
+              )}
+            </div>
+            {clientConnected ? (
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/40 text-xs font-semibold px-3 py-1 gap-1.5">
+                <Circle className="w-2 h-2 fill-green-400 text-green-400" />
+                {clientCount === 1 ? "Client Connected" : `${clientCount} Clients Connected`}
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-white/40 border-white/20 text-xs px-3 py-1 gap-1.5">
+                <Circle className="w-2 h-2 fill-white/30 text-white/30" />
+                Waiting for client
+              </Badge>
+            )}
+          </div>
+
+          {/* Right: Controls */}
+          <div className="flex items-center gap-3">
+            {onTogglePauseShare && (
+              <Button
+                size="sm"
+                className={screenSharePaused
+                  ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/40 h-8 px-3 text-xs"
+                  : "bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 border border-yellow-500/40 h-8 px-3 text-xs"
+                }
+                onClick={(e) => { e.stopPropagation(); onTogglePauseShare(); }}
+              >
+                {screenSharePaused ? <Play className="w-3.5 h-3.5 mr-1" /> : <Pause className="w-3.5 h-3.5 mr-1" />}
+                {screenSharePaused ? "Resume Share" : "Pause Share"}
+              </Button>
+            )}
+            <span className="text-white/50 text-xs font-mono">
+              {current + 1} / {TOTAL_SLIDES}
             </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-white/50 text-xs font-mono">
-            {current + 1} / {TOTAL_SLIDES}
-          </span>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8"
-            onClick={toggleFullscreen}
-            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-          >
-            {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-          </Button>
-          {!isFullscreen && (
             <Button
               size="icon"
               variant="ghost"
               className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8"
-              onClick={onClose}
+              onClick={toggleFullscreen}
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
             >
-              <X className="w-4 h-4" />
+              {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
             </Button>
-          )}
+            {!isFullscreen && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8"
+                onClick={onClose}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
