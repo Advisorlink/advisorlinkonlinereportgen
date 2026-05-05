@@ -6,7 +6,8 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
   const safeLogoUrl = logoUrl.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
   const referralFormUrl = `https://report.advisorlinkonline.com.au/refer?name=${encodeURIComponent(firstName)}&email=${encodeURIComponent(clientEmail)}`;
 
-  const teal = "#0BB5A0";
+  const brandBlue = "#1E88E5";
+  const brandBlueDark = "#1565C0";
   const gold = "#FFD700";
   const darkText = "#1a1a2e";
   const bodyText = "#3a3a4e";
@@ -46,7 +47,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
   <!-- TEAL HERO BANNER -->
   <tr><td class="px" style="padding:24px 32px 0;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:16px 16px 0 0;overflow:hidden;">
-      <tr><td class="hero" style="padding:32px;background-color:${teal};">
+      <tr><td class="hero" style="padding:32px;background:linear-gradient(135deg, ${brandBlueDark}, ${brandBlue});">
         <p style="margin:0 0 6px;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.8);">Referral Reward Program</p>
         <p class="hero-title" style="margin:0;font-size:26px;font-weight:bold;color:#ffffff;line-height:34px;">Hey ${safeName}, want to earn a <span style="color:${gold};">$100 Gift Card</span>?</p>
       </td></tr>
@@ -69,7 +70,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
               <td width="48" style="vertical-align:top;padding-right:14px;">
                 <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-                  <td style="width:40px;height:40px;border-radius:12px;background-color:rgba(11,181,160,0.1);text-align:center;line-height:40px;font-size:20px;">&#9742;</td>
+                  <td style="width:40px;height:40px;border-radius:12px;background-color:rgba(30,136,229,0.1);text-align:center;line-height:40px;font-size:20px;">&#9742;</td>
                 </tr></table>
               </td>
               <td style="vertical-align:top;">
@@ -87,7 +88,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
               <td width="48" style="vertical-align:top;padding-right:14px;">
                 <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-                  <td style="width:40px;height:40px;border-radius:12px;background-color:rgba(11,181,160,0.1);text-align:center;line-height:40px;font-size:20px;">&#10024;</td>
+                  <td style="width:40px;height:40px;border-radius:12px;background-color:rgba(30,136,229,0.1);text-align:center;line-height:40px;font-size:20px;">&#10024;</td>
                 </tr></table>
               </td>
               <td style="vertical-align:top;">
@@ -101,7 +102,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
       <!-- Reward Card -->
       <tr><td style="padding:0 24px 24px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:12px;overflow:hidden;">
-          <tr><td style="padding:28px 20px;text-align:center;background-color:${teal};border-radius:12px;">
+          <tr><td style="padding:28px 20px;text-align:center;background:linear-gradient(135deg, ${brandBlueDark}, ${brandBlue});border-radius:12px;">
             <p style="margin:0 0 4px;font-size:28px;">&#127873;</p>
             <p style="margin:0;font-size:16px;font-weight:600;color:#ffffff;line-height:24px;">Refer <span style="color:${gold};font-weight:bold;">5 people</span> and receive a</p>
             <p class="reward-amount" style="margin:4px 0 0;font-size:44px;font-weight:800;color:${gold};line-height:48px;letter-spacing:-1px;">$100 <span style="color:#ffffff;">Gift Card</span></p>

@@ -93,10 +93,10 @@ export default function ReferralForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#f4f7f6] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#f0f4f9] flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-8 sm:p-12 text-center border border-[#e5e9e8]">
-          <div className="w-16 h-16 bg-[#0BB5A0]/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-8 h-8 text-[#0BB5A0]" />
+          <div className="w-16 h-16 bg-[#1E88E5]/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-8 h-8 text-[#1E88E5]" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1a1a2e] mb-3">
             Thank You, {clientName}!
@@ -105,7 +105,7 @@ export default function ReferralForm() {
             Your referrals have been submitted successfully. We'll reach out to
             each of them with an invitation for a free Super Performance Report.
           </p>
-          <div className="inline-flex items-center gap-2 bg-[#0BB5A0]/10 text-[#0BB5A0] font-semibold text-lg px-6 py-3 rounded-xl">
+          <div className="inline-flex items-center gap-2 bg-[#1E88E5]/10 text-[#1E88E5] font-semibold text-lg px-6 py-3 rounded-xl">
             <Gift className="w-5 h-5" />
             Your $100 gift card is on its way!
           </div>
@@ -115,7 +115,7 @@ export default function ReferralForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7f6]">
+    <div className="min-h-screen bg-[#f0f4f9]">
       {/* Compact Header */}
       <header className="bg-white border-b border-[#e5e9e8]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4">
@@ -131,7 +131,7 @@ export default function ReferralForm() {
         {/* Hero Card */}
         <div className="bg-white rounded-2xl border border-[#e5e9e8] shadow-sm overflow-hidden mb-6">
           {/* Top banner */}
-          <div className="bg-[#0BB5A0] px-5 sm:px-8 py-6 sm:py-8">
+          <div className="bg-[#1E88E5] px-5 sm:px-8 py-6 sm:py-8">
             <p className="text-white/80 text-sm font-medium tracking-wide uppercase mb-1">
               Referral Reward Program
             </p>
@@ -149,9 +149,9 @@ export default function ReferralForm() {
 
             <div className="grid gap-3">
               {/* Step 1 */}
-              <div className="flex items-start gap-3 sm:gap-4 bg-[#f4f7f6] rounded-xl p-4">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#0BB5A0]/10 flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-[#0BB5A0]" />
+              <div className="flex items-start gap-3 sm:gap-4 bg-[#f0f4f9] rounded-xl p-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1E88E5]/10 flex items-center justify-center flex-shrink-0">
+                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-[#1E88E5]" />
                 </div>
                 <p className="text-[#3a3a4e] text-sm sm:text-base leading-relaxed pt-1.5 sm:pt-2">
                   <strong>Give them a call or send them a text</strong> - ask if they'd like us to send them a free report!
@@ -159,9 +159,9 @@ export default function ReferralForm() {
               </div>
 
               {/* Step 2 */}
-              <div className="flex items-start gap-3 sm:gap-4 bg-[#f4f7f6] rounded-xl p-4">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#0BB5A0]/10 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#0BB5A0]" />
+              <div className="flex items-start gap-3 sm:gap-4 bg-[#f0f4f9] rounded-xl p-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1E88E5]/10 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#1E88E5]" />
                 </div>
                 <p className="text-[#3a3a4e] text-sm sm:text-base leading-relaxed pt-1.5 sm:pt-2">
                   It's <strong>completely free</strong> for them, and you get rewarded for doing the legwork for us 😄
@@ -170,7 +170,7 @@ export default function ReferralForm() {
             </div>
 
             {/* Reward highlight */}
-            <div className="relative bg-gradient-to-br from-[#0BB5A0] to-[#089e8c] rounded-xl p-5 sm:p-6 text-white text-center mt-2">
+            <div className="relative bg-gradient-to-br from-[#1E88E5] to-[#1565C0] rounded-xl p-5 sm:p-6 text-white text-center mt-2">
               <Gift className="w-8 h-8 mx-auto mb-2 opacity-90" />
               <p className="text-base sm:text-lg font-semibold leading-snug">
                 Refer <span className="text-[#FFD700] font-bold">5 people</span> and receive a
@@ -197,10 +197,10 @@ export default function ReferralForm() {
               {referrals.map((entry, i) => (
                 <div
                   key={i}
-                  className="rounded-xl border border-[#e5e9e8] hover:border-[#0BB5A0]/40 transition-colors"
+                  className="rounded-xl border border-[#e5e9e8] hover:border-[#1E88E5]/40 transition-colors"
                 >
                   <div className="flex items-center gap-2.5 px-4 py-2.5 bg-[#f8fafb] border-b border-[#e5e9e8] rounded-t-xl">
-                    <span className="w-6 h-6 rounded-md bg-[#0BB5A0] text-white text-xs font-bold flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-md bg-[#1E88E5] text-white text-xs font-bold flex items-center justify-center">
                       {i + 1}
                     </span>
                     <span className="text-sm font-medium text-[#3a3a4e]">
@@ -212,21 +212,21 @@ export default function ReferralForm() {
                       placeholder="Full Name"
                       value={entry.name}
                       onChange={(e) => updateEntry(i, "name", e.target.value)}
-                      className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20 h-10 text-sm"
+                      className="border-[#e0e0e8] focus:border-[#1E88E5] focus:ring-[#1E88E5]/20 h-10 text-sm"
                     />
                     <Input
                       placeholder="Phone"
                       type="tel"
                       value={entry.phone}
                       onChange={(e) => updateEntry(i, "phone", e.target.value)}
-                      className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20 h-10 text-sm"
+                      className="border-[#e0e0e8] focus:border-[#1E88E5] focus:ring-[#1E88E5]/20 h-10 text-sm"
                     />
                     <Input
                       placeholder="Email"
                       type="email"
                       value={entry.email}
                       onChange={(e) => updateEntry(i, "email", e.target.value)}
-                      className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20 h-10 text-sm"
+                      className="border-[#e0e0e8] focus:border-[#1E88E5] focus:ring-[#1E88E5]/20 h-10 text-sm"
                     />
                   </div>
                 </div>
@@ -248,7 +248,7 @@ export default function ReferralForm() {
                   type="checkbox"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
-                  className="w-4 h-4 rounded border-[#c0b870] text-[#0BB5A0] focus:ring-[#0BB5A0]"
+                  className="w-4 h-4 rounded border-[#c0b870] text-[#1E88E5] focus:ring-[#1E88E5]"
                 />
                 <span className="text-xs sm:text-sm font-medium text-[#3a3a4e]">
                   I agree and give permission to contact my referrals
@@ -261,7 +261,7 @@ export default function ReferralForm() {
               <Button
                 onClick={handleSubmit}
                 disabled={submitting || filledEntries.length === 0 || !agreed}
-                className="w-full sm:w-auto bg-[#0BB5A0] hover:bg-[#099e8c] text-white px-8 py-5 text-base rounded-xl shadow-md transition-all disabled:opacity-50"
+                className="w-full sm:w-auto bg-[#1E88E5] hover:bg-[#1565C0] text-white px-8 py-5 text-base rounded-xl shadow-md transition-all disabled:opacity-50"
               >
                 {submitting ? (
                   "Submitting..."
