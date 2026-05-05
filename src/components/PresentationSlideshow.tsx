@@ -96,6 +96,11 @@ export function PresentationSlideshow({ clientName, onClose, onShareReport, init
           <span className="text-white/70 text-sm font-medium">
             Presenting to <span className="text-white font-bold">{clientName}</span>
           </span>
+          {meetingId && (
+            <span className="text-white/50 text-xs font-mono bg-white/10 px-2 py-0.5 rounded">
+              ID {meetingId}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-white/50 text-xs font-mono">
