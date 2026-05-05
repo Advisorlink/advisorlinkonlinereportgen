@@ -93,15 +93,21 @@ export default function MeetingJoin() {
 
     pc.ontrack = (e) => {
       if (e.streams[0]) {
+        remoteStreamRef.current = e.streams[0];
         setRemoteStream(e.streams[0]);
         setStatus("connected");
+        if (!fullscreenDismissed) setShowFullscreenPrompt(true);
       }
     };
 
     pc.oniceconnectionstatechange = () => {
       if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed") {
         setStatus("waiting");
-        toast.info("Screen share ended. Waiting for host to share again...");
+        remoteStreamRef.current = null;
+        setRemoteStream(null);
+        if (reconnectTimerRef.current) window.clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = window.setTimeout(() => requestFreshOffer("ice-reconnect"), 900);
+        toast.info("Reconnecting to the screen share...");
       }
     };
 
@@ -112,7 +118,7 @@ export default function MeetingJoin() {
     };
 
     return pc;
-  }, []);
+  }, [fullscreenDismissed, requestFreshOffer]);
 
   const connectToMeeting = useCallback(async (mid: string, cid: string) => {
     const ch = supabase.channel(`meeting:${mid}`, {
