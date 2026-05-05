@@ -136,6 +136,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
             email: confirmEmail,
             phone: clientPhone,
             address: clientAddress,
+            dob: clientDob,
             signing_fields: esignFields,
           },
           report_id: selectedReport?.id || null,
