@@ -77,7 +77,10 @@ export default function MeetingJoin() {
     const clientId = clientIdRef.current;
 
     const ch = supabase.channel(`meeting:${mid}`, {
-      config: { broadcast: { self: false } },
+      config: {
+        broadcast: { self: false },
+        presence: { key: `client-${clientId}` },
+      },
     });
 
     ch.on("broadcast", { event: "offer" }, async ({ payload }) => {
@@ -107,11 +110,13 @@ export default function MeetingJoin() {
       toast.info("The host has ended the meeting");
     });
 
-    await ch.subscribe();
+    await ch.subscribe(async (subscribeStatus) => {
+      if (subscribeStatus === "SUBSCRIBED") {
+        await ch.track({ role: "client", clientId });
+        ch.send({ type: "broadcast", event: "join", payload: { clientId } });
+      }
+    });
     channelRef.current = ch;
-
-    // Tell host we want to join
-    ch.send({ type: "broadcast", event: "join", payload: { clientId } });
     setStatus("waiting");
   }, [meetingId, setupPeerConnection]);
 
