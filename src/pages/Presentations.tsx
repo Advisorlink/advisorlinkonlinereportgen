@@ -52,6 +52,8 @@ export default function Presentations() {
     startMeeting,
     startScreenShare,
     stopScreenShare,
+    screenSharePaused,
+    togglePauseScreenShare,
     endMeeting,
     toggleMic,
     toggleRecording,
