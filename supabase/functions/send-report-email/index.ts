@@ -6,6 +6,8 @@ const CORS = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_mail/gmail/v1";
+const EMAIL_LOGO_URL = "https://report.advisorlinkonline.com.au/logo-email.png";
+const EMAIL_LOGO_CID = "advisorlink-logo";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -115,6 +117,24 @@ function buildRawEmail(
   return encoded.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+async function fetchInlineLogo(): Promise<InlineImage | null> {
+  try {
+    const res = await fetch(EMAIL_LOGO_URL);
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") || "image/png";
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    let binary = "";
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+    }
+    return { cid: EMAIL_LOGO_CID, contentType, fileName: "logo-email.png", base64: btoa(binary) };
+  } catch (e) {
+    console.warn("[send-report-email] Logo inline fetch failed:", e);
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
@@ -168,7 +188,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    const raw = buildRawEmail(recipientEmail, subject, fullHtml, pdfBase64, fileName);
+    const inlineLogo = isHtml ? await fetchInlineLogo() : null;
+    if (inlineLogo) {
+      fullHtml = fullHtml.replaceAll(EMAIL_LOGO_URL, `cid:${EMAIL_LOGO_CID}`);
+    }
+
+    const raw = buildRawEmail(recipientEmail, subject, fullHtml, pdfBase64, fileName, inlineLogo ? [inlineLogo] : []);
 
     console.log("[send-report-email] Sending to", recipientEmail, "file:", fileName, "signature:", signatureHtml ? "yes" : "no");
 
