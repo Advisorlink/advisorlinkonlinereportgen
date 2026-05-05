@@ -19,6 +19,7 @@ export interface ClientInputs {
   // Personal
   clientName: string;
   clientEmail?: string;
+  clientPhone?: string;
   age: number;
   retirementAge: number; // N8
   goalBalance: number; // N9

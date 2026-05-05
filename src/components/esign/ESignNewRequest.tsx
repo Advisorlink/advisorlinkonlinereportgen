@@ -79,7 +79,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
     const inputs = report.inputs || {};
     setClientName(report.client_name || "");
     setClientEmail(report.email || (inputs as any).email || "");
-    setClientPhone((inputs as any).phone || (inputs as any).mobile || "");
+    setClientPhone((inputs as any).clientPhone || (inputs as any).phone || (inputs as any).mobile || "");
     setClientAddress((inputs as any).address || "");
     setClientDob((inputs as any).dob || (inputs as any).date_of_birth || "");
     setStep("fill-details");
