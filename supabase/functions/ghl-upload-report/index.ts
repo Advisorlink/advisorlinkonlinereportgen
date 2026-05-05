@@ -8,6 +8,7 @@ const corsHeaders = {
 
 const GHL_API = "https://services.leadconnectorhq.com";
 const GHL_VERSION = "2021-07-28";
+const KNOWN_DOCUMENTS_FIELD_ID = "rpCMeE8PNtoJoPYR5D3V";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -164,10 +165,11 @@ function json(data: unknown, status = 200) {
 
 async function resolveDocumentsFieldId(apiKey: string, locationId: string, contactId: string, configuredKey?: string): Promise<string | null> {
   const rawConfiguredKey = cleanConfiguredFieldKey(configuredKey);
-  if (rawConfiguredKey) return rawConfiguredKey;
+  const normalizedConfiguredKey = normalizeFieldKey(rawConfiguredKey);
+  if (["contact.documents", "documents"].includes(normalizedConfiguredKey)) return KNOWN_DOCUMENTS_FIELD_ID;
+  if (/^[A-Za-z0-9]{12,}$/.test(rawConfiguredKey)) return rawConfiguredKey;
 
   const fields = await getLocationCustomFields(apiKey, locationId);
-  const normalizedConfiguredKey = normalizeFieldKey(rawConfiguredKey);
   if (normalizedConfiguredKey) {
     const configuredField = fields.find((field: Record<string, unknown>) => {
       const keys = [field.id, field.fieldKey, field.key, field.uniqueKey, field.name, field.label, field.fieldName]
