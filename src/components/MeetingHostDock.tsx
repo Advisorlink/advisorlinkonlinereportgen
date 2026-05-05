@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useMeetingHost } from "@/hooks/useMeetingHost";
-import { Circle, Copy, Monitor, ScreenShare, ScreenShareOff, StopCircle, UserCheck, UserX } from "lucide-react";
+import { Circle, Copy, Monitor, Presentation, ScreenShare, ScreenShareOff, StopCircle, UserCheck, UserX } from "lucide-react";
 
 export function MeetingHostDock() {
   const navigate = useNavigate();
@@ -10,6 +10,8 @@ export function MeetingHostDock() {
     clientConnected,
     clientCount,
     sharing,
+    pausedSlide,
+    setPausedSlide,
     startScreenShare,
     stopScreenShare,
     endMeeting,
