@@ -8,6 +8,7 @@ const corsHeaders = {
 
 const GHL_API = "https://services.leadconnectorhq.com";
 const GHL_VERSION = "2021-07-28";
+const KNOWN_DOCUMENTS_FIELD_ID = "rpCMeE8PNtoJoPYR5D3V";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -73,8 +74,8 @@ Deno.serve(async (req) => {
     }
     console.log("[ghl-upload] Contact found:", contactId);
 
-    // 2) Decode base64 → blob and upload into the contact's Documents/File Upload custom field.
-    // GHL powers the contact "Documents" area with a File Upload custom field, not conversation attachments.
+    // 2) Decode base64 → blob and upload into the configured Documents/File Upload field.
+    // Prefer the configured field key because this token may not have custom-field admin scopes.
     const bin = Uint8Array.from(atob(pdfBase64), (c) => c.charCodeAt(0));
     if (bin.byteLength > 50 * 1024 * 1024) {
       return json({
@@ -163,9 +164,12 @@ function json(data: unknown, status = 200) {
 }
 
 async function resolveDocumentsFieldId(apiKey: string, locationId: string, contactId: string, configuredKey?: string): Promise<string | null> {
-  const fields = await getLocationCustomFields(apiKey, locationId);
   const rawConfiguredKey = cleanConfiguredFieldKey(configuredKey);
   const normalizedConfiguredKey = normalizeFieldKey(rawConfiguredKey);
+  if (["contact.documents", "documents"].includes(normalizedConfiguredKey)) return KNOWN_DOCUMENTS_FIELD_ID;
+  if (/^[A-Za-z0-9]{12,}$/.test(rawConfiguredKey)) return rawConfiguredKey;
+
+  const fields = await getLocationCustomFields(apiKey, locationId);
   if (normalizedConfiguredKey) {
     const configuredField = fields.find((field: Record<string, unknown>) => {
       const keys = [field.id, field.fieldKey, field.key, field.uniqueKey, field.name, field.label, field.fieldName]
@@ -188,7 +192,7 @@ async function resolveDocumentsFieldId(apiKey: string, locationId: string, conta
   const existingFieldId = String(docsField?.id ?? "") || await findExistingContactFileFieldId(apiKey, contactId);
   if (existingFieldId) return existingFieldId;
 
-  return await createDocumentsField(apiKey, locationId);
+  return null;
 }
 
 async function getLocationCustomFields(apiKey: string, locationId: string): Promise<Record<string, unknown>[]> {
