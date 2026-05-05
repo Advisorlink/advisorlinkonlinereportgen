@@ -9,7 +9,7 @@ function createRawEmail(to: string, subject: string, htmlBody: string): string {
   const boundary = "boundary_" + Date.now();
   const email = [
     `To: ${to}`,
-    `Subject: ${subject}`,
+    `Subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=`,
     `MIME-Version: 1.0`,
     `Content-Type: multipart/alternative; boundary="${boundary}"`,
     "",
