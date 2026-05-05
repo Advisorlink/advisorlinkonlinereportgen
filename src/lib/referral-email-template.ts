@@ -1,10 +1,10 @@
 /**
  * Generates a referral email that matches the referral form page design.
  */
-export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png", clientEmail = ""): string {
-  const safeName = firstName.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
+export function buildReferralEmailHtml(clientFullName: string, logoUrl = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png", clientEmail = ""): string {
+  const safeName = clientFullName.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
   const safeLogoUrl = logoUrl.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
-  const referralFormUrl = `https://report.advisorlinkonline.com.au/refer?name=${encodeURIComponent(firstName)}&email=${encodeURIComponent(clientEmail)}`;
+  const referralFormUrl = `https://report.advisorlinkonline.com.au/refer?name=${encodeURIComponent(clientFullName)}&email=${encodeURIComponent(clientEmail)}`;
 
   const brandBlue = "#29B6F6";
   const brandBlueDark = "#1E88E5";
