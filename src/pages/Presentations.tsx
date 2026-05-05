@@ -188,18 +188,6 @@ export default function Presentations() {
             )}
 
             <div className="flex flex-wrap gap-3">
-              {!showSlideshow && (
-                <Button className="bg-gradient-to-r from-cyan to-primary text-white hover:opacity-90 h-10 px-5 text-sm font-semibold" onClick={() => setShowSlideshow(true)}>
-                  <Presentation className="w-4 h-4 mr-2" />
-                  <span>Start Presentation for {activeMeeting.client_name}</span>
-                </Button>
-              )}
-              {showSlideshow && (
-                <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-10 px-5 text-sm font-semibold" onClick={() => setShowSlideshow(false)}>
-                  <Presentation className="w-4 h-4 mr-2" />
-                  <span>Hide Presentation</span>
-                </Button>
-              )}
               {!sharing ? (
                 <Button className="bg-cyan text-cyan-foreground hover:bg-cyan/90 h-10 px-5 text-sm font-semibold" onClick={startScreenShare}>
                   <ScreenShare className="w-4 h-4 mr-2" />
@@ -238,17 +226,24 @@ export default function Presentations() {
               </Button>
             </div>
 
-            {showSlideshow && (
-              <PresentationSlideshow
-                clientName={activeMeeting.client_name}
-                onClose={() => setShowSlideshow(false)}
-              />
-            )}
-
             <p className="text-xs text-navy-foreground/50">
               Share this link with your client: <span className="text-cyan font-medium break-all">{meetingJoinUrl}</span> — they'll enter the meeting ID to see your screen.
             </p>
           </div>
+        )}
+
+        {activeMeeting && (
+          <Button className="bg-gradient-to-r from-cyan to-primary text-white hover:opacity-90 h-12 px-6 text-base font-semibold w-full" onClick={() => setShowSlideshow(true)}>
+            <Presentation className="w-5 h-5 mr-2" />
+            <span>Start Presentation for {activeMeeting.client_name}</span>
+          </Button>
+        )}
+
+        {showSlideshow && activeMeeting && (
+          <PresentationSlideshow
+            clientName={activeMeeting.client_name}
+            onClose={() => setShowSlideshow(false)}
+          />
         )}
 
         <div className="bg-card rounded-xl shadow-elevated p-6">
