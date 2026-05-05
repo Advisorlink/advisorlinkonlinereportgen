@@ -101,10 +101,10 @@ function signingRequestEmail(clientName: string, documentName: string, signingUr
       Hi <strong>${clientName}</strong>,
     </p>
     <p style="margin:0 0 16px;font-size:15px;color:#475569;line-height:1.6;">
-      Your adviser has prepared <strong style="color:#0f172a;">${documentName}</strong> for your review and signature.
+      Your Senior Consultant has prepared the <strong style="color:#0f172a;">${documentName}</strong> for your review and signature.
     </p>
     <p style="margin:0 0 28px;font-size:15px;color:#475569;line-height:1.6;">
-      Please take a moment to review the document carefully, then sign it electronically. The process is quick, easy and fully secure.
+      Please take a moment to review the document, then sign it electronically. The process is quick, easy and fully secure for your convenience.
     </p>
     <!-- CTA Button -->
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
