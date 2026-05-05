@@ -218,7 +218,7 @@ export default function Admin() {
       case "follow-up":
         return `Hi ${firstName},\n\nHere is your performance report that you requested. I have tried reaching out a few times because I said I would personally give you a call if there were any concerns. As you can see, there is a potential extra of ${potentialExtra} in your super by the age of ${retirementAge}, so I'm sure you would agree that is a fair bit of money back in your pocket. Please let me know when you have a spare 5 minutes that I can at least let you know what your options are and run you through it properly so at least you know what's going on, and then you can do what you like with that information.\n\nWe are available Monday - Friday 9am - 7pm QLD time.\n\nPlease let me know a time that works for you and I'll work something out in between clients,\n\nOr call me on\n\n0485991688`;
       case "referral":
-        return `Hi ${firstName},\n\nGet a $50 Gift Card just for referring your friends and family!\n\nSimply give us 7 Names and Numbers and you will receive a $50 Gift Card to spend!!\n\nYou just need to give us permission to say that you have referred them and that's it!! $50 is all yours!\n\nBUT WAIT THERE'S MORE HAHA\n\nIf any of your referrals choose to take on board the advice like you have, you receive a $100 GIFT CARD PER REFERRAL!!!\n\nWe are available Monday - Friday 9am - 7pm QLD time.\n\nOr call me on\n\n0485991688`;
+        return `Hi ${firstName},\n\nDo you know 5 people that would like a free performance report like you got? Give them a call and ask if they'd like us to send them one. If you can get 5, you'll get a $100 Gift Card!! It's that simple.\n\nYou just need to give us permission to say that you have referred them and that's it!! $100 is all yours!\n\nBUT WAIT THERE'S MORE HAHA\n\nIf any of your referrals choose to take on board the advice like you have, you receive a $100 GIFT CARD PER REFERRAL!!!\n\nWe are available Monday - Friday 9am - 7pm QLD time.\n\nOr call me on\n\n0485991688`;
       case "standard":
       default:
         return `Hi ${firstName},\n\nHere is your free performance report. Please note that this document is NOT to be taken as financial advice. It is just to help you understand if there are potential improvements you could be missing out on.`;
@@ -228,7 +228,7 @@ export default function Admin() {
   const EMAIL_TEMPLATES = [
     { key: "standard", label: "Standard – Free Report" },
     { key: "follow-up", label: "Follow-Up – Call Request" },
-    { key: "referral", label: "Referral – $50 Gift Card" },
+    { key: "referral", label: "Referral – $100 Gift Card" },
   ];
 
   const [selectedTemplate, setSelectedTemplate] = useState("standard");
@@ -257,7 +257,7 @@ export default function Admin() {
     setEmailDialog(prev => ({
       ...prev,
       body: getTemplateBody(templateKey, prev.report!),
-      subject: isReferral ? "Get a $50 Gift Card - Referral Offer" : "Super Performance Report",
+      subject: isReferral ? "Get a $100 Gift Card - Referral Offer" : "Super Performance Report",
       htmlBody: isReferral ? buildReferralEmailHtml(firstName) : undefined,
       isHtml: isReferral,
     }));

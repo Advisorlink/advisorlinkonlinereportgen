@@ -50,7 +50,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:16px;overflow:hidden;">
       <tr><td class="gift-card" style="padding:40px 32px;text-align:center;background-color:${teal};border-radius:16px;">
         <p style="margin:0 0 4px;font-size:13px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.85);">Exclusive Client Reward</p>
-        <p class="hero-amount" style="margin:0;font-size:88px;font-weight:bold;color:#ffffff;line-height:92px;letter-spacing:-3px;">$50</p>
+        <p class="hero-amount" style="margin:0;font-size:88px;font-weight:bold;color:#ffffff;line-height:92px;letter-spacing:-3px;">$100</p>
         <p class="hero-subtitle" style="margin:4px 0 0;font-size:22px;font-weight:bold;color:#ffffff;letter-spacing:2px;">GIFT CARD</p>
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px auto 0;"><tr>
           <td style="background-color:rgba(255,255,255,0.2);border-radius:30px;padding:8px 20px;">
@@ -90,8 +90,8 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
             </tr></table>
           </td>
           <td style="vertical-align:top;">
-            <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:${darkText};">Send us 7 names &amp; numbers</p>
-            <p style="margin:0;font-size:14px;color:${bodyText};line-height:22px;">Share friends or family who might benefit from a free super review and you'll receive a <strong style="color:${teal};">$50 Gift Card</strong> to spend however you like.</p>
+            <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:${darkText};">Know 5 people who'd love a free report?</p>
+            <p style="margin:0;font-size:14px;color:${bodyText};line-height:22px;">Do you know 5 people that would like a free performance report like you got? Give them a call and ask if they'd like us to send them one. Get 5 and you'll receive a <strong style="color:${teal};">$100 Gift Card</strong>!</p>
           </td>
         </tr></table>
       </td></tr>
@@ -110,7 +110,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
           </td>
           <td style="vertical-align:top;">
             <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:${darkText};">Give us permission to mention you</p>
-            <p style="margin:0;font-size:14px;color:${bodyText};line-height:22px;">That's literally it — let us say you referred them, and the <strong style="color:${darkText};">$50 is all yours</strong>.</p>
+            <p style="margin:0;font-size:14px;color:${bodyText};line-height:22px;">That's literally it — let us say you referred them, and the <strong style="color:${darkText};">$100 is all yours</strong>.</p>
           </td>
         </tr></table>
       </td></tr>
@@ -151,7 +151,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
       <tr>
         <td style="border-radius:14px;background: linear-gradient(135deg, ${teal}, #089e8c);">
           <a href="${referralFormUrl}" style="display:inline-block;padding:18px 48px;color:#ffffff;font-size:20px;font-weight:bold;text-decoration:none;letter-spacing:0.5px;">
-            ✨ Refer Now &amp; Earn $50 ✨
+            ✨ Refer Now &amp; Earn $100 ✨
           </a>
         </td>
       </tr>
