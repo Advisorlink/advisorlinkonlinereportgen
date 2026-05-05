@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download, Send, X, Users, Gift, Phone, Mail, User, MapPin, DollarSign, Building } from "lucide-react";
+import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download, Send, X, Users, Gift, Phone, Mail, User, MapPin, DollarSign, Building, Filter } from "lucide-react";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { buildReferralEmailHtml } from "@/lib/referral-email-template";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
@@ -546,23 +546,15 @@ export default function Admin() {
                   className="pl-9"
                 />
               </div>
-              <select
-                value={referrerFilter}
-                onChange={e => setReferrerFilter(e.target.value)}
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm w-full sm:w-auto"
-              >
-                <option value="">All Referrers</option>
-                {(() => {
-                  const names = new Map<string, string>();
-                  referralLeads.forEach(l => {
-                    const key = l.referrer_email.toLowerCase();
-                    if (!names.has(key)) names.set(key, l.referrer_name);
-                  });
-                  return Array.from(names.entries()).map(([email, name]) => (
-                    <option key={email} value={email}>{name}</option>
-                  ));
-                })()}
-              </select>
+               <div className="relative w-full sm:w-56">
+                 <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                 <Input
+                   value={referrerFilter}
+                   onChange={e => setReferrerFilter(e.target.value)}
+                   placeholder="Filter by referrer..."
+                   className="pl-9"
+                 />
+               </div>
             </div>
           </div>
 
@@ -587,7 +579,8 @@ export default function Admin() {
                 (lead?.referrer_name ?? "").toLowerCase().includes(q) ||
                 (lead?.referrer_email ?? "").toLowerCase().includes(q)
               );
-              const matchesReferrer = !referrerFilter || (lead?.referrer_email?.toLowerCase() === referrerFilter);
+              const rf = referrerFilter.trim().toLowerCase();
+              const matchesReferrer = !rf || (lead?.referrer_name ?? "").toLowerCase().includes(rf) || (lead?.referrer_email ?? "").toLowerCase().includes(rf);
               return matchesSearch && matchesReferrer;
             });
 
