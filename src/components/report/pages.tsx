@@ -5,7 +5,7 @@ import {
   comparisonAdminPct, COMPARISON_ADMIN_FLAT,
   comparisonAnnualFee, comparisonAdviceFee,
   getAllFunds, totalBalance, weightedGrowthPct,
-  existingReturnPct, inferRiskProfile,
+  existingReturnPct, inferRiskProfile, annualPersonalContrib,
 } from "@/lib/calc";
 import {
   PageShell, PageHeader, PageFooter, KpiCard, SectionCard,
