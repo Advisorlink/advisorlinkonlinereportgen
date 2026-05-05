@@ -93,12 +93,14 @@ Deno.serve(async (req) => {
     if (!GOOGLE_MAIL_API_KEY) return json({ error: "GOOGLE_MAIL_API_KEY not configured" }, 500);
 
     const body = await req.json().catch(() => ({}));
-    const { recipientEmail, clientName, pdfBase64, fileName, customBody } = body as {
+    const { recipientEmail, clientName, pdfBase64, fileName, customBody, isHtml, customSubject } = body as {
       recipientEmail?: string;
       clientName?: string;
       pdfBase64?: string;
       fileName?: string;
       customBody?: string;
+      isHtml?: boolean;
+      customSubject?: string;
     };
 
     if (!recipientEmail || !pdfBase64 || !fileName) {
@@ -106,21 +108,28 @@ Deno.serve(async (req) => {
     }
 
     const name = (clientName ?? "").trim() || "there";
-    const subject = "Super Performance Report";
-
-    // Use customBody if provided by the user (from the edit dialog), otherwise default
-    const plainBody = customBody ??
-      `Hi ${name}\n\nHere is your Free performance report. Please note that this document is NOT to be taken as financial advice. It is just to help you understand if there is potential improvements you could be missing out on.`;
-
-    // Convert plain text body to simple HTML
-    const bodyHtmlParts = plainBody.split("\n").map((line: string) => line === "" ? "<br>" : `<p style="margin:0">${line.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`);
+    const subject = customSubject ?? "Super Performance Report";
 
     // Fetch Gmail signature
     const signatureHtml = await fetchSignature(LOVABLE_API_KEY, GOOGLE_MAIL_API_KEY);
 
-    let fullHtml = bodyHtmlParts.join("\n");
-    if (signatureHtml) {
-      fullHtml += `\n<br>\n<div class="gmail_signature">${signatureHtml}</div>`;
+    let fullHtml: string;
+
+    if (isHtml && customBody) {
+      // Already formatted HTML — use as-is, append signature
+      fullHtml = customBody;
+      if (signatureHtml) {
+        fullHtml += `\n<br>\n<div class="gmail_signature">${signatureHtml}</div>`;
+      }
+    } else {
+      // Plain text — convert to simple HTML
+      const plainBody = customBody ??
+        `Hi ${name}\n\nHere is your Free performance report. Please note that this document is NOT to be taken as financial advice. It is just to help you understand if there is potential improvements you could be missing out on.`;
+      const bodyHtmlParts = plainBody.split("\n").map((line: string) => line === "" ? "<br>" : `<p style="margin:0">${line.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`);
+      fullHtml = bodyHtmlParts.join("\n");
+      if (signatureHtml) {
+        fullHtml += `\n<br>\n<div class="gmail_signature">${signatureHtml}</div>`;
+      }
     }
 
     const raw = buildRawEmail(recipientEmail, subject, fullHtml, pdfBase64, fileName);

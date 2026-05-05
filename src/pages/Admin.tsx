@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download, Send, X } from "lucide-react";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
+import { buildReferralEmailHtml } from "@/lib/referral-email-template";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
 import {
   CoverPage, WhoWeArePage, SnapshotPage, FundsPage,
@@ -194,6 +195,8 @@ export default function Admin() {
     to: string;
     subject: string;
     body: string;
+    htmlBody?: string;
+    isHtml?: boolean;
   }>({ open: false, report: null, to: "", subject: "", body: "" });
 
   const getFirstName = (fullName: string) => {
@@ -249,9 +252,14 @@ export default function Admin() {
   const applyTemplate = (templateKey: string) => {
     if (!emailDialog.report) return;
     setSelectedTemplate(templateKey);
+    const firstName = getFirstName(emailDialog.report.client_name);
+    const isReferral = templateKey === "referral";
     setEmailDialog(prev => ({
       ...prev,
       body: getTemplateBody(templateKey, prev.report!),
+      subject: isReferral ? "🎁 Get a $50 Gift Card – Referral Offer" : "Super Performance Report",
+      htmlBody: isReferral ? buildReferralEmailHtml(firstName) : undefined,
+      isHtml: isReferral,
     }));
   };
 
@@ -315,7 +323,9 @@ export default function Admin() {
           clientName: r.client_name.trim(),
           pdfBase64,
           fileName,
-          customBody: emailDialog.body,
+          customBody: emailDialog.isHtml ? emailDialog.htmlBody : emailDialog.body,
+          isHtml: emailDialog.isHtml ?? false,
+          customSubject: emailDialog.subject,
         },
       });
       if (error) throw error;
@@ -553,15 +563,30 @@ export default function Admin() {
                   onChange={e => setEmailDialog(prev => ({ ...prev, subject: e.target.value }))}
                 />
               </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Message</label>
-                <Textarea
-                  value={emailDialog.body}
-                  onChange={e => setEmailDialog(prev => ({ ...prev, body: e.target.value }))}
-                  rows={10}
-                  className="resize-y"
-                />
-              </div>
+              {emailDialog.isHtml ? (
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Preview (Designed Template)</label>
+                  <div className="rounded-md border border-input overflow-hidden" style={{ maxHeight: 320 }}>
+                    <iframe
+                      srcDoc={emailDialog.htmlBody}
+                      title="Email preview"
+                      className="w-full border-0"
+                      style={{ height: 300, pointerEvents: "none" }}
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1">This is a designed HTML email — it will look exactly like this in the recipient's inbox.</p>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Message</label>
+                  <Textarea
+                    value={emailDialog.body}
+                    onChange={e => setEmailDialog(prev => ({ ...prev, body: e.target.value }))}
+                    rows={10}
+                    className="resize-y"
+                  />
+                </div>
+              )}
               <p className="text-[11px] text-muted-foreground italic">
                 📎 PDF report will be attached automatically &bull; Your Gmail signature will be appended
               </p>
