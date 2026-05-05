@@ -142,6 +142,7 @@ export default function Presentations() {
   const handleShareReport = async (currentSlide: number) => {
     if (!activeMeeting) return;
     setPausedSlide(currentSlide);
+    setGlobalPausedSlide(currentSlide);
     setShowSlideshow(false);
 
     // Try to load the client's report inputs if we have a report_id
@@ -152,7 +153,7 @@ export default function Presentations() {
         setInputs(data.inputs as any);
       }
     }
-    navigate("/admin", { state: { fromPresentation: true, pausedSlide: currentSlide } });
+    navigate("/");
   };
 
   const deleteMeeting = async (id: string) => {
