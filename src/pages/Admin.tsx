@@ -37,6 +37,7 @@ export default function Admin() {
   const handleResumePresentation = () => {
     nav("/presentations", { state: { resumeSlide: presentationState?.pausedSlide ?? 0 } });
   };
+  const { profile, loading } = useAuth();
   const { setInputs } = useClientInputs();
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportSearch, setReportSearch] = useState("");
