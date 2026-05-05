@@ -155,8 +155,8 @@ export function PresentationSlideshow({ clientName, onClose, onShareReport, init
           </button>
         )}
 
-        {/* Share Report button — only on slide 3 (index 2), bottom right */}
-        {onShareReport && current === 2 && (
+        {/* Share Report button — only on slide 6 (index 5), bottom right */}
+        {onShareReport && current === 5 && (
           <Button
             onClick={handleShareReport}
             className="absolute bottom-6 right-6 bg-white text-navy hover:bg-white/90 font-semibold shadow-lg px-6 py-2 h-auto text-base z-20"
