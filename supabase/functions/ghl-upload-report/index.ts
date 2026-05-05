@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
       return json({ error: "Missing email, fileName, or pdfBase64" }, 400);
     }
 
-    // 1) Lookup contact by email
+    console.log("[ghl-upload] Email:", email, "File:", fileName, "Base64 length:", pdfBase64.length);
     const lookupUrl = `${GHL_API}/contacts/search/duplicate?locationId=${encodeURIComponent(locationId)}&email=${encodeURIComponent(email)}`;
     const lookup = await fetch(lookupUrl, {
       headers: {
