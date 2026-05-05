@@ -106,8 +106,10 @@ Deno.serve(async (req) => {
       body: fd,
     });
 
+    console.log("[ghl-upload] Upload response status:", up.status);
     if (!up.ok) {
       const t = await up.text();
+      console.log("[ghl-upload] Upload failed:", up.status, t);
       if (up.status === 401 && t.toLowerCase().includes("scope")) {
         return json({
           skipped: true,
