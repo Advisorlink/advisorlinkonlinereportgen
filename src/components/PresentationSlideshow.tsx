@@ -7,6 +7,7 @@ const SLIDE_URLS = Array.from({ length: TOTAL_SLIDES }, (_, i) => `/slides/slide
 
 interface Props {
   clientName: string;
+  meetingId?: string;
   onClose: () => void;
   onShareReport?: (currentSlide: number) => void;
   initialSlide?: number;
