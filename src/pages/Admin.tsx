@@ -196,20 +196,60 @@ export default function Admin() {
     body: string;
   }>({ open: false, report: null, to: "", subject: "", body: "" });
 
+  const getFirstName = (fullName: string) => {
+    const trimmed = (fullName ?? "").trim();
+    if (!trimmed) return "there";
+    return trimmed.split(/\s+/)[0];
+  };
+
+  const getTemplateBody = (templateKey: string, r: ReportRow) => {
+    const firstName = getFirstName(r.client_name);
+    const inputs = resolveInputs(r);
+    const summary = buildSummary(inputs);
+    const potentialExtra = summary.potentialExtra != null
+      ? `$${Math.round(summary.potentialExtra).toLocaleString()}`
+      : "(Potential Extra Amount)";
+    const retirementAge = inputs.targetRetirementAge ?? "(Target Retirement Age)";
+
+    switch (templateKey) {
+      case "follow-up":
+        return `Hi ${firstName},\n\nHere is your performance report that you requested. I have tried reaching out a few times because I said I would personally give you a call if there were any concerns. As you can see, there is a potential extra of ${potentialExtra} just super by the age of ${retirementAge}, so I'm sure you would agree that is a fair bit of money back in your pocket. Please let me know when you have a spare 5 minutes that I can at least let you know what your options are and run you through it properly so at least you know what's going on, and then you can do what you like with that information.\n\nWe are available Monday - Friday 9am - 7pm QLD time.\n\nPlease let me know a time that works for you and I'll work something out in between clients,\n\nOr call me on\n0485991688`;
+      case "standard":
+      default:
+        return `Hi ${firstName},\n\nHere is your free performance report. Please note that this document is NOT to be taken as financial advice. It is just to help you understand if there are potential improvements you could be missing out on.`;
+    }
+  };
+
+  const EMAIL_TEMPLATES = [
+    { key: "standard", label: "Standard – Free Report" },
+    { key: "follow-up", label: "Follow-Up – Call Request" },
+  ];
+
+  const [selectedTemplate, setSelectedTemplate] = useState("standard");
+
   const openEmailDialog = (r: ReportRow) => {
     const clientEmail = (r.email ?? "").trim();
     if (!clientEmail) {
       toast.error("No email address on file for this client");
       return;
     }
-    const name = (r.client_name ?? "").trim() || "there";
+    setSelectedTemplate("standard");
     setEmailDialog({
       open: true,
       report: r,
       to: clientEmail,
       subject: "Super Performance Report",
-      body: `Hi ${name}\n\nHere is your Free performance report. Please note that this document is NOT to be taken as financial advice. It is just to help you understand if there is potential improvements you could be missing out on.`,
+      body: getTemplateBody("standard", r),
     });
+  };
+
+  const applyTemplate = (templateKey: string) => {
+    if (!emailDialog.report) return;
+    setSelectedTemplate(templateKey);
+    setEmailDialog(prev => ({
+      ...prev,
+      body: getTemplateBody(templateKey, prev.report!),
+    }));
   };
 
   const closeEmailDialog = () => setEmailDialog(prev => ({ ...prev, open: false, report: null }));
