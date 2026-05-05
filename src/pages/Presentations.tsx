@@ -52,7 +52,7 @@ export default function Presentations() {
   const [clientConnected, setClientConnected] = useState(false);
 
   // Realtime channel for signaling
-  const [channel, setChannel] = useState<ReturnType<typeof supabase.channel> | null>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -61,10 +61,28 @@ export default function Presentations() {
     { urls: "stun:stun1.l.google.com:19302" },
   ];
 
+  // Load data + restore active meeting on mount
   useEffect(() => {
     if (!profile?.is_owner) return;
     loadData();
+    restoreActiveMeeting();
   }, [profile]);
+
+  // Cleanup on unmount: DON'T end the meeting, just clean up local resources
+  useEffect(() => {
+    return () => {
+      // Unsubscribe from channel but don't end the meeting
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      // Close peer connections
+      peerConnectionsRef.current.forEach((pc) => pc.close());
+      peerConnectionsRef.current = new Map();
+      // Note: we do NOT stop streams or update DB status here
+      // The meeting stays alive for when the user navigates back
+    };
+  }, []);
 
   const loadData = async () => {
     const [{ data: r }, { data: m }] = await Promise.all([
@@ -75,42 +93,32 @@ export default function Presentations() {
     setMeetings((m as MeetingRow[]) || []);
   };
 
-  const filteredReports = reports.filter((r) => {
-    const q = search.trim().toLowerCase();
-    if (!q) return true;
-    return r.client_name.toLowerCase().includes(q) || (r.email ?? "").toLowerCase().includes(q);
-  });
+  // Restore an active/waiting meeting if one exists in the DB
+  const restoreActiveMeeting = async () => {
+    if (!profile) return;
+    const { data } = await supabase
+      .from("meetings")
+      .select("*")
+      .eq("host_user_id", profile.id)
+      .in("status", ["waiting", "active"])
+      .order("created_at", { ascending: false })
+      .limit(1);
 
-  const handleSelectClient = (r: ReportRow) => {
-    setSelectedReport(r);
-    setSelectOpen(false);
-    setConfirmOpen(true);
+    if (data && data.length > 0) {
+      const meeting = data[0] as MeetingRow;
+      setActiveMeeting(meeting);
+      setSharing(false); // Screen share won't persist across navigation
+      setClientConnected(false);
+      setupSignalingChannel(meeting);
+    }
   };
 
-  // Step 1: Start meeting — just creates DB record + signaling channel (NO screen share yet)
-  const startMeeting = async () => {
-    if (!selectedReport) return;
-    setConfirmOpen(false);
-
-    const { data, error } = await supabase.from("meetings").insert({
-      host_user_id: profile!.id,
-      report_id: selectedReport.id,
-      client_name: selectedReport.client_name,
-      client_email: selectedReport.email,
-      status: "waiting",
-    } as never).select().single();
-
-    if (error || !data) {
-      toast.error("Failed to create meeting");
-      return;
+  const setupSignalingChannel = (meeting: MeetingRow) => {
+    // Clean up any existing channel
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
     }
 
-    const meeting = data as MeetingRow;
-    setActiveMeeting(meeting);
-    setClientConnected(false);
-    setSharing(false);
-
-    // Set up Realtime signaling channel
     const ch = supabase.channel(`meeting:${meeting.meeting_id}`, {
       config: { broadcast: { self: false } },
     });
@@ -120,7 +128,6 @@ export default function Presentations() {
       setClientConnected(true);
       toast.success("Client has joined the meeting!");
 
-      // If screen is already being shared, set up WebRTC for this client
       const currentStream = streamRef.current;
       if (currentStream) {
         setupPeerConnection(ch, clientId, currentStream);
@@ -149,8 +156,46 @@ export default function Presentations() {
       toast.info("Client has left the meeting");
     });
 
-    await ch.subscribe();
-    setChannel(ch);
+    ch.subscribe();
+    channelRef.current = ch;
+  };
+
+  const filteredReports = reports.filter((r) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return r.client_name.toLowerCase().includes(q) || (r.email ?? "").toLowerCase().includes(q);
+  });
+
+  const handleSelectClient = (r: ReportRow) => {
+    setSelectedReport(r);
+    setSelectOpen(false);
+    setConfirmOpen(true);
+  };
+
+  // Start meeting — creates DB record + signaling channel
+  const startMeeting = async () => {
+    if (!selectedReport) return;
+    setConfirmOpen(false);
+
+    const { data, error } = await supabase.from("meetings").insert({
+      host_user_id: profile!.id,
+      report_id: selectedReport.id,
+      client_name: selectedReport.client_name,
+      client_email: selectedReport.email,
+      status: "waiting",
+    } as never).select().single();
+
+    if (error || !data) {
+      toast.error("Failed to create meeting");
+      return;
+    }
+
+    const meeting = data as MeetingRow;
+    setActiveMeeting(meeting);
+    setClientConnected(false);
+    setSharing(false);
+
+    setupSignalingChannel(meeting);
 
     await supabase.from("meetings").update({ status: "waiting", started_at: new Date().toISOString() } as never).eq("id", meeting.id);
     loadData();
@@ -183,9 +228,9 @@ export default function Presentations() {
     peerConnectionsRef.current.set(clientId, pc);
   };
 
-  // Step 2: Share screen — triggered by a separate button
+  // Share screen — triggered by a separate button
   const startScreenShare = async () => {
-    if (!activeMeeting || !channel) return;
+    if (!activeMeeting || !channelRef.current) return;
 
     try {
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
@@ -201,15 +246,11 @@ export default function Presentations() {
         stopScreenShare();
       });
 
-      // Update meeting status to active
       await supabase.from("meetings").update({ status: "active" } as never).eq("id", activeMeeting.id);
       setActiveMeeting((prev) => prev ? { ...prev, status: "active" } : null);
       loadData();
 
-      // If a client is already connected, set up peer connections
-      // The client will re-join via broadcast, which will trigger setupPeerConnection
-      // Notify any connected clients to re-join to pick up the stream
-      channel.send({ type: "broadcast", event: "screen-ready", payload: {} });
+      channelRef.current.send({ type: "broadcast", event: "screen-ready", payload: {} });
 
       toast.success("Screen sharing started!");
     } catch (e) {
@@ -224,7 +265,6 @@ export default function Presentations() {
     streamRef.current = null;
     setSharing(false);
 
-    // Close peer connections (clients will see stream end)
     peerConnectionsRef.current.forEach((pc) => pc.close());
     peerConnectionsRef.current = new Map();
 
@@ -254,10 +294,10 @@ export default function Presentations() {
     peerConnectionsRef.current = new Map();
 
     // Notify clients
-    if (channel) {
-      channel.send({ type: "broadcast", event: "meeting-ended", payload: {} });
-      await channel.unsubscribe();
-      setChannel(null);
+    if (channelRef.current) {
+      channelRef.current.send({ type: "broadcast", event: "meeting-ended", payload: {} });
+      await supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
     }
 
     // Update DB
@@ -352,6 +392,19 @@ export default function Presentations() {
 
   const meetingJoinUrl = `${window.location.origin}/meeting/join`;
 
+  // Compute display status for history (show "ended" for non-active meetings that are the current one)
+  const getDisplayStatus = (m: MeetingRow) => {
+    // If this is the active meeting, show its live status
+    if (activeMeeting && m.id === activeMeeting.id) {
+      return activeMeeting.status;
+    }
+    // For non-active meetings that still show "waiting" or "active", display as "ended"
+    if (m.status === "waiting" || m.status === "active") {
+      return "ended";
+    }
+    return m.status;
+  };
+
   return (
     <CRMLayout>
       <div className="p-6 max-w-6xl mx-auto space-y-8">
@@ -373,14 +426,12 @@ export default function Presentations() {
         {/* Active meeting panel */}
         {activeMeeting && (
           <div className="bg-gradient-to-r from-navy to-[hsl(215_50%_18%)] rounded-xl p-6 text-white space-y-5">
-            {/* Top row: client info + meeting ID + client status */}
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <p className="text-xs text-white/60 font-semibold uppercase tracking-wider">Active Meeting</p>
                 <p className="text-lg font-bold mt-1">{activeMeeting.client_name}</p>
               </div>
               <div className="flex items-center gap-6">
-                {/* Client status indicator */}
                 <div className="flex items-center gap-2">
                   {clientConnected ? (
                     <>
@@ -396,7 +447,6 @@ export default function Presentations() {
                     </>
                   )}
                 </div>
-                {/* Meeting ID */}
                 <div className="text-center">
                   <p className="text-xs text-white/60 mb-1">Meeting ID</p>
                   <button
@@ -409,9 +459,7 @@ export default function Presentations() {
               </div>
             </div>
 
-            {/* Controls */}
             <div className="flex flex-wrap gap-3">
-              {/* Share / Stop Share Screen button */}
               {!sharing ? (
                 <Button className="bg-cyan text-cyan-foreground hover:bg-cyan/90 h-10 px-5 text-sm font-semibold" onClick={startScreenShare}>
                   <ScreenShare className="w-4 h-4 mr-2" />
@@ -473,20 +521,23 @@ export default function Presentations() {
                   </tr>
                 </thead>
                 <tbody>
-                  {meetings.map((m) => (
-                    <tr key={m.id} className="border-b border-border/50">
-                      <td className="py-2 pr-4 font-medium">{m.client_name}</td>
-                      <td className="py-2 pr-4 font-mono text-xs">{m.meeting_id}</td>
-                      <td className="py-2 pr-4">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                          m.status === "active" ? "bg-emerald-100 text-emerald-700" :
-                          m.status === "waiting" ? "bg-amber-100 text-amber-700" :
-                          "bg-muted text-muted-foreground"
-                        }`}>{m.status}</span>
-                      </td>
-                      <td className="py-2 text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</td>
-                    </tr>
-                  ))}
+                  {meetings.map((m) => {
+                    const displayStatus = getDisplayStatus(m);
+                    return (
+                      <tr key={m.id} className="border-b border-border/50">
+                        <td className="py-2 pr-4 font-medium">{m.client_name}</td>
+                        <td className="py-2 pr-4 font-mono text-xs">{m.meeting_id}</td>
+                        <td className="py-2 pr-4">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                            displayStatus === "active" ? "bg-emerald-100 text-emerald-700" :
+                            displayStatus === "waiting" ? "bg-amber-100 text-amber-700" :
+                            "bg-muted text-muted-foreground"
+                          }`}>{displayStatus}</span>
+                        </td>
+                        <td className="py-2 text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
