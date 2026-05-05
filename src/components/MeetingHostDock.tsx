@@ -44,6 +44,19 @@ export function MeetingHostDock() {
         </button>
 
         <div className="flex flex-wrap items-center gap-2">
+          {pausedSlide != null && (
+            <Button
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3 text-xs animate-pulse"
+              onClick={() => {
+                const slide = pausedSlide;
+                setPausedSlide(null);
+                navigate("/presentations", { state: { resumeSlide: slide } });
+              }}
+            >
+              <Presentation className="w-3.5 h-3.5 mr-1" />
+              <span>Resume Presentation</span>
+            </Button>
+          )}
           <Button className="bg-navy-foreground/10 border border-navy-foreground/20 text-navy-foreground hover:bg-navy-foreground/20 h-9 px-3 text-xs" onClick={copyMeetingId}>
             <Copy className="w-3.5 h-3.5 mr-1" />
             <span>Copy ID</span>
