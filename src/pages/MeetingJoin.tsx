@@ -299,7 +299,7 @@ export default function MeetingJoin() {
   // ----- Connected / viewing screen share -----
   if (status === "connected") {
     return (
-      <div className="min-h-screen min-h-[100dvh] bg-black flex flex-col">
+      <div ref={viewingRef} className="min-h-screen min-h-[100dvh] bg-black flex flex-col relative">
         <header className="px-4 py-3 bg-black/80 backdrop-blur-sm flex items-center justify-between shrink-0">
           <img src={logoSvg} alt="Advisor Link Online" className="h-7 sm:h-8" />
           <span className="text-white/50 text-xs font-mono">ID: {meetingId}</span>
@@ -312,6 +312,40 @@ export default function MeetingJoin() {
             className="w-full max-h-[calc(100dvh-80px)] rounded-lg bg-black shadow-2xl object-contain"
           />
         </main>
+        {showFullscreenPrompt && (
+          <div className="fixed inset-x-3 bottom-5 z-50 mx-auto max-w-sm rounded-2xl border border-white/15 bg-black/85 p-4 text-white shadow-2xl backdrop-blur-xl sm:bottom-8">
+            <button
+              type="button"
+              aria-label="Close fullscreen prompt"
+              className="absolute right-3 top-3 rounded-full p-1 text-white/60 transition-colors hover:text-white"
+              onClick={() => {
+                setFullscreenDismissed(true);
+                setShowFullscreenPrompt(false);
+              }}
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="pr-7">
+              <p className="text-base font-semibold">Make this full screen?</p>
+              <p className="mt-1 text-sm text-white/60">This makes the shared screen easier to read on your phone.</p>
+            </div>
+            <div className="mt-4 flex gap-2">
+              <Button className="h-11 flex-1 rounded-xl" onClick={openFullscreen}>
+                <Maximize2 className="mr-2 h-4 w-4" /> Yes, full screen
+              </Button>
+              <Button
+                variant="outline"
+                className="h-11 rounded-xl border-white/15 bg-white/10 text-white hover:bg-white/15 hover:text-white"
+                onClick={() => {
+                  setFullscreenDismissed(true);
+                  setShowFullscreenPrompt(false);
+                }}
+              >
+                Not now
+              </Button>
+            </div>
+          </div>
+        )}
         <p className="text-white/30 text-[10px] text-center pb-2">You are viewing your consultant's screen</p>
       </div>
     );
