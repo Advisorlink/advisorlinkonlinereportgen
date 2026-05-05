@@ -233,7 +233,7 @@ export default function Presentations() {
         )}
 
         {activeMeeting && (
-          <Button className="bg-gradient-to-r from-cyan to-primary text-white hover:opacity-90 h-12 px-6 text-base font-semibold w-full" onClick={() => setShowSlideshow(true)}>
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-6 text-base font-semibold w-full" onClick={() => setShowSlideshow(true)}>
             <Presentation className="w-5 h-5 mr-2" />
             <span>Start Presentation for {activeMeeting.client_name}</span>
           </Button>

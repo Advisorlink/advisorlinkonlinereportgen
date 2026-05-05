@@ -15,6 +15,14 @@ export function PresentationSlideshow({ clientName, onClose }: Props) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Preload all slide images immediately
+  useEffect(() => {
+    SLIDE_URLS.forEach((url) => {
+      const img = new Image();
+      img.src = url;
+    });
+  }, []);
+
   const prev = useCallback(() => setCurrent((c) => Math.max(0, c - 1)), []);
   const next = useCallback(() => setCurrent((c) => Math.min(TOTAL_SLIDES - 1, c + 1)), []);
 
