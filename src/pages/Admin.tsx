@@ -6,7 +6,7 @@ import { useClientInputs } from "@/hooks/useClientInputs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download } from "lucide-react";
+import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download, Send } from "lucide-react";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
 import {
@@ -184,6 +184,25 @@ export default function Admin() {
     }
   };
 
+  const sendReportEmail = (r: ReportRow) => {
+    const clientEmail = (r.email ?? "").trim();
+    if (!clientEmail) {
+      toast.error("No email address on file for this client");
+      return;
+    }
+    const clientName = r.client_name.trim() || "there";
+    const subject = encodeURIComponent("Super Performance Report");
+    const body = encodeURIComponent(
+      `Hi ${clientName}\n\nHere is your Free performance report. Please note that this document is NOT to be taken as financial advice. It is just to help you understand if there is potential improvements you could be missing out on.\n\n`
+    );
+    // Open Gmail compose — user's signature is preserved automatically
+    window.open(
+      `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(clientEmail)}&su=${subject}&body=${body}`,
+      "_blank"
+    );
+    toast.info("Gmail opened — please attach the PDF before sending");
+  };
+
   const filteredReports = useMemo(() => {
     const q = reportSearch.trim().toLowerCase();
     if (!q) return reports;
@@ -306,6 +325,9 @@ export default function Admin() {
                         </Button>
                         <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => downloadReportPdf(r)} disabled={pdfBusyId === r.id}>
                           <Download className="w-3.5 h-3.5 mr-1" /> {pdfBusyId === r.id ? "…" : "PDF"}
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => sendReportEmail(r)}>
+                          <Send className="w-3.5 h-3.5 mr-1" /> Send
                         </Button>
                         <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => deleteReport(r.id)}>
                           <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
