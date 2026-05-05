@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Monitor, Loader2 } from "lucide-react";
+import { Maximize2, Monitor, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import logoSvg from "@/assets/logo.svg";
 import heroImg from "@/assets/meeting-hero.jpg";
@@ -15,21 +15,76 @@ const iceServers = [
 
 const SESSION_KEY = "alo_meeting_session";
 
+interface SavedMeetingSession {
+  meetingId: string;
+  clientId: string;
+}
+
+const loadSavedSession = (): SavedMeetingSession | null => {
+  if (typeof window === "undefined") return null;
+  const saved = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY);
+  if (!saved) return null;
+  try {
+    return JSON.parse(saved) as SavedMeetingSession;
+  } catch {
+    return null;
+  }
+};
+
+const persistSession = (session: SavedMeetingSession) => {
+  const value = JSON.stringify(session);
+  localStorage.setItem(SESSION_KEY, value);
+  sessionStorage.setItem(SESSION_KEY, value);
+};
+
+const clearSavedSession = () => {
+  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+};
+
 export default function MeetingJoin() {
   const [meetingId, setMeetingId] = useState("");
   const [status, setStatus] = useState<"idle" | "connecting" | "waiting" | "connected" | "ended">("idle");
   const [error, setError] = useState("");
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false);
+  const [fullscreenDismissed, setFullscreenDismissed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const viewingRef = useRef<HTMLDivElement>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const clientIdRef = useRef(crypto.randomUUID());
+  const meetingIdRef = useRef("");
+  const remoteStreamRef = useRef<MediaStream | null>(null);
+  const reconnectTimerRef = useRef<number | null>(null);
+  const lastJoinRequestRef = useRef(0);
 
   // Persist session so mobile users can navigate away and come back
   const saveSession = (mid: string) => {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ meetingId: mid, clientId: clientIdRef.current }));
+    meetingIdRef.current = mid;
+    persistSession({ meetingId: mid, clientId: clientIdRef.current });
   };
-  const clearSession = () => sessionStorage.removeItem(SESSION_KEY);
+  const clearSession = () => {
+    meetingIdRef.current = "";
+    clearSavedSession();
+  };
+
+  const requestFreshOffer = useCallback((reason = "resume") => {
+    const ch = channelRef.current;
+    const mid = meetingIdRef.current;
+    if (!ch || !mid) return;
+
+    const now = Date.now();
+    if (now - lastJoinRequestRef.current < 1200) return;
+    lastJoinRequestRef.current = now;
+
+    pcRef.current?.close();
+    pcRef.current = null;
+    remoteStreamRef.current = null;
+    setRemoteStream(null);
+    setStatus("waiting");
+    ch.send({ type: "broadcast", event: "join", payload: { clientId: clientIdRef.current, reason } });
+  }, []);
 
   const setupPeerConnection = useCallback((ch: ReturnType<typeof supabase.channel>) => {
     pcRef.current?.close();
