@@ -7,19 +7,50 @@ import { toast } from "sonner";
 
 export default function MeetingJoin() {
   const [meetingId, setMeetingId] = useState("");
-  const [status, setStatus] = useState<"idle" | "connecting" | "connected" | "ended">("idle");
+  const [status, setStatus] = useState<"idle" | "connecting" | "waiting" | "connected" | "ended">("idle");
   const [error, setError] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const clientIdRef = useRef(crypto.randomUUID());
 
   const iceServers = [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
   ];
 
+  const setupPeerConnection = useCallback((ch: ReturnType<typeof supabase.channel>) => {
+    // Close existing PC if any
+    pcRef.current?.close();
+
+    const pc = new RTCPeerConnection({ iceServers });
+    pcRef.current = pc;
+
+    pc.ontrack = (e) => {
+      if (videoRef.current && e.streams[0]) {
+        videoRef.current.srcObject = e.streams[0];
+        setStatus("connected");
+      }
+    };
+
+    pc.oniceconnectionstatechange = () => {
+      if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed") {
+        setStatus("waiting");
+        toast.info("Screen share ended. Waiting for host to share again...");
+      }
+    };
+
+    pc.onicecandidate = (e) => {
+      if (e.candidate) {
+        ch.send({ type: "broadcast", event: "ice-candidate", payload: { candidate: e.candidate, clientId: clientIdRef.current, from: "client" } });
+      }
+    };
+
+    return pc;
+  }, []);
+
   const joinMeeting = useCallback(async () => {
-    const mid = meetingId.trim().toLowerCase();
+    const mid = meetingId.trim();
     if (!mid) { setError("Please enter a meeting ID"); return; }
     setError("");
     setStatus("connecting");
@@ -43,23 +74,7 @@ export default function MeetingJoin() {
       return;
     }
 
-    const clientId = crypto.randomUUID();
-    const pc = new RTCPeerConnection({ iceServers });
-    pcRef.current = pc;
-
-    pc.ontrack = (e) => {
-      if (videoRef.current && e.streams[0]) {
-        videoRef.current.srcObject = e.streams[0];
-        setStatus("connected");
-      }
-    };
-
-    pc.oniceconnectionstatechange = () => {
-      if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed") {
-        setStatus("ended");
-        toast.info("The host has ended the screen share");
-      }
-    };
+    const clientId = clientIdRef.current;
 
     const ch = supabase.channel(`meeting:${mid}`, {
       config: { broadcast: { self: false } },
@@ -67,6 +82,7 @@ export default function MeetingJoin() {
 
     ch.on("broadcast", { event: "offer" }, async ({ payload }) => {
       if (payload.clientId !== clientId) return;
+      const pc = pcRef.current || setupPeerConnection(ch);
       await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
@@ -75,28 +91,37 @@ export default function MeetingJoin() {
 
     ch.on("broadcast", { event: "ice-candidate" }, async ({ payload }) => {
       if (payload.from !== "host") return;
-      if (payload.candidate) {
-        await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+      if (payload.candidate && pcRef.current) {
+        await pcRef.current.addIceCandidate(new RTCIceCandidate(payload.candidate));
       }
     });
 
-    pc.onicecandidate = (e) => {
-      if (e.candidate) {
-        ch.send({ type: "broadcast", event: "ice-candidate", payload: { candidate: e.candidate, clientId, from: "client" } });
-      }
-    };
+    // When host starts sharing screen after we've joined
+    ch.on("broadcast", { event: "screen-ready" }, () => {
+      // Re-announce ourselves so host sends us an offer
+      ch.send({ type: "broadcast", event: "join", payload: { clientId } });
+    });
+
+    ch.on("broadcast", { event: "meeting-ended" }, () => {
+      setStatus("ended");
+      toast.info("The host has ended the meeting");
+    });
 
     await ch.subscribe();
     channelRef.current = ch;
 
     // Tell host we want to join
     ch.send({ type: "broadcast", event: "join", payload: { clientId } });
-  }, [meetingId]);
+    setStatus("waiting");
+  }, [meetingId, setupPeerConnection]);
 
   useEffect(() => {
     return () => {
       pcRef.current?.close();
-      channelRef.current?.unsubscribe();
+      if (channelRef.current) {
+        channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId: clientIdRef.current } });
+        channelRef.current.unsubscribe();
+      }
     };
   }, []);
 
@@ -157,6 +182,17 @@ export default function MeetingJoin() {
               Powered by Advisor Link Online
             </p>
           </div>
+        ) : status === "waiting" ? (
+          <div className="w-full max-w-md text-center">
+            <div className="w-16 h-16 rounded-2xl bg-cyan/20 flex items-center justify-center mx-auto mb-4">
+              <Loader2 className="w-8 h-8 text-cyan animate-spin" />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">You're in the meeting</h2>
+            <p className="text-white/50 text-sm mb-6">Waiting for your consultant to share their screen...</p>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <p className="text-white/40 text-xs">Meeting ID: <span className="font-mono font-bold text-white/70">{meetingId}</span></p>
+            </div>
+          </div>
         ) : status === "connected" ? (
           <div className="w-full h-full flex flex-col items-center">
             <video
@@ -173,7 +209,7 @@ export default function MeetingJoin() {
               <Monitor className="w-8 h-8 text-white/40" />
             </div>
             <h2 className="text-xl font-bold text-white mb-2">Meeting Ended</h2>
-            <p className="text-white/50 text-sm mb-6">Your consultant has ended the screen share</p>
+            <p className="text-white/50 text-sm mb-6">Your consultant has ended the meeting</p>
             <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => { setStatus("idle"); setMeetingId(""); }}>
               Join Another Meeting
             </Button>
