@@ -61,6 +61,7 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
   const [clientCount, setClientCount] = useState(0);
   const [meetingVersion, setMeetingVersion] = useState(0);
   const [pausedSlide, setPausedSlide] = useState<number | null>(null);
+  const [screenSharePaused, setScreenSharePaused] = useState(false);
 
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
