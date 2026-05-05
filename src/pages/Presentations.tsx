@@ -145,16 +145,7 @@ export default function Presentations() {
     setPausedSlide(currentSlide);
     setGlobalPausedSlide(currentSlide);
     setShowSlideshow(false);
-
-    // Try to load the client's report inputs if we have a report_id
-    const meetingData = activeMeeting as any;
-    if (meetingData.report_id) {
-      const { data } = await supabase.from("reports").select("inputs").eq("id", meetingData.report_id).single();
-      if (data?.inputs) {
-        setInputs(data.inputs as any);
-      }
-    }
-    navigate("/");
+    navigate("/admin");
   };
 
   const deleteMeeting = async (id: string) => {
