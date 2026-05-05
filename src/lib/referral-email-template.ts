@@ -13,18 +13,22 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    @media only screen and (max-width: 620px) {
-      .container { width: 100% !important; border-radius: 0 !important; }
-      .outer { padding: 8px 0 !important; }
-      .px { padding-left: 20px !important; padding-right: 20px !important; }
-      .hero-section { padding: 32px 20px 36px !important; }
-      .hero-title { font-size: 36px !important; line-height: 42px !important; }
-      .hero-amount { font-size: 72px !important; line-height: 76px !important; }
+    @media only screen and (max-width: 700px) {
+      .container { width: 100% !important; max-width: 100% !important; border-radius: 18px !important; }
+      .outer { padding: 10px !important; background-color:#07101f !important; }
+      .px { padding-left: 16px !important; padding-right: 16px !important; }
+      .hero-section { padding: 14px 16px 30px !important; }
+      .gift-shell { width: 100% !important; max-width: 350px !important; padding: 3px 3px 9px !important; border-radius: 22px !important; }
+      .gift-card { width: 100% !important; border-radius: 19px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.16) !important; }
+      .gift-card-pad { padding-left: 20px !important; padding-right: 20px !important; }
+      .hero-title { font-size: 24px !important; line-height: 30px !important; }
+      .hero-amount { font-size: 74px !important; line-height: 78px !important; letter-spacing: -2px !important; text-shadow: 0 3px 0 #06101f, 0 8px 20px rgba(0,0,0,0.45), 0 0 22px rgba(12,246,218,0.55) !important; }
       .reward-amount { font-size: 36px !important; line-height: 40px !important; }
-      .card-3d { margin-left: 0 !important; margin-right: 0 !important; }
+      .card-3d { margin-left: 0 !important; margin-right: 0 !important; box-shadow: 0 7px 0 #07101f, 0 12px 22px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.08) !important; }
       .step-row { display: block !important; width: 100% !important; }
       .step-icon-cell { display: block !important; width: 100% !important; text-align: center !important; padding-bottom: 12px !important; padding-right: 0 !important; }
       .step-text-cell { display: block !important; width: 100% !important; text-align: center !important; }
+      .bonus-shell { padding: 3px 3px 9px !important; border-radius: 22px !important; background-image: linear-gradient(135deg,#ffd76a 0%,#0CF6DA 44%,#1b2c62 100%) !important; }
       .bonus-inner { padding: 28px 20px !important; }
     }
   </style>
