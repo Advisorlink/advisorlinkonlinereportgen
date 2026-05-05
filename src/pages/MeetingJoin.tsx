@@ -91,6 +91,16 @@ export default function MeetingJoin() {
     ch.send({ type: "broadcast", event: "join", payload: { clientId: clientIdRef.current, reason } });
   }, []);
 
+  const markMeetingEnded = useCallback(() => {
+    pcRef.current?.close();
+    pcRef.current = null;
+    remoteStreamRef.current = null;
+    setRemoteStream(null);
+    setShowFullscreenPrompt(false);
+    setStatus("ended");
+    clearSession();
+  }, []);
+
   const setupPeerConnection = useCallback((ch: ReturnType<typeof supabase.channel>) => {
     pcRef.current?.close();
     const pc = new RTCPeerConnection({ iceServers });
