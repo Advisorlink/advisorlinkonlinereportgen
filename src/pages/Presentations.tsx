@@ -232,6 +232,20 @@ export default function Presentations() {
           </div>
         )}
 
+        {activeMeeting && (
+          <Button className="bg-gradient-to-r from-cyan to-primary text-white hover:opacity-90 h-12 px-6 text-base font-semibold w-full" onClick={() => setShowSlideshow(true)}>
+            <Presentation className="w-5 h-5 mr-2" />
+            <span>Start Presentation for {activeMeeting.client_name}</span>
+          </Button>
+        )}
+
+        {showSlideshow && activeMeeting && (
+          <PresentationSlideshow
+            clientName={activeMeeting.client_name}
+            onClose={() => setShowSlideshow(false)}
+          />
+        )}
+
         <div className="bg-card rounded-xl shadow-elevated p-6">
           <h2 className="text-lg font-bold font-heading text-navy mb-4">Meeting History</h2>
           {meetings.length === 0 ? (
