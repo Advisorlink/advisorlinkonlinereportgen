@@ -50,7 +50,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:16px;overflow:hidden;">
       <tr><td class="gift-card" style="padding:40px 32px;text-align:center;background-color:${teal};border-radius:16px;">
         <p style="margin:0 0 4px;font-size:13px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.85);">Exclusive Client Reward</p>
-        <p class="hero-amount" style="margin:0;font-size:88px;font-weight:bold;color:#ffffff;line-height:92px;letter-spacing:-3px;">$50</p>
+        <p class="hero-amount" style="margin:0;font-size:88px;font-weight:bold;color:#ffffff;line-height:92px;letter-spacing:-3px;">$100</p>
         <p class="hero-subtitle" style="margin:4px 0 0;font-size:22px;font-weight:bold;color:#ffffff;letter-spacing:2px;">GIFT CARD</p>
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px auto 0;"><tr>
           <td style="background-color:rgba(255,255,255,0.2);border-radius:30px;padding:8px 20px;">
