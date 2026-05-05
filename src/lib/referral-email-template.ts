@@ -48,9 +48,9 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
     <!-- 3D Gift Card -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;">
       <tr><td align="center">
-        <table role="presentation" cellpadding="0" cellspacing="0" class="gift-shell" style="width:92%;max-width:466px;border-collapse:separate;border-radius:24px;background-image:linear-gradient(135deg,#0CF6DA 0%,#00a7ff 36%,#142148 72%,#050914 100%);box-shadow:0 10px 0 #06101f, 0 22px 42px rgba(0,0,0,0.58), 0 0 44px rgba(12,246,218,0.18);padding:4px 4px 12px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" class="gift-shell" bgcolor="#0CF6DA" style="width:92%;max-width:466px;border-collapse:separate;border-radius:24px;background-color:#0CF6DA;background-image:linear-gradient(135deg,#0CF6DA 0%,#00a7ff 36%,#142148 72%,#050914 100%);box-shadow:0 10px 0 #06101f, 0 22px 42px rgba(0,0,0,0.58), 0 0 44px rgba(12,246,218,0.18);padding:4px 4px 12px;border-right:6px solid #020814;border-bottom:10px solid #020814;">
         <tr><td>
-        <table role="presentation" cellpadding="0" cellspacing="0" class="gift-card card-3d" style="width:100%;border-collapse:separate;border-radius:20px;overflow:hidden;background-image:linear-gradient(145deg,#22365f 0%,#0d1a33 48%,#17223c 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -18px 35px rgba(0,0,0,0.24);">
+        <table role="presentation" cellpadding="0" cellspacing="0" class="gift-card card-3d" bgcolor="#14264a" style="width:100%;border-collapse:separate;border-radius:20px;overflow:hidden;background-color:#14264a;background-image:linear-gradient(145deg,#22365f 0%,#0d1a33 48%,#17223c 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -18px 35px rgba(0,0,0,0.24);border-top:1px solid rgba(255,255,255,0.22);border-left:1px solid rgba(255,255,255,0.14);">
           <tr><td class="gift-card-pad" style="padding:36px 28px 14px;">
             <!-- Decorative line -->
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
@@ -143,9 +143,9 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
 
   <!-- BUT WAIT — Premium 3D Banner -->
   <tr><td class="px" style="padding:0 36px 28px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="bonus-shell" style="border-collapse:separate;border-radius:24px;background-image:linear-gradient(135deg,#FFD700 0%,#0CF6DA 42%,#18285a 100%);box-shadow:0 9px 0 #06101f, 0 20px 38px rgba(0,0,0,0.52), 0 0 44px rgba(255,215,0,0.12);padding:4px 4px 12px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="bonus-shell" bgcolor="#FFD700" style="border-collapse:separate;border-radius:24px;background-color:#FFD700;background-image:linear-gradient(135deg,#FFD700 0%,#0CF6DA 42%,#18285a 100%);box-shadow:0 9px 0 #06101f, 0 20px 38px rgba(0,0,0,0.52), 0 0 44px rgba(255,215,0,0.12);padding:4px 4px 12px;border-right:6px solid #020814;border-bottom:10px solid #020814;">
     <tr><td>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:20px;overflow:hidden;background-image:linear-gradient(145deg,#0a2e4a 0%,#0d1a33 40%,#1a0a33 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -20px 36px rgba(0,0,0,0.28);">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#0d1a33" style="border-collapse:separate;border-radius:20px;overflow:hidden;background-color:#0d1a33;background-image:linear-gradient(145deg,#0a2e4a 0%,#0d1a33 40%,#1a0a33 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -20px 36px rgba(0,0,0,0.28);border-top:1px solid rgba(255,255,255,0.18);border-left:1px solid rgba(255,255,255,0.12);">
       <tr><td class="bonus-inner" style="padding:36px 32px;text-align:center;">
         <!-- Glowing accent -->
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 14px;border-collapse:separate;"><tr>
