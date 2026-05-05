@@ -378,11 +378,22 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
     toast.success("Meeting ID copied!");
   }, []);
 
+  const togglePauseScreenShare = useCallback(() => {
+    if (!streamRef.current) return;
+    const videoTrack = streamRef.current.getVideoTracks()[0];
+    if (!videoTrack) return;
+    const newPaused = !screenSharePaused;
+    videoTrack.enabled = !newPaused;
+    setScreenSharePaused(newPaused);
+    toast.info(newPaused ? "Screen share paused — client sees last frame" : "Screen share resumed");
+  }, [screenSharePaused]);
+
   const value = useMemo<MeetingHostContextValue>(() => ({
     activeMeeting,
     clientConnected: clientCount > 0,
     clientCount,
     sharing,
+    screenSharePaused,
     stream,
     micOn,
     recording,
@@ -393,12 +404,13 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
     startMeeting,
     startScreenShare,
     stopScreenShare,
+    togglePauseScreenShare,
     endMeeting,
     toggleMic,
     toggleRecording,
     copyMeetingLink,
     copyMeetingId,
-  }), [activeMeeting, clientCount, sharing, stream, micOn, recording, meetingJoinUrl, meetingVersion, pausedSlide, startMeeting, startScreenShare, stopScreenShare, endMeeting, toggleMic, toggleRecording, copyMeetingLink, copyMeetingId]);
+  }), [activeMeeting, clientCount, sharing, screenSharePaused, stream, micOn, recording, meetingJoinUrl, meetingVersion, pausedSlide, startMeeting, startScreenShare, stopScreenShare, togglePauseScreenShare, endMeeting, toggleMic, toggleRecording, copyMeetingLink, copyMeetingId]);
 
   return <MeetingHostContext.Provider value={value}>{children}</MeetingHostContext.Provider>;
 }
