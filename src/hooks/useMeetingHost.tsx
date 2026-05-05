@@ -22,6 +22,7 @@ interface MeetingHostContextValue {
   clientConnected: boolean;
   clientCount: number;
   sharing: boolean;
+  screenSharePaused: boolean;
   stream: MediaStream | null;
   micOn: boolean;
   recording: boolean;
@@ -32,6 +33,7 @@ interface MeetingHostContextValue {
   startMeeting: (report: StartMeetingInput) => Promise<boolean>;
   startScreenShare: () => Promise<void>;
   stopScreenShare: () => void;
+  togglePauseScreenShare: () => void;
   endMeeting: () => Promise<void>;
   toggleMic: () => Promise<void>;
   toggleRecording: () => void;
