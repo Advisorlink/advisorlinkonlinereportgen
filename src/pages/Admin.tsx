@@ -30,13 +30,6 @@ interface ReportRow {
 
 export default function Admin() {
   const nav = useNavigate();
-  const location = useLocation();
-  const presentationState = location.state as { fromPresentation?: boolean; pausedSlide?: number } | null;
-  const isFromPresentation = presentationState?.fromPresentation === true;
-
-  const handleResumePresentation = () => {
-    nav("/presentations", { state: { resumeSlide: presentationState?.pausedSlide ?? 0 } });
-  };
   const { profile, loading } = useAuth();
   const { setInputs } = useClientInputs();
   const [reports, setReports] = useState<ReportRow[]>([]);
