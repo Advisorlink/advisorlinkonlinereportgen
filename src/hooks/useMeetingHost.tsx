@@ -87,6 +87,7 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
     streamRef.current = null;
     setStream(null);
     setSharing(false);
+    setScreenSharePaused(false);
     cleanupPeerConnections();
     toast.info("Screen sharing stopped");
   }, [cleanupPeerConnections]);
