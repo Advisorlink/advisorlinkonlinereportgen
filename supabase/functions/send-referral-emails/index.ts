@@ -23,7 +23,8 @@ function buildReferralEmailHtml(referrerName: string, leadName: string, token: s
   const safeReferrer = referrerName.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] ?? c));
   const formUrl = `${APP_URL}/refer/claim?token=${token}`;
 
-  const teal = "#0BB5A0";
+  const brandBlue = "#1E88E5";
+  const brandBlueDark = "#1565C0";
   const darkText = "#1a1a2e";
   const bodyText = "#444455";
   const mutedText = "#7a7a8e";
@@ -54,7 +55,7 @@ function buildReferralEmailHtml(referrerName: string, leadName: string, token: s
   <!-- HERO BANNER -->
   <tr><td class="px" style="padding:0 32px 24px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:16px;overflow:hidden;">
-      <tr><td style="padding:40px 32px;text-align:center;background-color:${teal};border-radius:16px;">
+      <tr><td style="padding:40px 32px;text-align:center;background:linear-gradient(135deg, ${brandBlueDark}, ${brandBlue});border-radius:16px;">
         <p style="margin:0 0 4px;font-size:13px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.85);">You've Been Referred!</p>
         <p style="margin:8px 0 0;font-size:28px;font-weight:bold;color:#ffffff;line-height:34px;">Free Super<br>Performance Report</p>
       </td></tr>
@@ -65,13 +66,10 @@ function buildReferralEmailHtml(referrerName: string, leadName: string, token: s
   <tr><td class="px" style="padding:0 32px 20px;">
     <p style="margin:0 0 12px;font-size:18px;font-weight:bold;color:${darkText};line-height:26px;">Hi ${safeName},</p>
     <p style="margin:0;font-size:15px;color:${bodyText};line-height:25px;">
-      Great news — <strong style="color:${teal};">${safeReferrer}</strong> has referred you for a
-      <strong>completely free</strong> Super Performance Report!
+      Great news! <strong style="color:${brandBlue};">${safeReferrer}</strong> has just done a free superannuation review with us and got a lot of value, so they have referred you for a completely free Super Performance Report!
     </p>
     <p style="margin:16px 0 0;font-size:15px;color:${bodyText};line-height:25px;">
-      This report gives you a professional analysis of your superannuation,
-      highlighting potential improvements that could make a real difference
-      to your retirement.
+      This report is completely free and gives you a detailed analysis of how your super fund is performing, how much you will potentially retire on, highlighting potential improvements that could make a real difference to your retirement.
     </p>
   </td></tr>
 
