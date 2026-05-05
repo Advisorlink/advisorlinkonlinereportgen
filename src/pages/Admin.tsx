@@ -484,46 +484,6 @@ export default function Admin() {
           </div>
         </section>
 
-
-        <section className="bg-white rounded-xl shadow-elevated p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold font-heading text-navy">Activity Log ({logs.length})</h2>
-            <Button size="sm" variant="outline" onClick={clearLogs}>
-              <Trash2 className="w-3.5 h-3.5 mr-1" /> Clear
-            </Button>
-          </div>
-          <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-white">
-                <tr className="text-left border-b border-border">
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">When</th>
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">Email</th>
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">Event</th>
-                  <th className="py-2 font-semibold text-muted-foreground">Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map(l => (
-                  <tr key={l.id} className="border-b border-border/50">
-                    <td className="py-2 pr-4 text-xs whitespace-nowrap">{new Date(l.created_at).toLocaleString()}</td>
-                    <td className="py-2 pr-4 text-xs">{l.email || "—"}</td>
-                    <td className="py-2 pr-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${
-                        l.event_type === "login" ? "bg-[hsl(145_70%_45%/0.15)] text-[hsl(145_70%_30%)]" :
-                        l.event_type === "access_denied" || l.event_type === "signup_blocked" ? "bg-destructive/15 text-destructive" :
-                        "bg-muted text-muted-foreground"
-                      }`}>{l.event_type}</span>
-                    </td>
-                    <td className="py-2 text-xs text-muted-foreground">{l.details ? JSON.stringify(l.details) : "—"}</td>
-                  </tr>
-                ))}
-                {logs.length === 0 && (
-                  <tr><td colSpan={4} className="py-6 text-center text-muted-foreground text-xs">No activity yet</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
       </div>
 
       {/* ---- Email compose dialog ---- */}
