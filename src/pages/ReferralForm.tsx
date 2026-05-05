@@ -20,7 +20,7 @@ export default function ReferralForm() {
   const clientEmail = params.get("email") || "";
 
   const [referrals, setReferrals] = useState<ReferralEntry[]>(
-    Array.from({ length: 7 }, emptyEntry)
+    Array.from({ length: 5 }, emptyEntry)
   );
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
