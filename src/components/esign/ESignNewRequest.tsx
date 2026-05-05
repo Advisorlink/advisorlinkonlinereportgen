@@ -336,6 +336,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           clientEmail={clientEmail}
           clientPhone={clientPhone}
           clientAddress={clientAddress}
+          clientDob={clientDob}
           onBack={() => setStep("fill-details")}
           onContinue={(edited, fields) => {
             setEditedFile(edited);
