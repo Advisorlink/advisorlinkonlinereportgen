@@ -20,7 +20,7 @@ export default function ReferralForm() {
   const clientEmail = params.get("email") || "";
 
   const [referrals, setReferrals] = useState<ReferralEntry[]>(
-    Array.from({ length: 7 }, emptyEntry)
+    Array.from({ length: 5 }, emptyEntry)
   );
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -109,7 +109,7 @@ export default function ReferralForm() {
             each of them with an invitation for a free Super Performance Report.
           </p>
           <p className="text-[#0BB5A0] font-semibold text-lg">
-            Your $50 gift card is on its way! 🎉
+            Your $100 gift card is on its way! 🎉
           </p>
         </div>
       </div>
@@ -135,11 +135,11 @@ export default function ReferralForm() {
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Users className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-bold mb-2 font-heading">
-            Refer Friends & Family
+          <h1 className="text-3xl font-bold mb-3 font-heading">
+            Know 5 People Who'd Love a Free Report?
           </h1>
-          <p className="text-white/90 text-lg">
-            Share the gift of financial clarity — and earn a <strong>$50 Gift Card</strong> for yourself!
+          <p className="text-white/90 text-lg leading-relaxed">
+            Do you know 5 people that would like a free performance report like you got? Give them a call and ask if they'd like us to send them one. If you can get 5, you'll get a <strong>$100 Gift Card</strong>!! It's that simple.
           </p>
         </div>
 
@@ -150,7 +150,7 @@ export default function ReferralForm() {
               Your Referrals
             </h2>
             <p className="text-[#7a7a8e] text-sm mb-6">
-              Add up to 7 people who might benefit from a free super performance review.
+              Add up to 5 people who might benefit from a free super performance review.
             </p>
 
             <div className="space-y-4">
@@ -239,7 +239,7 @@ export default function ReferralForm() {
                 )}
               </Button>
               <p className="text-xs text-[#7a7a8e]">
-                {filledEntries.length} of 7 referrals filled in
+                {filledEntries.length} of 5 referrals filled in
               </p>
             </div>
           </div>
