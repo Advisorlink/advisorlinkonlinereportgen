@@ -326,6 +326,9 @@ export default function Admin() {
                         <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => downloadReportPdf(r)} disabled={pdfBusyId === r.id}>
                           <Download className="w-3.5 h-3.5 mr-1" /> {pdfBusyId === r.id ? "…" : "PDF"}
                         </Button>
+                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => sendReportEmail(r)}>
+                          <Send className="w-3.5 h-3.5 mr-1" /> Send
+                        </Button>
                         <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => deleteReport(r.id)}>
                           <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
                         </Button>
