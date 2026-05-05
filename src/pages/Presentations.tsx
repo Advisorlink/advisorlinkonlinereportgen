@@ -48,6 +48,7 @@ export default function Presentations() {
     recording,
     meetingJoinUrl,
     meetingVersion,
+    setPausedSlide: setGlobalPausedSlide,
     startMeeting,
     startScreenShare,
     stopScreenShare,
@@ -75,6 +76,7 @@ export default function Presentations() {
     if (state?.resumeSlide != null && activeMeeting) {
       setPausedSlide(state.resumeSlide);
       setShowSlideshow(true);
+      setGlobalPausedSlide(null);
       // Clear the state so it doesn't re-trigger
       window.history.replaceState({}, "");
     }
@@ -141,6 +143,7 @@ export default function Presentations() {
   const handleShareReport = async (currentSlide: number) => {
     if (!activeMeeting) return;
     setPausedSlide(currentSlide);
+    setGlobalPausedSlide(currentSlide);
     setShowSlideshow(false);
 
     // Try to load the client's report inputs if we have a report_id
@@ -151,7 +154,7 @@ export default function Presentations() {
         setInputs(data.inputs as any);
       }
     }
-    navigate("/admin", { state: { fromPresentation: true, pausedSlide: currentSlide } });
+    navigate("/");
   };
 
   const deleteMeeting = async (id: string) => {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CRMLayout } from "@/components/CRMLayout";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientInputs } from "@/hooks/useClientInputs";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Trash2, RefreshCw, Search, Eye, Download, Send, X, FileText, Calendar, Mail, Presentation } from "lucide-react";
+import { Trash2, RefreshCw, Search, Eye, Download, Send, X, FileText, Calendar, Mail } from "lucide-react";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { buildReferralEmailHtml } from "@/lib/referral-email-template";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
@@ -30,13 +30,6 @@ interface ReportRow {
 
 export default function Admin() {
   const nav = useNavigate();
-  const location = useLocation();
-  const presentationState = location.state as { fromPresentation?: boolean; pausedSlide?: number } | null;
-  const isFromPresentation = presentationState?.fromPresentation === true;
-
-  const handleResumePresentation = () => {
-    nav("/presentations", { state: { resumeSlide: presentationState?.pausedSlide ?? 0 } });
-  };
   const { profile, loading } = useAuth();
   const { setInputs } = useClientInputs();
   const [reports, setReports] = useState<ReportRow[]>([]);
@@ -326,16 +319,6 @@ export default function Admin() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {isFromPresentation && (
-              <Button
-                size="sm"
-                onClick={handleResumePresentation}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5 animate-pulse"
-              >
-                <Presentation className="w-4 h-4" />
-                Resume Presentation
-              </Button>
-            )}
             <div className="relative w-full sm:w-72">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
