@@ -525,6 +525,18 @@ export default function Admin() {
 
             <div className="space-y-3">
               <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Template</label>
+                <select
+                  value={selectedTemplate}
+                  onChange={e => applyTemplate(e.target.value)}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  {EMAIL_TEMPLATES.map(t => (
+                    <option key={t.key} value={t.key}>{t.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">To</label>
                 <Input
                   value={emailDialog.to}
@@ -543,7 +555,7 @@ export default function Admin() {
                 <Textarea
                   value={emailDialog.body}
                   onChange={e => setEmailDialog(prev => ({ ...prev, body: e.target.value }))}
-                  rows={8}
+                  rows={10}
                   className="resize-y"
                 />
               </div>
