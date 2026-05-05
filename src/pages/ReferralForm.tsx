@@ -131,16 +131,41 @@ export default function ReferralForm() {
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Hero */}
-        <div className="bg-gradient-to-r from-[#0BB5A0] to-[#089e8c] rounded-2xl p-8 mb-8 text-white text-center shadow-lg">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="w-8 h-8" />
+        <div className="rounded-2xl mb-8 overflow-hidden shadow-lg">
+          <div className="bg-gradient-to-r from-[#0BB5A0] to-[#089e8c] p-8 text-white text-center">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+              <span className="text-3xl">🎉</span>
+            </div>
+            <h1 className="text-3xl font-bold mb-2 font-heading">
+              Hey {clientName || "there"}!
+            </h1>
+            <p className="text-white/90 text-xl leading-relaxed">
+              Do you know 5 people that would like a free performance report like you got!!!? 
+            </p>
           </div>
-          <h1 className="text-3xl font-bold mb-3 font-heading">
-            Know 5 People Who'd Love a Free Report?
-          </h1>
-          <p className="text-white/90 text-lg leading-relaxed">
-            Do you know 5 people that would like a free performance report like you got? Give them a call and ask if they'd like us to send them one. If you can get 5, you'll get a <strong>$100 Gift Card</strong>!! It's that simple.
-          </p>
+          
+          <div className="bg-white p-6 space-y-4">
+            <div className="flex items-start gap-4 p-4 bg-[#f0f9f7] rounded-xl border-l-4 border-[#0BB5A0]">
+              <span className="text-2xl flex-shrink-0">📞</span>
+              <p className="text-[#1a1a2e] text-base leading-relaxed">
+                Well I'll tell you what.. <strong>Give them a call, send them a text</strong> and ask if they'd like us to send them one!!
+              </p>
+            </div>
+            
+            <div className="flex items-start gap-4 p-4 bg-[#f0f9f7] rounded-xl border-l-4 border-[#0BB5A0]">
+              <span className="text-2xl flex-shrink-0">🆓</span>
+              <p className="text-[#1a1a2e] text-base leading-relaxed">
+                It's <strong>free for them</strong> as you know, and you get rewarded for doing the work for us 😄
+              </p>
+            </div>
+            
+            <div className="flex items-center justify-center gap-3 p-5 bg-gradient-to-r from-[#0BB5A0]/10 to-[#089e8c]/10 rounded-xl border-2 border-dashed border-[#0BB5A0]">
+              <span className="text-3xl">🎁</span>
+              <p className="text-[#1a1a2e] text-lg font-semibold text-center">
+                Yup, that's right — give us <strong>5 people</strong> that want a free report and you'll receive a <span className="text-[#0BB5A0] text-xl font-bold">$100 Gift Card!</span>
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Form Card */}
