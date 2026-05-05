@@ -57,6 +57,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
 
     text("clientName", r.clientName);
     text("clientEmail", r.clientEmail);
+    text("clientPhone", r.clientPhone);
     text("fundName", r.fundName);
     text("modelLabel", r.modelLabel);
     numeric("age", r.age);
