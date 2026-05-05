@@ -291,7 +291,7 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
   const hasPersonalContrib = personalContrib > 0;
 
   const personalContribLabel = hasPersonalContrib
-    ? `${fmtMoney(i.personalContributionAmount ?? 0)} ${(i.personalContributionFrequency ?? "Annually").toLowerCase()} (${i.personalContributionType === "percent" ? "% of income" : "fixed $"})`
+    ? `${fmtMoney(i.personalContributionAmount ?? 0)} ${(i.personalContributionFrequency ?? "Annually").toLowerCase()}${i.personalContributionType === "percent" ? " (% of income)" : ""}`
     : "None";
 
   return (
