@@ -546,23 +546,15 @@ export default function Admin() {
                   className="pl-9"
                 />
               </div>
-              <select
-                value={referrerFilter}
-                onChange={e => setReferrerFilter(e.target.value)}
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm w-full sm:w-auto"
-              >
-                <option value="">All Referrers</option>
-                {(() => {
-                  const names = new Map<string, string>();
-                  referralLeads.forEach(l => {
-                    const key = l.referrer_email.toLowerCase();
-                    if (!names.has(key)) names.set(key, l.referrer_name);
-                  });
-                  return Array.from(names.entries()).map(([email, name]) => (
-                    <option key={email} value={email}>{name}</option>
-                  ));
-                })()}
-              </select>
+               <div className="relative w-full sm:w-56">
+                 <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                 <Input
+                   value={referrerFilter}
+                   onChange={e => setReferrerFilter(e.target.value)}
+                   placeholder="Filter by referrer..."
+                   className="pl-9"
+                 />
+               </div>
             </div>
           </div>
 
