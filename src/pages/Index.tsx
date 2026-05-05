@@ -8,8 +8,9 @@ import { importFromFile } from "@/lib/xlsx-import";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { supabase } from "@/integrations/supabase/client";
-import { Settings, LogOut, Maximize2 } from "lucide-react";
+import { Maximize2 } from "lucide-react";
 import { toast } from "sonner";
+import { CRMLayout } from "@/components/CRMLayout";
 
 export default function Index() {
   const nav = useNavigate();
