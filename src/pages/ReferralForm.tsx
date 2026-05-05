@@ -154,7 +154,7 @@ export default function ReferralForm() {
                   <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-[#0BB5A0]" />
                 </div>
                 <p className="text-[#3a3a4e] text-sm sm:text-base leading-relaxed pt-1.5 sm:pt-2">
-                  <strong>Give them a call or send them a text</strong> — ask if they'd like us to send them a free report!
+                  <strong>Give them a call or send them a text</strong> - ask if they'd like us to send them a free report!
                 </p>
               </div>
 

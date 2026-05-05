@@ -128,7 +128,7 @@ export default function ReferralLanding() {
           </h1>
           <p className="text-[#444455] text-lg leading-relaxed mb-3">
             Someone from the team will reach out within the next{" "}
-            <strong className="text-[#0BB5A0]">24–48 hours</strong> to get
+            <strong className="text-[#0BB5A0]">24-48 hours</strong> to get
             your free report generated and confirm your details.
           </p>
           <p className="text-[#7a7a8e] text-sm">

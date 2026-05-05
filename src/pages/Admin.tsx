@@ -260,9 +260,9 @@ export default function Admin() {
   };
 
   const EMAIL_TEMPLATES = [
-    { key: "standard", label: "Standard – Free Report" },
-    { key: "follow-up", label: "Follow-Up – Call Request" },
-    { key: "referral", label: "Referral – $100 Gift Card" },
+    { key: "standard", label: "Standard - Free Report" },
+    { key: "follow-up", label: "Follow-Up - Call Request" },
+    { key: "referral", label: "Referral - $100 Gift Card" },
   ];
 
   const [selectedTemplate, setSelectedTemplate] = useState("standard");
