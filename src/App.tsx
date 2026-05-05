@@ -13,6 +13,8 @@ import Presentations from "./pages/Presentations.tsx";
 import Index from "./pages/Index.tsx";
 import Admin from "./pages/Admin.tsx";
 import Referrals from "./pages/Referrals.tsx";
+import ESign from "./pages/ESign.tsx";
+import ESignPublic from "./pages/ESignPublic.tsx";
 import ReferralForm from "./pages/ReferralForm.tsx";
 import ReferralLanding from "./pages/ReferralLanding.tsx";
 import MeetingJoin from "./pages/MeetingJoin.tsx";
