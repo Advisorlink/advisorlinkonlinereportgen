@@ -125,20 +125,6 @@ export function PresentationSlideshow({ clientName, onClose }: Props) {
         )}
       </div>
 
-      {/* Bottom thumbnail strip */}
-      <div className="flex items-center gap-1 px-4 py-2 bg-black/80 backdrop-blur overflow-x-auto">
-        {SLIDE_URLS.map((url, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={`shrink-0 rounded border-2 transition ${
-              i === current ? "border-cyan opacity-100" : "border-transparent opacity-50 hover:opacity-80"
-            }`}
-          >
-            <img src={url} alt={`Thumb ${i + 1}`} className="h-12 w-auto rounded-sm" draggable={false} />
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
