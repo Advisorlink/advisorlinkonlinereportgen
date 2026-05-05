@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, FileText, Loader2, AlertCircle, PenTool, ShieldCheck, Eraser } from "lucide-react";
 import { toast } from "sonner";
