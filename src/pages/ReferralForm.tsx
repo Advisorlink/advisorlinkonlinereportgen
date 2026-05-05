@@ -51,7 +51,7 @@ export default function ReferralForm() {
     setSubmitting(true);
     try {
       // Create submission
-      const { data: submission, error: subErr } = await supabase
+      const { data: submission, error: subErr } = (await supabase
         .from("referral_submissions" as any)
         .insert({
           client_name: clientName,
@@ -59,7 +59,7 @@ export default function ReferralForm() {
           referrals: filledEntries,
         } as any)
         .select("id")
-        .single();
+        .single()) as any;
 
       if (subErr) throw subErr;
 
