@@ -130,8 +130,10 @@ export default function MeetingJoin() {
                 <label className="text-xs font-semibold text-white/60 mb-2 block">Enter your meeting ID</label>
                 <Input
                   value={meetingId}
-                  onChange={(e) => setMeetingId(e.target.value)}
-                  placeholder="e.g. a1b2c3d4"
+                  onChange={(e) => setMeetingId(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="e.g. 482019"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-center text-lg font-mono tracking-widest h-14"
                   onKeyDown={(e) => e.key === "Enter" && joinMeeting()}
                   disabled={status === "connecting"}
