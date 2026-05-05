@@ -23,8 +23,8 @@ function buildReferralEmailHtml(referrerName: string, leadName: string, token: s
   const safeReferrer = referrerName.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] ?? c));
   const formUrl = `${APP_URL}/refer/claim?token=${token}`;
 
-  const brandBlue = "#1E88E5";
-  const brandBlueDark = "#1565C0";
+  const brandBlue = "#29B6F6";
+  const brandBlueDark = "#1E88E5";
   const darkText = "#1a1a2e";
   const bodyText = "#444455";
   const mutedText = "#7a7a8e";
