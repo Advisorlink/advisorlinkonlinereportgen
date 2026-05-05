@@ -376,7 +376,7 @@ export default function Admin() {
           >
             <div ref={pdfStageRef} className="bg-white">
               <CoverPage s={summary} />
-              <WhoWeArePage />
+              <WhoWeArePage s={summary} />
               <SnapshotPage s={summary} />
               <ProjectionPage s={summary} />
               <FundsPage s={summary} />
