@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download, Send, X } from "lucide-react";
+import { Trash2, RefreshCw, Search, Eye, Download, Send, X, FileText, Calendar, Mail } from "lucide-react";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { buildReferralEmailHtml } from "@/lib/referral-email-template";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
@@ -16,16 +16,6 @@ import {
   CoverPage, WhoWeArePage, SnapshotPage, FundsPage,
   ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage,
 } from "@/components/report/pages";
-
-interface ProfileRow {
-  id: string;
-  email: string;
-  is_owner: boolean;
-  is_blocked: boolean;
-  created_at: string;
-  last_login_at: string | null;
-}
-
 
 interface ReportRow {
   id: string;
@@ -42,8 +32,6 @@ export default function Admin() {
   const nav = useNavigate();
   const { profile, loading } = useAuth();
   const { setInputs } = useClientInputs();
-  const [users, setUsers] = useState<ProfileRow[]>([]);
-  
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportSearch, setReportSearch] = useState("");
   const [busy, setBusy] = useState(false);
@@ -51,8 +39,6 @@ export default function Admin() {
   const pdfStageRef = useRef<HTMLDivElement>(null);
   const [pdfStageInputs, setPdfStageInputs] = useState<ClientInputs | null>(null);
 
-  // Resolve a usable inputs object — fall back to defaults so demo rows still
-  // render a complete-looking report.
   const resolveInputs = (r: ReportRow): ClientInputs => {
     const saved = (r.inputs && typeof r.inputs === "object" ? r.inputs : {}) as Partial<ClientInputs>;
     return { ...DEFAULT_INPUTS, ...saved, clientName: saved.clientName || r.client_name } as ClientInputs;
@@ -73,11 +59,11 @@ export default function Admin() {
 
   const refresh = async () => {
     setBusy(true);
-    const [{ data: u }, { data: r }] = await Promise.all([
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-      supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(500),
-    ]);
-    setUsers((u as ProfileRow[]) || []);
+    const { data: r } = await supabase
+      .from("reports")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(500);
     setReports((r as ReportRow[]) || []);
     setBusy(false);
   };
@@ -85,24 +71,6 @@ export default function Admin() {
   useEffect(() => {
     if (profile?.is_owner) refresh();
   }, [profile]);
-
-  const toggleBlock = async (u: ProfileRow) => {
-    const { error } = await supabase.from("profiles").update({ is_blocked: !u.is_blocked }).eq("id", u.id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success(u.is_blocked ? "User unblocked" : "User blocked");
-      refresh();
-    }
-  };
-
-  const deleteUser = async (u: ProfileRow) => {
-    if (u.is_owner) { toast.error("Cannot delete the owner"); return; }
-    if (!confirm(`Permanently delete ${u.email}?`)) return;
-    const { error } = await supabase.from("profiles").delete().eq("id", u.id);
-    if (error) toast.error(error.message);
-    else { toast.success("User deleted"); refresh(); }
-  };
-
 
   const deleteReport = async (id: string) => {
     if (!confirm("Delete this saved report?")) return;
@@ -112,7 +80,6 @@ export default function Admin() {
   };
 
   const downloadReportPdf = async (r: ReportRow) => {
-    // Prefer the originally-uploaded PDF stored in client-reports if available.
     if (r.pdf_path) {
       setPdfBusyId(r.id);
       try {
@@ -133,13 +100,11 @@ export default function Admin() {
         return;
       } catch (e) {
         console.error("Stored PDF download failed, regenerating:", e);
-        // fall through to regenerate
       }
     }
     setPdfBusyId(r.id);
     setPdfStageInputs(resolveInputs(r));
     try {
-      // Wait two frames for the hidden offscreen render to mount.
       await new Promise(requestAnimationFrame);
       await new Promise(requestAnimationFrame);
       const root = pdfStageRef.current;
@@ -173,7 +138,6 @@ export default function Admin() {
 
   const [sendBusyId, setSendBusyId] = useState<string | null>(null);
 
-  // --- Email compose dialog state ---
   const [emailDialog, setEmailDialog] = useState<{
     open: boolean;
     report: ReportRow | null;
@@ -257,7 +221,6 @@ export default function Admin() {
     setSendBusyId(r.id);
     try {
       const shouldAttachPdf = !emailDialog.isHtml;
-      // Get the PDF blob — prefer stored copy, fall back to regeneration
       let pdfBlob: Blob | null = null;
       if (shouldAttachPdf && r.pdf_path) {
         const { data, error } = await supabase.storage
@@ -266,7 +229,6 @@ export default function Admin() {
         if (!error && data) pdfBlob = data;
       }
       if (shouldAttachPdf && !pdfBlob) {
-        // Regenerate PDF on the fly
         setPdfStageInputs(resolveInputs(r));
         await new Promise(requestAnimationFrame);
         await new Promise(requestAnimationFrame);
@@ -295,7 +257,6 @@ export default function Admin() {
       let pdfBase64: string | undefined;
       let fileName: string | undefined;
       if (shouldAttachPdf && pdfBlob) {
-        // Convert blob to base64
         const buf = await pdfBlob.arrayBuffer();
         const bytes = new Uint8Array(buf);
         let binary = "";
@@ -346,137 +307,147 @@ export default function Admin() {
 
   return (
     <CRMLayout>
-      <div className="max-w-6xl mx-auto px-6 py-6 space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold font-heading text-navy">Admin</h1>
-            <p className="text-sm text-muted-foreground">Owner Control Panel</p>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan to-[hsl(215_60%_12%)] flex items-center justify-center shadow-lg">
+              <FileText className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold font-heading text-navy tracking-tight">Client Reports</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {reports.length} report{reports.length !== 1 ? "s" : ""} generated
+              </p>
+            </div>
           </div>
-          <Button size="sm" onClick={refresh} disabled={busy} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
-            <RefreshCw className={`w-4 h-4 mr-1 ${busy ? "animate-spin" : ""}`} /> Refresh
-          </Button>
-        </div>
-        <section className="bg-white rounded-xl shadow-elevated p-6">
-          <h2 className="text-lg font-bold font-heading text-navy mb-4">Users ({users.length})</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left border-b border-border">
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">Email</th>
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">Role</th>
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">Status</th>
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">Last Login</th>
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">Created</th>
-                  <th className="py-2 font-semibold text-muted-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map(u => (
-                  <tr key={u.id} className="border-b border-border/50">
-                    <td className="py-2 pr-4">{u.email}</td>
-                    <td className="py-2 pr-4">
-                      {u.is_owner
-                        ? <span className="px-2 py-0.5 rounded bg-cyan/20 text-cyan text-xs font-semibold">OWNER</span>
-                        : <span className="text-xs text-muted-foreground">user</span>}
-                    </td>
-                    <td className="py-2 pr-4">
-                      {u.is_blocked
-                        ? <span className="text-xs font-semibold text-destructive">BLOCKED</span>
-                        : <span className="text-xs font-semibold text-[hsl(145_70%_35%)]">active</span>}
-                    </td>
-                    <td className="py-2 pr-4 text-xs text-muted-foreground">{u.last_login_at ? new Date(u.last_login_at).toLocaleString() : "—"}</td>
-                    <td className="py-2 pr-4 text-xs text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
-                    <td className="py-2 flex gap-2">
-                      {!u.is_owner && (
-                        <>
-                          <Button size="sm" variant="outline" onClick={() => toggleBlock(u)}>
-                            {u.is_blocked ? <CheckCircle className="w-3.5 h-3.5 mr-1" /> : <Ban className="w-3.5 h-3.5 mr-1" />}
-                            {u.is_blocked ? "Unblock" : "Block"}
-                          </Button>
-                          <Button size="sm" variant="destructive" onClick={() => deleteUser(u)}>
-                            <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
-                          </Button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {users.length === 0 && (
-                  <tr><td colSpan={6} className="py-6 text-center text-muted-foreground text-xs">No users</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="bg-white rounded-xl shadow-elevated p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <h2 className="text-lg font-bold font-heading text-navy">
-              Saved Reports ({filteredReports.length}{reportSearch ? ` of ${reports.length}` : ""})
-            </h2>
+          <div className="flex items-center gap-3">
             <div className="relative w-full sm:w-72">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={reportSearch}
                 onChange={e => setReportSearch(e.target.value)}
-                placeholder="Search by client name or email…"
-                className="pl-9"
+                placeholder="Search clients…"
+                className="pl-9 bg-white border-border/60 shadow-sm"
               />
             </div>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={refresh}
+              disabled={busy}
+              className="shrink-0 h-10 w-10 shadow-sm"
+            >
+              <RefreshCw className={`w-4 h-4 ${busy ? "animate-spin" : ""}`} />
+            </Button>
           </div>
-          <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-white">
-                <tr className="text-left border-b border-border">
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">Client</th>
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">Client's Email</th>
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">When</th>
-                  <th className="py-2 font-semibold text-muted-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredReports.map(r => (
-                  <tr key={r.id} className="border-b border-border/50">
-                    <td className="py-2 pr-4 font-medium">{r.client_name}</td>
-                    <td className="py-2 pr-4 text-xs text-muted-foreground">{r.email ?? "—"}</td>
-                    <td className="py-2 pr-4 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</td>
-                    <td className="py-2">
-                      <div className="flex gap-1.5">
-                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => viewReport(r)}>
-                          <Eye className="w-3.5 h-3.5 mr-1" /> View
-                        </Button>
-                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => downloadReportPdf(r)} disabled={pdfBusyId === r.id}>
-                          <Download className="w-3.5 h-3.5 mr-1" /> {pdfBusyId === r.id ? "…" : "PDF"}
-                        </Button>
-                        <Button size="sm" variant="outline" className="h-8 px-2.5 text-xs" onClick={() => openEmailDialog(r)} disabled={sendBusyId === r.id}>
-                          <Send className="w-3.5 h-3.5 mr-1" /> {sendBusyId === r.id ? "Sending…" : "Send"}
-                        </Button>
-                        <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => deleteReport(r.id)}>
-                          <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filteredReports.length === 0 && (
-                  <tr><td colSpan={4} className="py-6 text-center text-muted-foreground text-xs">
-                    {reportSearch ? "No reports match that search" : "No saved reports yet"}
-                  </td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        </div>
 
+        {/* Reports Grid */}
+        {filteredReports.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-elevated border border-border/40 p-16 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-secondary mx-auto mb-4 flex items-center justify-center">
+              <FileText className="w-8 h-8 text-muted-foreground/50" />
+            </div>
+            <p className="text-muted-foreground font-medium">
+              {reportSearch ? "No reports match your search" : "No reports generated yet"}
+            </p>
+            <p className="text-xs text-muted-foreground/60 mt-1">
+              {reportSearch ? "Try a different search term" : "Reports will appear here once created"}
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            {filteredReports.map((r, i) => (
+              <div
+                key={r.id}
+                className="group bg-white rounded-2xl border border-border/40 shadow-sm hover:shadow-elevated transition-all duration-300 hover:border-cyan/30 overflow-hidden"
+                style={{ animationDelay: `${i * 30}ms` }}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5">
+                  {/* Client Avatar & Name */}
+                  <div className="flex items-center gap-3.5 sm:w-56 shrink-0">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-navy to-navy/80 flex items-center justify-center text-white font-bold text-base shadow-md shrink-0">
+                      {r.client_name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-navy text-sm leading-tight truncate">
+                        {r.client_name}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <Calendar className="w-3 h-3 text-muted-foreground/60" />
+                        <span className="text-[11px] text-muted-foreground">
+                          {new Date(r.created_at).toLocaleDateString("en-AU", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Client Email */}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {r.email && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Mail className="w-3.5 h-3.5 shrink-0" />
+                        <span className="text-xs truncate">{r.email}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 px-3.5 text-xs font-medium border-border/60 hover:bg-secondary/80 shadow-sm"
+                      onClick={() => viewReport(r)}
+                    >
+                      <Eye className="w-3.5 h-3.5 mr-1.5" /> View
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-9 px-3.5 text-xs font-medium bg-navy text-white hover:bg-navy/90 shadow-sm"
+                      onClick={() => downloadReportPdf(r)}
+                      disabled={pdfBusyId === r.id}
+                    >
+                      <Download className="w-3.5 h-3.5 mr-1.5" />
+                      {pdfBusyId === r.id ? "Exporting…" : "PDF"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-9 px-3.5 text-xs font-medium bg-cyan text-white hover:bg-cyan/90 shadow-sm"
+                      onClick={() => openEmailDialog(r)}
+                      disabled={sendBusyId === r.id}
+                    >
+                      <Send className="w-3.5 h-3.5 mr-1.5" />
+                      {sendBusyId === r.id ? "Sending…" : "Send"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-9 w-9 p-0 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => deleteReport(r.id)}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ---- Email compose dialog ---- */}
       {emailDialog.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-3 sm:p-6">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[calc(100vh-1.5rem)] overflow-y-auto p-4 sm:p-6 space-y-4 animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 backdrop-blur-sm p-3 sm:p-6">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[calc(100vh-1.5rem)] overflow-y-auto p-5 sm:p-6 space-y-4 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold font-heading text-navy">Compose Email</h3>
-              <button onClick={closeEmailDialog} className="text-muted-foreground hover:text-foreground">
+              <button onClick={closeEmailDialog} className="text-muted-foreground hover:text-foreground transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -487,7 +458,7 @@ export default function Admin() {
                 <select
                   value={selectedTemplate}
                   onChange={e => applyTemplate(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                 >
                   {EMAIL_TEMPLATES.map(t => (
                     <option key={t.key} value={t.key}>{t.label}</option>
@@ -511,7 +482,7 @@ export default function Admin() {
               {emailDialog.isHtml ? (
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground mb-1 block">Preview (Designed Template)</label>
-                  <div className="rounded-md border border-input overflow-hidden h-[58vh] max-h-[520px] min-h-[280px]">
+                  <div className="rounded-lg border border-input overflow-hidden h-[58vh] max-h-[520px] min-h-[280px]">
                     <iframe
                       srcDoc={emailDialog.htmlBody}
                       title="Email preview"
@@ -539,7 +510,7 @@ export default function Admin() {
 
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" size="sm" onClick={closeEmailDialog}>Cancel</Button>
-              <Button size="sm" onClick={confirmSendEmail} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
+              <Button size="sm" onClick={confirmSendEmail} className="bg-cyan text-white hover:bg-cyan/90">
                 <Send className="w-3.5 h-3.5 mr-1" /> Send Email
               </Button>
             </div>

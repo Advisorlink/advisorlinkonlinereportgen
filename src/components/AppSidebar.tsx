@@ -20,7 +20,7 @@ const navItems = [
   { title: "Presentations", url: "/presentations", icon: Monitor },
   { title: "Report Generator", url: "/", icon: FileText },
   { title: "Referrals", url: "/referrals", icon: Gift },
-  { title: "Admin", url: "/admin", icon: Settings },
+  { title: "Client Reports", url: "/admin", icon: Settings },
 ];
 
 export function AppSidebar() {
