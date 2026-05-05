@@ -6,6 +6,8 @@ const CORS = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_mail/gmail/v1";
+const EMAIL_LOGO_URL = "https://report.advisorlinkonline.com.au/logo-email.png";
+const EMAIL_LOGO_CID = "advisorlink-logo";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -45,14 +47,23 @@ async function fetchSignature(lovableKey: string, gmailKey: string): Promise<str
  * so it can be sent via the Gmail API's messages/send endpoint.
  * The body is HTML so the signature (which is HTML) renders properly.
  */
+interface InlineImage {
+  cid: string;
+  contentType: string;
+  fileName: string;
+  base64: string;
+}
+
 function buildRawEmail(
   to: string,
   subject: string,
   bodyHtml: string,
   pdfBase64?: string,
   pdfFileName?: string,
+  inlineImages: InlineImage[] = [],
 ): string {
-  const boundary = `----=_Part_${crypto.randomUUID().replace(/-/g, "")}`;
+  const boundary = `----=_Mixed_${crypto.randomUUID().replace(/-/g, "")}`;
+  const relatedBoundary = `----=_Related_${crypto.randomUUID().replace(/-/g, "")}`;
   const messageParts = [
     `To: ${to}`,
     `Subject: ${subject}`,
@@ -60,12 +71,30 @@ function buildRawEmail(
     `Content-Type: multipart/mixed; boundary="${boundary}"`,
     "",
     `--${boundary}`,
-    'Content-Type: text/html; charset="UTF-8"',
+    inlineImages.length > 0 ? `Content-Type: multipart/related; boundary="${relatedBoundary}"` : 'Content-Type: text/html; charset="UTF-8"',
+    ...(inlineImages.length > 0 ? ["", `--${relatedBoundary}`, 'Content-Type: text/html; charset="UTF-8"'] : []),
     "Content-Transfer-Encoding: 8bit",
     "",
     bodyHtml,
     "",
   ];
+
+  for (const image of inlineImages) {
+    messageParts.push(
+      `--${relatedBoundary}`,
+      `Content-Type: ${image.contentType}; name="${image.fileName}"`,
+      "Content-Transfer-Encoding: base64",
+      `Content-ID: <${image.cid}>`,
+      `Content-Disposition: inline; filename="${image.fileName}"`,
+      "",
+      image.base64,
+      "",
+    );
+  }
+
+  if (inlineImages.length > 0) {
+    messageParts.push(`--${relatedBoundary}--`, "");
+  }
 
   if (pdfBase64 && pdfFileName) {
     messageParts.push(
@@ -86,6 +115,24 @@ function buildRawEmail(
     unescape(encodeURIComponent(message)),
   );
   return encoded.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function fetchInlineLogo(): Promise<InlineImage | null> {
+  try {
+    const res = await fetch(EMAIL_LOGO_URL);
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") || "image/png";
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    let binary = "";
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+    }
+    return { cid: EMAIL_LOGO_CID, contentType, fileName: "logo-email.png", base64: btoa(binary) };
+  } catch (e) {
+    console.warn("[send-report-email] Logo inline fetch failed:", e);
+    return null;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -141,7 +188,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    const raw = buildRawEmail(recipientEmail, subject, fullHtml, pdfBase64, fileName);
+    const inlineLogo = isHtml ? await fetchInlineLogo() : null;
+    if (inlineLogo) {
+      fullHtml = fullHtml.replaceAll(EMAIL_LOGO_URL, `cid:${EMAIL_LOGO_CID}`);
+    }
+
+    const raw = buildRawEmail(recipientEmail, subject, fullHtml, pdfBase64, fileName, inlineLogo ? [inlineLogo] : []);
 
     console.log("[send-report-email] Sending to", recipientEmail, "file:", fileName, "signature:", signatureHtml ? "yes" : "no");
 
