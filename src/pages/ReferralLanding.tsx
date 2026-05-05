@@ -156,14 +156,17 @@ export default function ReferralLanding() {
         {/* Hero */}
         <div className="bg-gradient-to-r from-[#0BB5A0] to-[#089e8c] rounded-2xl p-8 mb-8 text-white text-center shadow-lg">
           <Sparkles className="w-10 h-10 mx-auto mb-3 opacity-90" />
-          <h1 className="text-3xl font-bold mb-2 font-heading">
+          <h1 className="text-3xl font-bold mb-4 font-heading">
             Your Free Super Performance Report
           </h1>
           {lead?.referrer_name && (
-            <p className="text-white/90 text-lg">
-              <strong>{lead.referrer_name}</strong> thought you'd benefit from this!
+            <p className="text-white/90 text-lg leading-relaxed mb-3">
+              Great news! <strong>{lead.referrer_name}</strong> has just done a free superannuation review with us and got a lot of value, so they have referred you for a completely free Super Performance Report!
             </p>
           )}
+          <p className="text-white/80 text-base leading-relaxed">
+            This report is completely free and gives you a detailed analysis of how your super fund is performing, how much you will potentially retire on, highlighting potential improvements that could make a real difference to your retirement.
+          </p>
         </div>
 
         {/* Benefits */}
