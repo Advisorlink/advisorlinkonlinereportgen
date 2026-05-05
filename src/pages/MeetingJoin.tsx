@@ -253,13 +253,12 @@ export default function MeetingJoin() {
   }, [connectToMeeting]);
 
   useEffect(() => {
-    const cid = clientIdRef.current;
     return () => {
       if (reconnectTimerRef.current) window.clearTimeout(reconnectTimerRef.current);
       setRemoteStream(null);
       pcRef.current?.close();
       if (channelRef.current) {
-        channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId: cid } });
+        channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId: clientIdRef.current } });
         supabase.removeChannel(channelRef.current);
       }
     };
