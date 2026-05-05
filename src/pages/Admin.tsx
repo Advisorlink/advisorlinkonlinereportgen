@@ -316,9 +316,6 @@ export default function Admin() {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold font-heading text-navy tracking-tight">Client Reports</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                {reports.length} report{reports.length !== 1 ? "s" : ""} generated
-              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
