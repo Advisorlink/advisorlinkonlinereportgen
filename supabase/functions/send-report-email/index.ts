@@ -6,7 +6,7 @@ const CORS = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_mail/gmail/v1";
-const EMAIL_LOGO_URL = "https://report.advisorlinkonline.com.au/logo-email.png";
+const EMAIL_LOGO_URL = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png";
 const EMAIL_LOGO_CID = "advisorlink-logo";
 
 function json(body: unknown, status = 200) {
