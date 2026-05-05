@@ -18,7 +18,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
       .outer { padding: 10px !important; background-color:#07101f !important; }
       .px { padding-left: 16px !important; padding-right: 16px !important; }
       .hero-section { padding: 14px 16px 30px !important; }
-      .gift-shell { width: 100% !important; max-width: 350px !important; padding: 3px 3px 9px !important; border-radius: 22px !important; }
+      .gift-shell { width: 100% !important; max-width: 350px !important; padding: 3px 3px 9px !important; border-radius: 22px !important; border-right: 5px solid #020814 !important; border-bottom: 9px solid #020814 !important; }
       .gift-card { width: 100% !important; border-radius: 19px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.16) !important; }
       .gift-card-pad { padding-left: 20px !important; padding-right: 20px !important; }
       .hero-title { font-size: 24px !important; line-height: 30px !important; }
@@ -28,7 +28,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
       .step-row { display: block !important; width: 100% !important; }
       .step-icon-cell { display: block !important; width: 100% !important; text-align: center !important; padding-bottom: 12px !important; padding-right: 0 !important; }
       .step-text-cell { display: block !important; width: 100% !important; text-align: center !important; }
-      .bonus-shell { padding: 3px 3px 9px !important; border-radius: 22px !important; background-image: linear-gradient(135deg,#ffd76a 0%,#0CF6DA 44%,#1b2c62 100%) !important; }
+      .bonus-shell { padding: 3px 3px 9px !important; border-radius: 22px !important; background-image: linear-gradient(135deg,#ffd76a 0%,#0CF6DA 44%,#1b2c62 100%) !important; border-right: 5px solid #020814 !important; border-bottom: 9px solid #020814 !important; }
       .bonus-inner { padding: 28px 20px !important; }
     }
   </style>
