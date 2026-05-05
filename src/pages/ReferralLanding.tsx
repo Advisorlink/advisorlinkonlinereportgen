@@ -87,7 +87,7 @@ export default function ReferralLanding() {
     }
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("referral_responses").insert({
+      const { error } = await supabase.from("referral_responses" as any).insert({
         lead_id: lead?.id,
         name: name.trim(),
         phone: phone.trim(),
@@ -97,7 +97,7 @@ export default function ReferralLanding() {
         age: age || null,
         state: state || null,
         had_review_before: hadReview,
-      });
+      } as any);
       if (error) throw error;
       setSubmitted(true);
     } catch (e: any) {
