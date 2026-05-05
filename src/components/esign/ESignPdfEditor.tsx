@@ -677,8 +677,8 @@ function suggestedValue(name: string, clientData: Record<string, string>) {
   for (const [key, value] of Object.entries(clientData)) {
     if (normalized.includes(key) && value) return value;
   }
-  // Date-like field names that didn't match above
-  if (/\bdate\b/.test(normalized) && !/(birth|dob)/.test(normalized)) {
+  // Date-like field names that didn't match above (broad match)
+  if (/date/i.test(normalized) && !/(birth|dob)/i.test(normalized)) {
     return clientData.date || "";
   }
   return "";
