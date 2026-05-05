@@ -143,7 +143,9 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
 
   <!-- BUT WAIT — Premium 3D Banner -->
   <tr><td class="px" style="padding:0 36px 28px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:20px;overflow:hidden;background-image:linear-gradient(145deg,#0a2e4a 0%,#0d1a33 40%,#1a0a33 100%);box-shadow:0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(12,246,218,0.1), 0 0 80px rgba(12,246,218,0.06) inset;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="bonus-shell" style="border-collapse:separate;border-radius:24px;background-image:linear-gradient(135deg,#FFD700 0%,#0CF6DA 42%,#18285a 100%);box-shadow:0 9px 0 #06101f, 0 20px 38px rgba(0,0,0,0.52), 0 0 44px rgba(255,215,0,0.12);padding:4px 4px 12px;">
+    <tr><td>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:20px;overflow:hidden;background-image:linear-gradient(145deg,#0a2e4a 0%,#0d1a33 40%,#1a0a33 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -20px 36px rgba(0,0,0,0.28);">
       <tr><td class="bonus-inner" style="padding:36px 32px;text-align:center;">
         <!-- Glowing accent -->
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 14px;border-collapse:separate;"><tr>
@@ -169,6 +171,8 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
 
         <p style="margin:0;font-size:20px;font-weight:900;color:#0CF6DA;line-height:26px;letter-spacing:0;">PER REFERRAL!</p>
       </td></tr>
+    </table>
+    </td></tr>
     </table>
   </td></tr>
 
