@@ -108,11 +108,12 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   };
 
   const handleSendDocument = async () => {
-    if (!file || !user) return;
+    const fileToUpload = editedFile || file;
+    if (!fileToUpload || !user) return;
     setSending(true);
     try {
-      // Upload PDF
-      const filePath = `${user.id}/${Date.now()}_${file.name}`;
+      // Upload PDF (edited version with filled fields)
+      const filePath = `${user.id}/${Date.now()}_${fileToUpload.name}`;
       const { error: uploadErr } = await supabase.storage
         .from("esign-documents")
         .upload(filePath, file);
