@@ -52,12 +52,12 @@ export default function ReferralForm() {
     try {
       // Create submission
       const { data: submission, error: subErr } = await supabase
-        .from("referral_submissions")
+        .from("referral_submissions" as any)
         .insert({
           client_name: clientName,
           client_email: clientEmail,
           referrals: filledEntries,
-        })
+        } as any)
         .select("id")
         .single();
 
@@ -74,8 +74,8 @@ export default function ReferralForm() {
       }));
 
       const { error: leadErr } = await supabase
-        .from("referral_leads")
-        .insert(leads);
+        .from("referral_leads" as any)
+        .insert(leads as any);
 
       if (leadErr) throw leadErr;
 
