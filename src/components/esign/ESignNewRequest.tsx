@@ -273,7 +273,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           </div>
 
           <div className="flex justify-between">
-            <Button variant="outline" onClick={() => setStep("upload")}>Back</Button>
+            <Button variant="outline" onClick={() => setStep("edit-pdf")}>Back</Button>
           </div>
         </div>
       )}
