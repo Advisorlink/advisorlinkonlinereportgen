@@ -184,6 +184,25 @@ export default function Admin() {
     }
   };
 
+  const sendReportEmail = (r: ReportRow) => {
+    const clientEmail = (r.email ?? "").trim();
+    if (!clientEmail) {
+      toast.error("No email address on file for this client");
+      return;
+    }
+    const clientName = r.client_name.trim() || "there";
+    const subject = encodeURIComponent("Super Performance Report");
+    const body = encodeURIComponent(
+      `Hi ${clientName}\n\nHere is your Free performance report. Please note that this document is NOT to be taken as financial advice. It is just to help you understand if there is potential improvements you could be missing out on.\n\n`
+    );
+    // Open Gmail compose — user's signature is preserved automatically
+    window.open(
+      `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(clientEmail)}&su=${subject}&body=${body}`,
+      "_blank"
+    );
+    toast.info("Gmail opened — please attach the PDF before sending");
+  };
+
   const filteredReports = useMemo(() => {
     const q = reportSearch.trim().toLowerCase();
     if (!q) return reports;
