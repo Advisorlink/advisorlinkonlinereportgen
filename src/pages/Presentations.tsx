@@ -6,7 +6,8 @@ import { CRMLayout } from "@/components/CRMLayout";
 import { PresentationSlideshow } from "@/components/PresentationSlideshow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Monitor, Play, Copy, StopCircle, Search, Mic, MicOff, Circle, ScreenShare, ScreenShareOff, UserCheck, UserX, Presentation } from "lucide-react";
+import { Monitor, Play, Copy, StopCircle, Search, Mic, MicOff, Circle, ScreenShare, ScreenShareOff, UserCheck, UserX, Presentation, Trash2, UserPlus } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -59,6 +60,8 @@ export default function Presentations() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const hostPreviewRef = useRef<HTMLVideoElement>(null);
   const [showSlideshow, setShowSlideshow] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [showGuestInput, setShowGuestInput] = useState(false);
 
   const loadData = async () => {
     const [{ data: r }, { data: m }] = await Promise.all([
@@ -89,6 +92,25 @@ export default function Presentations() {
   const handleSelectClient = (r: ReportRow) => {
     setSelectedReport(r);
     setSelectOpen(false);
+    setShowGuestInput(false);
+    setConfirmOpen(true);
+  };
+
+  const handleSelectGuest = () => {
+    if (!guestName.trim()) {
+      toast.error("Please enter a guest name");
+      return;
+    }
+    const guestReport: ReportRow = {
+      id: "guest-" + Date.now(),
+      client_name: guestName.trim(),
+      email: null,
+      created_at: new Date().toISOString(),
+    };
+    setSelectedReport(guestReport);
+    setSelectOpen(false);
+    setShowGuestInput(false);
+    setGuestName("");
     setConfirmOpen(true);
   };
 
@@ -97,6 +119,25 @@ export default function Presentations() {
     setConfirmOpen(false);
     const created = await startMeeting(selectedReport);
     if (created) loadData();
+  };
+
+  const deleteMeeting = async (id: string) => {
+    if (!confirm("Delete this meeting?")) return;
+    const { error } = await supabase.from("meetings").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Meeting deleted"); loadData(); }
+  };
+
+  const deleteAllMeetings = async () => {
+    if (!confirm("Delete all meeting history? This cannot be undone.")) return;
+    const ids = meetings.filter(m => {
+      const ds = getDisplayStatus(m);
+      return ds === "ended";
+    }).map(m => m.id);
+    if (ids.length === 0) { toast.info("No ended meetings to delete"); return; }
+    const { error } = await supabase.from("meetings").delete().in("id", ids);
+    if (error) toast.error(error.message);
+    else { toast.success(`Deleted ${ids.length} meeting(s)`); loadData(); }
   };
 
   const getDisplayStatus = (m: MeetingRow) => {
@@ -115,7 +156,7 @@ export default function Presentations() {
           </div>
           <Button
             className="bg-cyan text-cyan-foreground hover:bg-cyan/90 gap-2"
-            onClick={() => setSelectOpen(true)}
+            onClick={() => { setSelectOpen(true); setShowGuestInput(false); setGuestName(""); }}
             disabled={!!activeMeeting}
           >
             <Monitor className="w-4 h-4" />
@@ -247,7 +288,20 @@ export default function Presentations() {
         )}
 
         <div className="bg-card rounded-xl shadow-elevated p-6">
-          <h2 className="text-lg font-bold font-heading text-navy mb-4">Meeting History</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold font-heading text-navy">Meeting History</h2>
+            {meetings.length > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+                onClick={deleteAllMeetings}
+              >
+                <Trash2 className="w-3.5 h-3.5 mr-1" />
+                Delete All
+              </Button>
+            )}
+          </div>
           {meetings.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">No meetings yet. Start your first presentation!</p>
           ) : (
@@ -258,14 +312,15 @@ export default function Presentations() {
                     <th className="py-2 pr-4 font-semibold text-muted-foreground">Client</th>
                     <th className="py-2 pr-4 font-semibold text-muted-foreground">Meeting ID</th>
                     <th className="py-2 pr-4 font-semibold text-muted-foreground">Status</th>
-                    <th className="py-2 font-semibold text-muted-foreground">Date</th>
+                    <th className="py-2 pr-4 font-semibold text-muted-foreground">Date</th>
+                    <th className="py-2 font-semibold text-muted-foreground"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {meetings.map((m) => {
                     const displayStatus = getDisplayStatus(m);
                     return (
-                      <tr key={m.id} className="border-b border-border/50">
+                      <tr key={m.id} className="border-b border-border/50 group">
                         <td className="py-2 pr-4 font-medium">{m.client_name}</td>
                         <td className="py-2 pr-4 font-mono text-xs">{m.meeting_id}</td>
                         <td className="py-2 pr-4">
@@ -275,7 +330,19 @@ export default function Presentations() {
                             "bg-muted text-muted-foreground"
                           }`}>{displayStatus}</span>
                         </td>
-                        <td className="py-2 text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</td>
+                        <td className="py-2 pr-4 text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</td>
+                        <td className="py-2">
+                          {displayStatus === "ended" && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => deleteMeeting(m.id)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                        </td>
                       </tr>
                     );
                   })}
@@ -290,9 +357,43 @@ export default function Presentations() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-navy font-heading">Select Client</DialogTitle>
-            <DialogDescription>Choose a client to present to</DialogDescription>
+            <DialogDescription>Choose a client to present to, or add a guest</DialogDescription>
           </DialogHeader>
-          <div className="relative mb-3">
+
+          {/* Guest option */}
+          {!showGuestInput ? (
+            <button
+              onClick={() => setShowGuestInput(true)}
+              className="w-full text-left px-4 py-3 rounded-lg border-2 border-dashed border-border hover:border-cyan/50 hover:bg-cyan/5 transition flex items-center gap-3"
+            >
+              <div className="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center shrink-0">
+                <UserPlus className="w-4 h-4 text-cyan" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-navy">Present to a Guest</p>
+                <p className="text-xs text-muted-foreground">Enter a name for someone not in your client list</p>
+              </div>
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <Input
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                placeholder="Enter guest name..."
+                className="flex-1"
+                autoFocus
+                onKeyDown={(e) => e.key === "Enter" && handleSelectGuest()}
+              />
+              <Button size="sm" className="bg-cyan text-white hover:bg-cyan/90 shrink-0" onClick={handleSelectGuest}>
+                Continue
+              </Button>
+              <Button size="sm" variant="outline" className="shrink-0" onClick={() => { setShowGuestInput(false); setGuestName(""); }}>
+                Cancel
+              </Button>
+            </div>
+          )}
+
+          <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search clients..." className="pl-9" />
           </div>
