@@ -210,6 +210,16 @@ export default function Index() {
             <span className="text-sm font-semibold text-navy">Report Generator</span>
           </div>
           <div className="flex items-center gap-2">
+            {isFromPresentation && (
+              <Button
+                size="sm"
+                onClick={handleResumePresentation}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5 animate-pulse"
+              >
+                <Presentation className="w-4 h-4" />
+                Resume Presentation
+              </Button>
+            )}
             <input
               ref={fileRef} type="file" accept=".xlsx,.xls" className="hidden"
               onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.currentTarget.value = ""; }}
