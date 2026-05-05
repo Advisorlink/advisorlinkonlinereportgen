@@ -107,6 +107,21 @@ export function netSuperContrib(annualIncome: number): number {
   return annualIncome * 0.12 * 0.85;
 }
 
+// Annual personal contribution (after-tax voluntary)
+export function annualPersonalContrib(i: ClientInputs): number {
+  const amt = i.personalContributionAmount ?? 0;
+  if (amt <= 0) return 0;
+  const freq = i.personalContributionFrequency ?? "Annually";
+  let annual = freq === "Weekly" ? amt * 52 : freq === "Monthly" ? amt * 12 : amt;
+  if (i.personalContributionType === "percent") {
+    annual = (i.annualIncome * (amt / 100));
+    if (freq === "Weekly") annual = (i.annualIncome * (amt / 100));
+    else if (freq === "Monthly") annual = (i.annualIncome * (amt / 100));
+    // percent is always of annual income regardless of frequency display
+  }
+  return annual;
+}
+
 // Annual desired income from N11/N10 → annual figure (N12 simplified)
 export function annualDesiredIncome(amount: number, freq: IncomeFrequency): number {
   if (freq === "Weekly") return amount * 52;
