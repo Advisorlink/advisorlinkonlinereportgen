@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { CRMLayout } from "@/components/CRMLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Monitor, Play, Copy, StopCircle, Search, Mic, MicOff, Circle } from "lucide-react";
+import { Monitor, Play, Copy, StopCircle, Search, Mic, MicOff, Circle, ScreenShare, ScreenShareOff, UserCheck, UserX } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -41,15 +41,20 @@ export default function Presentations() {
 
   // Screen share / recording state
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [sharing, setSharing] = useState(false);
   const [micStream, setMicStream] = useState<MediaStream | null>(null);
   const [micOn, setMicOn] = useState(false);
   const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
   const [recording, setRecording] = useState(false);
   const [chunks, setChunks] = useState<Blob[]>([]);
 
+  // Client connected state
+  const [clientConnected, setClientConnected] = useState(false);
+
   // Realtime channel for signaling
   const [channel, setChannel] = useState<ReturnType<typeof supabase.channel> | null>(null);
-  const [peerConnections, setPeerConnections] = useState<Map<string, RTCPeerConnection>>(new Map());
+  const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
+  const streamRef = useRef<MediaStream | null>(null);
 
   const iceServers = [
     { urls: "stun:stun.l.google.com:19302" },
@@ -82,11 +87,11 @@ export default function Presentations() {
     setConfirmOpen(true);
   };
 
+  // Step 1: Start meeting — just creates DB record + signaling channel (NO screen share yet)
   const startMeeting = async () => {
     if (!selectedReport) return;
     setConfirmOpen(false);
 
-    // Create meeting in DB
     const { data, error } = await supabase.from("meetings").insert({
       host_user_id: profile!.id,
       report_id: selectedReport.id,
@@ -102,88 +107,140 @@ export default function Presentations() {
 
     const meeting = data as MeetingRow;
     setActiveMeeting(meeting);
+    setClientConnected(false);
+    setSharing(false);
 
-    // Start screen sharing
+    // Set up Realtime signaling channel
+    const ch = supabase.channel(`meeting:${meeting.meeting_id}`, {
+      config: { broadcast: { self: false } },
+    });
+
+    ch.on("broadcast", { event: "join" }, async ({ payload }) => {
+      const clientId = payload.clientId as string;
+      setClientConnected(true);
+      toast.success("Client has joined the meeting!");
+
+      // If screen is already being shared, set up WebRTC for this client
+      const currentStream = streamRef.current;
+      if (currentStream) {
+        setupPeerConnection(ch, clientId, currentStream);
+      }
+    });
+
+    ch.on("broadcast", { event: "answer" }, async ({ payload }) => {
+      const pcs = peerConnectionsRef.current;
+      const pc = pcs.get(payload.clientId) || [...pcs.values()][0];
+      if (pc && payload.sdp) {
+        await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+      }
+    });
+
+    ch.on("broadcast", { event: "ice-candidate" }, async ({ payload }) => {
+      if (payload.from === "host") return;
+      const pcs = peerConnectionsRef.current;
+      const pc = pcs.get(payload.clientId) || [...pcs.values()][0];
+      if (pc && payload.candidate) {
+        await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+      }
+    });
+
+    ch.on("broadcast", { event: "leave" }, () => {
+      setClientConnected(false);
+      toast.info("Client has left the meeting");
+    });
+
+    await ch.subscribe();
+    setChannel(ch);
+
+    await supabase.from("meetings").update({ status: "waiting", started_at: new Date().toISOString() } as never).eq("id", meeting.id);
+    loadData();
+
+    toast.success("Meeting created! Share the meeting ID with your client.");
+  };
+
+  const setupPeerConnection = (ch: ReturnType<typeof supabase.channel>, clientId: string, displayStream: MediaStream) => {
+    const pc = new RTCPeerConnection({ iceServers });
+
+    displayStream.getTracks().forEach((track) => pc.addTrack(track, displayStream));
+
+    pc.onicecandidate = (e) => {
+      if (e.candidate) {
+        ch.send({ type: "broadcast", event: "ice-candidate", payload: { candidate: e.candidate, clientId, from: "host" } });
+      }
+    };
+
+    pc.oniceconnectionstatechange = () => {
+      if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed") {
+        setClientConnected(false);
+      }
+    };
+
+    pc.createOffer().then(async (offer) => {
+      await pc.setLocalDescription(offer);
+      ch.send({ type: "broadcast", event: "offer", payload: { sdp: offer, clientId } });
+    });
+
+    peerConnectionsRef.current.set(clientId, pc);
+  };
+
+  // Step 2: Share screen — triggered by a separate button
+  const startScreenShare = async () => {
+    if (!activeMeeting || !channel) return;
+
     try {
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
-        audio: true, // system audio if available
+        audio: true,
       });
 
       setStream(displayStream);
+      streamRef.current = displayStream;
+      setSharing(true);
 
-      // Listen for screen share stop
       displayStream.getVideoTracks()[0].addEventListener("ended", () => {
-        endMeeting(meeting.meeting_id);
+        stopScreenShare();
       });
 
-      // Set up Realtime signaling channel
-      const ch = supabase.channel(`meeting:${meeting.meeting_id}`, {
-        config: { broadcast: { self: false } },
-      });
-
-      ch.on("broadcast", { event: "join" }, async ({ payload }) => {
-        // A client wants to join — create a peer connection and send offer
-        const clientId = payload.clientId as string;
-        const pc = new RTCPeerConnection({ iceServers });
-
-        // Add screen tracks to the connection
-        displayStream.getTracks().forEach((track) => pc.addTrack(track, displayStream));
-
-        pc.onicecandidate = (e) => {
-          if (e.candidate) {
-            ch.send({ type: "broadcast", event: "ice-candidate", payload: { candidate: e.candidate, clientId, from: "host" } });
-          }
-        };
-
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        ch.send({ type: "broadcast", event: "offer", payload: { sdp: offer, clientId } });
-
-        setPeerConnections((prev) => new Map(prev).set(clientId, pc));
-      });
-
-      ch.on("broadcast", { event: "answer" }, async ({ payload }) => {
-        const pc = peerConnections.get(payload.clientId) || [...peerConnections.values()][0];
-        if (pc && payload.sdp) {
-          await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-        }
-      });
-
-      ch.on("broadcast", { event: "ice-candidate" }, async ({ payload }) => {
-        if (payload.from === "host") return;
-        const pc = peerConnections.get(payload.clientId) || [...peerConnections.values()][0];
-        if (pc && payload.candidate) {
-          await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
-        }
-      });
-
-      await ch.subscribe();
-      setChannel(ch);
-
-      // Update meeting status
-      await supabase.from("meetings").update({ status: "active", started_at: new Date().toISOString() } as never).eq("id", meeting.id);
-      setActiveMeeting({ ...meeting, status: "active" });
+      // Update meeting status to active
+      await supabase.from("meetings").update({ status: "active" } as never).eq("id", activeMeeting.id);
+      setActiveMeeting((prev) => prev ? { ...prev, status: "active" } : null);
       loadData();
 
-      toast.success("Screen sharing started! Share the meeting ID with your client.");
+      // If a client is already connected, set up peer connections
+      // The client will re-join via broadcast, which will trigger setupPeerConnection
+      // Notify any connected clients to re-join to pick up the stream
+      channel.send({ type: "broadcast", event: "screen-ready", payload: {} });
+
+      toast.success("Screen sharing started!");
     } catch (e) {
       console.error("Screen share failed:", e);
       toast.error("Screen sharing was cancelled or denied");
-      await supabase.from("meetings").delete().eq("id", meeting.id);
-      setActiveMeeting(null);
     }
   };
 
-  const endMeeting = async (meetingId?: string) => {
-    const mid = meetingId || activeMeeting?.meeting_id;
+  const stopScreenShare = () => {
+    stream?.getTracks().forEach((t) => t.stop());
+    setStream(null);
+    streamRef.current = null;
+    setSharing(false);
 
+    // Close peer connections (clients will see stream end)
+    peerConnectionsRef.current.forEach((pc) => pc.close());
+    peerConnectionsRef.current = new Map();
+
+    toast.info("Screen sharing stopped");
+  };
+
+  const endMeeting = async () => {
     // Stop all streams
     stream?.getTracks().forEach((t) => t.stop());
     micStream?.getTracks().forEach((t) => t.stop());
     setStream(null);
+    streamRef.current = null;
     setMicStream(null);
     setMicOn(false);
+    setSharing(false);
+    setClientConnected(false);
 
     // Stop recorder
     if (recorder && recorder.state !== "inactive") {
@@ -193,11 +250,12 @@ export default function Presentations() {
     setRecording(false);
 
     // Close peer connections
-    peerConnections.forEach((pc) => pc.close());
-    setPeerConnections(new Map());
+    peerConnectionsRef.current.forEach((pc) => pc.close());
+    peerConnectionsRef.current = new Map();
 
-    // Unsubscribe channel
+    // Notify clients
     if (channel) {
+      channel.send({ type: "broadcast", event: "meeting-ended", payload: {} });
       await channel.unsubscribe();
       setChannel(null);
     }
@@ -218,11 +276,10 @@ export default function Presentations() {
       setMicStream(null);
       setMicOn(false);
 
-      // Remove mic tracks from all peer connections
-      peerConnections.forEach((pc) => {
+      peerConnectionsRef.current.forEach((pc) => {
         const senders = pc.getSenders();
         senders.forEach((s) => {
-          if (s.track?.kind === "audio" && micStream.getTracks().includes(s.track)) {
+          if (s.track?.kind === "audio") {
             pc.removeTrack(s);
           }
         });
@@ -233,8 +290,7 @@ export default function Presentations() {
         setMicStream(mic);
         setMicOn(true);
 
-        // Add mic to all peer connections
-        peerConnections.forEach((pc) => {
+        peerConnectionsRef.current.forEach((pc) => {
           mic.getTracks().forEach((t) => pc.addTrack(t, mic));
         });
       } catch {
@@ -255,7 +311,6 @@ export default function Presentations() {
       return;
     }
 
-    // Combine screen + mic into one stream for recording
     const tracks = [...stream.getTracks()];
     if (micStream) tracks.push(...micStream.getAudioTracks());
     const combined = new MediaStream(tracks);
@@ -310,19 +365,38 @@ export default function Presentations() {
             onClick={() => setSelectOpen(true)}
             disabled={!!activeMeeting}
           >
-            <Monitor className="w-4 h-4" /> Start Presentation
+            <Monitor className="w-4 h-4" />
+            <span>Start Presentation</span>
           </Button>
         </div>
 
         {/* Active meeting panel */}
         {activeMeeting && (
-          <div className="bg-gradient-to-r from-navy to-[hsl(215_50%_18%)] rounded-xl p-6 text-white space-y-4">
+          <div className="bg-gradient-to-r from-navy to-[hsl(215_50%_18%)] rounded-xl p-6 text-white space-y-5">
+            {/* Top row: client info + meeting ID + client status */}
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <p className="text-xs text-white/60 font-semibold uppercase tracking-wider">Active Meeting</p>
                 <p className="text-lg font-bold mt-1">{activeMeeting.client_name}</p>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
+                {/* Client status indicator */}
+                <div className="flex items-center gap-2">
+                  {clientConnected ? (
+                    <>
+                      <div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
+                      <UserCheck className="w-4 h-4 text-emerald-400" />
+                      <span className="text-sm font-semibold text-emerald-400">Client Connected</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-3 h-3 rounded-full bg-white/30" />
+                      <UserX className="w-4 h-4 text-white/40" />
+                      <span className="text-sm font-medium text-white/40">Waiting for client...</span>
+                    </>
+                  )}
+                </div>
+                {/* Meeting ID */}
                 <div className="text-center">
                   <p className="text-xs text-white/60 mb-1">Meeting ID</p>
                   <button
@@ -335,7 +409,21 @@ export default function Presentations() {
               </div>
             </div>
 
+            {/* Controls */}
             <div className="flex flex-wrap gap-3">
+              {/* Share / Stop Share Screen button */}
+              {!sharing ? (
+                <Button className="bg-cyan text-cyan-foreground hover:bg-cyan/90 h-10 px-5 text-sm font-semibold" onClick={startScreenShare}>
+                  <ScreenShare className="w-4 h-4 mr-2" />
+                  <span>Share Screen</span>
+                </Button>
+              ) : (
+                <Button className="bg-amber-600 text-white hover:bg-amber-700 h-10 px-5 text-sm font-semibold" onClick={stopScreenShare}>
+                  <ScreenShareOff className="w-4 h-4 mr-2" />
+                  <span>Stop Sharing</span>
+                </Button>
+              )}
+
               <Button className="bg-white/10 border border-white/20 text-white hover:bg-white/20 h-10 px-4 text-sm font-medium" onClick={copyMeetingLink}>
                 <Copy className="w-4 h-4 mr-2" />
                 <span>Copy Join Link</span>
@@ -351,11 +439,12 @@ export default function Presentations() {
               <Button
                 className={`bg-white/10 border border-white/20 text-white hover:bg-white/20 h-10 px-4 text-sm font-medium ${recording ? "bg-red-600/30 border-red-400/50 text-red-200" : ""}`}
                 onClick={toggleRecording}
+                disabled={!sharing}
               >
                 <Circle className={`w-4 h-4 mr-2 ${recording ? "fill-red-500 text-red-500 animate-pulse" : ""}`} />
                 <span>{recording ? "Stop Recording" : "Start Recording"}</span>
               </Button>
-              <Button className="bg-red-600 text-white hover:bg-red-700 h-10 px-4 text-sm font-medium" onClick={() => endMeeting()}>
+              <Button className="bg-red-600 text-white hover:bg-red-700 h-10 px-4 text-sm font-medium" onClick={endMeeting}>
                 <StopCircle className="w-4 h-4 mr-2" />
                 <span>End Meeting</span>
               </Button>
@@ -443,20 +532,21 @@ export default function Presentations() {
           <DialogHeader>
             <DialogTitle className="text-navy font-heading">Start Meeting</DialogTitle>
             <DialogDescription>
-              Begin a screen-sharing presentation with <strong>{selectedReport?.client_name}</strong>
+              Create a meeting room for <strong>{selectedReport?.client_name}</strong>
             </DialogDescription>
           </DialogHeader>
           <div className="bg-secondary/50 rounded-lg p-4 text-center">
             <Monitor className="w-10 h-10 mx-auto text-cyan mb-2" />
             <p className="text-sm text-muted-foreground">
-              A unique meeting ID will be generated. Your client can join at:
+              A unique meeting ID will be generated. You can share your screen when you're ready.
             </p>
             <p className="text-sm font-semibold text-navy mt-1">{meetingJoinUrl}</p>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setConfirmOpen(false)}>Cancel</Button>
             <Button className="bg-cyan text-cyan-foreground hover:bg-cyan/90 gap-2" onClick={startMeeting}>
-              <Play className="w-4 h-4" /> Start Meeting
+              <Play className="w-4 h-4" />
+              <span>Start Meeting</span>
             </Button>
           </div>
         </DialogContent>
