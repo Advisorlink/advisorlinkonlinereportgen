@@ -57,7 +57,7 @@ export default function ReferralForm() {
         .from("referral_submissions" as any)
         .insert({
           id: submissionId,
-          client_name: clientName,
+          client_name: clientFullName,
           client_email: clientEmail,
           referrals: filledEntries,
         } as any);
@@ -66,7 +66,7 @@ export default function ReferralForm() {
 
       const leads = filledEntries.map((r) => ({
         submission_id: submissionId,
-        referrer_name: clientName,
+        referrer_name: clientFullName,
         referrer_email: clientEmail,
         lead_name: r.name,
         lead_phone: r.phone,
@@ -100,7 +100,7 @@ export default function ReferralForm() {
             <CheckCircle className="w-8 h-8 text-[#29B6F6]" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1a1a2e] mb-3">
-            Thank You, {clientName}!
+            Thank You, {clientFirstName}!
           </h1>
           <p className="text-[#5a5a6e] text-base leading-relaxed mb-6">
             Your referrals have been submitted successfully. We'll reach out to
@@ -137,7 +137,7 @@ export default function ReferralForm() {
               Referral Reward Program
             </p>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white leading-snug">
-              Hey {clientName || "there"}, want to earn a{" "}
+              Hey {clientFirstName || "there"}, want to earn a{" "}
               <span className="text-[#FFD700]">$100 Gift Card</span>?
             </h1>
           </div>
@@ -236,7 +236,7 @@ export default function ReferralForm() {
                 <AlertCircle className="w-4 h-4 text-[#b89a30] flex-shrink-0 mt-0.5" />
                 <p className="text-xs sm:text-sm text-[#5a5540] leading-relaxed">
                   By submitting, your referrals will receive an email from us letting them know
-                  <strong> {clientName || "you"}</strong> referred them, inviting them to receive
+                  <strong> {clientFirstName || "you"}</strong> referred them, inviting them to receive
                   a free Super Performance Report. Your information is handled per our privacy policy.
                 </p>
               </div>
