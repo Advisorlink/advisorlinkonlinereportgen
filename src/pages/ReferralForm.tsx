@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Users, Send, CheckCircle, AlertCircle } from "lucide-react";
+import { Send, CheckCircle, AlertCircle, Gift, Phone, Sparkles } from "lucide-react";
 
 interface ReferralEntry {
   name: string;
@@ -50,7 +50,6 @@ export default function ReferralForm() {
 
     setSubmitting(true);
     try {
-      // Generate ID client-side so we don't need select-after-insert
       const submissionId = crypto.randomUUID();
 
       const { error: subErr } = await supabase
@@ -64,7 +63,6 @@ export default function ReferralForm() {
 
       if (subErr) throw subErr;
 
-      // Create individual leads
       const leads = filledEntries.map((r) => ({
         submission_id: submissionId,
         referrer_name: clientName,
@@ -80,7 +78,6 @@ export default function ReferralForm() {
 
       if (leadErr) throw leadErr;
 
-      // Trigger emails to each referral
       await supabase.functions.invoke("send-referral-emails", {
         body: { submissionId: submissionId },
       });
@@ -96,123 +93,140 @@ export default function ReferralForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#f0f9f7] to-[#e8f4f8] flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-10 text-center">
-          <div className="w-20 h-20 bg-[#0BB5A0]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-[#0BB5A0]" />
+      <div className="min-h-screen bg-[#f4f7f6] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-8 sm:p-12 text-center border border-[#e5e9e8]">
+          <div className="w-16 h-16 bg-[#0BB5A0]/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-8 h-8 text-[#0BB5A0]" />
           </div>
-          <h1 className="text-3xl font-bold text-[#1a1a2e] mb-4 font-heading">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1a1a2e] mb-3">
             Thank You, {clientName}!
           </h1>
-          <p className="text-[#444455] text-lg leading-relaxed mb-6">
+          <p className="text-[#5a5a6e] text-base leading-relaxed mb-6">
             Your referrals have been submitted successfully. We'll reach out to
             each of them with an invitation for a free Super Performance Report.
           </p>
-          <p className="text-[#0BB5A0] font-semibold text-lg">
-            Your $100 gift card is on its way! 🎉
-          </p>
+          <div className="inline-flex items-center gap-2 bg-[#0BB5A0]/10 text-[#0BB5A0] font-semibold text-lg px-6 py-3 rounded-xl">
+            <Gift className="w-5 h-5" />
+            Your $100 gift card is on its way!
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f0f9f7] to-[#e8f4f8]">
-      {/* Header */}
-      <div className="bg-white border-b border-[#e8e8ee]">
-        <div className="max-w-3xl mx-auto px-4 py-6 flex items-center gap-4">
+    <div className="min-h-screen bg-[#f4f7f6]">
+      {/* Compact Header */}
+      <header className="bg-white border-b border-[#e5e9e8]">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4">
           <img
             src="https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png"
             alt="Advisor Link Online"
-            className="h-10"
+            className="h-8 sm:h-9"
           />
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* Hero */}
-        <div className="rounded-2xl mb-8 overflow-hidden shadow-lg">
-          <div className="bg-gradient-to-r from-[#0BB5A0] to-[#089e8c] p-8 text-white text-center">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-              <span className="text-3xl">🎉</span>
-            </div>
-            <h1 className="text-3xl font-bold mb-2 font-heading">
-              Hey {clientName || "there"}!
-            </h1>
-            <p className="text-white/90 text-xl leading-relaxed">
-              Do you know 5 people that would like a free performance report like you got!!!? 
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        {/* Hero Card */}
+        <div className="bg-white rounded-2xl border border-[#e5e9e8] shadow-sm overflow-hidden mb-6">
+          {/* Top banner */}
+          <div className="bg-[#0BB5A0] px-5 sm:px-8 py-6 sm:py-8">
+            <p className="text-white/80 text-sm font-medium tracking-wide uppercase mb-1">
+              Referral Reward Program
             </p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white leading-snug">
+              Hey {clientName || "there"}, want to earn a{" "}
+              <span className="text-[#FFD700]">$100 Gift Card</span>?
+            </h1>
           </div>
-          
-          <div className="bg-white p-6 space-y-4">
-            <div className="flex items-start gap-4 p-4 bg-[#f0f9f7] rounded-xl border-l-4 border-[#0BB5A0]">
-              <span className="text-2xl flex-shrink-0">📞</span>
-              <p className="text-[#1a1a2e] text-base leading-relaxed">
-                Well I'll tell you what.. <strong>Give them a call, send them a text</strong> and ask if they'd like us to send them one!!
-              </p>
+
+          {/* Steps */}
+          <div className="px-5 sm:px-8 py-6 sm:py-8 space-y-4">
+            <p className="text-[#3a3a4e] text-sm sm:text-base leading-relaxed">
+              Do you know <strong>5 people</strong> that would like a free performance report like you got?
+            </p>
+
+            <div className="grid gap-3">
+              {/* Step 1 */}
+              <div className="flex items-start gap-3 sm:gap-4 bg-[#f4f7f6] rounded-xl p-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#0BB5A0]/10 flex items-center justify-center flex-shrink-0">
+                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-[#0BB5A0]" />
+                </div>
+                <p className="text-[#3a3a4e] text-sm sm:text-base leading-relaxed pt-1.5 sm:pt-2">
+                  <strong>Give them a call or send them a text</strong> — ask if they'd like us to send them a free report!
+                </p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex items-start gap-3 sm:gap-4 bg-[#f4f7f6] rounded-xl p-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#0BB5A0]/10 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#0BB5A0]" />
+                </div>
+                <p className="text-[#3a3a4e] text-sm sm:text-base leading-relaxed pt-1.5 sm:pt-2">
+                  It's <strong>completely free</strong> for them, and you get rewarded for doing the legwork for us 😄
+                </p>
+              </div>
             </div>
-            
-            <div className="flex items-start gap-4 p-4 bg-[#f0f9f7] rounded-xl border-l-4 border-[#0BB5A0]">
-              <span className="text-2xl flex-shrink-0">🆓</span>
-              <p className="text-[#1a1a2e] text-base leading-relaxed">
-                It's <strong>free for them</strong> as you know, and you get rewarded for doing the work for us 😄
+
+            {/* Reward highlight */}
+            <div className="relative bg-gradient-to-br from-[#0BB5A0] to-[#089e8c] rounded-xl p-5 sm:p-6 text-white text-center mt-2">
+              <Gift className="w-8 h-8 mx-auto mb-2 opacity-90" />
+              <p className="text-base sm:text-lg font-semibold leading-snug">
+                Refer <span className="text-[#FFD700] font-bold">5 people</span> and receive a
               </p>
-            </div>
-            
-            <div className="flex items-center justify-center gap-3 p-5 bg-gradient-to-r from-[#0BB5A0]/10 to-[#089e8c]/10 rounded-xl border-2 border-dashed border-[#0BB5A0]">
-              <span className="text-3xl">🎁</span>
-              <p className="text-[#1a1a2e] text-lg font-semibold text-center">
-                Yup, that's right — give us <strong>5 people</strong> that want a free report and you'll receive a <span className="text-[#0BB5A0] text-xl font-bold">$100 Gift Card!</span>
+              <p className="text-3xl sm:text-4xl font-extrabold tracking-tight mt-1">
+                <span className="text-[#FFD700]">$100</span> Gift Card
               </p>
+              <p className="text-white/70 text-xs sm:text-sm mt-2">It's that simple.</p>
             </div>
           </div>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-[#e8e8ee] overflow-hidden">
-          <div className="p-6 md:p-8">
-            <h2 className="text-xl font-bold text-[#1a1a2e] mb-1 font-heading">
+        {/* Form */}
+        <div className="bg-white rounded-2xl border border-[#e5e9e8] shadow-sm overflow-hidden">
+          <div className="px-5 sm:px-8 py-6 sm:py-8">
+            <h2 className="text-lg font-bold text-[#1a1a2e] mb-1">
               Your Referrals
             </h2>
             <p className="text-[#7a7a8e] text-sm mb-6">
-              Add up to 5 people who might benefit from a free super performance review.
+              Fill in the details of up to 5 people below.
             </p>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {referrals.map((entry, i) => (
                 <div
                   key={i}
-                  className="group rounded-xl border border-[#e8e8ee] hover:border-[#0BB5A0]/40 transition-all duration-200 hover:shadow-md"
+                  className="rounded-xl border border-[#e5e9e8] hover:border-[#0BB5A0]/40 transition-colors"
                 >
-                  <div className="flex items-center gap-3 px-4 py-3 bg-[#f8fafb] rounded-t-xl border-b border-[#e8e8ee]">
-                    <span className="w-7 h-7 rounded-lg bg-[#0BB5A0] text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-center gap-2.5 px-4 py-2.5 bg-[#f8fafb] border-b border-[#e5e9e8] rounded-t-xl">
+                    <span className="w-6 h-6 rounded-md bg-[#0BB5A0] text-white text-xs font-bold flex items-center justify-center">
                       {i + 1}
                     </span>
-                    <span className="text-sm font-semibold text-[#1a1a2e]">
+                    <span className="text-sm font-medium text-[#3a3a4e]">
                       Referral {i + 1}
-                      {i === 0 && <span className="text-[#0BB5A0] ml-1">*</span>}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-3 sm:p-4">
                     <Input
                       placeholder="Full Name"
                       value={entry.name}
                       onChange={(e) => updateEntry(i, "name", e.target.value)}
-                      className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20"
+                      className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20 h-10 text-sm"
                     />
                     <Input
-                      placeholder="Phone Number"
+                      placeholder="Phone"
                       type="tel"
                       value={entry.phone}
                       onChange={(e) => updateEntry(i, "phone", e.target.value)}
-                      className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20"
+                      className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20 h-10 text-sm"
                     />
                     <Input
-                      placeholder="Email Address"
+                      placeholder="Email"
                       type="email"
                       value={entry.email}
                       onChange={(e) => updateEntry(i, "email", e.target.value)}
-                      className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20"
+                      className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20 h-10 text-sm"
                     />
                   </div>
                 </div>
@@ -220,56 +234,55 @@ export default function ReferralForm() {
             </div>
 
             {/* Disclaimer */}
-            <div className="mt-8 p-5 bg-[#fff8e6] border border-[#D4A017]/30 rounded-xl">
+            <div className="mt-6 p-4 bg-[#fffbeb] border border-[#f0e0a0] rounded-xl">
               <div className="flex gap-3">
-                <AlertCircle className="w-5 h-5 text-[#D4A017] flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm text-[#444455] leading-relaxed">
-                    By submitting this form, you understand that your referrals will receive
-                    an email letting them know that <strong>{clientName || "you"}</strong> has
-                    referred them, and inviting them to receive a free Super Performance Report.
-                    They will be asked to fill out a short form if they would like to take
-                    advantage of this offer. Your information will be handled in accordance
-                    with our privacy policy.
-                  </p>
-                </div>
+                <AlertCircle className="w-4 h-4 text-[#b89a30] flex-shrink-0 mt-0.5" />
+                <p className="text-xs sm:text-sm text-[#5a5540] leading-relaxed">
+                  By submitting, your referrals will receive an email from us letting them know
+                  <strong> {clientName || "you"}</strong> referred them, inviting them to receive
+                  a free Super Performance Report. Your information is handled per our privacy policy.
+                </p>
               </div>
-              <label className="flex items-center gap-3 mt-4 cursor-pointer">
+              <label className="flex items-center gap-2.5 mt-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
-                  className="w-5 h-5 rounded border-[#D4A017] text-[#0BB5A0] focus:ring-[#0BB5A0]"
+                  className="w-4 h-4 rounded border-[#c0b870] text-[#0BB5A0] focus:ring-[#0BB5A0]"
                 />
-                <span className="text-sm font-medium text-[#1a1a2e]">
+                <span className="text-xs sm:text-sm font-medium text-[#3a3a4e]">
                   I agree and give permission to contact my referrals
                 </span>
               </label>
             </div>
 
             {/* Submit */}
-            <div className="mt-8 flex flex-col items-center gap-3">
+            <div className="mt-6 flex flex-col items-center gap-2">
               <Button
                 onClick={handleSubmit}
                 disabled={submitting || filledEntries.length === 0 || !agreed}
-                className="bg-[#0BB5A0] hover:bg-[#099e8c] text-white px-10 py-6 text-lg rounded-xl shadow-lg shadow-[#0BB5A0]/25 transition-all duration-200 hover:shadow-xl hover:shadow-[#0BB5A0]/30 disabled:opacity-50"
+                className="w-full sm:w-auto bg-[#0BB5A0] hover:bg-[#099e8c] text-white px-8 py-5 text-base rounded-xl shadow-md transition-all disabled:opacity-50"
               >
                 {submitting ? (
-                  <>Submitting...</>
+                  "Submitting..."
                 ) : (
                   <>
-                    <Send className="w-5 h-5 mr-2" />
+                    <Send className="w-4 h-4 mr-2" />
                     Submit {filledEntries.length} Referral{filledEntries.length !== 1 ? "s" : ""}
                   </>
                 )}
               </Button>
-              <p className="text-xs text-[#7a7a8e]">
-                {filledEntries.length} of 5 referrals filled in
+              <p className="text-xs text-[#9a9aae]">
+                {filledEntries.length} of 5 referrals filled
               </p>
             </div>
           </div>
         </div>
-      </div>
+
+        <p className="text-center text-xs text-[#b0b0be] mt-6 mb-4">
+          © {new Date().getFullYear()} Advisor Link Online. All rights reserved.
+        </p>
+      </main>
     </div>
   );
 }
