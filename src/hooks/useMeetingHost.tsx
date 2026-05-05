@@ -58,6 +58,7 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
   const [recording, setRecording] = useState(false);
   const [clientCount, setClientCount] = useState(0);
   const [meetingVersion, setMeetingVersion] = useState(0);
+  const [pausedSlide, setPausedSlide] = useState<number | null>(null);
 
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
@@ -384,6 +385,8 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
     recording,
     meetingJoinUrl,
     meetingVersion,
+    pausedSlide,
+    setPausedSlide,
     startMeeting,
     startScreenShare,
     stopScreenShare,
@@ -392,7 +395,7 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
     toggleRecording,
     copyMeetingLink,
     copyMeetingId,
-  }), [activeMeeting, clientCount, sharing, stream, micOn, recording, meetingJoinUrl, meetingVersion, startMeeting, startScreenShare, stopScreenShare, endMeeting, toggleMic, toggleRecording, copyMeetingLink, copyMeetingId]);
+  }), [activeMeeting, clientCount, sharing, stream, micOn, recording, meetingJoinUrl, meetingVersion, pausedSlide, startMeeting, startScreenShare, stopScreenShare, endMeeting, toggleMic, toggleRecording, copyMeetingLink, copyMeetingId]);
 
   return <MeetingHostContext.Provider value={value}>{children}</MeetingHostContext.Provider>;
 }
