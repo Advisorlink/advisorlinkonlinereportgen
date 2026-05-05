@@ -49,12 +49,11 @@ function buildRawEmail(
   to: string,
   subject: string,
   bodyHtml: string,
-  pdfBase64: string,
-  pdfFileName: string,
+  pdfBase64?: string,
+  pdfFileName?: string,
 ): string {
   const boundary = `----=_Part_${crypto.randomUUID().replace(/-/g, "")}`;
-
-  const message = [
+  const messageParts = [
     `To: ${to}`,
     `Subject: ${subject}`,
     "MIME-Version: 1.0",
@@ -66,15 +65,22 @@ function buildRawEmail(
     "",
     bodyHtml,
     "",
-    `--${boundary}`,
-    `Content-Type: application/pdf; name="${pdfFileName}"`,
-    "Content-Transfer-Encoding: base64",
-    `Content-Disposition: attachment; filename="${pdfFileName}"`,
-    "",
-    pdfBase64,
-    "",
-    `--${boundary}--`,
-  ].join("\r\n");
+  ];
+
+  if (pdfBase64 && pdfFileName) {
+    messageParts.push(
+      `--${boundary}`,
+      `Content-Type: application/pdf; name="${pdfFileName}"`,
+      "Content-Transfer-Encoding: base64",
+      `Content-Disposition: attachment; filename="${pdfFileName}"`,
+      "",
+      pdfBase64,
+      "",
+    );
+  }
+
+  messageParts.push(`--${boundary}--`);
+  const message = messageParts.join("\r\n");
 
   const encoded = btoa(
     unescape(encodeURIComponent(message)),
