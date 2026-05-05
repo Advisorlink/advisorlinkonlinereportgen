@@ -40,11 +40,29 @@ export default function ESignPublic() {
   const [submitting, setSubmitting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!token) { setState("error"); return; }
     loadDocument();
   }, [token]);
+
+  // Resize canvas to container width while keeping aspect ratio
+  useEffect(() => {
+    const resizeCanvas = () => {
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
+      if (!canvas || !container) return;
+      const containerWidth = container.clientWidth;
+      const desiredWidth = Math.min(containerWidth, 600);
+      const ratio = desiredWidth / 600;
+      canvas.width = desiredWidth;
+      canvas.height = Math.round(200 * ratio);
+    };
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    return () => window.removeEventListener("resize", resizeCanvas);
+  }, [state]);
 
   const loadDocument = async () => {
     const { data, error } = await supabase
@@ -62,7 +80,6 @@ export default function ESignPublic() {
       return;
     }
 
-    // Get PDF URL
     if (d.original_pdf_path) {
       const { data: urlData } = await supabase.storage
         .from("esign-documents")
@@ -73,18 +90,25 @@ export default function ESignPublic() {
     setState("ready");
   };
 
-  // Canvas drawing handlers
-  const getPos = (e: React.MouseEvent | React.TouchEvent) => {
+  const getPos = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     if ("touches" in e) {
-      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+      return {
+        x: (e.touches[0].clientX - rect.left) * scaleX,
+        y: (e.touches[0].clientY - rect.top) * scaleY,
+      };
     }
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  };
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY,
+    };
+  }, []);
 
-  const startDraw = (e: React.MouseEvent | React.TouchEvent) => {
+  const startDraw = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
@@ -92,9 +116,9 @@ export default function ESignPublic() {
     const { x, y } = getPos(e);
     ctx.beginPath();
     ctx.moveTo(x, y);
-  };
+  }, [getPos]);
 
-  const draw = (e: React.MouseEvent | React.TouchEvent) => {
+  const draw = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (!isDrawing) return;
     const ctx = canvasRef.current?.getContext("2d");
@@ -106,15 +130,15 @@ export default function ESignPublic() {
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.stroke();
-  };
+  }, [isDrawing, getPos]);
 
-  const endDraw = () => {
+  const endDraw = useCallback(() => {
     if (!isDrawing) return;
     setIsDrawing(false);
     if (canvasRef.current) {
       setSignatureData(canvasRef.current.toDataURL("image/png"));
     }
-  };
+  }, [isDrawing]);
 
   const clearSignature = () => {
     const canvas = canvasRef.current;
@@ -125,7 +149,7 @@ export default function ESignPublic() {
   };
 
   const handleSubmit = async () => {
-    if (!doc || !signatureData) return;
+    if (!doc || !signatureData || !token) return;
     setSubmitting(true);
     try {
       const signingFields: SigningField[] = (doc.client_data?.signing_fields || []).filter(
@@ -156,12 +180,16 @@ export default function ESignPublic() {
 
         const completedBytes = await pdfDoc.save();
         signedPdfPath = doc.original_pdf_path.replace(/\.pdf$/i, "_signed.pdf");
-        await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from("esign-documents")
           .upload(signedPdfPath, new Blob([completedBytes as BlobPart], { type: "application/pdf" }), { upsert: true });
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          throw new Error("Failed to upload signed document");
+        }
       }
 
-      // Save signature (field 1)
+      // Save signature records
       await supabase.from("esign_signatures").insert({
         document_id: doc.id,
         signer_name: doc.client_name || "Unknown",
@@ -170,34 +198,45 @@ export default function ESignPublic() {
         field_index: 1,
       });
 
-      // Save signature (field 2 - auto-applied same signature)
-      await supabase.from("esign_signatures").insert({
-        document_id: doc.id,
-        signer_name: doc.client_name || "Unknown",
-        signer_email: doc.client_email,
-        signature_data: signatureData,
-        field_index: 2,
+      if (signingFields.length > 1) {
+        await supabase.from("esign_signatures").insert({
+          document_id: doc.id,
+          signer_name: doc.client_name || "Unknown",
+          signer_email: doc.client_email,
+          signature_data: signatureData,
+          field_index: 2,
+        });
+      }
+
+      // Update document status using the secure RPC function
+      const { error: rpcError } = await supabase.rpc("complete_signing", {
+        _token: token,
+        _signed_pdf_path: signedPdfPath,
       });
 
-      // Update document status
-      await supabase
-        .from("esign_documents")
-        .update({ status: "signed", signed_at: new Date().toISOString(), signed_pdf_path: signedPdfPath })
-        .eq("id", doc.id);
+      if (rpcError) {
+        console.error("RPC error:", rpcError);
+        throw new Error("Failed to update document status");
+      }
 
       // Notify host
-      await supabase.functions.invoke("send-esign-email", {
-        body: {
-          type: "signed-notification",
-          documentId: doc.id,
-          clientName: doc.client_name,
-          documentName: doc.document_name,
-        },
-      });
+      try {
+        await supabase.functions.invoke("send-esign-email", {
+          body: {
+            type: "signed-notification",
+            documentId: doc.id,
+            clientName: doc.client_name,
+            documentName: doc.document_name,
+          },
+        });
+      } catch {
+        // Non-critical - don't fail the signing
+      }
 
       setState("submitted");
     } catch (err: any) {
-      toast.error("Failed to submit signature. Please try again.");
+      console.error("Signing error:", err);
+      toast.error(err.message || "Failed to submit signature. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -242,7 +281,7 @@ export default function ESignPublic() {
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Document Signed!</h1>
           <p className="text-gray-500 mb-2">Your signature has been recorded successfully.</p>
-          <p className="text-gray-400 text-sm">A copy has been sent to your email and the adviser.</p>
+          <p className="text-gray-400 text-sm">A copy has been sent to you and your adviser.</p>
         </div>
       </div>
     );
@@ -251,12 +290,12 @@ export default function ESignPublic() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FileText className="w-6 h-6 text-blue-600" />
             <div>
-              <h1 className="text-lg font-bold text-gray-900">Document Signing</h1>
+              <h1 className="text-base sm:text-lg font-bold text-gray-900">Document Signing</h1>
               <p className="text-xs text-gray-500">{doc?.document_name}</p>
             </div>
           </div>
@@ -267,11 +306,11 @@ export default function ESignPublic() {
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto py-8 px-6 space-y-8">
+      <div className="max-w-3xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6 sm:space-y-8">
         {/* Client details summary */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Your Details</h2>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
             <div><span className="text-gray-400">Name:</span> <span className="text-gray-900 font-medium ml-2">{doc?.client_name}</span></div>
             <div><span className="text-gray-400">Email:</span> <span className="text-gray-900 font-medium ml-2">{doc?.client_email}</span></div>
             <div><span className="text-gray-400">Phone:</span> <span className="text-gray-900 font-medium ml-2">{doc?.client_phone || "—"}</span></div>
@@ -282,31 +321,30 @@ export default function ESignPublic() {
         {/* PDF Preview */}
         {pdfUrl && (
           <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Document Preview</h2>
             </div>
-            <iframe src={pdfUrl} className="w-full h-[500px]" title="Document" />
+            <iframe src={pdfUrl} className="w-full h-[400px] sm:h-[500px]" title="Document" />
           </div>
         )}
 
         {/* Signature Area */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <PenTool className="w-5 h-5 text-blue-600" />
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-              Sign Below (Applied to both signature fields)
+              Sign Below
             </h2>
           </div>
           <p className="text-xs text-gray-400 mb-4">
-            Draw your signature using your mouse or finger. This signature will be automatically applied to both signature fields in the document.
+            Draw your signature using your mouse or finger. This signature will be applied to all signature fields in the document.
           </p>
 
-          <div className="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden bg-white">
+          <div ref={containerRef} className="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden bg-white">
             <canvas
               ref={canvasRef}
-              width={600}
-              height={200}
               className="w-full cursor-crosshair touch-none"
+              style={{ height: "auto", aspectRatio: "3 / 1" }}
               onMouseDown={startDraw}
               onMouseMove={draw}
               onMouseUp={endDraw}

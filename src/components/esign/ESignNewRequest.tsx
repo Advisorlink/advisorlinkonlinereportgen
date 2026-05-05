@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Upload, ArrowRight, Search, User, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ interface ReportRow {
   inputs: Record<string, any> | null;
 }
 
-type Step = "upload" | "edit-pdf" | "select-client" | "fill-details" | "confirm-send";
+type Step = "upload" | "select-client" | "fill-details" | "edit-pdf" | "confirm-send";
 
 export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   const { user } = useAuth();
@@ -93,10 +93,6 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
     setStep("fill-details");
   };
 
-  const handleProceedToEdit = () => {
-    setStep("edit-pdf");
-  };
-
   const handleProceedToSend = () => {
     if (!clientName.trim()) {
       toast.error("Client name is required");
@@ -110,24 +106,17 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
     setShowEmailConfirm(true);
   };
 
-  const handleProceedToConfirm = () => {
-    setConfirmEmail(clientEmail);
-    setShowEmailConfirm(true);
-  };
-
   const handleSendDocument = async () => {
     const fileToUpload = editedFile || file;
     if (!fileToUpload || !user) return;
     setSending(true);
     try {
-      // Upload PDF (edited version with filled fields)
       const filePath = `${user.id}/${Date.now()}_${fileToUpload.name}`;
       const { error: uploadErr } = await supabase.storage
         .from("esign-documents")
         .upload(filePath, fileToUpload);
       if (uploadErr) throw uploadErr;
 
-      // Create esign document record
       const { data: doc, error: docErr } = await supabase
         .from("esign_documents")
         .insert({
@@ -154,7 +143,6 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
 
       if (docErr) throw docErr;
 
-      // Send signing email
       const signingUrl = `${window.location.origin}/esign/sign?token=${doc.signing_token}`;
       
       await supabase.functions.invoke("send-esign-email", {
@@ -176,6 +164,15 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
     }
   };
 
+  const stepOrder: Step[] = ["upload", "select-client", "fill-details", "edit-pdf"];
+  const stepLabels: Record<Step, string> = {
+    "upload": "Upload",
+    "select-client": "Client",
+    "fill-details": "Details",
+    "edit-pdf": "Prepare",
+    "confirm-send": "Send",
+  };
+
   return (
     <div className={`${step === "edit-pdf" ? "max-w-7xl" : "max-w-3xl"} mx-auto py-6 px-4`}>
       <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
@@ -184,18 +181,18 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
 
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-8">
-        {(["upload", "edit-pdf", "select-client", "fill-details"] as Step[]).map((s, i) => (
+        {stepOrder.map((s, i) => (
           <div key={s} className="flex items-center gap-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
               step === s ? "bg-cyan text-white" : 
-              (["upload", "edit-pdf", "select-client", "fill-details"].indexOf(step) > i ? "bg-cyan/20 text-cyan" : "bg-muted text-muted-foreground")
+              (stepOrder.indexOf(step) > i ? "bg-cyan/20 text-cyan" : "bg-muted text-muted-foreground")
             }`}>
               {i + 1}
             </div>
             <span className={`text-sm font-medium hidden sm:inline ${step === s ? "text-foreground" : "text-muted-foreground"}`}>
-              {s === "upload" ? "Upload" : s === "edit-pdf" ? "Prepare" : s === "select-client" ? "Client" : "Details"}
+              {stepLabels[s]}
             </span>
-            {i < 3 && <div className="w-8 h-px bg-border" />}
+            {i < stepOrder.length - 1 && <div className="w-8 h-px bg-border" />}
           </div>
         ))}
       </div>
@@ -223,7 +220,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           </label>
 
           <div className="flex justify-end">
-            <Button onClick={handleProceedToEdit} disabled={!file} className="gap-2">
+            <Button onClick={() => setStep("select-client")} disabled={!file} className="gap-2">
               Next <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
@@ -277,7 +274,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           </div>
 
           <div className="flex justify-between">
-            <Button variant="outline" onClick={() => setStep("edit-pdf")}>Back</Button>
+            <Button variant="outline" onClick={() => setStep("upload")}>Back</Button>
           </div>
         </div>
       )}
@@ -289,7 +286,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
             {isGuest ? "Enter Client Details" : "Confirm Client Details"}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {isGuest ? "Fill in the client information" : "Review and edit the pre-filled details"}
+            {isGuest ? "Fill in the client information" : "Review and edit the pre-filled details. These will be used to auto-fill the PDF."}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -311,23 +308,20 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-muted/50 border border-border">
-            <p className="text-sm font-medium text-foreground">Document: {fileName}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              This document includes {esignFields.filter((field) => field.kind === "signature").length || 0} signature field(s) that will be filled when signed
-            </p>
-          </div>
-
-           <div className="flex justify-between">
+          <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep("select-client")}>Back</Button>
-            <Button onClick={handleProceedToSend} className="gap-2">
-              Send Document <ArrowRight className="w-4 h-4" />
+            <Button onClick={() => {
+              if (!clientName.trim()) { toast.error("Client name is required"); return; }
+              if (!clientEmail.trim()) { toast.error("Client email is required"); return; }
+              setStep("edit-pdf");
+            }} className="gap-2">
+              Prepare Document <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
       )}
 
-      {/* Step 2: Edit PDF */}
+      {/* Step 4: Edit PDF */}
       {step === "edit-pdf" && file && (
         <ESignPdfEditor
           file={file}
@@ -335,11 +329,11 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           clientEmail={clientEmail}
           clientPhone={clientPhone}
           clientAddress={clientAddress}
-          onBack={() => setStep("upload")}
+          onBack={() => setStep("fill-details")}
           onContinue={(edited, fields) => {
             setEditedFile(edited);
             setEsignFields(fields);
-            setStep("select-client");
+            handleProceedToSend();
           }}
         />
       )}
