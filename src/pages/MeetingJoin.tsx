@@ -53,7 +53,7 @@ export default function MeetingJoin() {
   const viewingRef = useRef<HTMLDivElement>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const clientIdRef = useRef(crypto.randomUUID());
+  const clientIdRef = useRef<string>(crypto.randomUUID());
   const meetingIdRef = useRef("");
   const remoteStreamRef = useRef<MediaStream | null>(null);
   const reconnectTimerRef = useRef<number | null>(null);
