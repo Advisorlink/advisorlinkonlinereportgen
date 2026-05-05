@@ -73,13 +73,11 @@ export default function Admin() {
 
   const refresh = async () => {
     setBusy(true);
-    const [{ data: u }, { data: l }, { data: r }] = await Promise.all([
+    const [{ data: u }, { data: r }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-      supabase.from("activity_log").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(500),
     ]);
     setUsers((u as ProfileRow[]) || []);
-    setLogs((l as LogRow[]) || []);
     setReports((r as ReportRow[]) || []);
     setBusy(false);
   };
