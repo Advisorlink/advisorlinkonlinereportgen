@@ -46,33 +46,6 @@ interface ReportRow {
   pdf_path: string | null;
 }
 
-interface ReferralResponseRow {
-  id: string;
-  lead_id: string;
-  name: string;
-  phone: string;
-  email: string;
-  age: string | null;
-  state: string | null;
-  super_balance: string | null;
-  super_fund_name: string | null;
-  had_review_before: boolean | null;
-  created_at: string;
-}
-
-interface ReferralLeadRow {
-  id: string;
-  referrer_name: string;
-  referrer_email: string;
-  lead_name: string;
-  lead_phone: string;
-  lead_email: string;
-  status: string;
-  created_at: string;
-  token: string;
-  submission_id: string | null;
-}
-
 export default function Admin() {
   const nav = useNavigate();
   const { profile, loading } = useAuth();
@@ -85,10 +58,6 @@ export default function Admin() {
   const [pdfBusyId, setPdfBusyId] = useState<string | null>(null);
   const pdfStageRef = useRef<HTMLDivElement>(null);
   const [pdfStageInputs, setPdfStageInputs] = useState<ClientInputs | null>(null);
-  const [referralResponses, setReferralResponses] = useState<ReferralResponseRow[]>([]);
-  const [referralLeads, setReferralLeads] = useState<ReferralLeadRow[]>([]);
-  const [referralSearch, setReferralSearch] = useState("");
-  const [referrerFilter, setReferrerFilter] = useState("");
 
   // Resolve a usable inputs object — fall back to defaults so demo rows still
   // render a complete-looking report.
