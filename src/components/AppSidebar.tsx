@@ -1,4 +1,4 @@
-import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, Users } from "lucide-react";
+import { BarChart3, FileText, Gift, Monitor, Settings, LogOut } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -14,12 +14,13 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import logoSvg from "@/assets/logo.svg";
 
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: BarChart3 },
   { title: "Presentations", url: "/presentations", icon: Monitor },
   { title: "Report Generator", url: "/", icon: FileText },
-  { title: "Referrals", url: "/referrals", icon: Gift },
+  { title: "Referrals", url: "/referrals", icon: Gift, badge: "12 new" },
   { title: "Client Reports", url: "/admin", icon: Settings },
 ];
 
@@ -40,14 +41,12 @@ export function AppSidebar() {
               <span className="text-xs font-black text-cyan-foreground">AL</span>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-cyan flex items-center justify-center shrink-0">
-                <span className="text-xs font-black text-cyan-foreground">AL</span>
-              </div>
-              <div>
-                <p className="text-sm font-bold tracking-tight text-white">Advisor Link</p>
-                <p className="text-[10px] text-white/50 font-medium">Online CRM</p>
-              </div>
+            <div className="flex items-center justify-center py-1">
+              <img
+                src={logoSvg}
+                alt="Advisor Link Online"
+                className="h-10 w-auto"
+              />
             </div>
           )}
         </div>
@@ -70,7 +69,14 @@ export function AppSidebar() {
                   >
                     <NavLink to={item.url} className="flex items-center gap-2.5">
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span className="text-sm font-medium">{item.title}</span>}
+                      {!collapsed && (
+                        <span className="text-sm font-medium flex-1">{item.title}</span>
+                      )}
+                      {!collapsed && item.badge && (
+                        <span className="ml-auto px-1.5 py-0.5 rounded-full bg-cyan text-[10px] font-bold text-white leading-none">
+                          {item.badge}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
