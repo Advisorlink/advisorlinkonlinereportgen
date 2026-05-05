@@ -148,7 +148,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           },
           report_id: selectedReport?.id || null,
           sent_at: new Date().toISOString(),
-        })
+        } as any)
         .select("id, signing_token")
         .single();
 
