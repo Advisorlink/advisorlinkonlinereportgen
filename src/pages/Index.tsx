@@ -12,8 +12,7 @@ import { toast } from "sonner";
 import { CRMLayout } from "@/components/CRMLayout";
 
 export default function Index() {
-  const nav = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { inputs, setInputs } = useClientInputs();
   const summary = useMemo(() => buildSummary(inputs), [inputs]);
   const fileRef = useRef<HTMLInputElement>(null);
