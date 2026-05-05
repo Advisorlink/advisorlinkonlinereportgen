@@ -6,7 +6,8 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
   const safeLogoUrl = logoUrl.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
   const referralFormUrl = `https://report.advisorlinkonline.com.au/refer?name=${encodeURIComponent(firstName)}&email=${encodeURIComponent(clientEmail)}`;
 
-  const teal = "#0BB5A0";
+  const brandBlue = "#1E88E5";
+  const brandBlueDark = "#1565C0";
   const gold = "#FFD700";
   const darkText = "#1a1a2e";
   const bodyText = "#3a3a4e";
