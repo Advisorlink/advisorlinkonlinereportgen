@@ -203,7 +203,9 @@ export interface YearRow { age: number; existing: number; comparison: number; }
 export function projectAccumulation(i: ClientInputs): YearRow[] {
   const startAge = Math.min(i.age, 67);
   const targetAge = i.retirementAge;
-  const contrib = netSuperContrib(i.annualIncome);
+  const sgContrib = netSuperContrib(i.annualIncome);
+  const personalContrib = annualPersonalContrib(i);
+  const contrib = sgContrib + personalContrib;
 
   const exReturn = existingReturnPct(i);
   const exAdmin = existingAdminPct(i);
