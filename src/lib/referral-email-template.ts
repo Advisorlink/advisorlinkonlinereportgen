@@ -48,23 +48,25 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
     <!-- 3D Gift Card -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;">
       <tr><td align="center">
-        <table role="presentation" cellpadding="0" cellspacing="0" class="card-3d" style="width:92%;max-width:460px;border-collapse:separate;border-radius:20px;overflow:hidden;background-image:linear-gradient(145deg,#1a2744 0%,#0d1a33 50%,#152038 100%);box-shadow:0 2px 4px rgba(0,200,220,0.15), 0 8px 24px rgba(0,0,0,0.4), 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);">
-          <tr><td style="padding:36px 28px 14px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" class="gift-shell" style="width:92%;max-width:466px;border-collapse:separate;border-radius:24px;background-image:linear-gradient(135deg,#0CF6DA 0%,#00a7ff 36%,#142148 72%,#050914 100%);box-shadow:0 10px 0 #06101f, 0 22px 42px rgba(0,0,0,0.58), 0 0 44px rgba(12,246,218,0.18);padding:4px 4px 12px;">
+        <tr><td>
+        <table role="presentation" cellpadding="0" cellspacing="0" class="gift-card card-3d" style="width:100%;border-collapse:separate;border-radius:20px;overflow:hidden;background-image:linear-gradient(145deg,#22365f 0%,#0d1a33 48%,#17223c 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -18px 35px rgba(0,0,0,0.24);">
+          <tr><td class="gift-card-pad" style="padding:36px 28px 14px;">
             <!-- Decorative line -->
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
               <td style="height:3px;background-image:linear-gradient(90deg,#00d4ff,#0CF6DA,#00d4ff);border-radius:2px;"></td>
             </tr></table>
           </td></tr>
-          <tr><td style="padding:8px 28px 4px;text-align:center;">
+          <tr><td class="gift-card-pad" style="padding:8px 28px 4px;text-align:center;">
             <p style="margin:0;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#0CF6DA;">Exclusive Client Reward</p>
           </td></tr>
-          <tr><td style="padding:4px 28px 0;text-align:center;">
+          <tr><td class="gift-card-pad" style="padding:4px 28px 0;text-align:center;">
             <p class="hero-amount" style="margin:0;font-size:88px;font-weight:900;color:#ffffff;line-height:92px;letter-spacing:-3px;text-shadow:0 4px 20px rgba(0,212,255,0.3), 0 1px 0 rgba(255,255,255,0.1);">$50</p>
           </td></tr>
-          <tr><td style="padding:2px 28px 8px;text-align:center;">
+          <tr><td class="gift-card-pad" style="padding:2px 28px 8px;text-align:center;">
             <p class="hero-title" style="margin:0;font-size:26px;font-weight:800;color:#ffffff;line-height:32px;letter-spacing:0.5px;">GIFT CARD</p>
           </td></tr>
-          <tr><td style="padding:4px 28px 28px;text-align:center;">
+          <tr><td class="gift-card-pad" style="padding:4px 28px 28px;text-align:center;">
             <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;border-collapse:separate;"><tr>
               <td style="background-color:rgba(12,246,218,0.12);border:1px solid rgba(12,246,218,0.25);border-radius:30px;padding:8px 22px;">
                 <p style="margin:0;font-size:13px;font-weight:700;color:#0CF6DA;letter-spacing:0.5px;">Just for referring friends &amp; family</p>
@@ -72,11 +74,13 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
             </tr></table>
           </td></tr>
           <!-- Bottom decorative line -->
-          <tr><td style="padding:0 28px 20px;">
+          <tr><td class="gift-card-pad" style="padding:0 28px 20px;">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
               <td style="height:3px;background-image:linear-gradient(90deg,#0CF6DA,#00d4ff,#0CF6DA);border-radius:2px;"></td>
             </tr></table>
           </td></tr>
+        </table>
+        </td></tr>
         </table>
       </td></tr>
     </table>
