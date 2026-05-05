@@ -336,24 +336,28 @@ export default function Presentations() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10" onClick={copyMeetingLink}>
-                <Copy className="w-4 h-4 mr-1" /> Copy Join Link
+              <Button className="bg-white/10 border border-white/20 text-white hover:bg-white/20 h-10 px-4 text-sm font-medium" onClick={copyMeetingLink}>
+                <Copy className="w-4 h-4 mr-2" />
+                <span>Copy Join Link</span>
               </Button>
-              <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10" onClick={toggleMic}>
-                {micOn ? <MicOff className="w-4 h-4 mr-1" /> : <Mic className="w-4 h-4 mr-1" />}
-                {micOn ? "Mute" : "Unmute"}
+              <Button className="bg-white/10 border border-white/20 text-white hover:bg-white/20 h-10 px-4 text-sm font-medium" onClick={copyMeetingId}>
+                <Copy className="w-4 h-4 mr-2" />
+                <span>Copy Meeting ID</span>
+              </Button>
+              <Button className={`bg-white/10 border border-white/20 text-white hover:bg-white/20 h-10 px-4 text-sm font-medium ${micOn ? "bg-emerald-600/30 border-emerald-400/50" : ""}`} onClick={toggleMic}>
+                {micOn ? <MicOff className="w-4 h-4 mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
+                <span>{micOn ? "Mute Mic" : "Unmute Mic"}</span>
               </Button>
               <Button
-                variant="outline"
-                size="sm"
-                className={`border-white/20 text-white hover:bg-white/10 ${recording ? "border-red-400 text-red-300" : ""}`}
+                className={`bg-white/10 border border-white/20 text-white hover:bg-white/20 h-10 px-4 text-sm font-medium ${recording ? "bg-red-600/30 border-red-400/50 text-red-200" : ""}`}
                 onClick={toggleRecording}
               >
-                <Circle className={`w-4 h-4 mr-1 ${recording ? "fill-red-500 text-red-500 animate-pulse" : ""}`} />
-                {recording ? "Stop Recording" : "Record"}
+                <Circle className={`w-4 h-4 mr-2 ${recording ? "fill-red-500 text-red-500 animate-pulse" : ""}`} />
+                <span>{recording ? "Stop Recording" : "Start Recording"}</span>
               </Button>
-              <Button variant="destructive" size="sm" onClick={() => endMeeting()}>
-                <StopCircle className="w-4 h-4 mr-1" /> End Meeting
+              <Button className="bg-red-600 text-white hover:bg-red-700 h-10 px-4 text-sm font-medium" onClick={() => endMeeting()}>
+                <StopCircle className="w-4 h-4 mr-2" />
+                <span>End Meeting</span>
               </Button>
             </div>
 
