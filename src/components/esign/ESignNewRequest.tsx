@@ -16,7 +16,7 @@ interface ReportRow {
   inputs: Record<string, any> | null;
 }
 
-type Step = "upload" | "select-client" | "fill-details" | "edit-pdf" | "confirm-send";
+type Step = "upload" | "edit-pdf" | "select-client" | "fill-details" | "confirm-send";
 
 export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   const { user } = useAuth();
@@ -91,6 +91,10 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   };
 
   const handleProceedToEdit = () => {
+    setStep("edit-pdf");
+  };
+
+  const handleProceedToSend = () => {
     if (!clientName.trim()) {
       toast.error("Client name is required");
       return;
@@ -99,7 +103,8 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
       toast.error("Client email is required");
       return;
     }
-    setStep("edit-pdf");
+    setConfirmEmail(clientEmail);
+    setShowEmailConfirm(true);
   };
 
   const handleProceedToConfirm = () => {
@@ -175,16 +180,16 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
 
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-8">
-        {(["upload", "select-client", "fill-details", "edit-pdf"] as Step[]).map((s, i) => (
+        {(["upload", "edit-pdf", "select-client", "fill-details"] as Step[]).map((s, i) => (
           <div key={s} className="flex items-center gap-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
               step === s ? "bg-cyan text-white" : 
-              (["upload", "select-client", "fill-details", "edit-pdf"].indexOf(step) > i ? "bg-cyan/20 text-cyan" : "bg-muted text-muted-foreground")
+              (["upload", "edit-pdf", "select-client", "fill-details"].indexOf(step) > i ? "bg-cyan/20 text-cyan" : "bg-muted text-muted-foreground")
             }`}>
               {i + 1}
             </div>
             <span className={`text-sm font-medium hidden sm:inline ${step === s ? "text-foreground" : "text-muted-foreground"}`}>
-              {s === "upload" ? "Upload" : s === "select-client" ? "Client" : s === "fill-details" ? "Details" : "Review"}
+              {s === "upload" ? "Upload" : s === "edit-pdf" ? "Review" : s === "select-client" ? "Client" : "Details"}
             </span>
             {i < 3 && <div className="w-8 h-px bg-border" />}
           </div>
@@ -214,7 +219,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           </label>
 
           <div className="flex justify-end">
-            <Button onClick={() => setStep("select-client")} disabled={!file} className="gap-2">
+            <Button onClick={handleProceedToEdit} disabled={!file} className="gap-2">
               Next <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
@@ -268,7 +273,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           </div>
 
           <div className="flex justify-between">
-            <Button variant="outline" onClick={() => setStep("upload")}>Back</Button>
+            <Button variant="outline" onClick={() => setStep("edit-pdf")}>Back</Button>
           </div>
         </div>
       )}
@@ -309,16 +314,16 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
             </p>
           </div>
 
-          <div className="flex justify-between">
+           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep("select-client")}>Back</Button>
-            <Button onClick={handleProceedToEdit} className="gap-2">
-              Review Document <ArrowRight className="w-4 h-4" />
+            <Button onClick={handleProceedToSend} className="gap-2">
+              Send Document <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
       )}
 
-      {/* Step 4: Edit PDF */}
+      {/* Step 2: Edit PDF */}
       {step === "edit-pdf" && file && (
         <ESignPdfEditor
           file={file}
@@ -326,10 +331,10 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           clientEmail={clientEmail}
           clientPhone={clientPhone}
           clientAddress={clientAddress}
-          onBack={() => setStep("fill-details")}
+          onBack={() => setStep("upload")}
           onContinue={(edited) => {
             setEditedFile(edited);
-            handleProceedToConfirm();
+            setStep("select-client");
           }}
         />
       )}
