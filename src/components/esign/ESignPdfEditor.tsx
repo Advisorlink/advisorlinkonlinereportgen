@@ -164,12 +164,38 @@ export function ESignPdfEditor({
                 acroName: annotation.fieldName,
               });
             });
+
+          // --- Auto-detect signature areas via text content scanning ---
+          const textContent = await page.getTextContent();
+          const items = textContent.items as any[];
+          items.forEach((item: any) => {
+            const str = (item.str || "").toLowerCase().trim();
+            const isSignatureLabel = /\bsign(ature|ed)?\b/.test(str) || str === "sign here" || str === "client signature" || str === "signature of applicant" || str === "authorised signature";
+            if (isSignatureLabel && item.transform) {
+              const tx = item.transform[4]; // x position
+              const ty = item.transform[5]; // y position (PDF coords, bottom-up)
+              // Convert to viewport coords
+              const vx = tx * (viewport.width / (viewport.width / 1.35)) * 1.35;
+              const vy = viewport.height - (ty * 1.35) + 5; // flip y, offset below label
+              const nx = clamp(vx / viewport.width, 0, 0.65);
+              const ny = clamp(vy / viewport.height, 0, 0.88);
+              // Avoid duplicates near the same position
+              const isDuplicate = detectedFields.some(
+                (f) => f.kind === "signature" && f.pageIndex === pageIndex && Math.abs(f.x - nx) < 0.1 && Math.abs(f.y - ny) < 0.08
+              );
+              if (!isDuplicate) {
+                detectedFields.push(createSignatureField(pageIndex, nx, ny, `Signature ${detectedFields.filter(f => f.kind === "signature").length + 1}`));
+              }
+            }
+          });
         }
 
+        // Fallback: if no signature fields found at all, add defaults on last page
         const signatureCount = detectedFields.filter((field) => field.kind === "signature").length;
         if (pageMetas.length > 0 && signatureCount === 0) {
-          detectedFields.push(createSignatureField(0, 0.58, 0.78, "Signature 1"));
-          detectedFields.push(createSignatureField(0, 0.58, 0.88, "Signature 2"));
+          const lastPage = pageMetas.length - 1;
+          detectedFields.push(createSignatureField(lastPage, 0.1, 0.78, "Signature 1"));
+          detectedFields.push(createSignatureField(lastPage, 0.1, 0.88, "Signature 2"));
         }
 
         setPages(pageMetas);

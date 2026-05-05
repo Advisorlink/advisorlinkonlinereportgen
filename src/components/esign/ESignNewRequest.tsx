@@ -303,16 +303,32 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
               <Input value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="john@example.com" type="email" />
             </div>
             <div className="space-y-2">
-              <Label>Mobile</Label>
+              <Label>Phone Number *</Label>
               <Input value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="0400 000 000" />
             </div>
             <div className="space-y-2">
-              <Label>Date of Birth</Label>
-              <Input value={clientDob} onChange={(e) => setClientDob(e.target.value)} placeholder="DD/MM/YYYY" />
-            </div>
-            <div className="space-y-2">
-              <Label>Address</Label>
+              <Label>Address *</Label>
               <Input value={clientAddress} onChange={(e) => setClientAddress(e.target.value)} placeholder="123 Main St, Sydney NSW" />
+            </div>
+          </div>
+
+          <div className="mt-6 p-4 rounded-xl border border-border bg-muted/30">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Second Signatory (if applicable)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input value={clientName} disabled className="bg-muted/50" />
+                <p className="text-xs text-muted-foreground">Auto-filled from above</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Date of Birth</Label>
+                <Input value={clientDob} onChange={(e) => setClientDob(e.target.value)} placeholder="DD/MM/YYYY" />
+              </div>
+              <div className="space-y-2">
+                <Label>Address</Label>
+                <Input value={clientAddress} disabled className="bg-muted/50" />
+                <p className="text-xs text-muted-foreground">Auto-filled from above</p>
+              </div>
             </div>
           </div>
 
