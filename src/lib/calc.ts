@@ -43,6 +43,11 @@ export interface ClientInputs {
   secondAdminPct?: number; // W21
   secondReturn?: number; // R25
 
+  // Personal contributions
+  personalContributionAmount?: number;
+  personalContributionFrequency?: IncomeFrequency;
+  personalContributionType?: "dollar" | "percent"; // dollar = fixed $, percent = % of income
+
   // Multiple funds support
   additionalFunds?: FundEntry[];
 }
