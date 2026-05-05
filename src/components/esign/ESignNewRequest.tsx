@@ -91,6 +91,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
     setClientName("");
     setClientEmail("");
     setClientPhone("");
+    setClientDob("");
     setClientAddress("");
     setStep("fill-details");
   };
