@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ClientForm } from "@/components/ClientForm";
 import { CoverPage, WhoWeArePage, SnapshotPage, FundsPage, ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage } from "@/components/report/pages";
@@ -8,26 +8,18 @@ import { importFromFile } from "@/lib/xlsx-import";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { supabase } from "@/integrations/supabase/client";
-import { Maximize2, Presentation } from "lucide-react";
+import { Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 import { CRMLayout } from "@/components/CRMLayout";
 
 export default function Index() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const { inputs, setInputs } = useClientInputs();
   const summary = useMemo(() => buildSummary(inputs), [inputs]);
   const fileRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
-
-  const presentationState = location.state as { fromPresentation?: boolean; pausedSlide?: number } | null;
-  const isFromPresentation = presentationState?.fromPresentation === true;
-
-  const handleResumePresentation = () => {
-    navigate("/presentations", { state: { resumeSlide: presentationState?.pausedSlide ?? 0 } });
-  };
 
   const handleUpload = async (file: File) => {
     try {
