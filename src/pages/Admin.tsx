@@ -26,14 +26,6 @@ interface ProfileRow {
   last_login_at: string | null;
 }
 
-interface LogRow {
-  id: string;
-  user_id: string | null;
-  email: string | null;
-  event_type: string;
-  details: Record<string, unknown> | null;
-  created_at: string;
-}
 
 interface ReportRow {
   id: string;
