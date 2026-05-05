@@ -77,7 +77,7 @@ function buildReferralEmailHtml(referrerName: string, leadName: string, token: s
   <tr><td class="px" style="padding:8px 32px 32px;text-align:center;">
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;border-collapse:separate;">
       <tr>
-        <td style="border-radius:12px;background-color:${teal};">
+        <td style="border-radius:12px;background:linear-gradient(135deg, ${brandBlueDark}, ${brandBlue});">
           <a href="${formUrl}" style="display:inline-block;padding:16px 40px;color:#ffffff;font-size:18px;font-weight:bold;text-decoration:none;letter-spacing:0.5px;">
             Click Here for Your Free Report →
           </a>
