@@ -311,11 +311,27 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
 
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep("select-client")}>Back</Button>
-            <Button onClick={handleProceedToConfirm} className="gap-2">
-              Send for E-Sign <ArrowRight className="w-4 h-4" />
+            <Button onClick={handleProceedToEdit} className="gap-2">
+              Review Document <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Step 4: Edit PDF */}
+      {step === "edit-pdf" && file && (
+        <ESignPdfEditor
+          file={file}
+          clientName={clientName}
+          clientEmail={clientEmail}
+          clientPhone={clientPhone}
+          clientAddress={clientAddress}
+          onBack={() => setStep("fill-details")}
+          onContinue={(edited) => {
+            setEditedFile(edited);
+            handleProceedToConfirm();
+          }}
+        />
       )}
 
       {/* Email Confirmation Dialog */}
