@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { PDFDocument } from "pdf-lib";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, FileText, Loader2, AlertCircle, PenTool } from "lucide-react";
+import { CheckCircle, FileText, Loader2, AlertCircle, PenTool, ShieldCheck, Eraser } from "lucide-react";
 import { toast } from "sonner";
 
 interface ESignDoc {
@@ -30,6 +30,22 @@ interface SigningField {
 
 type PageState = "loading" | "ready" | "signing" | "submitted" | "already-signed" | "error";
 
+const BRAND = {
+  navy: "#0f172a",
+  cyan: "#0ea5e9",
+  cyanLight: "#e0f7ff",
+  cyanDark: "#0284c7",
+  gray50: "#f8fafc",
+  gray100: "#f1f5f9",
+  gray200: "#e2e8f0",
+  gray400: "#94a3b8",
+  gray500: "#64748b",
+  gray700: "#334155",
+  gray900: "#0f172a",
+  white: "#ffffff",
+  green: "#10b981",
+};
+
 export default function ESignPublic() {
   const [params] = useSearchParams();
   const token = params.get("token");
@@ -47,7 +63,6 @@ export default function ESignPublic() {
     loadDocument();
   }, [token]);
 
-  // Resize canvas to container width while keeping aspect ratio
   useEffect(() => {
     const resizeCanvas = () => {
       const canvas = canvasRef.current;
@@ -125,7 +140,7 @@ export default function ESignPublic() {
     if (!ctx) return;
     const { x, y } = getPos(e);
     ctx.lineTo(x, y);
-    ctx.strokeStyle = "#1a1a2e";
+    ctx.strokeStyle = BRAND.navy;
     ctx.lineWidth = 2.5;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -189,7 +204,6 @@ export default function ESignPublic() {
         }
       }
 
-      // Save signature records
       await supabase.from("esign_signatures").insert({
         document_id: doc.id,
         signer_name: doc.client_name || "Unknown",
@@ -208,7 +222,6 @@ export default function ESignPublic() {
         });
       }
 
-      // Update document status using the secure RPC function
       const { error: rpcError } = await supabase.rpc("complete_signing", {
         _token: token,
         _signed_pdf_path: signedPdfPath,
@@ -219,7 +232,6 @@ export default function ESignPublic() {
         throw new Error("Failed to update document status");
       }
 
-      // Notify host
       try {
         await supabase.functions.invoke("send-esign-email", {
           body: {
@@ -230,7 +242,7 @@ export default function ESignPublic() {
           },
         });
       } catch {
-        // Non-critical - don't fail the signing
+        // Non-critical
       }
 
       setState("submitted");
@@ -242,21 +254,27 @@ export default function ESignPublic() {
     }
   };
 
+  // --- Status screens ---
   if (state === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: BRAND.gray50 }}>
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4" style={{ color: BRAND.cyan }} />
+          <p className="text-sm" style={{ color: BRAND.gray500 }}>Loading your document…</p>
+        </div>
       </div>
     );
   }
 
   if (state === "error") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: BRAND.gray50 }}>
         <div className="text-center max-w-md mx-auto px-6">
-          <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Link</h1>
-          <p className="text-gray-500">This signing link is invalid or has expired.</p>
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "#fef2f2" }}>
+            <AlertCircle className="w-10 h-10" style={{ color: "#ef4444" }} />
+          </div>
+          <h1 className="text-2xl font-bold mb-2" style={{ color: BRAND.navy, fontFamily: "Montserrat, sans-serif" }}>Invalid Link</h1>
+          <p style={{ color: BRAND.gray500 }}>This signing link is invalid or has expired. Please contact your adviser for assistance.</p>
         </div>
       </div>
     );
@@ -264,11 +282,13 @@ export default function ESignPublic() {
 
   if (state === "already-signed") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: BRAND.gray50 }}>
         <div className="text-center max-w-md mx-auto px-6">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Already Signed</h1>
-          <p className="text-gray-500">This document has already been signed. Thank you!</p>
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "#ecfdf5" }}>
+            <CheckCircle className="w-10 h-10" style={{ color: BRAND.green }} />
+          </div>
+          <h1 className="text-2xl font-bold mb-2" style={{ color: BRAND.navy, fontFamily: "Montserrat, sans-serif" }}>Already Signed</h1>
+          <p style={{ color: BRAND.gray500 }}>This document has already been signed. Thank you!</p>
         </div>
       </div>
     );
@@ -276,115 +296,154 @@ export default function ESignPublic() {
 
   if (state === "submitted") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: BRAND.gray50 }}>
         <div className="text-center max-w-md mx-auto px-6">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Document Signed!</h1>
-          <p className="text-gray-500 mb-2">Your signature has been recorded successfully.</p>
-          <p className="text-gray-400 text-sm">A copy has been sent to you and your adviser.</p>
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "#ecfdf5" }}>
+            <CheckCircle className="w-10 h-10" style={{ color: BRAND.green }} />
+          </div>
+          <h1 className="text-2xl font-bold mb-3" style={{ color: BRAND.navy, fontFamily: "Montserrat, sans-serif" }}>Document Signed!</h1>
+          <p className="mb-2" style={{ color: BRAND.gray700 }}>Your signature has been recorded successfully.</p>
+          <p className="text-sm" style={{ color: BRAND.gray500 }}>A confirmation email with a copy of your signed document will be sent to you shortly.</p>
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs" style={{ color: BRAND.gray400 }}>
+            <ShieldCheck className="w-4 h-4" />
+            <span>Secured by Advisor Link Online</span>
+          </div>
         </div>
       </div>
     );
   }
 
+  // --- Main signing page ---
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+    <div className="min-h-screen" style={{ background: BRAND.gray50 }}>
+      {/* Branded Header */}
+      <header style={{ background: BRAND.navy }} className="px-4 sm:px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <FileText className="w-6 h-6 text-blue-600" />
-            <div>
-              <h1 className="text-base sm:text-lg font-bold text-gray-900">Document Signing</h1>
-              <p className="text-xs text-gray-500">{doc?.document_name}</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-medium text-gray-700">{doc?.client_name}</p>
-            <p className="text-xs text-gray-400">{doc?.client_email}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-3xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6 sm:space-y-8">
-        {/* Client details summary */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Your Details</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
-            <div><span className="text-gray-400">Name:</span> <span className="text-gray-900 font-medium ml-2">{doc?.client_name}</span></div>
-            <div><span className="text-gray-400">Email:</span> <span className="text-gray-900 font-medium ml-2">{doc?.client_email}</span></div>
-            <div><span className="text-gray-400">Phone:</span> <span className="text-gray-900 font-medium ml-2">{doc?.client_phone || "—"}</span></div>
-            <div><span className="text-gray-400">Address:</span> <span className="text-gray-900 font-medium ml-2">{doc?.client_address || "—"}</span></div>
-          </div>
-        </div>
-
-        {/* PDF Preview */}
-        {pdfUrl && (
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Document Preview</h2>
-            </div>
-            <iframe src={pdfUrl} className="w-full h-[400px] sm:h-[500px]" title="Document" />
-          </div>
-        )}
-
-        {/* Signature Area */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <PenTool className="w-5 h-5 text-blue-600" />
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-              Sign Below
-            </h2>
-          </div>
-          <p className="text-xs text-gray-400 mb-4">
-            Draw your signature using your mouse or finger. This signature will be applied to all signature fields in the document.
-          </p>
-
-          <div ref={containerRef} className="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden bg-white">
-            <canvas
-              ref={canvasRef}
-              className="w-full cursor-crosshair touch-none"
-              style={{ height: "auto", aspectRatio: "3 / 1" }}
-              onMouseDown={startDraw}
-              onMouseMove={draw}
-              onMouseUp={endDraw}
-              onMouseLeave={endDraw}
-              onTouchStart={startDraw}
-              onTouchMove={draw}
-              onTouchEnd={endDraw}
+            <img
+              src="https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png"
+              alt="Advisor Link Online"
+              className="h-8 sm:h-10 brightness-0 invert"
             />
           </div>
+          <div className="text-right">
+            <p className="text-sm font-medium text-white/90">{doc?.client_name}</p>
+            <p className="text-xs text-white/50">{doc?.client_email}</p>
+          </div>
+        </div>
+      </header>
 
-          <div className="flex justify-between items-center mt-4">
-            <button onClick={clearSignature} className="text-sm text-gray-500 hover:text-gray-700 underline">
-              Clear Signature
-            </button>
+      {/* Cyan accent bar */}
+      <div className="h-1" style={{ background: `linear-gradient(90deg, ${BRAND.cyan}, ${BRAND.cyanDark})` }} />
 
-            {signatureData && (
-              <span className="text-xs text-green-600 font-medium flex items-center gap-1">
-                <CheckCircle className="w-3 h-3" /> Signature captured
-              </span>
-            )}
+      <div className="max-w-3xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-5">
+        {/* Document title banner */}
+        <div className="rounded-2xl overflow-hidden" style={{ background: BRAND.white, border: `1px solid ${BRAND.gray200}` }}>
+          <div className="px-5 py-4 flex items-center gap-3" style={{ borderBottom: `1px solid ${BRAND.gray100}` }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: BRAND.cyanLight }}>
+              <FileText className="w-5 h-5" style={{ color: BRAND.cyan }} />
+            </div>
+            <div>
+              <h2 className="text-base font-bold" style={{ color: BRAND.navy, fontFamily: "Montserrat, sans-serif" }}>
+                {doc?.document_name}
+              </h2>
+              <p className="text-xs" style={{ color: BRAND.gray500 }}>Please review the document below, then scroll down to sign.</p>
+            </div>
+          </div>
+
+          {/* PDF Preview - shown automatically */}
+          {pdfUrl && (
+            <iframe
+              src={`${pdfUrl}#toolbar=0&navpanes=0`}
+              className="w-full border-0"
+              style={{ height: "70vh", minHeight: "400px" }}
+              title="Document Preview"
+            />
+          )}
+        </div>
+
+        {/* Signature Area */}
+        <div className="rounded-2xl overflow-hidden" style={{ background: BRAND.white, border: `1px solid ${BRAND.gray200}` }}>
+          <div className="px-5 py-4 flex items-center gap-3" style={{ background: `linear-gradient(135deg, ${BRAND.navy}, #1e293b)` }}>
+            <PenTool className="w-5 h-5 text-white/80" />
+            <div>
+              <h2 className="text-base font-bold text-white" style={{ fontFamily: "Montserrat, sans-serif" }}>
+                Sign Here
+              </h2>
+              <p className="text-xs text-white/60">
+                Draw your signature using your finger or mouse
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 sm:p-6">
+            <div
+              ref={containerRef}
+              className="rounded-xl overflow-hidden"
+              style={{ border: `2px dashed ${signatureData ? BRAND.cyan : BRAND.gray200}`, background: signatureData ? BRAND.cyanLight + "33" : BRAND.gray50 }}
+            >
+              <canvas
+                ref={canvasRef}
+                className="w-full cursor-crosshair touch-none"
+                style={{ height: "auto", aspectRatio: "3 / 1" }}
+                onMouseDown={startDraw}
+                onMouseMove={draw}
+                onMouseUp={endDraw}
+                onMouseLeave={endDraw}
+                onTouchStart={startDraw}
+                onTouchMove={draw}
+                onTouchEnd={endDraw}
+              />
+            </div>
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={clearSignature}
+                className="flex items-center gap-1.5 text-sm hover:opacity-80 transition-opacity"
+                style={{ color: BRAND.gray500 }}
+              >
+                <Eraser className="w-4 h-4" />
+                Clear
+              </button>
+
+              {signatureData && (
+                <span className="text-xs font-medium flex items-center gap-1" style={{ color: BRAND.green }}>
+                  <CheckCircle className="w-3.5 h-3.5" /> Signature captured
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Submit */}
-        <Button
+        {/* Submit Button */}
+        <button
           onClick={handleSubmit}
           disabled={!signatureData || submitting}
-          className="w-full h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-600/20"
-          size="lg"
+          className="w-full h-14 text-base font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            background: signatureData ? `linear-gradient(135deg, ${BRAND.cyan}, ${BRAND.cyanDark})` : BRAND.gray200,
+            color: signatureData ? BRAND.white : BRAND.gray500,
+            boxShadow: signatureData ? `0 8px 24px -4px ${BRAND.cyan}44` : "none",
+            fontFamily: "Montserrat, sans-serif",
+          }}
         >
           {submitting ? (
-            <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Submitting...</>
+            <><Loader2 className="w-5 h-5 animate-spin" /> Submitting…</>
           ) : (
-            <><CheckCircle className="w-5 h-5 mr-2" /> Submit Signed Document</>
+            <><CheckCircle className="w-5 h-5" /> Submit Signed Document</>
           )}
-        </Button>
+        </button>
 
-        <p className="text-xs text-gray-400 text-center">
-          By signing, you agree to the terms of this document. A copy will be sent to you and your adviser.
-        </p>
+        {/* Footer */}
+        <div className="text-center pb-6 space-y-3">
+          <p className="text-xs" style={{ color: BRAND.gray400 }}>
+            By signing, you agree to the terms of this document. A copy will be sent to you and your adviser.
+          </p>
+          <div className="flex items-center justify-center gap-2 text-xs" style={{ color: BRAND.gray400 }}>
+            <ShieldCheck className="w-4 h-4" style={{ color: BRAND.cyan }} />
+            <span>Secured by <strong>Advisor Link Online</strong></span>
+          </div>
+        </div>
       </div>
     </div>
   );
