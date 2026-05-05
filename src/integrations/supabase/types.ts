@@ -405,6 +405,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_signing: {
+        Args: { _signed_pdf_path: string; _token: string }
+        Returns: undefined
+      }
       is_blocked: { Args: { _uid: string }; Returns: boolean }
       is_owner: { Args: { _uid: string }; Returns: boolean }
     }
