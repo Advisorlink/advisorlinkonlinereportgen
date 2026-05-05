@@ -4,12 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Monitor, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import logoSvg from "@/assets/logo.svg";
+import heroImg from "@/assets/meeting-hero.jpg";
 
 const iceServers = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
   { urls: "stun:stun2.l.google.com:19302" },
 ];
+
+const SESSION_KEY = "alo_meeting_session";
 
 export default function MeetingJoin() {
   const [meetingId, setMeetingId] = useState("");
@@ -21,10 +25,14 @@ export default function MeetingJoin() {
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const clientIdRef = useRef(crypto.randomUUID());
 
-  const setupPeerConnection = useCallback((ch: ReturnType<typeof supabase.channel>) => {
-    // Close existing PC if any
-    pcRef.current?.close();
+  // Persist session so mobile users can navigate away and come back
+  const saveSession = (mid: string) => {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ meetingId: mid, clientId: clientIdRef.current }));
+  };
+  const clearSession = () => sessionStorage.removeItem(SESSION_KEY);
 
+  const setupPeerConnection = useCallback((ch: ReturnType<typeof supabase.channel>) => {
+    pcRef.current?.close();
     const pc = new RTCPeerConnection({ iceServers });
     pcRef.current = pc;
 
@@ -51,13 +59,57 @@ export default function MeetingJoin() {
     return pc;
   }, []);
 
+  const connectToMeeting = useCallback(async (mid: string, cid: string) => {
+    const ch = supabase.channel(`meeting:${mid}`, {
+      config: {
+        broadcast: { self: false },
+        presence: { key: `client-${cid}` },
+      },
+    });
+
+    ch.on("broadcast", { event: "offer" }, async ({ payload }) => {
+      if (payload.clientId !== cid) return;
+      const pc = pcRef.current || setupPeerConnection(ch);
+      await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      ch.send({ type: "broadcast", event: "answer", payload: { sdp: answer, clientId: cid } });
+    });
+
+    ch.on("broadcast", { event: "ice-candidate" }, async ({ payload }) => {
+      if (payload.from !== "host") return;
+      if (payload.candidate && pcRef.current) {
+        await pcRef.current.addIceCandidate(new RTCIceCandidate(payload.candidate));
+      }
+    });
+
+    ch.on("broadcast", { event: "screen-ready" }, () => {
+      ch.send({ type: "broadcast", event: "join", payload: { clientId: cid } });
+    });
+
+    ch.on("broadcast", { event: "meeting-ended" }, () => {
+      setRemoteStream(null);
+      setStatus("ended");
+      clearSession();
+      toast.info("The host has ended the meeting");
+    });
+
+    await ch.subscribe(async (subscribeStatus) => {
+      if (subscribeStatus === "SUBSCRIBED") {
+        await ch.track({ role: "client", clientId: cid });
+        ch.send({ type: "broadcast", event: "join", payload: { clientId: cid } });
+      }
+    });
+    channelRef.current = ch;
+    setStatus("waiting");
+  }, [setupPeerConnection]);
+
   const joinMeeting = useCallback(async () => {
     const mid = meetingId.trim();
     if (!mid) { setError("Please enter a meeting ID"); return; }
     setError("");
     setStatus("connecting");
 
-    // Check if meeting exists
     const { data: meeting } = await supabase
       .from("meetings")
       .select("*")
@@ -76,60 +128,39 @@ export default function MeetingJoin() {
       return;
     }
 
-    const clientId = clientIdRef.current;
+    const cid = clientIdRef.current;
+    saveSession(mid);
+    await connectToMeeting(mid, cid);
+  }, [meetingId, connectToMeeting]);
 
-    const ch = supabase.channel(`meeting:${mid}`, {
-      config: {
-        broadcast: { self: false },
-        presence: { key: `client-${clientId}` },
-      },
-    });
-
-    ch.on("broadcast", { event: "offer" }, async ({ payload }) => {
-      if (payload.clientId !== clientId) return;
-      const pc = pcRef.current || setupPeerConnection(ch);
-      await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      ch.send({ type: "broadcast", event: "answer", payload: { sdp: answer, clientId } });
-    });
-
-    ch.on("broadcast", { event: "ice-candidate" }, async ({ payload }) => {
-      if (payload.from !== "host") return;
-      if (payload.candidate && pcRef.current) {
-        await pcRef.current.addIceCandidate(new RTCIceCandidate(payload.candidate));
-      }
-    });
-
-    // When host starts sharing screen after we've joined
-    ch.on("broadcast", { event: "screen-ready" }, () => {
-      // Re-announce ourselves so host sends us an offer
-      ch.send({ type: "broadcast", event: "join", payload: { clientId } });
-    });
-
-    ch.on("broadcast", { event: "meeting-ended" }, () => {
-      setRemoteStream(null);
-      setStatus("ended");
-      toast.info("The host has ended the meeting");
-    });
-
-    await ch.subscribe(async (subscribeStatus) => {
-      if (subscribeStatus === "SUBSCRIBED") {
-        await ch.track({ role: "client", clientId });
-        ch.send({ type: "broadcast", event: "join", payload: { clientId } });
-      }
-    });
-    channelRef.current = ch;
-    setStatus("waiting");
-  }, [meetingId, setupPeerConnection]);
+  // Restore session on mount (mobile navigation back)
+  useEffect(() => {
+    const saved = sessionStorage.getItem(SESSION_KEY);
+    if (saved) {
+      try {
+        const { meetingId: mid, clientId: cid } = JSON.parse(saved);
+        clientIdRef.current = cid;
+        setMeetingId(mid);
+        // Check if meeting is still active
+        supabase.from("meetings").select("status").eq("meeting_id", mid).single().then(({ data }) => {
+          if (data && data.status !== "ended") {
+            connectToMeeting(mid, cid);
+          } else {
+            clearSession();
+            if (data?.status === "ended") setStatus("ended");
+          }
+        });
+      } catch { clearSession(); }
+    }
+  }, [connectToMeeting]);
 
   useEffect(() => {
-    const clientId = clientIdRef.current;
+    const cid = clientIdRef.current;
     return () => {
       setRemoteStream(null);
       pcRef.current?.close();
       if (channelRef.current) {
-        channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId } });
+        channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId: cid } });
         channelRef.current.unsubscribe();
       }
     };
@@ -141,97 +172,149 @@ export default function MeetingJoin() {
     }
   }, [remoteStream, status]);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-navy via-[hsl(215_50%_15%)] to-[hsl(215_60%_8%)] flex flex-col">
-      {/* Header */}
-      <header className="px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-cyan flex items-center justify-center">
-            <span className="text-xs font-black text-cyan-foreground">AL</span>
-          </div>
-          <p className="text-white/80 text-sm font-semibold">Advisor Link Online</p>
+  // ----- Connected / viewing screen share -----
+  if (status === "connected") {
+    return (
+      <div className="min-h-screen min-h-[100dvh] bg-black flex flex-col">
+        <header className="px-4 py-3 bg-black/80 backdrop-blur-sm flex items-center justify-between shrink-0">
+          <img src={logoSvg} alt="Advisor Link Online" className="h-7 sm:h-8" />
+          <span className="text-white/50 text-xs font-mono">ID: {meetingId}</span>
+        </header>
+        <main className="flex-1 flex items-center justify-center p-2 sm:p-4">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="w-full max-h-[calc(100dvh-80px)] rounded-lg bg-black shadow-2xl object-contain"
+          />
+        </main>
+        <p className="text-white/30 text-[10px] text-center pb-2">You are viewing your consultant's screen</p>
+      </div>
+    );
+  }
+
+  // ----- Ended -----
+  if (status === "ended") {
+    return (
+      <div className="min-h-screen min-h-[100dvh] relative flex flex-col">
+        <div className="absolute inset-0 -z-10">
+          <img src={heroImg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-[hsl(210_60%_12%/0.75)]" />
         </div>
-      </header>
-
-      <main className="flex-1 flex items-center justify-center p-6">
-        {status === "idle" || status === "connecting" ? (
-          <div className="w-full max-w-md">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-2xl bg-cyan/20 flex items-center justify-center mx-auto mb-4">
-                <Monitor className="w-8 h-8 text-cyan" />
-              </div>
-              <h1 className="text-2xl font-bold text-white font-heading">Join Meeting</h1>
-              <p className="text-white/50 text-sm mt-2">
-                Please wait for your consultant to give you the meeting ID
-              </p>
+        <header className="px-4 sm:px-8 py-4 flex items-center justify-between">
+          <img src={logoSvg} alt="Advisor Link Online" className="h-8 sm:h-10" />
+        </header>
+        <main className="flex-1 flex items-center justify-center p-4">
+          <div className="text-center max-w-md">
+            <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur flex items-center justify-center mx-auto mb-5">
+              <Monitor className="w-8 h-8 text-white/50" />
             </div>
-
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-white/60 mb-2 block">Enter your meeting ID</label>
-                <Input
-                  value={meetingId}
-                  onChange={(e) => setMeetingId(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  placeholder="e.g. 482019"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-center text-lg font-mono tracking-widest h-14"
-                  onKeyDown={(e) => e.key === "Enter" && joinMeeting()}
-                  disabled={status === "connecting"}
-                />
-              </div>
-              {error && <p className="text-sm text-red-400 text-center">{error}</p>}
-              <Button
-                className="w-full bg-cyan text-cyan-foreground hover:bg-cyan/90 h-12 text-base font-semibold"
-                onClick={joinMeeting}
-                disabled={status === "connecting"}
-              >
-                {status === "connecting" ? (
-                  <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Connecting...</>
-                ) : (
-                  <><Monitor className="w-5 h-5 mr-2" /> Start Your Meeting</>
-                )}
-              </Button>
-            </div>
-
-            <p className="text-center text-white/30 text-xs mt-6">
-              Powered by Advisor Link Online
-            </p>
-          </div>
-        ) : status === "waiting" ? (
-          <div className="w-full max-w-md text-center">
-            <div className="w-16 h-16 rounded-2xl bg-cyan/20 flex items-center justify-center mx-auto mb-4">
-              <Loader2 className="w-8 h-8 text-cyan animate-spin" />
-            </div>
-            <h2 className="text-xl font-bold text-white mb-2">You're in the meeting</h2>
-            <p className="text-white/50 text-sm mb-6">Waiting for your consultant to share their screen...</p>
-            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-              <p className="text-white/40 text-xs">Meeting ID: <span className="font-mono font-bold text-white/70">{meetingId}</span></p>
-            </div>
-          </div>
-        ) : status === "connected" ? (
-          <div className="w-full h-full flex flex-col items-center">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="w-full max-h-[85vh] rounded-xl bg-black shadow-2xl"
-            />
-            <p className="text-white/40 text-xs mt-4">You are viewing your consultant's screen</p>
-          </div>
-        ) : (
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
-              <Monitor className="w-8 h-8 text-white/40" />
-            </div>
-            <h2 className="text-xl font-bold text-white mb-2">Meeting Ended</h2>
-            <p className="text-white/50 text-sm mb-6">Your consultant has ended the meeting</p>
-            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => { setStatus("idle"); setMeetingId(""); }}>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Meeting Ended</h2>
+            <p className="text-white/60 text-sm sm:text-base mb-8">Your consultant has ended the meeting. Thank you for joining.</p>
+            <Button
+              className="bg-[hsl(170_90%_45%)] hover:bg-[hsl(170_90%_40%)] text-white font-semibold px-8 h-12 rounded-full text-base"
+              onClick={() => { setStatus("idle"); setMeetingId(""); }}
+            >
               Join Another Meeting
             </Button>
           </div>
-        )}
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // ----- Idle / Connecting / Waiting (main landing) -----
+  return (
+    <div className="min-h-screen min-h-[100dvh] relative flex flex-col">
+      {/* Background */}
+      <div className="absolute inset-0 -z-10">
+        <img src={heroImg} alt="" className="w-full h-full object-cover" width={1920} height={1080} />
+        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(210_60%_12%/0.6)] via-[hsl(210_60%_12%/0.7)] to-[hsl(210_60%_12%/0.85)]" />
+      </div>
+
+      {/* Header */}
+      <header className="px-4 sm:px-8 py-4 flex items-center justify-between shrink-0">
+        <img src={logoSvg} alt="Advisor Link Online" className="h-8 sm:h-10" />
+      </header>
+
+      {/* Main */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8">
+        {/* Hero text */}
+        <div className="text-center mb-6 sm:mb-10 max-w-2xl">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
+            Welcome To Your Advisor Link Online Meeting.
+          </h1>
+          <p className="text-[hsl(170_80%_60%)] text-sm sm:text-base mt-3">
+            Please wait for your consultant to call you with your meeting ID so you can view their screen
+          </p>
+        </div>
+
+        {/* Card */}
+        <div className="w-full max-w-md">
+          <div className="bg-white/[0.08] backdrop-blur-xl border border-white/[0.12] rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl">
+            {status === "waiting" ? (
+              <div className="text-center space-y-4">
+                <Loader2 className="w-10 h-10 text-[hsl(170_80%_55%)] animate-spin mx-auto" />
+                <h2 className="text-lg sm:text-xl font-semibold text-white">You're in the meeting</h2>
+                <p className="text-white/50 text-sm">Waiting for your consultant to share their screen...</p>
+                <div className="bg-white/5 rounded-xl p-3 mt-2">
+                  <p className="text-white/40 text-xs">Meeting ID: <span className="font-mono font-bold text-white/80 text-base">{meetingId}</span></p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-xl sm:text-2xl font-semibold text-white text-center mb-6">Start a Meeting</h2>
+                <div className="space-y-4">
+                  <Input
+                    value={meetingId}
+                    onChange={(e) => setMeetingId(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="Enter your meeting ID"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    className="bg-white/90 border-0 text-gray-800 placeholder:text-gray-400 text-center text-lg font-mono tracking-widest h-14 rounded-xl focus-visible:ring-[hsl(170_80%_55%)] focus-visible:ring-2"
+                    onKeyDown={(e) => e.key === "Enter" && joinMeeting()}
+                    disabled={status === "connecting"}
+                  />
+                  {error && <p className="text-sm text-red-400 text-center">{error}</p>}
+                  <Button
+                    className="w-full bg-[hsl(220_80%_55%)] hover:bg-[hsl(220_80%_48%)] text-white h-12 sm:h-14 text-base font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-[hsl(220_80%_55%/0.3)]"
+                    onClick={joinMeeting}
+                    disabled={status === "connecting"}
+                  >
+                    {status === "connecting" ? (
+                      <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Connecting...</>
+                    ) : (
+                      "Start Meeting"
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </main>
+
+      <Footer />
     </div>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="px-4 sm:px-8 py-6 text-center space-y-3 shrink-0">
+      <p className="text-white/40 text-xs sm:text-sm max-w-lg mx-auto">
+        With AdvisorLink, we connect you to fully Licensed and Vetted advisors to take the guesswork out of who to trust.
+      </p>
+      <div className="flex items-center justify-center gap-4 text-white/30 text-xs">
+        <a href="https://advisorlinkonline.com.au/privacy-policy/" target="_blank" rel="noopener noreferrer" className="hover:text-white/60 transition-colors underline underline-offset-2">
+          Privacy Policy
+        </a>
+        <a href="https://advisorlinkonline.com.au/terms-and-conditions/" target="_blank" rel="noopener noreferrer" className="hover:text-white/60 transition-colors underline underline-offset-2">
+          Terms and Conditions
+        </a>
+      </div>
+      <p className="text-white/20 text-[10px]">© {new Date().getFullYear()} Advisor Link Online. All rights reserved.</p>
+    </footer>
   );
 }
