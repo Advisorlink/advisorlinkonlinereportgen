@@ -70,7 +70,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
               <td width="48" style="vertical-align:top;padding-right:14px;">
                 <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-                  <td style="width:40px;height:40px;border-radius:12px;background-color:rgba(11,181,160,0.1);text-align:center;line-height:40px;font-size:20px;">&#9742;</td>
+                  <td style="width:40px;height:40px;border-radius:12px;background-color:rgba(30,136,229,0.1);text-align:center;line-height:40px;font-size:20px;">&#9742;</td>
                 </tr></table>
               </td>
               <td style="vertical-align:top;">
@@ -88,7 +88,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
               <td width="48" style="vertical-align:top;padding-right:14px;">
                 <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-                  <td style="width:40px;height:40px;border-radius:12px;background-color:rgba(11,181,160,0.1);text-align:center;line-height:40px;font-size:20px;">&#10024;</td>
+                  <td style="width:40px;height:40px;border-radius:12px;background-color:rgba(30,136,229,0.1);text-align:center;line-height:40px;font-size:20px;">&#10024;</td>
                 </tr></table>
               </td>
               <td style="vertical-align:top;">
