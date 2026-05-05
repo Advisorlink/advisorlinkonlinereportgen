@@ -103,12 +103,6 @@ export default function Admin() {
     else { toast.success("User deleted"); refresh(); }
   };
 
-  const clearLogs = async () => {
-    if (!confirm("Clear all activity logs?")) return;
-    const { error } = await supabase.from("activity_log").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    if (error) toast.error(error.message);
-    else { toast.success("Logs cleared"); refresh(); }
-  };
 
   const deleteReport = async (id: string) => {
     if (!confirm("Delete this saved report?")) return;
