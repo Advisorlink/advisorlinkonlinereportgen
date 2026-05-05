@@ -19,7 +19,11 @@ function createRawEmail(to: string, subject: string, htmlBody: string): string {
     htmlBody,
     `--${boundary}--`,
   ].join("\r\n");
-  return btoa(email).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(email);
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 async function sendEmail(to: string, subject: string, htmlBody: string) {
