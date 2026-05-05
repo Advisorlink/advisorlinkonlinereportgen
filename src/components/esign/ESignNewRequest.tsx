@@ -16,7 +16,7 @@ interface ReportRow {
   inputs: Record<string, any> | null;
 }
 
-type Step = "upload" | "select-client" | "fill-details" | "edit-pdf" | "confirm-send";
+type Step = "upload" | "edit-pdf" | "select-client" | "fill-details" | "confirm-send";
 
 export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   const { user } = useAuth();
