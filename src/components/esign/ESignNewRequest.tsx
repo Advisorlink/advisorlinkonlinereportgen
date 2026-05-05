@@ -306,6 +306,10 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
               <Input value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="0400 000 000" />
             </div>
             <div className="space-y-2">
+              <Label>Date of Birth</Label>
+              <Input value={clientDob} onChange={(e) => setClientDob(e.target.value)} placeholder="DD/MM/YYYY" />
+            </div>
+            <div className="space-y-2">
               <Label>Address</Label>
               <Input value={clientAddress} onChange={(e) => setClientAddress(e.target.value)} placeholder="123 Main St, Sydney NSW" />
             </div>
