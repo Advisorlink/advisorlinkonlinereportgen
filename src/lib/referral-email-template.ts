@@ -2,7 +2,7 @@
  * Generates a clean, mobile-first white referral email template.
  * Designed for maximum compatibility across all email clients.
  */
-export function buildReferralEmailHtml(firstName: string, logoUrl = "https://report.advisorlinkonline.com.au/logo-email.png"): string {
+export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png"): string {
   const safeName = firstName.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
   const safeLogoUrl = logoUrl.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
 
