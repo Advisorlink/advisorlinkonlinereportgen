@@ -143,9 +143,17 @@ export default function ReferralForm() {
 
           {/* Steps */}
           <div className="px-5 sm:px-8 py-6 sm:py-8 space-y-4">
-            <p className="text-[#3a3a4e] text-sm sm:text-base leading-relaxed">
-              Do you know <strong>5 people</strong> that would like a free performance report like you got?
-            </p>
+            {/* Reward highlight */}
+            <div className="relative bg-gradient-to-br from-[#29B6F6] to-[#1E88E5] rounded-xl p-5 sm:p-6 text-white text-center">
+              <Gift className="w-8 h-8 mx-auto mb-2 opacity-90" />
+              <p className="text-base sm:text-lg font-semibold leading-snug">
+                Refer <span className="text-[#FFD700] font-bold">5 people</span> and receive a
+              </p>
+              <p className="text-3xl sm:text-4xl font-extrabold tracking-tight mt-1">
+                <span className="text-[#FFD700]">$100</span> Gift Card
+              </p>
+              <p className="text-white/70 text-xs sm:text-sm mt-2">It's that simple.</p>
+            </div>
 
             <div className="grid gap-3">
               {/* Step 1 */}
@@ -167,18 +175,6 @@ export default function ReferralForm() {
                   It's <strong>completely free</strong> for them, and you get rewarded for doing the legwork for us 😄
                 </p>
               </div>
-            </div>
-
-            {/* Reward highlight */}
-            <div className="relative bg-gradient-to-br from-[#29B6F6] to-[#1E88E5] rounded-xl p-5 sm:p-6 text-white text-center mt-2">
-              <Gift className="w-8 h-8 mx-auto mb-2 opacity-90" />
-              <p className="text-base sm:text-lg font-semibold leading-snug">
-                Refer <span className="text-[#FFD700] font-bold">5 people</span> and receive a
-              </p>
-              <p className="text-3xl sm:text-4xl font-extrabold tracking-tight mt-1">
-                <span className="text-[#FFD700]">$100</span> Gift Card
-              </p>
-              <p className="text-white/70 text-xs sm:text-sm mt-2">It's that simple.</p>
             </div>
           </div>
         </div>
