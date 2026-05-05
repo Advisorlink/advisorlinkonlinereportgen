@@ -116,7 +116,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
       const filePath = `${user.id}/${Date.now()}_${fileToUpload.name}`;
       const { error: uploadErr } = await supabase.storage
         .from("esign-documents")
-        .upload(filePath, file);
+        .upload(filePath, fileToUpload);
       if (uploadErr) throw uploadErr;
 
       // Create esign document record
