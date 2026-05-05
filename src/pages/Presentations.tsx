@@ -76,6 +76,7 @@ export default function Presentations() {
     if (state?.resumeSlide != null && activeMeeting) {
       setPausedSlide(state.resumeSlide);
       setShowSlideshow(true);
+      setGlobalPausedSlide(null);
       // Clear the state so it doesn't re-trigger
       window.history.replaceState({}, "");
     }
