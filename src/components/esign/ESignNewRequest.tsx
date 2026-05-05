@@ -91,6 +91,10 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   };
 
   const handleProceedToEdit = () => {
+    setStep("edit-pdf");
+  };
+
+  const handleProceedToSend = () => {
     if (!clientName.trim()) {
       toast.error("Client name is required");
       return;
@@ -99,7 +103,8 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
       toast.error("Client email is required");
       return;
     }
-    setStep("edit-pdf");
+    setConfirmEmail(clientEmail);
+    setShowEmailConfirm(true);
   };
 
   const handleProceedToConfirm = () => {
