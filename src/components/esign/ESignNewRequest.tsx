@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { ESignPdfEditor } from "./ESignPdfEditor";
 
 interface ReportRow {
   id: string;
@@ -15,12 +16,13 @@ interface ReportRow {
   inputs: Record<string, any> | null;
 }
 
-type Step = "upload" | "select-client" | "fill-details" | "confirm-send";
+type Step = "upload" | "select-client" | "fill-details" | "edit-pdf" | "confirm-send";
 
 export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   const { user } = useAuth();
   const [step, setStep] = useState<Step>("upload");
   const [file, setFile] = useState<File | null>(null);
+  const [editedFile, setEditedFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState("");
 
   // Client selection
@@ -88,7 +90,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
     setStep("fill-details");
   };
 
-  const handleProceedToConfirm = () => {
+  const handleProceedToEdit = () => {
     if (!clientName.trim()) {
       toast.error("Client name is required");
       return;
@@ -97,19 +99,24 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
       toast.error("Client email is required");
       return;
     }
+    setStep("edit-pdf");
+  };
+
+  const handleProceedToConfirm = () => {
     setConfirmEmail(clientEmail);
     setShowEmailConfirm(true);
   };
 
   const handleSendDocument = async () => {
-    if (!file || !user) return;
+    const fileToUpload = editedFile || file;
+    if (!fileToUpload || !user) return;
     setSending(true);
     try {
-      // Upload PDF
-      const filePath = `${user.id}/${Date.now()}_${file.name}`;
+      // Upload PDF (edited version with filled fields)
+      const filePath = `${user.id}/${Date.now()}_${fileToUpload.name}`;
       const { error: uploadErr } = await supabase.storage
         .from("esign-documents")
-        .upload(filePath, file);
+        .upload(filePath, fileToUpload);
       if (uploadErr) throw uploadErr;
 
       // Create esign document record
@@ -168,18 +175,18 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
 
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-8">
-        {(["upload", "select-client", "fill-details"] as Step[]).map((s, i) => (
+        {(["upload", "select-client", "fill-details", "edit-pdf"] as Step[]).map((s, i) => (
           <div key={s} className="flex items-center gap-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
               step === s ? "bg-cyan text-white" : 
-              (["upload", "select-client", "fill-details"].indexOf(step) > i ? "bg-cyan/20 text-cyan" : "bg-muted text-muted-foreground")
+              (["upload", "select-client", "fill-details", "edit-pdf"].indexOf(step) > i ? "bg-cyan/20 text-cyan" : "bg-muted text-muted-foreground")
             }`}>
               {i + 1}
             </div>
             <span className={`text-sm font-medium hidden sm:inline ${step === s ? "text-foreground" : "text-muted-foreground"}`}>
-              {s === "upload" ? "Upload" : s === "select-client" ? "Select Client" : "Details"}
+              {s === "upload" ? "Upload" : s === "select-client" ? "Client" : s === "fill-details" ? "Details" : "Review"}
             </span>
-            {i < 2 && <div className="w-8 h-px bg-border" />}
+            {i < 3 && <div className="w-8 h-px bg-border" />}
           </div>
         ))}
       </div>
@@ -304,11 +311,27 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
 
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep("select-client")}>Back</Button>
-            <Button onClick={handleProceedToConfirm} className="gap-2">
-              Send for E-Sign <ArrowRight className="w-4 h-4" />
+            <Button onClick={handleProceedToEdit} className="gap-2">
+              Review Document <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Step 4: Edit PDF */}
+      {step === "edit-pdf" && file && (
+        <ESignPdfEditor
+          file={file}
+          clientName={clientName}
+          clientEmail={clientEmail}
+          clientPhone={clientPhone}
+          clientAddress={clientAddress}
+          onBack={() => setStep("fill-details")}
+          onContinue={(edited) => {
+            setEditedFile(edited);
+            handleProceedToConfirm();
+          }}
+        />
       )}
 
       {/* Email Confirmation Dialog */}
