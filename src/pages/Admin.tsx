@@ -254,11 +254,12 @@ export default function Admin() {
     setSelectedTemplate(templateKey);
     const firstName = getFirstName(emailDialog.report.client_name);
     const isReferral = templateKey === "referral";
+    const logoUrl = `${window.location.origin}/logo-email.png`;
     setEmailDialog(prev => ({
       ...prev,
       body: getTemplateBody(templateKey, prev.report!),
-      subject: isReferral ? "🎁 Get a $50 Gift Card – Referral Offer" : "Super Performance Report",
-      htmlBody: isReferral ? buildReferralEmailHtml(firstName) : undefined,
+      subject: isReferral ? "Get a $50 Gift Card - Referral Offer" : "Super Performance Report",
+      htmlBody: isReferral ? buildReferralEmailHtml(firstName, logoUrl) : undefined,
       isHtml: isReferral,
     }));
   };
@@ -271,15 +272,16 @@ export default function Admin() {
     closeEmailDialog();
     setSendBusyId(r.id);
     try {
+      const shouldAttachPdf = !emailDialog.isHtml;
       // Get the PDF blob — prefer stored copy, fall back to regeneration
       let pdfBlob: Blob | null = null;
-      if (r.pdf_path) {
+      if (shouldAttachPdf && r.pdf_path) {
         const { data, error } = await supabase.storage
           .from("client-reports")
           .download(r.pdf_path);
         if (!error && data) pdfBlob = data;
       }
-      if (!pdfBlob) {
+      if (shouldAttachPdf && !pdfBlob) {
         // Regenerate PDF on the fly
         setPdfStageInputs(resolveInputs(r));
         await new Promise(requestAnimationFrame);
@@ -306,17 +308,21 @@ export default function Admin() {
         setPdfStageInputs(null);
       }
 
-      // Convert blob to base64
-      const buf = await pdfBlob.arrayBuffer();
-      const bytes = new Uint8Array(buf);
-      let binary = "";
-      const chunk = 0x8000;
-      for (let i = 0; i < bytes.length; i += chunk) {
-        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      let pdfBase64: string | undefined;
+      let fileName: string | undefined;
+      if (shouldAttachPdf && pdfBlob) {
+        // Convert blob to base64
+        const buf = await pdfBlob.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let binary = "";
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+        }
+        pdfBase64 = btoa(binary);
+        fileName = `${(r.client_name.trim() || "Client")} Performance Report.pdf`;
       }
-      const pdfBase64 = btoa(binary);
 
-      const fileName = `${(r.client_name.trim() || "Client")} Performance Report.pdf`;
       const { data, error } = await supabase.functions.invoke("send-report-email", {
         body: {
           recipientEmail: emailDialog.to,
@@ -330,7 +336,7 @@ export default function Admin() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success(`Email sent to ${emailDialog.to} with PDF attached`);
+      toast.success(shouldAttachPdf ? `Email sent to ${emailDialog.to} with PDF attached` : `Gift card email sent to ${emailDialog.to}`);
     } catch (e) {
       console.error("Send email failed:", e);
       toast.error("Failed to send email", {
@@ -527,8 +533,8 @@ export default function Admin() {
 
       {/* ---- Email compose dialog ---- */}
       {emailDialog.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 p-6 space-y-4 animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-3 sm:p-6">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[calc(100vh-1.5rem)] overflow-y-auto p-4 sm:p-6 space-y-4 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold font-heading text-navy">Compose Email</h3>
               <button onClick={closeEmailDialog} className="text-muted-foreground hover:text-foreground">
@@ -566,15 +572,15 @@ export default function Admin() {
               {emailDialog.isHtml ? (
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground mb-1 block">Preview (Designed Template)</label>
-                  <div className="rounded-md border border-input overflow-hidden" style={{ maxHeight: 320 }}>
+                  <div className="rounded-md border border-input overflow-hidden h-[58vh] max-h-[520px] min-h-[280px]">
                     <iframe
                       srcDoc={emailDialog.htmlBody}
                       title="Email preview"
                       className="w-full border-0"
-                      style={{ height: 300, pointerEvents: "none" }}
+                      style={{ height: "100%", pointerEvents: "none" }}
                     />
                   </div>
-                  <p className="text-[10px] text-muted-foreground mt-1">This is a designed HTML email — it will look exactly like this in the recipient's inbox.</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Designed HTML email preview. The gift-card template sends without the PDF attached.</p>
                 </div>
               ) : (
                 <div>
@@ -588,7 +594,7 @@ export default function Admin() {
                 </div>
               )}
               <p className="text-[11px] text-muted-foreground italic">
-                📎 PDF report will be attached automatically &bull; Your Gmail signature will be appended
+                {emailDialog.isHtml ? "No PDF will be attached" : "PDF report will be attached automatically"} &bull; Your Gmail signature will be appended
               </p>
             </div>
 
