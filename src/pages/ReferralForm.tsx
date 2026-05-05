@@ -50,16 +50,17 @@ export default function ReferralForm() {
 
     setSubmitting(true);
     try {
-      // Create submission
-      const { data: submission, error: subErr } = (await supabase
+      // Generate ID client-side so we don't need select-after-insert
+      const submissionId = crypto.randomUUID();
+
+      const { error: subErr } = await supabase
         .from("referral_submissions" as any)
         .insert({
+          id: submissionId,
           client_name: clientName,
           client_email: clientEmail,
           referrals: filledEntries,
-        } as any)
-        .select("id")
-        .single()) as any;
+        } as any);
 
       if (subErr) throw subErr;
 
