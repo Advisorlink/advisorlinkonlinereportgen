@@ -59,6 +59,116 @@ export type Database = {
         }
         Relationships: []
       }
+      esign_documents: {
+        Row: {
+          client_address: string | null
+          client_data: Json | null
+          client_email: string | null
+          client_name: string | null
+          client_phone: string | null
+          completed_at: string | null
+          created_at: string
+          document_name: string
+          host_user_id: string
+          id: string
+          original_pdf_path: string | null
+          report_id: string | null
+          resend_email: string | null
+          sent_at: string | null
+          signed_at: string | null
+          signed_pdf_path: string | null
+          signing_token: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_address?: string | null
+          client_data?: Json | null
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          completed_at?: string | null
+          created_at?: string
+          document_name: string
+          host_user_id: string
+          id?: string
+          original_pdf_path?: string | null
+          report_id?: string | null
+          resend_email?: string | null
+          sent_at?: string | null
+          signed_at?: string | null
+          signed_pdf_path?: string | null
+          signing_token?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_address?: string | null
+          client_data?: Json | null
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          completed_at?: string | null
+          created_at?: string
+          document_name?: string
+          host_user_id?: string
+          id?: string
+          original_pdf_path?: string | null
+          report_id?: string | null
+          resend_email?: string | null
+          sent_at?: string | null
+          signed_at?: string | null
+          signed_pdf_path?: string | null
+          signing_token?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      esign_signatures: {
+        Row: {
+          created_at: string
+          document_id: string
+          field_index: number
+          id: string
+          ip_address: string | null
+          signature_data: string
+          signed_at: string
+          signer_email: string | null
+          signer_name: string
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          field_index?: number
+          id?: string
+          ip_address?: string | null
+          signature_data: string
+          signed_at?: string
+          signer_email?: string | null
+          signer_name: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          field_index?: number
+          id?: string
+          ip_address?: string | null
+          signature_data?: string
+          signed_at?: string
+          signer_email?: string | null
+          signer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esign_signatures_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "esign_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meetings: {
         Row: {
           client_email: string | null
