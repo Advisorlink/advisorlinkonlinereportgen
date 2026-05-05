@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { CRMLayout } from "@/components/CRMLayout";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download, Send, X, Users, Gift, Phone, Mail, User, MapPin, DollarSign, Building, Filter } from "lucide-react";
+import { Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download, Send, X } from "lucide-react";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { buildReferralEmailHtml } from "@/lib/referral-email-template";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
@@ -45,33 +46,6 @@ interface ReportRow {
   pdf_path: string | null;
 }
 
-interface ReferralResponseRow {
-  id: string;
-  lead_id: string;
-  name: string;
-  phone: string;
-  email: string;
-  age: string | null;
-  state: string | null;
-  super_balance: string | null;
-  super_fund_name: string | null;
-  had_review_before: boolean | null;
-  created_at: string;
-}
-
-interface ReferralLeadRow {
-  id: string;
-  referrer_name: string;
-  referrer_email: string;
-  lead_name: string;
-  lead_phone: string;
-  lead_email: string;
-  status: string;
-  created_at: string;
-  token: string;
-  submission_id: string | null;
-}
-
 export default function Admin() {
   const nav = useNavigate();
   const { profile, loading } = useAuth();
@@ -84,10 +58,6 @@ export default function Admin() {
   const [pdfBusyId, setPdfBusyId] = useState<string | null>(null);
   const pdfStageRef = useRef<HTMLDivElement>(null);
   const [pdfStageInputs, setPdfStageInputs] = useState<ClientInputs | null>(null);
-  const [referralResponses, setReferralResponses] = useState<ReferralResponseRow[]>([]);
-  const [referralLeads, setReferralLeads] = useState<ReferralLeadRow[]>([]);
-  const [referralSearch, setReferralSearch] = useState("");
-  const [referrerFilter, setReferrerFilter] = useState("");
 
   // Resolve a usable inputs object — fall back to defaults so demo rows still
   // render a complete-looking report.
@@ -111,18 +81,14 @@ export default function Admin() {
 
   const refresh = async () => {
     setBusy(true);
-    const [{ data: u }, { data: l }, { data: r }, { data: rr }, { data: rl }] = await Promise.all([
+    const [{ data: u }, { data: l }, { data: r }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("activity_log").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(500),
-      supabase.from("referral_responses").select("*").order("created_at", { ascending: false }),
-      supabase.from("referral_leads").select("*").order("created_at", { ascending: false }),
     ]);
     setUsers((u as ProfileRow[]) || []);
     setLogs((l as LogRow[]) || []);
     setReports((r as ReportRow[]) || []);
-    setReferralResponses((rr as ReferralResponseRow[]) || []);
-    setReferralLeads((rl as ReferralLeadRow[]) || []);
     setBusy(false);
   };
 
@@ -395,23 +361,17 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary/40">
-      <header className="sticky top-0 z-40 bg-navy text-navy-foreground shadow-elevated">
-        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="text-navy-foreground hover:bg-white/10" onClick={() => nav("/")}>
-              <ArrowLeft className="w-4 h-4 mr-1" /> Back
-            </Button>
-            <span className="px-2.5 py-1 rounded-md bg-cyan text-cyan-foreground text-[10px] font-bold tracking-wide">Admin</span>
-            <span className="text-xs font-semibold opacity-70">Owner Control Panel</span>
+    <CRMLayout>
+      <div className="max-w-6xl mx-auto px-6 py-6 space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold font-heading text-navy">Admin</h1>
+            <p className="text-sm text-muted-foreground">Owner Control Panel</p>
           </div>
           <Button size="sm" onClick={refresh} disabled={busy} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
             <RefreshCw className={`w-4 h-4 mr-1 ${busy ? "animate-spin" : ""}`} /> Refresh
           </Button>
         </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-6 py-6 space-y-8">
         <section className="bg-white rounded-xl shadow-elevated p-6">
           <h2 className="text-lg font-bold font-heading text-navy mb-4">Users ({users.length})</h2>
           <div className="overflow-x-auto">
@@ -524,162 +484,6 @@ export default function Admin() {
           </div>
         </section>
 
-        {/* ---- Referrals Section ---- */}
-        <section className="bg-white rounded-xl shadow-elevated p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan to-[hsl(170_80%_35%)] flex items-center justify-center">
-                <Gift className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold font-heading text-navy">Referrals ({referralResponses.length})</h2>
-                <p className="text-xs text-muted-foreground">People who filled out referral forms</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-              <div className="relative w-full sm:w-56">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={referralSearch}
-                  onChange={e => setReferralSearch(e.target.value)}
-                  placeholder="Search referrals..."
-                  className="pl-9"
-                />
-              </div>
-               <div className="relative w-full sm:w-56">
-                 <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                 <Input
-                   value={referrerFilter}
-                   onChange={e => setReferrerFilter(e.target.value)}
-                   placeholder="Filter by referrer..."
-                   className="pl-9"
-                 />
-               </div>
-            </div>
-          </div>
-
-          {(() => {
-            const leadMap = new Map(referralLeads.map(l => [l.id, l]));
-            const referrerCounts = new Map<string, number>();
-            referralResponses.forEach(r => {
-              const lead = leadMap.get(r.lead_id);
-              if (lead) {
-                const key = lead.referrer_email.toLowerCase();
-                referrerCounts.set(key, (referrerCounts.get(key) || 0) + 1);
-              }
-            });
-
-            const q = referralSearch.trim().toLowerCase();
-            const filtered = referralResponses.filter(r => {
-              const lead = leadMap.get(r.lead_id);
-              const matchesSearch = !q || (
-                r.name.toLowerCase().includes(q) ||
-                r.email.toLowerCase().includes(q) ||
-                r.phone.includes(q) ||
-                (lead?.referrer_name ?? "").toLowerCase().includes(q) ||
-                (lead?.referrer_email ?? "").toLowerCase().includes(q)
-              );
-              const rf = referrerFilter.trim().toLowerCase();
-              const matchesReferrer = !rf || (lead?.referrer_name ?? "").toLowerCase().includes(rf) || (lead?.referrer_email ?? "").toLowerCase().includes(rf);
-              return matchesSearch && matchesReferrer;
-            });
-
-            if (filtered.length === 0) {
-              return (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Users className="w-10 h-10 mx-auto mb-3 opacity-40" />
-                  <p className="text-sm">{q || referrerFilter ? "No referrals match that filter" : "No referral responses yet"}</p>
-                </div>
-              );
-            }
-
-            return (
-              <div className="space-y-3">
-                {filtered.map(r => {
-                  const lead = leadMap.get(r.lead_id);
-                  const referrerEmail = lead?.referrer_email?.toLowerCase() ?? "";
-                  const referrerTotal = referrerCounts.get(referrerEmail) || 0;
-
-                  return (
-                    <div
-                      key={r.id}
-                      className="border border-border rounded-xl p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-white to-secondary/30"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                        {/* Avatar + Name */}
-                        <div className="flex items-center gap-3 sm:w-48 shrink-0">
-                          <div className="w-9 h-9 rounded-full bg-navy/10 flex items-center justify-center text-navy font-bold text-sm shrink-0">
-                            {r.name.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-semibold text-navy text-sm leading-tight truncate">{r.name}</p>
-                            <p className="text-[11px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-
-                        {/* Contact + Details */}
-                        <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-xs text-muted-foreground flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <Mail className="w-3.5 h-3.5 shrink-0" />
-                            <span className="truncate max-w-[180px]">{r.email}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5 shrink-0" />
-                            <span>{r.phone}</span>
-                          </div>
-                          {r.age && (
-                            <div className="flex items-center gap-1.5">
-                              <User className="w-3.5 h-3.5 shrink-0" />
-                              <span>Age: {r.age}</span>
-                            </div>
-                          )}
-                          {r.state && (
-                            <div className="flex items-center gap-1.5">
-                              <MapPin className="w-3.5 h-3.5 shrink-0" />
-                              <span>{r.state}</span>
-                            </div>
-                          )}
-                          {r.super_fund_name && (
-                            <div className="flex items-center gap-1.5">
-                              <Building className="w-3.5 h-3.5 shrink-0" />
-                              <span className="truncate max-w-[160px]">{r.super_fund_name}</span>
-                            </div>
-                          )}
-                          {r.super_balance && (
-                            <div className="flex items-center gap-1.5">
-                              <DollarSign className="w-3.5 h-3.5 shrink-0" />
-                              <span>{r.super_balance}</span>
-                            </div>
-                          )}
-                          {r.had_review_before !== null && (
-                            <div className="flex items-center gap-1.5">
-                              <CheckCircle className="w-3.5 h-3.5 shrink-0" />
-                              <span>Previous review: {r.had_review_before ? "Yes" : "No"}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Referrer info */}
-                        {lead && (
-                          <div className="flex items-center gap-3 sm:border-l sm:border-border sm:pl-4 shrink-0">
-                            <div className="min-w-0">
-                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Referred by</p>
-                              <p className="text-xs font-semibold text-navy truncate">{lead.referrer_name}</p>
-                              <p className="text-[11px] text-muted-foreground truncate">{lead.referrer_email}</p>
-                            </div>
-                            <span className="px-2.5 py-1 rounded-full bg-cyan/15 text-cyan text-[11px] font-bold whitespace-nowrap">
-                              {referrerTotal} referral{referrerTotal !== 1 ? "s" : ""}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })()}
-        </section>
 
         <section className="bg-white rounded-xl shadow-elevated p-6">
           <div className="flex items-center justify-between mb-4">
@@ -720,7 +524,7 @@ export default function Admin() {
             </table>
           </div>
         </section>
-      </main>
+      </div>
 
       {/* ---- Email compose dialog ---- */}
       {emailDialog.open && (
@@ -799,8 +603,6 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Offscreen stage used to render a saved report into a PDF without
-          showing it to the user. */}
       {pdfStageInputs && (() => {
         const summary = buildSummary(pdfStageInputs);
         return (
@@ -821,6 +623,6 @@ export default function Admin() {
           </div>
         );
       })()}
-    </div>
+    </CRMLayout>
   );
 }

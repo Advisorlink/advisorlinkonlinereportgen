@@ -1,5 +1,4 @@
 import { useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ClientForm } from "@/components/ClientForm";
 import { CoverPage, WhoWeArePage, SnapshotPage, FundsPage, ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage } from "@/components/report/pages";
@@ -8,12 +7,12 @@ import { importFromFile } from "@/lib/xlsx-import";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { supabase } from "@/integrations/supabase/client";
-import { Settings, LogOut, Maximize2 } from "lucide-react";
+import { Maximize2 } from "lucide-react";
 import { toast } from "sonner";
+import { CRMLayout } from "@/components/CRMLayout";
 
 export default function Index() {
-  const nav = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { inputs, setInputs } = useClientInputs();
   const summary = useMemo(() => buildSummary(inputs), [inputs]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -194,60 +193,49 @@ export default function Index() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-secondary/40">
-      {/* Top bar */}
-      <header className="no-print sticky top-0 z-40 bg-navy text-navy-foreground shadow-elevated">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="px-2.5 py-1 rounded-md bg-cyan text-cyan-foreground text-[10px] font-bold tracking-wide">
-              Advisor Link
-            </span>
-            <span className="text-xs font-semibold opacity-70">Super Performance Report Builder</span>
+    <CRMLayout>
+      <div className="h-[calc(100vh-48px)] overflow-hidden">
+        <div className="no-print px-4 py-2 flex items-center justify-between bg-white border-b border-border">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-navy">Report Generator</span>
           </div>
           <div className="flex items-center gap-2">
             <input
               ref={fileRef} type="file" accept=".xlsx,.xls" className="hidden"
               onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.currentTarget.value = ""; }}
             />
-            <Button variant="outline" className="bg-transparent text-navy-foreground border-white/20 hover:bg-white/10" onClick={() => fileRef.current?.click()}>
+            <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
               Upload XLSX
             </Button>
-            <Button onClick={exportPDF} disabled={exporting} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
+            <Button size="sm" onClick={exportPDF} disabled={exporting} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
               {exporting ? "Exporting…" : "Download PDF"}
             </Button>
-            <Button variant="outline" size="icon" className="bg-transparent text-navy-foreground border-white/20 hover:bg-white/10" onClick={openFullScreen} title="Full screen (actual size)">
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={openFullScreen} title="Full screen">
               <Maximize2 className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="icon" className="bg-transparent text-navy-foreground border-white/20 hover:bg-white/10" onClick={() => nav("/admin")} title="Admin">
-              <Settings className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="icon" className="bg-transparent text-navy-foreground border-white/20 hover:bg-white/10" onClick={signOut} title="Sign out">
-              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
-      </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-6 grid h-[calc(100vh-64px)] grid-cols-1 grid-rows-[minmax(280px,42vh)_1fr] gap-6 overflow-hidden lg:grid-cols-[420px_1fr] lg:grid-rows-1">
-        <aside className="no-print min-h-0 overflow-y-auto pr-2 pb-6">
-          <ClientForm value={inputs} onChange={setInputs} />
-          <p className="mt-3 text-[11px] text-muted-foreground">
-            Tip: edits update the report instantly. Use <strong>Upload XLSX</strong> to load a saved
-            Client Data sheet, then download the PDF when you're happy.
-          </p>
-        </aside>
-        <section ref={reportRef} className="min-h-0 space-y-0 overflow-y-auto pb-6">
-          <CoverPage s={summary} />
-          <WhoWeArePage s={summary} />
-          <SnapshotPage s={summary} />
-          <ProjectionPage s={summary} />
-          <FundsPage s={summary} />
-          <IncomePage s={summary} />
-          <ImprovementSummaryPage s={summary} />
-          <WhatsNextPage s={summary} />
-          
-        </section>
-      </main>
-    </div>
+        <div className="px-6 py-4 grid h-[calc(100vh-48px-52px)] grid-cols-1 grid-rows-[minmax(280px,42vh)_1fr] gap-6 overflow-hidden lg:grid-cols-[420px_1fr] lg:grid-rows-1">
+          <aside className="no-print min-h-0 overflow-y-auto pr-2 pb-6">
+            <ClientForm value={inputs} onChange={setInputs} />
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              Tip: edits update the report instantly. Use <strong>Upload XLSX</strong> to load a saved
+              Client Data sheet, then download the PDF when you're happy.
+            </p>
+          </aside>
+          <section ref={reportRef} className="min-h-0 space-y-0 overflow-y-auto pb-6">
+            <CoverPage s={summary} />
+            <WhoWeArePage s={summary} />
+            <SnapshotPage s={summary} />
+            <ProjectionPage s={summary} />
+            <FundsPage s={summary} />
+            <IncomePage s={summary} />
+            <ImprovementSummaryPage s={summary} />
+            <WhatsNextPage s={summary} />
+          </section>
+        </div>
+      </div>
+    </CRMLayout>
   );
 }
