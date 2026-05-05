@@ -110,7 +110,7 @@ export default function ReferralLanding() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#f0f9f7] to-[#e8f4f8] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#f0f4f9] to-[#e8eff8] flex items-center justify-center">
         <div className="animate-pulse text-[#1E88E5] text-lg">Loading...</div>
       </div>
     );
@@ -118,7 +118,7 @@ export default function ReferralLanding() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#f0f9f7] to-[#e8f4f8] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#f0f4f9] to-[#e8eff8] flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-10 text-center">
           <div className="w-20 h-20 bg-[#1E88E5]/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-10 h-10 text-[#1E88E5]" />
@@ -140,7 +140,7 @@ export default function ReferralLanding() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f0f9f7] to-[#e8f4f8]">
+    <div className="min-h-screen bg-gradient-to-br from-[#f0f4f9] to-[#e8eff8]">
       {/* Header */}
       <div className="bg-white border-b border-[#e8e8ee]">
         <div className="max-w-2xl mx-auto px-4 py-6 flex items-center gap-4">

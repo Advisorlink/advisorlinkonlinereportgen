@@ -93,7 +93,7 @@ export default function ReferralForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#f4f7f6] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#f0f4f9] flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-8 sm:p-12 text-center border border-[#e5e9e8]">
           <div className="w-16 h-16 bg-[#1E88E5]/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-8 h-8 text-[#1E88E5]" />
@@ -115,7 +115,7 @@ export default function ReferralForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7f6]">
+    <div className="min-h-screen bg-[#f0f4f9]">
       {/* Compact Header */}
       <header className="bg-white border-b border-[#e5e9e8]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4">
@@ -149,7 +149,7 @@ export default function ReferralForm() {
 
             <div className="grid gap-3">
               {/* Step 1 */}
-              <div className="flex items-start gap-3 sm:gap-4 bg-[#f4f7f6] rounded-xl p-4">
+              <div className="flex items-start gap-3 sm:gap-4 bg-[#f0f4f9] rounded-xl p-4">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1E88E5]/10 flex items-center justify-center flex-shrink-0">
                   <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-[#1E88E5]" />
                 </div>
@@ -159,7 +159,7 @@ export default function ReferralForm() {
               </div>
 
               {/* Step 2 */}
-              <div className="flex items-start gap-3 sm:gap-4 bg-[#f4f7f6] rounded-xl p-4">
+              <div className="flex items-start gap-3 sm:gap-4 bg-[#f0f4f9] rounded-xl p-4">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1E88E5]/10 flex items-center justify-center flex-shrink-0">
                   <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#1E88E5]" />
                 </div>
