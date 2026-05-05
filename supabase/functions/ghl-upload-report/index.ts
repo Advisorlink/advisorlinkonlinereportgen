@@ -84,6 +84,7 @@ Deno.serve(async (req) => {
       }, 200);
     }
     const fieldId = await resolveDocumentsFieldId(apiKey, locationId, contactId, configuredDocumentsFieldKey);
+    console.log("[ghl-upload] Resolved field ID:", fieldId, "configured key:", configuredDocumentsFieldKey);
     if (!fieldId) {
       return json({
         skipped: true,
