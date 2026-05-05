@@ -109,8 +109,11 @@ Deno.serve(async (req) => {
       customSubject?: string;
     };
 
-    if (!recipientEmail || !pdfBase64 || !fileName) {
-      return json({ error: "Missing recipientEmail, pdfBase64, or fileName" }, 400);
+    if (!recipientEmail) {
+      return json({ error: "Missing recipientEmail" }, 400);
+    }
+    if (!isHtml && (!pdfBase64 || !fileName)) {
+      return json({ error: "Missing pdfBase64 or fileName" }, 400);
     }
 
     const name = (clientName ?? "").trim() || "there";
