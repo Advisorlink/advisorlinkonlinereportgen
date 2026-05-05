@@ -116,7 +116,7 @@ export function ESignPdfEditor({ file, clientName, clientEmail, clientPhone, cli
 
       const filledBytes = await pdfDoc.save();
       setPdfBytes(filledBytes);
-      const blob = new Blob([filledBytes], { type: "application/pdf" });
+      const blob = new Blob([filledBytes as BlobPart], { type: "application/pdf" });
       setPreviewUrl(URL.createObjectURL(blob));
 
       setLoading(false);
@@ -125,7 +125,7 @@ export function ESignPdfEditor({ file, clientName, clientEmail, clientPhone, cli
       // No form fields found — just show the PDF as-is
       const arrayBuffer = await file.arrayBuffer();
       setPdfBytes(new Uint8Array(arrayBuffer));
-      const blob = new Blob([arrayBuffer], { type: "application/pdf" });
+      const blob = new Blob([arrayBuffer as BlobPart], { type: "application/pdf" });
       setPreviewUrl(URL.createObjectURL(blob));
       setFields([]);
       setLoading(false);
@@ -156,7 +156,7 @@ export function ESignPdfEditor({ file, clientName, clientEmail, clientPhone, cli
       setPdfBytes(filledBytes);
 
       if (previewUrl) URL.revokeObjectURL(previewUrl);
-      const blob = new Blob([filledBytes], { type: "application/pdf" });
+      const blob = new Blob([filledBytes as BlobPart], { type: "application/pdf" });
       setPreviewUrl(URL.createObjectURL(blob));
 
       toast.success("Preview updated!");
