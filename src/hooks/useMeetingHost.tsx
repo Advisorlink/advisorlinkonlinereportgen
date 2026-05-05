@@ -212,9 +212,10 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
   const startMeeting = useCallback(async (report: StartMeetingInput) => {
     if (!profile?.id) return false;
 
+    const isGuest = report.id.startsWith("guest-");
     const { data, error } = await supabase.from("meetings").insert({
       host_user_id: profile.id,
-      report_id: report.id,
+      report_id: isGuest ? null : report.id,
       client_name: report.client_name,
       client_email: report.email,
       status: "waiting",
