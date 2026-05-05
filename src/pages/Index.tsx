@@ -14,11 +14,20 @@ import { CRMLayout } from "@/components/CRMLayout";
 
 export default function Index() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { inputs, setInputs } = useClientInputs();
   const summary = useMemo(() => buildSummary(inputs), [inputs]);
   const fileRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+
+  const presentationState = location.state as { fromPresentation?: boolean; pausedSlide?: number } | null;
+  const isFromPresentation = presentationState?.fromPresentation === true;
+
+  const handleResumePresentation = () => {
+    navigate("/presentations", { state: { resumeSlide: presentationState?.pausedSlide ?? 0 } });
+  };
 
   const handleUpload = async (file: File) => {
     try {
