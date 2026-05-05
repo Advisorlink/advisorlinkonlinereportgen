@@ -86,6 +86,16 @@ export default function Presentations() {
     };
   }, []);
 
+  // Clean up stale meetings (older than 24h still showing active/waiting)
+  const cleanStaleMeetings = async () => {
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    await supabase
+      .from("meetings")
+      .update({ status: "ended", ended_at: new Date().toISOString() } as never)
+      .in("status", ["waiting", "active"])
+      .lt("created_at", cutoff);
+  };
+
   const loadData = async () => {
     const [{ data: r }, { data: m }] = await Promise.all([
       supabase.from("reports").select("id, client_name, email, created_at").order("created_at", { ascending: false }),
