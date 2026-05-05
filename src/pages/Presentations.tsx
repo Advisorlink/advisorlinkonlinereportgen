@@ -58,6 +58,7 @@ export default function Presentations() {
   const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const hostPreviewRef = useRef<HTMLVideoElement>(null);
+  const [showSlideshow, setShowSlideshow] = useState(false);
 
   const loadData = async () => {
     const [{ data: r }, { data: m }] = await Promise.all([
