@@ -68,8 +68,10 @@ Deno.serve(async (req) => {
     }
 
     if (!contactId) {
+      console.log("[ghl-upload] No contact found for", email);
       return json({ skipped: true, reason: "no_contact" }, 200);
     }
+    console.log("[ghl-upload] Contact found:", contactId);
 
     // 2) Decode base64 → blob and upload into the contact's Documents/File Upload custom field.
     // GHL powers the contact "Documents" area with a File Upload custom field, not conversation attachments.
