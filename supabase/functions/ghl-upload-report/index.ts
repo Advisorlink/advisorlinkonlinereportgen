@@ -163,26 +163,17 @@ function json(data: unknown, status = 200) {
 }
 
 async function resolveDocumentsFieldId(apiKey: string, locationId: string, contactId: string, configuredKey?: string): Promise<string | null> {
-  const res = await fetch(`${GHL_API}/locations/${encodeURIComponent(locationId)}/customFields`, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      Version: "2023-02-21",
-      Accept: "application/json",
-    },
-  });
-
-  if (!res.ok) return await findExistingContactFileFieldId(apiKey, contactId);
-  const data = await res.json().catch(() => ({}));
-  const fields = Array.isArray(data?.customFields) ? data.customFields : Array.isArray(data) ? data : [];
-  const normalizedConfiguredKey = normalizeFieldKey(configuredKey);
+  const fields = await getLocationCustomFields(apiKey, locationId);
+  const rawConfiguredKey = cleanConfiguredFieldKey(configuredKey);
+  const normalizedConfiguredKey = normalizeFieldKey(rawConfiguredKey);
   if (normalizedConfiguredKey) {
     const configuredField = fields.find((field: Record<string, unknown>) => {
-      const keys = [field.id, field.fieldKey, field.key, field.uniqueKey]
+      const keys = [field.id, field.fieldKey, field.key, field.uniqueKey, field.name, field.label, field.fieldName]
         .map((value) => normalizeFieldKey(String(value ?? "")));
       return keys.includes(normalizedConfiguredKey);
     });
     if (configuredField?.id) return String(configuredField.id);
-    if (/^[A-Za-z0-9]{12,}$/.test(normalizedConfiguredKey)) return normalizedConfiguredKey;
+    if (/^[A-Za-z0-9]{12,}$/.test(rawConfiguredKey)) return rawConfiguredKey;
   }
 
   const fileFields = fields.filter((field: Record<string, unknown>) => {
@@ -194,7 +185,33 @@ async function resolveDocumentsFieldId(apiKey: string, locationId: string, conta
     return name.includes("document") || name.includes("review") || name.includes("super health");
   }) ?? fileFields[0];
 
-  return String(docsField?.id ?? "") || await findExistingContactFileFieldId(apiKey, contactId);
+  const existingFieldId = String(docsField?.id ?? "") || await findExistingContactFileFieldId(apiKey, contactId);
+  if (existingFieldId) return existingFieldId;
+
+  return await createDocumentsField(apiKey, locationId);
+}
+
+async function getLocationCustomFields(apiKey: string, locationId: string): Promise<Record<string, unknown>[]> {
+  const fieldsById = new Map<string, Record<string, unknown>>();
+  for (const suffix of ["?model=contact", "?model=all", ""]) {
+    const res = await fetch(`${GHL_API}/locations/${encodeURIComponent(locationId)}/customFields${suffix}`, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Version: "2023-02-21",
+        Accept: "application/json",
+      },
+    });
+
+    console.log("[ghl-upload] Custom fields lookup", suffix || "default", "status:", res.status);
+    if (!res.ok) continue;
+    const data = await res.json().catch(() => ({}));
+    const fields = Array.isArray(data?.customFields) ? data.customFields : Array.isArray(data) ? data : [];
+    for (const field of fields) {
+      const id = String(field?.id ?? crypto.randomUUID());
+      fieldsById.set(id, field);
+    }
+  }
+  return [...fieldsById.values()];
 }
 
 async function findExistingContactFileFieldId(apiKey: string, contactId: string): Promise<string | null> {
@@ -216,12 +233,46 @@ async function findExistingContactFileFieldId(apiKey: string, contactId: string)
   return String(fileField?.id ?? "") || null;
 }
 
+async function createDocumentsField(apiKey: string, locationId: string): Promise<string | null> {
+  const res = await fetch(`${GHL_API}/locations/${encodeURIComponent(locationId)}/customFields`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Version: "2023-02-21",
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      name: "Documents",
+      dataType: "FILE_UPLOAD",
+      placeholder: "Upload client documents",
+      acceptedFormat: [".pdf"],
+      isMultipleFile: true,
+      maxNumberOfFiles: 10,
+      model: "contact",
+    }),
+  });
+
+  const text = await res.text().catch(() => "");
+  console.log("[ghl-upload] Create Documents field status:", res.status, text.slice(0, 300));
+  if (!res.ok) return null;
+  const data = text ? JSON.parse(text) : {};
+  return String(data?.customField?.id ?? data?.id ?? "") || null;
+}
+
 function normalizeFieldKey(value?: string): string {
-  return String(value ?? "")
-    .replace(/[{}]/g, "")
+  return cleanConfiguredFieldKey(value)
     .replace(/^contact\./i, "")
     .trim()
     .toLowerCase();
+}
+
+function cleanConfiguredFieldKey(value?: string): string {
+  return String(value ?? "")
+    .replace(/[{}]/g, "")
+    .trim()
+    .replace(/^['"]|['"]$/g, "")
+    .trim();
 }
 
 function extractUploadedFileUrl(data: unknown, fileName: string, fieldId: string): string | null {

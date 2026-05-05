@@ -157,9 +157,11 @@ export default function Index() {
             if (ghlErr) throw ghlErr;
             if (ghl?.skipped) {
               toast.warning("Go High Level upload skipped", {
-                description: ghl.reason === "file_too_large"
+                description: ghl.message || (ghl.reason === "file_too_large"
                   ? "The CRM copy is still over Go High Level's file limit."
-                  : `No GHL contact found for ${clientEmail}.`,
+                  : ghl.reason === "no_contact"
+                    ? `No Go High Level contact found for ${clientEmail}.`
+                    : "Go High Level could not attach the PDF to this contact."),
               });
             } else if (ghl?.success) {
               toast.success("Uploaded to Go High Level contact");
