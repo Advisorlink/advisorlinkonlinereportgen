@@ -523,6 +523,149 @@ export default function Admin() {
           </div>
         </section>
 
+        {/* ---- Referrals Section ---- */}
+        <section className="bg-white rounded-xl shadow-elevated p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan to-[hsl(170_80%_35%)] flex items-center justify-center">
+                <Gift className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold font-heading text-navy">Referrals ({referralResponses.length})</h2>
+                <p className="text-xs text-muted-foreground">People who filled out referral forms</p>
+              </div>
+            </div>
+            <div className="relative w-full sm:w-72">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={referralSearch}
+                onChange={e => setReferralSearch(e.target.value)}
+                placeholder="Search referrals…"
+                className="pl-9"
+              />
+            </div>
+          </div>
+
+          {(() => {
+            const leadMap = new Map(referralLeads.map(l => [l.id, l]));
+            const referrerCounts = new Map<string, number>();
+            referralResponses.forEach(r => {
+              const lead = leadMap.get(r.lead_id);
+              if (lead) {
+                const key = lead.referrer_email.toLowerCase();
+                referrerCounts.set(key, (referrerCounts.get(key) || 0) + 1);
+              }
+            });
+
+            const q = referralSearch.trim().toLowerCase();
+            const filtered = referralResponses.filter(r => {
+              if (!q) return true;
+              const lead = leadMap.get(r.lead_id);
+              return (
+                r.name.toLowerCase().includes(q) ||
+                r.email.toLowerCase().includes(q) ||
+                r.phone.includes(q) ||
+                (lead?.referrer_name ?? "").toLowerCase().includes(q) ||
+                (lead?.referrer_email ?? "").toLowerCase().includes(q)
+              );
+            });
+
+            if (filtered.length === 0) {
+              return (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Users className="w-10 h-10 mx-auto mb-3 opacity-40" />
+                  <p className="text-sm">{q ? "No referrals match that search" : "No referral responses yet"}</p>
+                </div>
+              );
+            }
+
+            return (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map(r => {
+                  const lead = leadMap.get(r.lead_id);
+                  const referrerEmail = lead?.referrer_email?.toLowerCase() ?? "";
+                  const referrerTotal = referrerCounts.get(referrerEmail) || 0;
+
+                  return (
+                    <div
+                      key={r.id}
+                      className="border border-border rounded-xl p-4 hover:shadow-md transition-shadow bg-gradient-to-br from-white to-secondary/30"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-full bg-navy/10 flex items-center justify-center text-navy font-bold text-sm">
+                            {r.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-navy text-sm leading-tight">{r.name}</p>
+                            <p className="text-[11px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 text-xs mb-4">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Mail className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate">{r.email}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="w-3.5 h-3.5 shrink-0" />
+                          <span>{r.phone}</span>
+                        </div>
+                        {r.age && (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <User className="w-3.5 h-3.5 shrink-0" />
+                            <span>Age: {r.age}</span>
+                          </div>
+                        )}
+                        {r.state && (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <MapPin className="w-3.5 h-3.5 shrink-0" />
+                            <span>{r.state}</span>
+                          </div>
+                        )}
+                        {r.super_fund_name && (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Building className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">{r.super_fund_name}</span>
+                          </div>
+                        )}
+                        {r.super_balance && (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <DollarSign className="w-3.5 h-3.5 shrink-0" />
+                            <span>Balance: {r.super_balance}</span>
+                          </div>
+                        )}
+                        {r.had_review_before !== null && (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <CheckCircle className="w-3.5 h-3.5 shrink-0" />
+                            <span>Previous review: {r.had_review_before ? "Yes" : "No"}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {lead && (
+                        <div className="border-t border-border pt-3">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Referred by</p>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-xs font-semibold text-navy">{lead.referrer_name}</p>
+                              <p className="text-[11px] text-muted-foreground">{lead.referrer_email}</p>
+                            </div>
+                            <span className="px-2.5 py-1 rounded-full bg-cyan/15 text-cyan text-[11px] font-bold whitespace-nowrap">
+                              {referrerTotal} referral{referrerTotal !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+        </section>
+
         <section className="bg-white rounded-xl shadow-elevated p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold font-heading text-navy">Activity Log ({logs.length})</h2>
