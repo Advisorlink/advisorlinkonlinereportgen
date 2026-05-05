@@ -64,12 +64,12 @@ export default function ReferralLanding() {
       setLoading(false);
       return;
     }
-    supabase
-      .from("referral_leads")
+    (supabase
+      .from("referral_leads" as any)
       .select("*")
       .eq("token", token)
-      .single()
-      .then(({ data, error }) => {
+      .single() as any)
+      .then(({ data, error }: any) => {
         if (data) {
           setLead(data);
           setName(data.lead_name || "");
