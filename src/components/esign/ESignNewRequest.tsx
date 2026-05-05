@@ -323,7 +323,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
-      {/* Step 4: Edit PDF */}
+      {/* Step 2: Edit PDF */}
       {step === "edit-pdf" && file && (
         <ESignPdfEditor
           file={file}
@@ -331,10 +331,10 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           clientEmail={clientEmail}
           clientPhone={clientPhone}
           clientAddress={clientAddress}
-          onBack={() => setStep("fill-details")}
+          onBack={() => setStep("upload")}
           onContinue={(edited) => {
             setEditedFile(edited);
-            handleProceedToConfirm();
+            setStep("select-client");
           }}
         />
       )}
