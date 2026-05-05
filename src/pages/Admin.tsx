@@ -206,10 +206,10 @@ export default function Admin() {
     const firstName = getFirstName(r.client_name);
     const inputs = resolveInputs(r);
     const summary = buildSummary(inputs);
-    const potentialExtra = summary.potentialExtra != null
-      ? `$${Math.round(summary.potentialExtra).toLocaleString()}`
+    const potentialExtra = summary.potentialUplift != null
+      ? `$${Math.round(summary.potentialUplift).toLocaleString()}`
       : "(Potential Extra Amount)";
-    const retirementAge = inputs.targetRetirementAge ?? "(Target Retirement Age)";
+    const retirementAge = inputs.retirementAge ?? "(Target Retirement Age)";
 
     switch (templateKey) {
       case "follow-up":
