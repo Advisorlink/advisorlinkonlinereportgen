@@ -27,6 +27,8 @@ interface MeetingHostContextValue {
   recording: boolean;
   meetingJoinUrl: string;
   meetingVersion: number;
+  pausedSlide: number | null;
+  setPausedSlide: (slide: number | null) => void;
   startMeeting: (report: StartMeetingInput) => Promise<boolean>;
   startScreenShare: () => Promise<void>;
   stopScreenShare: () => void;
