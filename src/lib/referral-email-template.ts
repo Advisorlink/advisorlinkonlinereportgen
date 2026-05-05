@@ -110,7 +110,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
           </td>
           <td style="vertical-align:top;">
             <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:${darkText};">Give us permission to mention you</p>
-            <p style="margin:0;font-size:14px;color:${bodyText};line-height:22px;">That's literally it — let us say you referred them, and the <strong style="color:${darkText};">$50 is all yours</strong>.</p>
+            <p style="margin:0;font-size:14px;color:${bodyText};line-height:22px;">That's literally it — let us say you referred them, and the <strong style="color:${darkText};">$100 is all yours</strong>.</p>
           </td>
         </tr></table>
       </td></tr>
