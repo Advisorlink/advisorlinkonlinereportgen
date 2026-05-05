@@ -257,7 +257,7 @@ export default function Admin() {
     setEmailDialog(prev => ({
       ...prev,
       body: getTemplateBody(templateKey, prev.report!),
-      subject: isReferral ? "Get a $50 Gift Card - Referral Offer" : "Super Performance Report",
+      subject: isReferral ? "Get a $100 Gift Card - Referral Offer" : "Super Performance Report",
       htmlBody: isReferral ? buildReferralEmailHtml(firstName) : undefined,
       isHtml: isReferral,
     }));
