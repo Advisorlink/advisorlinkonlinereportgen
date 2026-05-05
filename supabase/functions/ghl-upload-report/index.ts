@@ -13,6 +13,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    console.log("[ghl-upload] Request received", req.method);
     const apiKey = Deno.env.get("GHL_API_KEY");
     const locationId = Deno.env.get("GHL_LOCATION_ID");
     const configuredDocumentsFieldKey = Deno.env.get("GHL_DOCUMENTS_FIELD_KEY");
