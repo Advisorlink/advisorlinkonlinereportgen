@@ -43,7 +43,7 @@ export default function Admin() {
   const { profile, loading } = useAuth();
   const { setInputs } = useClientInputs();
   const [users, setUsers] = useState<ProfileRow[]>([]);
-  const [logs, setLogs] = useState<LogRow[]>([]);
+  
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportSearch, setReportSearch] = useState("");
   const [busy, setBusy] = useState(false);
