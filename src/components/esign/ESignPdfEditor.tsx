@@ -66,6 +66,7 @@ export function ESignPdfEditor({
   clientEmail,
   clientPhone,
   clientAddress,
+  clientDob,
   onBack,
   onContinue,
 }: Props) {
