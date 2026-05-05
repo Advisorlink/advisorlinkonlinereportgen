@@ -36,6 +36,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
+  const [clientDob, setClientDob] = useState("");
   const [clientAddress, setClientAddress] = useState("");
 
   // Confirm send
