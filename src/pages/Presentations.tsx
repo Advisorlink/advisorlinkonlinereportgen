@@ -61,11 +61,13 @@ export default function Presentations() {
     { urls: "stun:stun1.l.google.com:19302" },
   ];
 
-  // Load data + restore active meeting on mount
+  // Load data + restore active meeting + clean stale meetings on mount
   useEffect(() => {
     if (!profile?.is_owner) return;
-    loadData();
-    restoreActiveMeeting();
+    cleanStaleMeetings().then(() => {
+      loadData();
+      restoreActiveMeeting();
+    });
   }, [profile]);
 
   // Cleanup on unmount: DON'T end the meeting, just clean up local resources
