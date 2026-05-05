@@ -10,6 +10,8 @@ import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
 import Admin from "./pages/Admin.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ReferralForm from "./pages/ReferralForm.tsx";
+import ReferralLanding from "./pages/ReferralLanding.tsx";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +27,8 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/" element={<ProtectedApp><Index /></ProtectedApp>} />
               <Route path="/admin" element={<ProtectedApp><Admin /></ProtectedApp>} />
+              <Route path="/refer" element={<ReferralForm />} />
+              <Route path="/refer/claim" element={<ReferralLanding />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </ClientInputsProvider>

@@ -2,9 +2,10 @@
  * Generates a clean, mobile-first white referral email template.
  * Designed for maximum compatibility across all email clients.
  */
-export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png"): string {
+export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png", clientEmail = ""): string {
   const safeName = firstName.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
   const safeLogoUrl = logoUrl.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
+  const referralFormUrl = `https://report.advisorlinkonline.com.au/refer?name=${encodeURIComponent(firstName)}&email=${encodeURIComponent(clientEmail)}`;
 
   const teal = "#0BB5A0";
   const tealLight = "#e6f9f6";
@@ -142,6 +143,20 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
         <p style="margin:0;font-size:18px;font-weight:bold;color:${teal};letter-spacing:0;">PER REFERRAL!</p>
       </td></tr>
     </table>
+  </td></tr>
+
+  <!-- REFER NOW CTA -->
+  <tr><td class="px" style="padding:0 32px 24px;text-align:center;">
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;border-collapse:separate;">
+      <tr>
+        <td style="border-radius:14px;background: linear-gradient(135deg, ${teal}, #089e8c);">
+          <a href="${referralFormUrl}" style="display:inline-block;padding:18px 48px;color:#ffffff;font-size:20px;font-weight:bold;text-decoration:none;letter-spacing:0.5px;">
+            ✨ Refer Now &amp; Earn $50 ✨
+          </a>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:12px 0 0;font-size:13px;color:${mutedText};">Click above to submit your referrals online</p>
   </td></tr>
 
   <!-- CONTACT -->

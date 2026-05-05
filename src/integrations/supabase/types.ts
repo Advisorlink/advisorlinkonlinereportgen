@@ -86,6 +86,130 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_leads: {
+        Row: {
+          created_at: string
+          email_sent: boolean
+          id: string
+          lead_email: string
+          lead_name: string
+          lead_phone: string
+          referrer_email: string
+          referrer_name: string
+          status: string
+          submission_id: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          email_sent?: boolean
+          id?: string
+          lead_email: string
+          lead_name: string
+          lead_phone: string
+          referrer_email: string
+          referrer_name: string
+          status?: string
+          submission_id?: string | null
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          email_sent?: boolean
+          id?: string
+          lead_email?: string
+          lead_name?: string
+          lead_phone?: string
+          referrer_email?: string
+          referrer_name?: string
+          status?: string
+          submission_id?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_leads_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "referral_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_responses: {
+        Row: {
+          age: string | null
+          created_at: string
+          email: string
+          had_review_before: boolean | null
+          id: string
+          lead_id: string
+          name: string
+          phone: string
+          state: string | null
+          super_balance: string | null
+          super_fund_name: string | null
+        }
+        Insert: {
+          age?: string | null
+          created_at?: string
+          email: string
+          had_review_before?: boolean | null
+          id?: string
+          lead_id: string
+          name: string
+          phone: string
+          state?: string | null
+          super_balance?: string | null
+          super_fund_name?: string | null
+        }
+        Update: {
+          age?: string | null
+          created_at?: string
+          email?: string
+          had_review_before?: boolean | null
+          id?: string
+          lead_id?: string
+          name?: string
+          phone?: string
+          state?: string | null
+          super_balance?: string | null
+          super_fund_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_responses_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "referral_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_submissions: {
+        Row: {
+          client_email: string
+          client_name: string
+          created_at: string
+          id: string
+          referrals: Json
+        }
+        Insert: {
+          client_email: string
+          client_name: string
+          created_at?: string
+          id?: string
+          referrals?: Json
+        }
+        Update: {
+          client_email?: string
+          client_name?: string
+          created_at?: string
+          id?: string
+          referrals?: Json
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           client_name: string
