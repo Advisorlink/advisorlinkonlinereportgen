@@ -16,7 +16,8 @@ const emptyEntry = (): ReferralEntry => ({ name: "", phone: "", email: "" });
 
 export default function ReferralForm() {
   const [params] = useSearchParams();
-  const clientName = params.get("name") || "";
+  const clientFullName = params.get("name") || "";
+  const clientFirstName = clientFullName.split(" ")[0];
   const clientEmail = params.get("email") || "";
 
   const [referrals, setReferrals] = useState<ReferralEntry[]>(
@@ -56,7 +57,7 @@ export default function ReferralForm() {
         .from("referral_submissions" as any)
         .insert({
           id: submissionId,
-          client_name: clientName,
+          client_name: clientFullName,
           client_email: clientEmail,
           referrals: filledEntries,
         } as any);
@@ -65,7 +66,7 @@ export default function ReferralForm() {
 
       const leads = filledEntries.map((r) => ({
         submission_id: submissionId,
-        referrer_name: clientName,
+        referrer_name: clientFullName,
         referrer_email: clientEmail,
         lead_name: r.name,
         lead_phone: r.phone,
@@ -99,7 +100,7 @@ export default function ReferralForm() {
             <CheckCircle className="w-8 h-8 text-[#29B6F6]" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1a1a2e] mb-3">
-            Thank You, {clientName}!
+            Thank You, {clientFirstName}!
           </h1>
           <p className="text-[#5a5a6e] text-base leading-relaxed mb-6">
             Your referrals have been submitted successfully. We'll reach out to
@@ -130,16 +131,6 @@ export default function ReferralForm() {
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Hero Card */}
         <div className="bg-white rounded-2xl border border-[#e5e9e8] shadow-sm overflow-hidden mb-6">
-          {/* Top banner */}
-          <div className="bg-[#29B6F6] px-5 sm:px-8 py-6 sm:py-8">
-            <p className="text-white/80 text-sm font-medium tracking-wide uppercase mb-1">
-              Referral Reward Program
-            </p>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white leading-snug">
-              Hey {clientName || "there"}, want to earn a{" "}
-              <span className="text-[#FFD700]">$100 Gift Card</span>?
-            </h1>
-          </div>
 
           {/* Steps */}
           <div className="px-5 sm:px-8 py-6 sm:py-8 space-y-4">
@@ -235,7 +226,7 @@ export default function ReferralForm() {
                 <AlertCircle className="w-4 h-4 text-[#b89a30] flex-shrink-0 mt-0.5" />
                 <p className="text-xs sm:text-sm text-[#5a5540] leading-relaxed">
                   By submitting, your referrals will receive an email from us letting them know
-                  <strong> {clientName || "you"}</strong> referred them, inviting them to receive
+                  <strong> {clientFirstName || "you"}</strong> referred them, inviting them to receive
                   a free Super Performance Report. Your information is handled per our privacy policy.
                 </p>
               </div>
