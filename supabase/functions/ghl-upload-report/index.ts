@@ -3,7 +3,7 @@
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const GHL_API = "https://services.leadconnectorhq.com";
@@ -13,6 +13,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    console.log("[ghl-upload] Request received", req.method);
     const apiKey = Deno.env.get("GHL_API_KEY");
     const locationId = Deno.env.get("GHL_LOCATION_ID");
     const configuredDocumentsFieldKey = Deno.env.get("GHL_DOCUMENTS_FIELD_KEY");
@@ -28,7 +29,7 @@ Deno.serve(async (req) => {
       return json({ error: "Missing email, fileName, or pdfBase64" }, 400);
     }
 
-    // 1) Lookup contact by email
+    console.log("[ghl-upload] Email:", email, "File:", fileName, "Base64 length:", pdfBase64.length);
     const lookupUrl = `${GHL_API}/contacts/search/duplicate?locationId=${encodeURIComponent(locationId)}&email=${encodeURIComponent(email)}`;
     const lookup = await fetch(lookupUrl, {
       headers: {
@@ -67,8 +68,10 @@ Deno.serve(async (req) => {
     }
 
     if (!contactId) {
+      console.log("[ghl-upload] No contact found for", email);
       return json({ skipped: true, reason: "no_contact" }, 200);
     }
+    console.log("[ghl-upload] Contact found:", contactId);
 
     // 2) Decode base64 → blob and upload into the contact's Documents/File Upload custom field.
     // GHL powers the contact "Documents" area with a File Upload custom field, not conversation attachments.
@@ -81,6 +84,7 @@ Deno.serve(async (req) => {
       }, 200);
     }
     const fieldId = await resolveDocumentsFieldId(apiKey, locationId, contactId, configuredDocumentsFieldKey);
+    console.log("[ghl-upload] Resolved field ID:", fieldId, "configured key:", configuredDocumentsFieldKey);
     if (!fieldId) {
       return json({
         skipped: true,
@@ -102,8 +106,10 @@ Deno.serve(async (req) => {
       body: fd,
     });
 
+    console.log("[ghl-upload] Upload response status:", up.status);
     if (!up.ok) {
       const t = await up.text();
+      console.log("[ghl-upload] Upload failed:", up.status, t);
       if (up.status === 401 && t.toLowerCase().includes("scope")) {
         return json({
           skipped: true,
