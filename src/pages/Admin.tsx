@@ -576,7 +576,7 @@ export default function Admin() {
                       srcDoc={emailDialog.htmlBody}
                       title="Email preview"
                       className="w-full border-0"
-                      style={{ height: "100%", pointerEvents: "none" }}
+                      style={{ height: "100%" }}
                     />
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-1">Designed HTML email preview. The gift-card template sends without the PDF attached.</p>
