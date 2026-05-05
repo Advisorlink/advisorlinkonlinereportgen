@@ -66,7 +66,7 @@ export default function ReferralForm() {
 
       // Create individual leads
       const leads = filledEntries.map((r) => ({
-        submission_id: submission.id,
+        submission_id: submissionId,
         referrer_name: clientName,
         referrer_email: clientEmail,
         lead_name: r.name,
@@ -82,7 +82,7 @@ export default function ReferralForm() {
 
       // Trigger emails to each referral
       await supabase.functions.invoke("send-referral-emails", {
-        body: { submissionId: submission.id },
+        body: { submissionId: submissionId },
       });
 
       setSubmitted(true);
