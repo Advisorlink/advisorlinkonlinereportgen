@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMeetingHost } from "@/hooks/useMeetingHost";
 import { CRMLayout } from "@/components/CRMLayout";
+import { PresentationSlideshow } from "@/components/PresentationSlideshow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Monitor, Play, Copy, StopCircle, Search, Mic, MicOff, Circle, ScreenShare, ScreenShareOff, UserCheck, UserX } from "lucide-react";
+import { Monitor, Play, Copy, StopCircle, Search, Mic, MicOff, Circle, ScreenShare, ScreenShareOff, UserCheck, UserX, Presentation } from "lucide-react";
 import {
   Dialog,
   DialogContent,
