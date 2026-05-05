@@ -36,6 +36,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
+  const [clientDob, setClientDob] = useState("");
   const [clientAddress, setClientAddress] = useState("");
 
   // Confirm send
@@ -80,6 +81,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
     setClientEmail(report.email || (inputs as any).email || "");
     setClientPhone((inputs as any).phone || (inputs as any).mobile || "");
     setClientAddress((inputs as any).address || "");
+    setClientDob((inputs as any).dob || (inputs as any).date_of_birth || "");
     setStep("fill-details");
   };
 
@@ -89,6 +91,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
     setClientName("");
     setClientEmail("");
     setClientPhone("");
+    setClientDob("");
     setClientAddress("");
     setStep("fill-details");
   };
@@ -133,6 +136,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
             email: confirmEmail,
             phone: clientPhone,
             address: clientAddress,
+            dob: clientDob,
             signing_fields: esignFields,
           },
           report_id: selectedReport?.id || null,
@@ -303,6 +307,10 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
               <Input value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="0400 000 000" />
             </div>
             <div className="space-y-2">
+              <Label>Date of Birth</Label>
+              <Input value={clientDob} onChange={(e) => setClientDob(e.target.value)} placeholder="DD/MM/YYYY" />
+            </div>
+            <div className="space-y-2">
               <Label>Address</Label>
               <Input value={clientAddress} onChange={(e) => setClientAddress(e.target.value)} placeholder="123 Main St, Sydney NSW" />
             </div>
@@ -329,6 +337,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           clientEmail={clientEmail}
           clientPhone={clientPhone}
           clientAddress={clientAddress}
+          clientDob={clientDob}
           onBack={() => setStep("fill-details")}
           onContinue={(edited, fields) => {
             setEditedFile(edited);

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, FileText, Loader2, AlertCircle, PenTool, ShieldCheck, Eraser } from "lucide-react";
 import { toast } from "sonner";
@@ -183,13 +183,27 @@ export default function ESignPublic() {
           if (!page) continue;
           const pageWidth = page.getWidth();
           const pageHeight = page.getHeight();
-          const width = field.width * pageWidth;
-          const height = field.height * pageHeight;
+          const w = field.width * pageWidth;
+          const h = field.height * pageHeight;
+          const fx = field.x * pageWidth;
+          const fy = pageHeight - field.y * pageHeight - h;
+
+          // Cover the "Sign here" box border with a white rectangle
+          page.drawRectangle({
+            x: fx - 2,
+            y: fy - 2,
+            width: w + 4,
+            height: h + 4,
+            color: rgb(1, 1, 1),
+            borderWidth: 0,
+          });
+
+          // Draw the actual signature
           page.drawImage(signatureImage, {
-            x: field.x * pageWidth + 6,
-            y: pageHeight - field.y * pageHeight - height + 4,
-            width: width - 12,
-            height: height - 8,
+            x: fx + 6,
+            y: fy + 4,
+            width: w - 12,
+            height: h - 8,
           });
         }
 
