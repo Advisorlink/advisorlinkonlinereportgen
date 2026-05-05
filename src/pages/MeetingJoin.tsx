@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Monitor, Loader2 } from "lucide-react";
+import { Maximize2, Monitor, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import logoSvg from "@/assets/logo.svg";
 import heroImg from "@/assets/meeting-hero.jpg";
@@ -15,21 +15,91 @@ const iceServers = [
 
 const SESSION_KEY = "alo_meeting_session";
 
+interface SavedMeetingSession {
+  meetingId: string;
+  clientId: string;
+}
+
+const loadSavedSession = (): SavedMeetingSession | null => {
+  if (typeof window === "undefined") return null;
+  const saved = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY);
+  if (!saved) return null;
+  try {
+    return JSON.parse(saved) as SavedMeetingSession;
+  } catch {
+    return null;
+  }
+};
+
+const persistSession = (session: SavedMeetingSession) => {
+  const value = JSON.stringify(session);
+  localStorage.setItem(SESSION_KEY, value);
+  sessionStorage.setItem(SESSION_KEY, value);
+};
+
+const clearSavedSession = () => {
+  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+};
+
 export default function MeetingJoin() {
   const [meetingId, setMeetingId] = useState("");
   const [status, setStatus] = useState<"idle" | "connecting" | "waiting" | "connected" | "ended">("idle");
   const [error, setError] = useState("");
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false);
+  const [fullscreenDismissed, setFullscreenDismissed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const viewingRef = useRef<HTMLDivElement>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const clientIdRef = useRef(crypto.randomUUID());
+  const clientIdRef = useRef<string>(crypto.randomUUID());
+  const meetingIdRef = useRef("");
+  const remoteStreamRef = useRef<MediaStream | null>(null);
+  const fullscreenDismissedRef = useRef(false);
+  const reconnectTimerRef = useRef<number | null>(null);
+  const lastJoinRequestRef = useRef(0);
 
   // Persist session so mobile users can navigate away and come back
   const saveSession = (mid: string) => {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ meetingId: mid, clientId: clientIdRef.current }));
+    meetingIdRef.current = mid;
+    persistSession({ meetingId: mid, clientId: clientIdRef.current });
   };
-  const clearSession = () => sessionStorage.removeItem(SESSION_KEY);
+  const clearSession = () => {
+    meetingIdRef.current = "";
+    clearSavedSession();
+  };
+
+  useEffect(() => {
+    fullscreenDismissedRef.current = fullscreenDismissed;
+  }, [fullscreenDismissed]);
+
+  const requestFreshOffer = useCallback((reason = "resume") => {
+    const ch = channelRef.current;
+    const mid = meetingIdRef.current;
+    if (!ch || !mid) return;
+
+    const now = Date.now();
+    if (now - lastJoinRequestRef.current < 1200) return;
+    lastJoinRequestRef.current = now;
+
+    pcRef.current?.close();
+    pcRef.current = null;
+    remoteStreamRef.current = null;
+    setRemoteStream(null);
+    setStatus("waiting");
+    ch.send({ type: "broadcast", event: "join", payload: { clientId: clientIdRef.current, reason } });
+  }, []);
+
+  const markMeetingEnded = useCallback(() => {
+    pcRef.current?.close();
+    pcRef.current = null;
+    remoteStreamRef.current = null;
+    setRemoteStream(null);
+    setShowFullscreenPrompt(false);
+    setStatus("ended");
+    clearSession();
+  }, []);
 
   const setupPeerConnection = useCallback((ch: ReturnType<typeof supabase.channel>) => {
     pcRef.current?.close();
@@ -38,15 +108,21 @@ export default function MeetingJoin() {
 
     pc.ontrack = (e) => {
       if (e.streams[0]) {
+        remoteStreamRef.current = e.streams[0];
         setRemoteStream(e.streams[0]);
         setStatus("connected");
+        if (!fullscreenDismissedRef.current) setShowFullscreenPrompt(true);
       }
     };
 
     pc.oniceconnectionstatechange = () => {
       if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed") {
         setStatus("waiting");
-        toast.info("Screen share ended. Waiting for host to share again...");
+        remoteStreamRef.current = null;
+        setRemoteStream(null);
+        if (reconnectTimerRef.current) window.clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = window.setTimeout(() => requestFreshOffer("ice-reconnect"), 900);
+        toast.info("Reconnecting to the screen share...");
       }
     };
 
@@ -57,9 +133,17 @@ export default function MeetingJoin() {
     };
 
     return pc;
-  }, []);
+  }, [requestFreshOffer]);
 
   const connectToMeeting = useCallback(async (mid: string, cid: string) => {
+    if (channelRef.current) {
+      await supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+    pcRef.current?.close();
+    pcRef.current = null;
+    meetingIdRef.current = mid;
+
     const ch = supabase.channel(`meeting:${mid}`, {
       config: {
         broadcast: { self: false },
@@ -88,9 +172,7 @@ export default function MeetingJoin() {
     });
 
     ch.on("broadcast", { event: "meeting-ended" }, () => {
-      setRemoteStream(null);
-      setStatus("ended");
-      clearSession();
+      markMeetingEnded();
       toast.info("The host has ended the meeting");
     });
 
@@ -102,7 +184,7 @@ export default function MeetingJoin() {
     });
     channelRef.current = ch;
     setStatus("waiting");
-  }, [setupPeerConnection]);
+  }, [markMeetingEnded, setupPeerConnection]);
 
   const joinMeeting = useCallback(async () => {
     const mid = meetingId.trim();
@@ -133,38 +215,79 @@ export default function MeetingJoin() {
     await connectToMeeting(mid, cid);
   }, [meetingId, connectToMeeting]);
 
+  const openFullscreen = useCallback(async () => {
+    const target = viewingRef.current;
+    const video = videoRef.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void; webkitSupportsFullscreen?: boolean }) | null;
+    try {
+      if (target?.requestFullscreen) {
+        await target.requestFullscreen();
+      } else if (video?.webkitEnterFullscreen && video.webkitSupportsFullscreen !== false) {
+        video.webkitEnterFullscreen();
+      }
+      setFullscreenDismissed(true);
+      setShowFullscreenPrompt(false);
+    } catch {
+      toast.error("Fullscreen could not be opened on this device");
+    }
+  }, []);
+
   // Restore session on mount (mobile navigation back)
   useEffect(() => {
-    const saved = sessionStorage.getItem(SESSION_KEY);
+    const saved = loadSavedSession();
     if (saved) {
-      try {
-        const { meetingId: mid, clientId: cid } = JSON.parse(saved);
-        clientIdRef.current = cid;
-        setMeetingId(mid);
-        // Check if meeting is still active
-        supabase.from("meetings").select("status").eq("meeting_id", mid).single().then(({ data }) => {
-          if (data && data.status !== "ended") {
-            connectToMeeting(mid, cid);
-          } else {
-            clearSession();
-            if (data?.status === "ended") setStatus("ended");
-          }
-        });
-      } catch { clearSession(); }
+      const { meetingId: mid, clientId: cid } = saved;
+      clientIdRef.current = cid;
+      meetingIdRef.current = mid;
+      setMeetingId(mid);
+      setStatus("connecting");
+      supabase.from("meetings").select("status").eq("meeting_id", mid).single().then(({ data }) => {
+        if (data && data.status !== "ended") {
+          connectToMeeting(mid, cid);
+        } else {
+          clearSession();
+          if (data?.status === "ended") setStatus("ended");
+          else setStatus("idle");
+        }
+      });
     }
   }, [connectToMeeting]);
 
   useEffect(() => {
-    const cid = clientIdRef.current;
     return () => {
+      if (reconnectTimerRef.current) window.clearTimeout(reconnectTimerRef.current);
       setRemoteStream(null);
       pcRef.current?.close();
       if (channelRef.current) {
-        channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId: cid } });
-        channelRef.current.unsubscribe();
+        channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId: clientIdRef.current } });
+        supabase.removeChannel(channelRef.current);
       }
     };
   }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && meetingIdRef.current && status !== "ended") {
+        supabase.from("meetings").select("status").eq("meeting_id", meetingIdRef.current).single().then(({ data }) => {
+          if (data?.status === "ended") {
+            markMeetingEnded();
+            return;
+          }
+          if (!remoteStreamRef.current || pcRef.current?.iceConnectionState === "disconnected" || pcRef.current?.iceConnectionState === "failed") {
+            requestFreshOffer("visible-resume");
+          }
+        });
+      }
+    };
+
+    window.addEventListener("pageshow", handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleVisibilityChange);
+    return () => {
+      window.removeEventListener("pageshow", handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleVisibilityChange);
+    };
+  }, [markMeetingEnded, requestFreshOffer, status]);
 
   useEffect(() => {
     if (videoRef.current && remoteStream) {
@@ -175,7 +298,7 @@ export default function MeetingJoin() {
   // ----- Connected / viewing screen share -----
   if (status === "connected") {
     return (
-      <div className="min-h-screen min-h-[100dvh] bg-black flex flex-col">
+      <div ref={viewingRef} className="min-h-screen min-h-[100dvh] bg-black flex flex-col relative">
         <header className="px-4 py-3 bg-black/80 backdrop-blur-sm flex items-center justify-between shrink-0">
           <img src={logoSvg} alt="Advisor Link Online" className="h-7 sm:h-8" />
           <span className="text-white/50 text-xs font-mono">ID: {meetingId}</span>
@@ -188,6 +311,40 @@ export default function MeetingJoin() {
             className="w-full max-h-[calc(100dvh-80px)] rounded-lg bg-black shadow-2xl object-contain"
           />
         </main>
+        {showFullscreenPrompt && (
+          <div className="fixed inset-x-3 bottom-5 z-50 mx-auto max-w-sm rounded-2xl border border-white/15 bg-black/85 p-4 text-white shadow-2xl backdrop-blur-xl sm:bottom-8">
+            <button
+              type="button"
+              aria-label="Close fullscreen prompt"
+              className="absolute right-3 top-3 rounded-full p-1 text-white/60 transition-colors hover:text-white"
+              onClick={() => {
+                setFullscreenDismissed(true);
+                setShowFullscreenPrompt(false);
+              }}
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="pr-7">
+              <p className="text-base font-semibold">Make this full screen?</p>
+              <p className="mt-1 text-sm text-white/60">This makes the shared screen easier to read on your phone.</p>
+            </div>
+            <div className="mt-4 flex gap-2">
+              <Button className="h-11 flex-1 rounded-xl" onClick={openFullscreen}>
+                <Maximize2 className="mr-2 h-4 w-4" /> Yes, full screen
+              </Button>
+              <Button
+                variant="outline"
+                className="h-11 rounded-xl border-white/15 bg-white/10 text-white hover:bg-white/15 hover:text-white"
+                onClick={() => {
+                  setFullscreenDismissed(true);
+                  setShowFullscreenPrompt(false);
+                }}
+              >
+                Not now
+              </Button>
+            </div>
+          </div>
+        )}
         <p className="text-white/30 text-[10px] text-center pb-2">You are viewing your consultant's screen</p>
       </div>
     );
