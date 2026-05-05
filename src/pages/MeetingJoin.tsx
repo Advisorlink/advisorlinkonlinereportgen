@@ -56,6 +56,7 @@ export default function MeetingJoin() {
   const clientIdRef = useRef<string>(crypto.randomUUID());
   const meetingIdRef = useRef("");
   const remoteStreamRef = useRef<MediaStream | null>(null);
+  const fullscreenDismissedRef = useRef(false);
   const reconnectTimerRef = useRef<number | null>(null);
   const lastJoinRequestRef = useRef(0);
 
@@ -68,6 +69,10 @@ export default function MeetingJoin() {
     meetingIdRef.current = "";
     clearSavedSession();
   };
+
+  useEffect(() => {
+    fullscreenDismissedRef.current = fullscreenDismissed;
+  }, [fullscreenDismissed]);
 
   const requestFreshOffer = useCallback((reason = "resume") => {
     const ch = channelRef.current;
@@ -96,7 +101,7 @@ export default function MeetingJoin() {
         remoteStreamRef.current = e.streams[0];
         setRemoteStream(e.streams[0]);
         setStatus("connected");
-        if (!fullscreenDismissed) setShowFullscreenPrompt(true);
+        if (!fullscreenDismissedRef.current) setShowFullscreenPrompt(true);
       }
     };
 
@@ -118,7 +123,7 @@ export default function MeetingJoin() {
     };
 
     return pc;
-  }, [fullscreenDismissed, requestFreshOffer]);
+  }, [requestFreshOffer]);
 
   const connectToMeeting = useCallback(async (mid: string, cid: string) => {
     if (channelRef.current) {
