@@ -109,7 +109,7 @@ export default function ReferralForm() {
             each of them with an invitation for a free Super Performance Report.
           </p>
           <p className="text-[#0BB5A0] font-semibold text-lg">
-            Your $50 gift card is on its way! 🎉
+            Your $100 gift card is on its way! 🎉
           </p>
         </div>
       </div>
