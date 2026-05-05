@@ -45,14 +45,23 @@ async function fetchSignature(lovableKey: string, gmailKey: string): Promise<str
  * so it can be sent via the Gmail API's messages/send endpoint.
  * The body is HTML so the signature (which is HTML) renders properly.
  */
+interface InlineImage {
+  cid: string;
+  contentType: string;
+  fileName: string;
+  base64: string;
+}
+
 function buildRawEmail(
   to: string,
   subject: string,
   bodyHtml: string,
   pdfBase64?: string,
   pdfFileName?: string,
+  inlineImages: InlineImage[] = [],
 ): string {
-  const boundary = `----=_Part_${crypto.randomUUID().replace(/-/g, "")}`;
+  const boundary = `----=_Mixed_${crypto.randomUUID().replace(/-/g, "")}`;
+  const relatedBoundary = `----=_Related_${crypto.randomUUID().replace(/-/g, "")}`;
   const messageParts = [
     `To: ${to}`,
     `Subject: ${subject}`,
@@ -60,12 +69,30 @@ function buildRawEmail(
     `Content-Type: multipart/mixed; boundary="${boundary}"`,
     "",
     `--${boundary}`,
-    'Content-Type: text/html; charset="UTF-8"',
+    inlineImages.length > 0 ? `Content-Type: multipart/related; boundary="${relatedBoundary}"` : 'Content-Type: text/html; charset="UTF-8"',
+    ...(inlineImages.length > 0 ? ["", `--${relatedBoundary}`, 'Content-Type: text/html; charset="UTF-8"'] : []),
     "Content-Transfer-Encoding: 8bit",
     "",
     bodyHtml,
     "",
   ];
+
+  for (const image of inlineImages) {
+    messageParts.push(
+      `--${relatedBoundary}`,
+      `Content-Type: ${image.contentType}; name="${image.fileName}"`,
+      "Content-Transfer-Encoding: base64",
+      `Content-ID: <${image.cid}>`,
+      `Content-Disposition: inline; filename="${image.fileName}"`,
+      "",
+      image.base64,
+      "",
+    );
+  }
+
+  if (inlineImages.length > 0) {
+    messageParts.push(`--${relatedBoundary}--`, "");
+  }
 
   if (pdfBase64 && pdfFileName) {
     messageParts.push(
