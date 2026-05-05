@@ -90,8 +90,8 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
             </tr></table>
           </td>
           <td style="vertical-align:top;">
-            <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:${darkText};">Send us 7 names &amp; numbers</p>
-            <p style="margin:0;font-size:14px;color:${bodyText};line-height:22px;">Share friends or family who might benefit from a free super review and you'll receive a <strong style="color:${teal};">$50 Gift Card</strong> to spend however you like.</p>
+            <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:${darkText};">Know 5 people who'd love a free report?</p>
+            <p style="margin:0;font-size:14px;color:${bodyText};line-height:22px;">Do you know 5 people that would like a free performance report like you got? Give them a call and ask if they'd like us to send them one. Get 5 and you'll receive a <strong style="color:${teal};">$100 Gift Card</strong>!</p>
           </td>
         </tr></table>
       </td></tr>
