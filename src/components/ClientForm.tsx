@@ -192,6 +192,30 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
             <Field label="Annual income"><NumInput v={value.annualIncome} on={n => set("annualIncome", n)} /></Field>
             <Field label="Target balance"><NumInput v={value.goalBalance} on={n => set("goalBalance", n)} /></Field>
           </Group>
+          <Group title="Personal contributions">
+            <Field label="Amount">
+              <NumInput v={value.personalContributionAmount ?? 0} on={n => set("personalContributionAmount", n)} />
+            </Field>
+            <Field label="Type">
+              <select
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                value={value.personalContributionType ?? "dollar"}
+                onChange={e => set("personalContributionType", e.target.value as "dollar" | "percent")}
+              >
+                <option value="dollar">$ Amount</option>
+                <option value="percent">% of Income</option>
+              </select>
+            </Field>
+            <Field label="Frequency">
+              <select
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                value={value.personalContributionFrequency ?? "Annually"}
+                onChange={e => set("personalContributionFrequency", e.target.value as IncomeFrequency)}
+              >
+                <option>Weekly</option><option>Monthly</option><option>Annually</option>
+              </select>
+            </Field>
+          </Group>
           <Group title="Desired retirement income">
             <Field label="Amount"><NumInput v={value.desiredIncomeAmount} on={n => set("desiredIncomeAmount", n)} /></Field>
             <Field label="Frequency">
