@@ -175,18 +175,18 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
 
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-8">
-        {(["upload", "select-client", "fill-details"] as Step[]).map((s, i) => (
+        {(["upload", "select-client", "fill-details", "edit-pdf"] as Step[]).map((s, i) => (
           <div key={s} className="flex items-center gap-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
               step === s ? "bg-cyan text-white" : 
-              (["upload", "select-client", "fill-details"].indexOf(step) > i ? "bg-cyan/20 text-cyan" : "bg-muted text-muted-foreground")
+              (["upload", "select-client", "fill-details", "edit-pdf"].indexOf(step) > i ? "bg-cyan/20 text-cyan" : "bg-muted text-muted-foreground")
             }`}>
               {i + 1}
             </div>
             <span className={`text-sm font-medium hidden sm:inline ${step === s ? "text-foreground" : "text-muted-foreground"}`}>
-              {s === "upload" ? "Upload" : s === "select-client" ? "Select Client" : "Details"}
+              {s === "upload" ? "Upload" : s === "select-client" ? "Client" : s === "fill-details" ? "Details" : "Review"}
             </span>
-            {i < 2 && <div className="w-8 h-px bg-border" />}
+            {i < 3 && <div className="w-8 h-px bg-border" />}
           </div>
         ))}
       </div>
