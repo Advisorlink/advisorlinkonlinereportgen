@@ -283,6 +283,14 @@ export function WhoWeArePage() {
 export function SnapshotPage({ s }: { s: ReportSummary }) {
   const i = s.inputs;
   const sgContrib = i.annualIncome * 0.12 * 0.85;
+  const personalContrib = annualPersonalContrib(i);
+  const totalContrib = sgContrib + personalContrib;
+  const hasPersonalContrib = personalContrib > 0;
+
+  const personalContribLabel = hasPersonalContrib
+    ? `${fmtMoney(i.personalContributionAmount ?? 0)} ${(i.personalContributionFrequency ?? "Annually").toLowerCase()} (${i.personalContributionType === "percent" ? "% of income" : "fixed $"})`
+    : "None";
+
   return (
     <PageShell>
       <PageHeader pageLabel="CLIENT SNAPSHOT" />
@@ -302,7 +310,12 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
         <SectionCard title="Client profile" icon="◉">
           <Row label="Name" value={i.clientName} />
           <Row label="Annual income" value={fmtMoney(i.annualIncome)} />
-          <Row label="Net super contribution (12% × 0.85)" value={fmtMoney(sgContrib)} />
+          <Row label="Employer SG contribution (12% × 0.85)" value={fmtMoney(sgContrib)} />
+          {hasPersonalContrib && (
+            <Row label="Personal contribution (annual)" value={fmtMoney(personalContrib)} />
+          )}
+          <Row label="Total annual contributions" value={fmtMoney(totalContrib)} />
+          <Row label="Personal contribution details" value={personalContribLabel} />
           <Row label="Desired retirement income" value={`${fmtMoney(i.desiredIncomeAmount)} ${i.desiredIncomeFrequency.toLowerCase()}`} />
           <Row label="Annualised desired income" value={fmtMoney(s.annualWithdrawal)} />
         </SectionCard>
@@ -320,7 +333,7 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
       <SectionCard title="Position summary" icon="✦">
         <p className="text-xs text-muted-foreground leading-relaxed">
           Based on {s.inputs.clientName.split(" ")[0]}'s current {getAllFunds(s.inputs).length > 1 ? "combined " : ""}balance of <strong className="text-navy">{fmtMoney(s.startingBalance)}</strong>{getAllFunds(s.inputs).length > 1 ? ` across ${getAllFunds(s.inputs).length} funds` : ""},
-          continued contributions of <strong className="text-navy">{fmtMoney(sgContrib)}</strong> per year and the existing fund{getAllFunds(s.inputs).length > 1 ? "s'" : "'s"} net return,
+          continued contributions of <strong className="text-navy">{fmtMoney(totalContrib)}</strong> per year{hasPersonalContrib ? ` (including ${fmtMoney(personalContrib)} personal contributions)` : ""} and the existing fund{getAllFunds(s.inputs).length > 1 ? "s'" : "'s"} net return,
           the projected balance at age {s.retirementAge} is <strong className="text-navy">{fmtMoney(s.projectedExisting)}</strong>.
           The reference target of {fmtMoney(s.goalBalance)} is included for context only.
         </p>
