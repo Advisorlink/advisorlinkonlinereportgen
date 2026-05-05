@@ -61,7 +61,7 @@ function buildRawEmail(
     "",
     `--${boundary}`,
     'Content-Type: text/html; charset="UTF-8"',
-    "Content-Transfer-Encoding: 7bit",
+    "Content-Transfer-Encoding: 8bit",
     "",
     bodyHtml,
     "",
