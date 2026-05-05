@@ -15,6 +15,7 @@ export default function MeetingJoin() {
   const [meetingId, setMeetingId] = useState("");
   const [status, setStatus] = useState<"idle" | "connecting" | "waiting" | "connected" | "ended">("idle");
   const [error, setError] = useState("");
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -28,8 +29,8 @@ export default function MeetingJoin() {
     pcRef.current = pc;
 
     pc.ontrack = (e) => {
-      if (videoRef.current && e.streams[0]) {
-        videoRef.current.srcObject = e.streams[0];
+      if (e.streams[0]) {
+        setRemoteStream(e.streams[0]);
         setStatus("connected");
       }
     };
@@ -107,6 +108,7 @@ export default function MeetingJoin() {
     });
 
     ch.on("broadcast", { event: "meeting-ended" }, () => {
+      setRemoteStream(null);
       setStatus("ended");
       toast.info("The host has ended the meeting");
     });
@@ -124,6 +126,7 @@ export default function MeetingJoin() {
   useEffect(() => {
     const clientId = clientIdRef.current;
     return () => {
+      setRemoteStream(null);
       pcRef.current?.close();
       if (channelRef.current) {
         channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId } });
@@ -131,6 +134,12 @@ export default function MeetingJoin() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (videoRef.current && remoteStream) {
+      videoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream, status]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-navy via-[hsl(215_50%_15%)] to-[hsl(215_60%_8%)] flex flex-col">
