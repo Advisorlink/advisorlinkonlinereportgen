@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMeetingHost } from "@/hooks/useMeetingHost";
+import { useClientInputs } from "@/hooks/useClientInputs";
 import { CRMLayout } from "@/components/CRMLayout";
 import { PresentationSlideshow } from "@/components/PresentationSlideshow";
 import { Button } from "@/components/ui/button";
