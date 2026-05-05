@@ -121,6 +121,14 @@ export default function MeetingJoin() {
   }, [fullscreenDismissed, requestFreshOffer]);
 
   const connectToMeeting = useCallback(async (mid: string, cid: string) => {
+    if (channelRef.current) {
+      await supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+    pcRef.current?.close();
+    pcRef.current = null;
+    meetingIdRef.current = mid;
+
     const ch = supabase.channel(`meeting:${mid}`, {
       config: {
         broadcast: { self: false },
@@ -149,6 +157,9 @@ export default function MeetingJoin() {
     });
 
     ch.on("broadcast", { event: "meeting-ended" }, () => {
+      pcRef.current?.close();
+      pcRef.current = null;
+      remoteStreamRef.current = null;
       setRemoteStream(null);
       setStatus("ended");
       clearSession();
