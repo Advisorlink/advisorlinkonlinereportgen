@@ -59,6 +59,53 @@ export type Database = {
         }
         Relationships: []
       }
+      meetings: {
+        Row: {
+          client_email: string | null
+          client_name: string
+          created_at: string
+          ended_at: string | null
+          host_user_id: string
+          id: string
+          meeting_id: string
+          report_id: string | null
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          client_email?: string | null
+          client_name: string
+          created_at?: string
+          ended_at?: string | null
+          host_user_id: string
+          id?: string
+          meeting_id?: string
+          report_id?: string | null
+          started_at?: string | null
+          status?: string
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          ended_at?: string | null
+          host_user_id?: string
+          id?: string
+          meeting_id?: string
+          report_id?: string | null
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meetings_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
