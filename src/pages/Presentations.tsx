@@ -35,6 +35,9 @@ interface MeetingRow {
 
 export default function Presentations() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { setInputs } = useClientInputs();
   const {
     activeMeeting,
     clientConnected,
@@ -62,8 +65,20 @@ export default function Presentations() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const hostPreviewRef = useRef<HTMLVideoElement>(null);
   const [showSlideshow, setShowSlideshow] = useState(false);
+  const [pausedSlide, setPausedSlide] = useState<number | null>(null);
   const [guestName, setGuestName] = useState("");
   const [showGuestInput, setShowGuestInput] = useState(false);
+
+  // Auto-resume slideshow if navigated back from report page
+  useEffect(() => {
+    const state = location.state as { resumeSlide?: number } | null;
+    if (state?.resumeSlide != null && activeMeeting) {
+      setPausedSlide(state.resumeSlide);
+      setShowSlideshow(true);
+      // Clear the state so it doesn't re-trigger
+      window.history.replaceState({}, "");
+    }
+  }, [location.state, activeMeeting]);
 
   const loadData = async () => {
     const [{ data: r }, { data: m }] = await Promise.all([
