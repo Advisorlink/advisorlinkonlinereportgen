@@ -38,6 +38,16 @@ export function PresentationSlideshow({ clientName, onClose }: Props) {
     return () => document.removeEventListener("fullscreenchange", handler);
   }, []);
 
+  // Auto-enter fullscreen on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (containerRef.current && !document.fullscreenElement) {
+        containerRef.current.requestFullscreen().catch(() => {});
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   const toggleFullscreen = async () => {
     if (!containerRef.current) return;
     if (document.fullscreenElement) {
