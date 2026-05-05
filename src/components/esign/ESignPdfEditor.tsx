@@ -80,6 +80,8 @@ export function ESignPdfEditor({
   const pdfDocRef = useRef<any>(null);
   const canvasRefs = useRef<Record<number, HTMLCanvasElement | null>>({});
 
+  const todayFormatted = new Date().toLocaleDateString("en-AU", { day: "2-digit", month: "2-digit", year: "numeric" });
+
   const clientData: Record<string, string> = {
     name: clientName,
     full_name: clientName,
@@ -96,6 +98,15 @@ export function ESignPdfEditor({
     client_address: clientAddress,
     residential_address: clientAddress,
     street: clientAddress,
+    dob: clientDob,
+    date_of_birth: clientDob,
+    dateofbirth: clientDob,
+    birth_date: clientDob,
+    birthdate: clientDob,
+    date: todayFormatted,
+    today: todayFormatted,
+    signed_date: todayFormatted,
+    current_date: todayFormatted,
   };
 
   useEffect(() => {
