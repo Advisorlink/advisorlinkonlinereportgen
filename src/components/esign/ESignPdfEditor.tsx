@@ -185,7 +185,7 @@ export function ESignPdfEditor({ file, clientName, clientEmail, clientPhone, cli
       }
 
       const filledBytes = await pdfDoc.save();
-      const editedFile = new File([filledBytes], file.name, { type: "application/pdf" });
+      const editedFile = new File([filledBytes as BlobPart], file.name, { type: "application/pdf" });
       onContinue(editedFile);
     } catch (err) {
       toast.error("Failed to prepare document");
