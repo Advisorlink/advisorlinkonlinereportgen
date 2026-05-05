@@ -49,16 +49,16 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
   </td></tr>
 
   <!-- STEP 1 -->
-  <tr><td style="background-color:#ffffff;padding:0 32px 24px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#f8faff 0%,#eef6ff 100%);border-radius:12px;border-left:4px solid #4269F6;">
-      <tr><td style="padding:24px;">
-        <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-          <td style="vertical-align:top;padding-right:16px;">
-            <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#4269F6,#0CF6DA);text-align:center;line-height:48px;font-size:22px;font-weight:800;color:#fff;">1</div>
+  <tr><td class="px" style="background-color:#ffffff;padding:0 34px 18px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f8ff;border-radius:14px;border-left:5px solid #4269F6;border-collapse:separate;">
+      <tr><td style="padding:22px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+          <td class="stack" width="52" style="vertical-align:top;padding-right:16px;">
+            <div class="step-number" style="width:46px;height:46px;border-radius:50%;background-color:#4269F6;text-align:center;line-height:46px;font-size:21px;font-weight:900;color:#ffffff;">1</div>
           </td>
-          <td style="vertical-align:top;">
-            <p style="margin:0 0 6px;font-size:18px;font-weight:700;color:#152038;">It's Simple!</p>
-            <p style="margin:0;font-size:15px;color:#3a4a5c;line-height:1.6;">Give us <strong>7 Names &amp; Numbers</strong> of friends or family who might benefit from a free super review.</p>
+          <td class="stack-text" style="vertical-align:top;">
+            <p style="margin:0 0 7px;font-size:18px;font-weight:800;color:#152038;line-height:24px;">Simply send 7 names &amp; numbers</p>
+            <p style="margin:0;font-size:15px;color:#344456;line-height:25px;">Share friends or family who might benefit from a free super review and you will receive a <strong style="color:#4269F6;">$50 Gift Card</strong> to spend.</p>
           </td>
         </tr></table>
       </td></tr>
@@ -66,16 +66,16 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
   </td></tr>
 
   <!-- STEP 2 -->
-  <tr><td style="background-color:#ffffff;padding:0 32px 24px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#f8faff 0%,#eef6ff 100%);border-radius:12px;border-left:4px solid #0CF6DA;">
-      <tr><td style="padding:24px;">
-        <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-          <td style="vertical-align:top;padding-right:16px;">
-            <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#0CF6DA,#4269F6);text-align:center;line-height:48px;font-size:22px;font-weight:800;color:#fff;">2</div>
+  <tr><td class="px" style="background-color:#ffffff;padding:0 34px 22px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eefdfb;border-radius:14px;border-left:5px solid #0CF6DA;border-collapse:separate;">
+      <tr><td style="padding:22px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+          <td class="stack" width="52" style="vertical-align:top;padding-right:16px;">
+            <div class="step-number" style="width:46px;height:46px;border-radius:50%;background-color:#0bbfad;text-align:center;line-height:46px;font-size:21px;font-weight:900;color:#ffffff;">2</div>
           </td>
-          <td style="vertical-align:top;">
-            <p style="margin:0 0 6px;font-size:18px;font-weight:700;color:#152038;">Give Us Permission</p>
-            <p style="margin:0;font-size:15px;color:#3a4a5c;line-height:1.6;">Just let us mention that <strong>you referred them</strong> — that's it! The <span style="color:#4269F6;font-weight:700;">$50 Gift Card</span> is all yours! 🎉</p>
+          <td class="stack-text" style="vertical-align:top;">
+            <p style="margin:0 0 7px;font-size:18px;font-weight:800;color:#152038;line-height:24px;">Let us say you referred them</p>
+            <p style="margin:0;font-size:15px;color:#344456;line-height:25px;">You just give us permission to mention your name — that’s it. Once we have the 7 referrals, the <strong style="color:#152038;">$50 is all yours</strong>.</p>
           </td>
         </tr></table>
       </td></tr>
