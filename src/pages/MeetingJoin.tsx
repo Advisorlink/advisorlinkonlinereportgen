@@ -205,24 +205,40 @@ export default function MeetingJoin() {
     await connectToMeeting(mid, cid);
   }, [meetingId, connectToMeeting]);
 
+  const openFullscreen = useCallback(async () => {
+    const target = viewingRef.current;
+    const video = videoRef.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void; webkitSupportsFullscreen?: boolean }) | null;
+    try {
+      if (target?.requestFullscreen) {
+        await target.requestFullscreen();
+      } else if (video?.webkitEnterFullscreen && video.webkitSupportsFullscreen !== false) {
+        video.webkitEnterFullscreen();
+      }
+      setFullscreenDismissed(true);
+      setShowFullscreenPrompt(false);
+    } catch {
+      toast.error("Fullscreen could not be opened on this device");
+    }
+  }, []);
+
   // Restore session on mount (mobile navigation back)
   useEffect(() => {
-    const saved = sessionStorage.getItem(SESSION_KEY);
+    const saved = loadSavedSession();
     if (saved) {
-      try {
-        const { meetingId: mid, clientId: cid } = JSON.parse(saved);
-        clientIdRef.current = cid;
-        setMeetingId(mid);
-        // Check if meeting is still active
-        supabase.from("meetings").select("status").eq("meeting_id", mid).single().then(({ data }) => {
-          if (data && data.status !== "ended") {
-            connectToMeeting(mid, cid);
-          } else {
-            clearSession();
-            if (data?.status === "ended") setStatus("ended");
-          }
-        });
-      } catch { clearSession(); }
+      const { meetingId: mid, clientId: cid } = saved;
+      clientIdRef.current = cid;
+      meetingIdRef.current = mid;
+      setMeetingId(mid);
+      setStatus("connecting");
+      supabase.from("meetings").select("status").eq("meeting_id", mid).single().then(({ data }) => {
+        if (data && data.status !== "ended") {
+          connectToMeeting(mid, cid);
+        } else {
+          clearSession();
+          if (data?.status === "ended") setStatus("ended");
+          else setStatus("idle");
+        }
+      });
     }
   }, [connectToMeeting]);
 
