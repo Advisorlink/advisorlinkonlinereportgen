@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { ESignPdfEditor } from "./ESignPdfEditor";
+import { ESignPdfEditor, type ESignField } from "./ESignPdfEditor";
 
 interface ReportRow {
   id: string;
@@ -23,6 +23,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   const [step, setStep] = useState<Step>("upload");
   const [file, setFile] = useState<File | null>(null);
   const [editedFile, setEditedFile] = useState<File | null>(null);
+  const [esignFields, setEsignFields] = useState<ESignField[]>([]);
   const [fileName, setFileName] = useState("");
 
   // Client selection
@@ -63,6 +64,8 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
     const f = e.target.files?.[0];
     if (f && f.type === "application/pdf") {
       setFile(f);
+      setEditedFile(null);
+      setEsignFields([]);
       setFileName(f.name);
     } else {
       toast.error("Please upload a PDF file");
@@ -141,6 +144,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
             email: confirmEmail,
             phone: clientPhone,
             address: clientAddress,
+            signing_fields: esignFields,
           },
           report_id: selectedReport?.id || null,
           sent_at: new Date().toISOString(),
@@ -173,7 +177,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-6 px-4">
+    <div className={`${step === "edit-pdf" ? "max-w-7xl" : "max-w-3xl"} mx-auto py-6 px-4`}>
       <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to E-Sign Docs
       </button>
@@ -189,7 +193,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
               {i + 1}
             </div>
             <span className={`text-sm font-medium hidden sm:inline ${step === s ? "text-foreground" : "text-muted-foreground"}`}>
-              {s === "upload" ? "Upload" : s === "edit-pdf" ? "Review" : s === "select-client" ? "Client" : "Details"}
+              {s === "upload" ? "Upload" : s === "edit-pdf" ? "Prepare" : s === "select-client" ? "Client" : "Details"}
             </span>
             {i < 3 && <div className="w-8 h-px bg-border" />}
           </div>
@@ -310,7 +314,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           <div className="p-4 rounded-xl bg-muted/50 border border-border">
             <p className="text-sm font-medium text-foreground">Document: {fileName}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              This document will include 2 signature fields that will be auto-applied once signed
+              This document includes {esignFields.filter((field) => field.kind === "signature").length || 0} signature field(s) that will be filled when signed
             </p>
           </div>
 
@@ -332,8 +336,9 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           clientPhone={clientPhone}
           clientAddress={clientAddress}
           onBack={() => setStep("upload")}
-          onContinue={(edited) => {
+          onContinue={(edited, fields) => {
             setEditedFile(edited);
+            setEsignFields(fields);
             setStep("select-client");
           }}
         />
