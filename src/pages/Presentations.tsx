@@ -188,18 +188,6 @@ export default function Presentations() {
             )}
 
             <div className="flex flex-wrap gap-3">
-              {!showSlideshow && (
-                <Button className="bg-gradient-to-r from-cyan to-primary text-white hover:opacity-90 h-10 px-5 text-sm font-semibold" onClick={() => setShowSlideshow(true)}>
-                  <Presentation className="w-4 h-4 mr-2" />
-                  <span>Start Presentation for {activeMeeting.client_name}</span>
-                </Button>
-              )}
-              {showSlideshow && (
-                <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-10 px-5 text-sm font-semibold" onClick={() => setShowSlideshow(false)}>
-                  <Presentation className="w-4 h-4 mr-2" />
-                  <span>Hide Presentation</span>
-                </Button>
-              )}
               {!sharing ? (
                 <Button className="bg-cyan text-cyan-foreground hover:bg-cyan/90 h-10 px-5 text-sm font-semibold" onClick={startScreenShare}>
                   <ScreenShare className="w-4 h-4 mr-2" />
@@ -237,13 +225,6 @@ export default function Presentations() {
                 <span>End Meeting</span>
               </Button>
             </div>
-
-            {showSlideshow && (
-              <PresentationSlideshow
-                clientName={activeMeeting.client_name}
-                onClose={() => setShowSlideshow(false)}
-              />
-            )}
 
             <p className="text-xs text-navy-foreground/50">
               Share this link with your client: <span className="text-cyan font-medium break-all">{meetingJoinUrl}</span> — they'll enter the meeting ID to see your screen.
