@@ -155,15 +155,13 @@ export function PresentationSlideshow({ clientName, onClose, onShareReport, init
           </button>
         )}
 
-        {/* Share Report button — only on slide 6 (index 5), bottom right */}
+        {/* Invisible clickable overlay on slide 6 (index 5) over the existing Share Report image button */}
         {onShareReport && current === 5 && (
-          <Button
+          <button
             onClick={handleShareReport}
-            className="absolute bottom-6 right-6 bg-white text-navy hover:bg-white/90 font-semibold shadow-lg px-6 py-2 h-auto text-base z-20"
-          >
-            <FileText className="w-5 h-5 mr-2" />
-            Share Report
-          </Button>
+            className="absolute bottom-4 right-4 w-48 h-14 z-20 cursor-pointer bg-transparent border-none outline-none"
+            aria-label="Share Report"
+          />
         )}
       </div>
     </div>
