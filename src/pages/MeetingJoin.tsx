@@ -5,19 +5,21 @@ import { Input } from "@/components/ui/input";
 import { Monitor, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+const iceServers = [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+  { urls: "stun:stun2.l.google.com:19302" },
+];
+
 export default function MeetingJoin() {
   const [meetingId, setMeetingId] = useState("");
   const [status, setStatus] = useState<"idle" | "connecting" | "waiting" | "connected" | "ended">("idle");
   const [error, setError] = useState("");
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const clientIdRef = useRef(crypto.randomUUID());
-
-  const iceServers = [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" },
-  ];
 
   const setupPeerConnection = useCallback((ch: ReturnType<typeof supabase.channel>) => {
     // Close existing PC if any
@@ -27,8 +29,8 @@ export default function MeetingJoin() {
     pcRef.current = pc;
 
     pc.ontrack = (e) => {
-      if (videoRef.current && e.streams[0]) {
-        videoRef.current.srcObject = e.streams[0];
+      if (e.streams[0]) {
+        setRemoteStream(e.streams[0]);
         setStatus("connected");
       }
     };
@@ -77,7 +79,10 @@ export default function MeetingJoin() {
     const clientId = clientIdRef.current;
 
     const ch = supabase.channel(`meeting:${mid}`, {
-      config: { broadcast: { self: false } },
+      config: {
+        broadcast: { self: false },
+        presence: { key: `client-${clientId}` },
+      },
     });
 
     ch.on("broadcast", { event: "offer" }, async ({ payload }) => {
@@ -103,27 +108,38 @@ export default function MeetingJoin() {
     });
 
     ch.on("broadcast", { event: "meeting-ended" }, () => {
+      setRemoteStream(null);
       setStatus("ended");
       toast.info("The host has ended the meeting");
     });
 
-    await ch.subscribe();
+    await ch.subscribe(async (subscribeStatus) => {
+      if (subscribeStatus === "SUBSCRIBED") {
+        await ch.track({ role: "client", clientId });
+        ch.send({ type: "broadcast", event: "join", payload: { clientId } });
+      }
+    });
     channelRef.current = ch;
-
-    // Tell host we want to join
-    ch.send({ type: "broadcast", event: "join", payload: { clientId } });
     setStatus("waiting");
   }, [meetingId, setupPeerConnection]);
 
   useEffect(() => {
+    const clientId = clientIdRef.current;
     return () => {
+      setRemoteStream(null);
       pcRef.current?.close();
       if (channelRef.current) {
-        channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId: clientIdRef.current } });
+        channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId } });
         channelRef.current.unsubscribe();
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (videoRef.current && remoteStream) {
+      videoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream, status]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-navy via-[hsl(215_50%_15%)] to-[hsl(215_60%_8%)] flex flex-col">

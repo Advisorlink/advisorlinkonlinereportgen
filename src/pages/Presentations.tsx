@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useMeetingHost } from "@/hooks/useMeetingHost";
 import { CRMLayout } from "@/components/CRMLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Monitor, Play, Copy, StopCircle, Search, Mic, MicOff, Circle, ScreenShare, ScreenShareOff, UserCheck, UserX } from "lucide-react";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -31,70 +31,32 @@ interface MeetingRow {
 
 export default function Presentations() {
   const { profile } = useAuth();
+  const {
+    activeMeeting,
+    clientConnected,
+    clientCount,
+    sharing,
+    stream,
+    micOn,
+    recording,
+    meetingJoinUrl,
+    meetingVersion,
+    startMeeting,
+    startScreenShare,
+    stopScreenShare,
+    endMeeting,
+    toggleMic,
+    toggleRecording,
+    copyMeetingLink,
+    copyMeetingId,
+  } = useMeetingHost();
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [meetings, setMeetings] = useState<MeetingRow[]>([]);
   const [search, setSearch] = useState("");
   const [selectOpen, setSelectOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [activeMeeting, setActiveMeeting] = useState<MeetingRow | null>(null);
-
-  // Screen share / recording state
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [sharing, setSharing] = useState(false);
-  const [micStream, setMicStream] = useState<MediaStream | null>(null);
-  const [micOn, setMicOn] = useState(false);
-  const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
-  const [recording, setRecording] = useState(false);
-  const [chunks, setChunks] = useState<Blob[]>([]);
-
-  // Client connected state
-  const [clientConnected, setClientConnected] = useState(false);
-
-  // Realtime channel for signaling
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
-  const streamRef = useRef<MediaStream | null>(null);
-
-  const iceServers = [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" },
-  ];
-
-  // Load data + restore active meeting + clean stale meetings on mount
-  useEffect(() => {
-    if (!profile?.is_owner) return;
-    cleanStaleMeetings().then(() => {
-      loadData();
-      restoreActiveMeeting();
-    });
-  }, [profile]);
-
-  // Cleanup on unmount: DON'T end the meeting, just clean up local resources
-  useEffect(() => {
-    return () => {
-      // Unsubscribe from channel but don't end the meeting
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-      // Close peer connections
-      peerConnectionsRef.current.forEach((pc) => pc.close());
-      peerConnectionsRef.current = new Map();
-      // Note: we do NOT stop streams or update DB status here
-      // The meeting stays alive for when the user navigates back
-    };
-  }, []);
-
-  // Clean up stale meetings (older than 24h still showing active/waiting)
-  const cleanStaleMeetings = async () => {
-    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    await supabase
-      .from("meetings")
-      .update({ status: "ended", ended_at: new Date().toISOString() } as never)
-      .in("status", ["waiting", "active"])
-      .lt("created_at", cutoff);
-  };
+  const hostPreviewRef = useRef<HTMLVideoElement>(null);
 
   const loadData = async () => {
     const [{ data: r }, { data: m }] = await Promise.all([
@@ -105,78 +67,22 @@ export default function Presentations() {
     setMeetings((m as MeetingRow[]) || []);
   };
 
-  // Restore an active/waiting meeting if one exists in the DB
-  const restoreActiveMeeting = async () => {
-    if (!profile) return;
-    const { data } = await supabase
-      .from("meetings")
-      .select("*")
-      .eq("host_user_id", profile.id)
-      .in("status", ["waiting", "active"])
-      .order("created_at", { ascending: false })
-      .limit(1);
+  useEffect(() => {
+    if (!profile?.is_owner) return;
+    loadData();
+  }, [profile?.is_owner, meetingVersion]);
 
-    if (data && data.length > 0) {
-      const meeting = data[0] as MeetingRow;
-      setActiveMeeting(meeting);
-      setSharing(false); // Screen share won't persist across navigation
-      setClientConnected(false);
-      setupSignalingChannel(meeting);
+  useEffect(() => {
+    if (hostPreviewRef.current) {
+      hostPreviewRef.current.srcObject = stream;
     }
-  };
+  }, [stream]);
 
-  const setupSignalingChannel = (meeting: MeetingRow) => {
-    // Clean up any existing channel
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-    }
-
-    const ch = supabase.channel(`meeting:${meeting.meeting_id}`, {
-      config: { broadcast: { self: false } },
-    });
-
-    ch.on("broadcast", { event: "join" }, async ({ payload }) => {
-      const clientId = payload.clientId as string;
-      setClientConnected(true);
-      toast.success("Client has joined the meeting!");
-
-      const currentStream = streamRef.current;
-      if (currentStream) {
-        setupPeerConnection(ch, clientId, currentStream);
-      }
-    });
-
-    ch.on("broadcast", { event: "answer" }, async ({ payload }) => {
-      const pcs = peerConnectionsRef.current;
-      const pc = pcs.get(payload.clientId) || [...pcs.values()][0];
-      if (pc && payload.sdp) {
-        await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-      }
-    });
-
-    ch.on("broadcast", { event: "ice-candidate" }, async ({ payload }) => {
-      if (payload.from === "host") return;
-      const pcs = peerConnectionsRef.current;
-      const pc = pcs.get(payload.clientId) || [...pcs.values()][0];
-      if (pc && payload.candidate) {
-        await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
-      }
-    });
-
-    ch.on("broadcast", { event: "leave" }, () => {
-      setClientConnected(false);
-      toast.info("Client has left the meeting");
-    });
-
-    ch.subscribe();
-    channelRef.current = ch;
-  };
-
-  const filteredReports = reports.filter((r) => {
+  const filteredReports = useMemo(() => reports.filter((r) => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
     return r.client_name.toLowerCase().includes(q) || (r.email ?? "").toLowerCase().includes(q);
-  });
+  }), [reports, search]);
 
   const handleSelectClient = (r: ReportRow) => {
     setSelectedReport(r);
@@ -184,236 +90,16 @@ export default function Presentations() {
     setConfirmOpen(true);
   };
 
-  // Start meeting — creates DB record + signaling channel
-  const startMeeting = async () => {
+  const handleStartMeeting = async () => {
     if (!selectedReport) return;
     setConfirmOpen(false);
-
-    const { data, error } = await supabase.from("meetings").insert({
-      host_user_id: profile!.id,
-      report_id: selectedReport.id,
-      client_name: selectedReport.client_name,
-      client_email: selectedReport.email,
-      status: "waiting",
-    } as never).select().single();
-
-    if (error || !data) {
-      toast.error("Failed to create meeting");
-      return;
-    }
-
-    const meeting = data as MeetingRow;
-    setActiveMeeting(meeting);
-    setClientConnected(false);
-    setSharing(false);
-
-    setupSignalingChannel(meeting);
-
-    await supabase.from("meetings").update({ status: "waiting", started_at: new Date().toISOString() } as never).eq("id", meeting.id);
-    loadData();
-
-    toast.success("Meeting created! Share the meeting ID with your client.");
+    const created = await startMeeting(selectedReport);
+    if (created) loadData();
   };
 
-  const setupPeerConnection = (ch: ReturnType<typeof supabase.channel>, clientId: string, displayStream: MediaStream) => {
-    const pc = new RTCPeerConnection({ iceServers });
-
-    displayStream.getTracks().forEach((track) => pc.addTrack(track, displayStream));
-
-    pc.onicecandidate = (e) => {
-      if (e.candidate) {
-        ch.send({ type: "broadcast", event: "ice-candidate", payload: { candidate: e.candidate, clientId, from: "host" } });
-      }
-    };
-
-    pc.oniceconnectionstatechange = () => {
-      if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed") {
-        setClientConnected(false);
-      }
-    };
-
-    pc.createOffer().then(async (offer) => {
-      await pc.setLocalDescription(offer);
-      ch.send({ type: "broadcast", event: "offer", payload: { sdp: offer, clientId } });
-    });
-
-    peerConnectionsRef.current.set(clientId, pc);
-  };
-
-  // Share screen — triggered by a separate button
-  const startScreenShare = async () => {
-    if (!activeMeeting || !channelRef.current) return;
-
-    try {
-      const displayStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: true,
-      });
-
-      setStream(displayStream);
-      streamRef.current = displayStream;
-      setSharing(true);
-
-      displayStream.getVideoTracks()[0].addEventListener("ended", () => {
-        stopScreenShare();
-      });
-
-      await supabase.from("meetings").update({ status: "active" } as never).eq("id", activeMeeting.id);
-      setActiveMeeting((prev) => prev ? { ...prev, status: "active" } : null);
-      loadData();
-
-      channelRef.current.send({ type: "broadcast", event: "screen-ready", payload: {} });
-
-      toast.success("Screen sharing started!");
-    } catch (e) {
-      console.error("Screen share failed:", e);
-      toast.error("Screen sharing was cancelled or denied");
-    }
-  };
-
-  const stopScreenShare = () => {
-    stream?.getTracks().forEach((t) => t.stop());
-    setStream(null);
-    streamRef.current = null;
-    setSharing(false);
-
-    peerConnectionsRef.current.forEach((pc) => pc.close());
-    peerConnectionsRef.current = new Map();
-
-    toast.info("Screen sharing stopped");
-  };
-
-  const endMeeting = async () => {
-    // Stop all streams
-    stream?.getTracks().forEach((t) => t.stop());
-    micStream?.getTracks().forEach((t) => t.stop());
-    setStream(null);
-    streamRef.current = null;
-    setMicStream(null);
-    setMicOn(false);
-    setSharing(false);
-    setClientConnected(false);
-
-    // Stop recorder
-    if (recorder && recorder.state !== "inactive") {
-      recorder.stop();
-    }
-    setRecorder(null);
-    setRecording(false);
-
-    // Close peer connections
-    peerConnectionsRef.current.forEach((pc) => pc.close());
-    peerConnectionsRef.current = new Map();
-
-    // Notify clients
-    if (channelRef.current) {
-      channelRef.current.send({ type: "broadcast", event: "meeting-ended", payload: {} });
-      await supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
-
-    // Update DB
-    if (activeMeeting) {
-      await supabase.from("meetings").update({ status: "ended", ended_at: new Date().toISOString() } as never).eq("id", activeMeeting.id);
-    }
-
-    setActiveMeeting(null);
-    loadData();
-    toast.info("Meeting ended");
-  };
-
-  const toggleMic = async () => {
-    if (micOn && micStream) {
-      micStream.getTracks().forEach((t) => t.stop());
-      setMicStream(null);
-      setMicOn(false);
-
-      peerConnectionsRef.current.forEach((pc) => {
-        const senders = pc.getSenders();
-        senders.forEach((s) => {
-          if (s.track?.kind === "audio") {
-            pc.removeTrack(s);
-          }
-        });
-      });
-    } else {
-      try {
-        const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
-        setMicStream(mic);
-        setMicOn(true);
-
-        peerConnectionsRef.current.forEach((pc) => {
-          mic.getTracks().forEach((t) => pc.addTrack(t, mic));
-        });
-      } catch {
-        toast.error("Microphone access denied");
-      }
-    }
-  };
-
-  const toggleRecording = () => {
-    if (recording && recorder) {
-      recorder.stop();
-      setRecording(false);
-      return;
-    }
-
-    if (!stream) {
-      toast.error("No screen share active");
-      return;
-    }
-
-    const tracks = [...stream.getTracks()];
-    if (micStream) tracks.push(...micStream.getAudioTracks());
-    const combined = new MediaStream(tracks);
-
-    const newChunks: Blob[] = [];
-    const mr = new MediaRecorder(combined, { mimeType: "video/webm" });
-    mr.ondataavailable = (e) => { if (e.data.size > 0) newChunks.push(e.data); };
-    mr.onstop = () => {
-      const blob = new Blob(newChunks, { type: "video/webm" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Meeting-${activeMeeting?.meeting_id || "recording"}-${new Date().toISOString().slice(0, 10)}.webm`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      toast.success("Recording downloaded!");
-    };
-    mr.start();
-    setRecorder(mr);
-    setChunks(newChunks);
-    setRecording(true);
-    toast.success("Recording started");
-  };
-
-  const copyMeetingLink = () => {
-    if (!activeMeeting) return;
-    const url = `${window.location.origin}/meeting/join`;
-    navigator.clipboard.writeText(url);
-    toast.success("Meeting join link copied!");
-  };
-
-  const copyMeetingId = () => {
-    if (!activeMeeting) return;
-    navigator.clipboard.writeText(activeMeeting.meeting_id);
-    toast.success("Meeting ID copied!");
-  };
-
-  const meetingJoinUrl = `${window.location.origin}/meeting/join`;
-
-  // Compute display status for history (show "ended" for non-active meetings that are the current one)
   const getDisplayStatus = (m: MeetingRow) => {
-    // If this is the active meeting, show its live status
-    if (activeMeeting && m.id === activeMeeting.id) {
-      return activeMeeting.status;
-    }
-    // For non-active meetings that still show "waiting" or "active", display as "ended"
-    if (m.status === "waiting" || m.status === "active") {
-      return "ended";
-    }
+    if (activeMeeting && m.id === activeMeeting.id) return activeMeeting.status;
+    if (m.status === "waiting" || m.status === "active") return "ended";
     return m.status;
   };
 
@@ -435,41 +121,69 @@ export default function Presentations() {
           </Button>
         </div>
 
-        {/* Active meeting panel */}
         {activeMeeting && (
-          <div className="bg-gradient-to-r from-navy to-[hsl(215_50%_18%)] rounded-xl p-6 text-white space-y-5">
-            <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="bg-gradient-to-r from-navy to-primary rounded-xl p-6 text-navy-foreground space-y-5">
+            <div className="flex items-start justify-between flex-wrap gap-4">
               <div>
-                <p className="text-xs text-white/60 font-semibold uppercase tracking-wider">Active Meeting</p>
+                <p className="text-xs text-navy-foreground/60 font-semibold uppercase tracking-wider">Active Meeting</p>
                 <p className="text-lg font-bold mt-1">{activeMeeting.client_name}</p>
+                <p className="text-xs text-navy-foreground/50 mt-1">
+                  {sharing ? "Your screen is live" : "Meeting room is ready — share your screen when you are ready"}
+                </p>
               </div>
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center gap-6">
                 <div className="flex items-center gap-2">
                   {clientConnected ? (
                     <>
-                      <div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
-                      <UserCheck className="w-4 h-4 text-emerald-400" />
-                      <span className="text-sm font-semibold text-emerald-400">Client Connected</span>
+                      <div className="w-3 h-3 rounded-full bg-online animate-pulse" />
+                      <UserCheck className="w-4 h-4 text-online" />
+                      <span className="text-sm font-semibold text-online">
+                        {clientCount === 1 ? "Client Connected" : `${clientCount} Clients Connected`}
+                      </span>
                     </>
                   ) : (
                     <>
-                      <div className="w-3 h-3 rounded-full bg-white/30" />
-                      <UserX className="w-4 h-4 text-white/40" />
-                      <span className="text-sm font-medium text-white/40">Waiting for client...</span>
+                      <div className="w-3 h-3 rounded-full bg-navy-foreground/30" />
+                      <UserX className="w-4 h-4 text-navy-foreground/40" />
+                      <span className="text-sm font-medium text-navy-foreground/40">Waiting for client...</span>
                     </>
                   )}
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-white/60 mb-1">Meeting ID</p>
+                  <p className="text-xs text-navy-foreground/60 mb-1">Meeting ID</p>
                   <button
                     onClick={copyMeetingId}
-                    className="font-mono text-xl font-bold tracking-widest bg-white/10 rounded-lg px-4 py-2 hover:bg-white/20 transition"
+                    className="font-mono text-xl font-bold tracking-widest bg-navy-foreground/10 rounded-lg px-4 py-2 hover:bg-navy-foreground/20 transition"
                   >
                     {activeMeeting.meeting_id}
                   </button>
                 </div>
               </div>
             </div>
+
+            {sharing && stream && (
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] gap-4 items-stretch">
+                <div className="rounded-lg overflow-hidden bg-background/10 border border-navy-foreground/10 min-h-[220px]">
+                  <video
+                    ref={hostPreviewRef}
+                    autoPlay
+                    muted
+                    playsInline
+                    className="w-full h-full max-h-[360px] object-contain bg-foreground"
+                  />
+                </div>
+                <div className="rounded-lg bg-navy-foreground/10 border border-navy-foreground/10 p-4 flex flex-col justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-navy-foreground/60">Host Preview</p>
+                    <p className="text-sm mt-2 text-navy-foreground/80">This is the screen your client can see after entering the meeting ID.</p>
+                  </div>
+                  <div className="text-sm font-semibold text-online flex items-center gap-2">
+                    <Circle className="w-3 h-3 fill-current animate-pulse" />
+                    Live Screen Share
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-3">
               {!sharing ? (
@@ -478,46 +192,45 @@ export default function Presentations() {
                   <span>Share Screen</span>
                 </Button>
               ) : (
-                <Button className="bg-amber-600 text-white hover:bg-amber-700 h-10 px-5 text-sm font-semibold" onClick={stopScreenShare}>
+                <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-10 px-5 text-sm font-semibold" onClick={stopScreenShare}>
                   <ScreenShareOff className="w-4 h-4 mr-2" />
                   <span>Stop Sharing</span>
                 </Button>
               )}
 
-              <Button className="bg-white/10 border border-white/20 text-white hover:bg-white/20 h-10 px-4 text-sm font-medium" onClick={copyMeetingLink}>
+              <Button className="bg-navy-foreground/10 border border-navy-foreground/20 text-navy-foreground hover:bg-navy-foreground/20 h-10 px-4 text-sm font-medium" onClick={copyMeetingLink}>
                 <Copy className="w-4 h-4 mr-2" />
                 <span>Copy Join Link</span>
               </Button>
-              <Button className="bg-white/10 border border-white/20 text-white hover:bg-white/20 h-10 px-4 text-sm font-medium" onClick={copyMeetingId}>
+              <Button className="bg-navy-foreground/10 border border-navy-foreground/20 text-navy-foreground hover:bg-navy-foreground/20 h-10 px-4 text-sm font-medium" onClick={copyMeetingId}>
                 <Copy className="w-4 h-4 mr-2" />
                 <span>Copy Meeting ID</span>
               </Button>
-              <Button className={`bg-white/10 border border-white/20 text-white hover:bg-white/20 h-10 px-4 text-sm font-medium ${micOn ? "bg-emerald-600/30 border-emerald-400/50" : ""}`} onClick={toggleMic}>
+              <Button className={`bg-navy-foreground/10 border border-navy-foreground/20 text-navy-foreground hover:bg-navy-foreground/20 h-10 px-4 text-sm font-medium ${micOn ? "bg-online/30 border-online/50" : ""}`} onClick={toggleMic}>
                 {micOn ? <MicOff className="w-4 h-4 mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
                 <span>{micOn ? "Mute Mic" : "Unmute Mic"}</span>
               </Button>
               <Button
-                className={`bg-white/10 border border-white/20 text-white hover:bg-white/20 h-10 px-4 text-sm font-medium ${recording ? "bg-red-600/30 border-red-400/50 text-red-200" : ""}`}
+                className={`bg-navy-foreground/10 border border-navy-foreground/20 text-navy-foreground hover:bg-navy-foreground/20 h-10 px-4 text-sm font-medium ${recording ? "bg-destructive/30 border-destructive/50 text-destructive-foreground" : ""}`}
                 onClick={toggleRecording}
                 disabled={!sharing}
               >
-                <Circle className={`w-4 h-4 mr-2 ${recording ? "fill-red-500 text-red-500 animate-pulse" : ""}`} />
+                <Circle className={`w-4 h-4 mr-2 ${recording ? "fill-destructive text-destructive animate-pulse" : ""}`} />
                 <span>{recording ? "Stop Recording" : "Start Recording"}</span>
               </Button>
-              <Button className="bg-red-600 text-white hover:bg-red-700 h-10 px-4 text-sm font-medium" onClick={endMeeting}>
+              <Button className="bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 px-4 text-sm font-medium" onClick={endMeeting}>
                 <StopCircle className="w-4 h-4 mr-2" />
                 <span>End Meeting</span>
               </Button>
             </div>
 
-            <p className="text-xs text-white/50">
-              Share this link with your client: <span className="text-cyan font-medium">{meetingJoinUrl}</span> — they'll enter the meeting ID to see your screen.
+            <p className="text-xs text-navy-foreground/50">
+              Share this link with your client: <span className="text-cyan font-medium break-all">{meetingJoinUrl}</span> — they'll enter the meeting ID to see your screen.
             </p>
           </div>
         )}
 
-        {/* Past meetings */}
-        <div className="bg-white rounded-xl shadow-elevated p-6">
+        <div className="bg-card rounded-xl shadow-elevated p-6">
           <h2 className="text-lg font-bold font-heading text-navy mb-4">Meeting History</h2>
           {meetings.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">No meetings yet. Start your first presentation!</p>
@@ -541,8 +254,8 @@ export default function Presentations() {
                         <td className="py-2 pr-4 font-mono text-xs">{m.meeting_id}</td>
                         <td className="py-2 pr-4">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                            displayStatus === "active" ? "bg-emerald-100 text-emerald-700" :
-                            displayStatus === "waiting" ? "bg-amber-100 text-amber-700" :
+                            displayStatus === "active" ? "bg-online/15 text-online" :
+                            displayStatus === "waiting" ? "bg-cyan/15 text-cyan" :
                             "bg-muted text-muted-foreground"
                           }`}>{displayStatus}</span>
                         </td>
@@ -557,7 +270,6 @@ export default function Presentations() {
         </div>
       </div>
 
-      {/* Select client dialog */}
       <Dialog open={selectOpen} onOpenChange={setSelectOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -589,7 +301,6 @@ export default function Presentations() {
         </DialogContent>
       </Dialog>
 
-      {/* Confirm start meeting dialog */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -603,11 +314,11 @@ export default function Presentations() {
             <p className="text-sm text-muted-foreground">
               A unique meeting ID will be generated. You can share your screen when you're ready.
             </p>
-            <p className="text-sm font-semibold text-navy mt-1">{meetingJoinUrl}</p>
+            <p className="text-sm font-semibold text-navy mt-1 break-all">{meetingJoinUrl}</p>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setConfirmOpen(false)}>Cancel</Button>
-            <Button className="bg-cyan text-cyan-foreground hover:bg-cyan/90 gap-2" onClick={startMeeting}>
+            <Button className="bg-cyan text-cyan-foreground hover:bg-cyan/90 gap-2" onClick={handleStartMeeting}>
               <Play className="w-4 h-4" />
               <span>Start Meeting</span>
             </Button>
