@@ -255,14 +255,40 @@ export default function MeetingJoin() {
   useEffect(() => {
     const cid = clientIdRef.current;
     return () => {
+      if (reconnectTimerRef.current) window.clearTimeout(reconnectTimerRef.current);
       setRemoteStream(null);
       pcRef.current?.close();
       if (channelRef.current) {
         channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId: cid } });
-        channelRef.current.unsubscribe();
+        supabase.removeChannel(channelRef.current);
       }
     };
   }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && meetingIdRef.current && status !== "ended") {
+        supabase.from("meetings").select("status").eq("meeting_id", meetingIdRef.current).single().then(({ data }) => {
+          if (data?.status === "ended") {
+            markMeetingEnded();
+            return;
+          }
+          if (!remoteStreamRef.current || pcRef.current?.iceConnectionState === "disconnected" || pcRef.current?.iceConnectionState === "failed") {
+            requestFreshOffer("visible-resume");
+          }
+        });
+      }
+    };
+
+    window.addEventListener("pageshow", handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleVisibilityChange);
+    return () => {
+      window.removeEventListener("pageshow", handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleVisibilityChange);
+    };
+  }, [markMeetingEnded, requestFreshOffer, status]);
 
   useEffect(() => {
     if (videoRef.current && remoteStream) {
