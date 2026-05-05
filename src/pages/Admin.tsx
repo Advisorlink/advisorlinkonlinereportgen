@@ -715,7 +715,7 @@ export default function Admin() {
             </table>
           </div>
         </section>
-      </main>
+      </div>
 
       {/* ---- Email compose dialog ---- */}
       {emailDialog.open && (
@@ -794,8 +794,6 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Offscreen stage used to render a saved report into a PDF without
-          showing it to the user. */}
       {pdfStageInputs && (() => {
         const summary = buildSummary(pdfStageInputs);
         return (
@@ -816,6 +814,6 @@ export default function Admin() {
           </div>
         );
       })()}
-    </div>
+    </CRMLayout>
   );
 }
