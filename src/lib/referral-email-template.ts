@@ -126,21 +126,6 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
     </table>
   </td></tr>
 
-  <!-- CONTACT -->
-  <tr><td class="px" style="padding:0 32px 24px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${borderColor};padding-top:20px;">
-      <tr><td>
-        <p style="margin:0 0 8px;font-size:14px;color:${bodyText};line-height:22px;">We are available <strong style="color:${darkText};">Monday – Friday, 9am – 7pm QLD time</strong>.</p>
-        <p style="margin:0 0 16px;font-size:14px;color:${bodyText};line-height:22px;">Please let me know a time that works for you and I'll work something out in between clients.</p>
-        <p style="margin:0 0 10px;font-size:13px;color:${mutedText};">Or call me on</p>
-        <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:separate;"><tr>
-          <td style="border-radius:10px;background-color:${teal};">
-            <a href="tel:0485991688" style="display:inline-block;padding:12px 24px;color:#ffffff;font-size:15px;font-weight:bold;text-decoration:none;">0485 991 688</a>
-          </td>
-        </tr></table>
-      </td></tr>
-    </table>
-  </td></tr>
 
   <!-- FOOTER -->
   <tr><td style="background-color:${bgPage};padding:20px 32px;text-align:center;border-top:1px solid ${borderColor};">
