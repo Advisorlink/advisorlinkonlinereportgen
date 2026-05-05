@@ -48,6 +48,7 @@ interface Props {
   clientEmail: string;
   clientPhone: string;
   clientAddress: string;
+  clientDob: string;
   onBack: () => void;
   onContinue: (editedFile: File, fields: ESignField[]) => void;
 }
