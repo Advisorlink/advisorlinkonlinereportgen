@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CRMLayout } from "@/components/CRMLayout";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientInputs } from "@/hooks/useClientInputs";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Trash2, RefreshCw, Search, Eye, Download, Send, X, FileText, Calendar, Mail, Presentation } from "lucide-react";
+import { Trash2, RefreshCw, Search, Eye, Download, Send, X, FileText, Calendar, Mail } from "lucide-react";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { buildReferralEmailHtml } from "@/lib/referral-email-template";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
