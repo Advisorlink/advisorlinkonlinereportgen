@@ -1,0 +1,1 @@
+ALTER TABLE public.meetings ALTER COLUMN meeting_id SET DEFAULT lpad(floor(random() * 1000000)::text, 6, '0');
