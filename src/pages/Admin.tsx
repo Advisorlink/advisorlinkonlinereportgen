@@ -187,12 +187,37 @@ export default function Admin() {
 
   const [sendBusyId, setSendBusyId] = useState<string | null>(null);
 
-  const sendReportEmail = async (r: ReportRow) => {
+  // --- Email compose dialog state ---
+  const [emailDialog, setEmailDialog] = useState<{
+    open: boolean;
+    report: ReportRow | null;
+    to: string;
+    subject: string;
+    body: string;
+  }>({ open: false, report: null, to: "", subject: "", body: "" });
+
+  const openEmailDialog = (r: ReportRow) => {
     const clientEmail = (r.email ?? "").trim();
     if (!clientEmail) {
       toast.error("No email address on file for this client");
       return;
     }
+    const name = (r.client_name ?? "").trim() || "there";
+    setEmailDialog({
+      open: true,
+      report: r,
+      to: clientEmail,
+      subject: "Super Performance Report",
+      body: `Hi ${name}\n\nHere is your Free performance report. Please note that this document is NOT to be taken as financial advice. It is just to help you understand if there is potential improvements you could be missing out on.`,
+    });
+  };
+
+  const closeEmailDialog = () => setEmailDialog(prev => ({ ...prev, open: false, report: null }));
+
+  const confirmSendEmail = async () => {
+    const r = emailDialog.report;
+    if (!r) return;
+    closeEmailDialog();
     setSendBusyId(r.id);
     try {
       // Get the PDF blob — prefer stored copy, fall back to regeneration
@@ -243,15 +268,16 @@ export default function Admin() {
       const fileName = `${(r.client_name.trim() || "Client")} Performance Report.pdf`;
       const { data, error } = await supabase.functions.invoke("send-report-email", {
         body: {
-          recipientEmail: clientEmail,
+          recipientEmail: emailDialog.to,
           clientName: r.client_name.trim(),
           pdfBase64,
           fileName,
+          customBody: emailDialog.body,
         },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success(`Email sent to ${clientEmail} with PDF attached`);
+      toast.success(`Email sent to ${emailDialog.to} with PDF attached`);
     } catch (e) {
       console.error("Send email failed:", e);
       toast.error("Failed to send email", {
