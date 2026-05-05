@@ -26,14 +26,6 @@ interface ProfileRow {
   last_login_at: string | null;
 }
 
-interface LogRow {
-  id: string;
-  user_id: string | null;
-  email: string | null;
-  event_type: string;
-  details: Record<string, unknown> | null;
-  created_at: string;
-}
 
 interface ReportRow {
   id: string;
@@ -51,7 +43,7 @@ export default function Admin() {
   const { profile, loading } = useAuth();
   const { setInputs } = useClientInputs();
   const [users, setUsers] = useState<ProfileRow[]>([]);
-  const [logs, setLogs] = useState<LogRow[]>([]);
+  
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportSearch, setReportSearch] = useState("");
   const [busy, setBusy] = useState(false);
@@ -81,13 +73,11 @@ export default function Admin() {
 
   const refresh = async () => {
     setBusy(true);
-    const [{ data: u }, { data: l }, { data: r }] = await Promise.all([
+    const [{ data: u }, { data: r }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-      supabase.from("activity_log").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(500),
     ]);
     setUsers((u as ProfileRow[]) || []);
-    setLogs((l as LogRow[]) || []);
     setReports((r as ReportRow[]) || []);
     setBusy(false);
   };
@@ -113,12 +103,6 @@ export default function Admin() {
     else { toast.success("User deleted"); refresh(); }
   };
 
-  const clearLogs = async () => {
-    if (!confirm("Clear all activity logs?")) return;
-    const { error } = await supabase.from("activity_log").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    if (error) toast.error(error.message);
-    else { toast.success("Logs cleared"); refresh(); }
-  };
 
   const deleteReport = async (id: string) => {
     if (!confirm("Delete this saved report?")) return;
@@ -484,46 +468,6 @@ export default function Admin() {
           </div>
         </section>
 
-
-        <section className="bg-white rounded-xl shadow-elevated p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold font-heading text-navy">Activity Log ({logs.length})</h2>
-            <Button size="sm" variant="outline" onClick={clearLogs}>
-              <Trash2 className="w-3.5 h-3.5 mr-1" /> Clear
-            </Button>
-          </div>
-          <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-white">
-                <tr className="text-left border-b border-border">
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">When</th>
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">Email</th>
-                  <th className="py-2 pr-4 font-semibold text-muted-foreground">Event</th>
-                  <th className="py-2 font-semibold text-muted-foreground">Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map(l => (
-                  <tr key={l.id} className="border-b border-border/50">
-                    <td className="py-2 pr-4 text-xs whitespace-nowrap">{new Date(l.created_at).toLocaleString()}</td>
-                    <td className="py-2 pr-4 text-xs">{l.email || "—"}</td>
-                    <td className="py-2 pr-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${
-                        l.event_type === "login" ? "bg-[hsl(145_70%_45%/0.15)] text-[hsl(145_70%_30%)]" :
-                        l.event_type === "access_denied" || l.event_type === "signup_blocked" ? "bg-destructive/15 text-destructive" :
-                        "bg-muted text-muted-foreground"
-                      }`}>{l.event_type}</span>
-                    </td>
-                    <td className="py-2 text-xs text-muted-foreground">{l.details ? JSON.stringify(l.details) : "—"}</td>
-                  </tr>
-                ))}
-                {logs.length === 0 && (
-                  <tr><td colSpan={4} className="py-6 text-center text-muted-foreground text-xs">No activity yet</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
       </div>
 
       {/* ---- Email compose dialog ---- */}
