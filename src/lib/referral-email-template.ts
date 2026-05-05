@@ -115,16 +115,15 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
 
   <!-- CTA BUTTON -->
   <tr><td class="px" style="padding:28px 32px;text-align:center;">
-    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;border-collapse:separate;">
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;border-collapse:separate;width:100%;">
       <tr>
-        <td style="border-radius:12px;background-color:${teal};">
-          <a href="${referralFormUrl}" style="display:inline-block;padding:16px 44px;color:#ffffff;font-size:17px;font-weight:bold;text-decoration:none;letter-spacing:0.3px;">
-            Refer Now &amp; Earn $100
+        <td style="border-radius:14px;background-color:${gold};text-align:center;">
+          <a href="${referralFormUrl}" style="display:block;padding:20px 32px;color:${darkText};font-size:20px;font-weight:800;text-decoration:none;letter-spacing:0.5px;">
+            👉 Click Here To Refer &amp; Earn $100!
           </a>
         </td>
       </tr>
     </table>
-    <p style="margin:10px 0 0;font-size:12px;color:${mutedText};">Click above to submit your referrals online</p>
   </td></tr>
 
   <!-- CONTACT -->
