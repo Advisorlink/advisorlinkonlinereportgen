@@ -5,8 +5,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download, Send } from "lucide-react";
+import { ArrowLeft, Ban, CheckCircle, Trash2, RefreshCw, Search, Eye, Download, Send, X } from "lucide-react";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
 import {
