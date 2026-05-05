@@ -149,6 +149,11 @@ export function ESignPdfEditor({
               const height = Math.abs(rect[3] - rect[1]);
               const label = formatLabel(annotation.fieldName || (isSignature ? "Signature" : "Text"));
 
+              const fieldName = annotation.fieldName || "";
+              const prefill = isText
+                ? (annotation.fieldValue && annotation.fieldValue.trim() ? annotation.fieldValue : suggestedValue(fieldName || label, clientData))
+                : "";
+
               detectedFields.push({
                 id: `acro-${pageIndex}-${annotationIndex}-${Date.now()}`,
                 kind: isSignature ? "signature" : "text",
@@ -158,10 +163,10 @@ export function ESignPdfEditor({
                 width: clamp(width / viewport.width, 0.06, 0.8),
                 height: clamp(height / viewport.height, 0.025, 0.2),
                 label,
-                value: isText ? annotation.fieldValue || suggestedValue(annotation.fieldName || "", clientData) : "",
+                value: prefill,
                 required: true,
                 source: "acroform",
-                acroName: annotation.fieldName,
+                acroName: fieldName,
               });
             });
 
