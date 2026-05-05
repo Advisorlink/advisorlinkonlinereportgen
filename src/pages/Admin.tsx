@@ -396,23 +396,17 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary/40">
-      <header className="sticky top-0 z-40 bg-navy text-navy-foreground shadow-elevated">
-        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="text-navy-foreground hover:bg-white/10" onClick={() => nav("/")}>
-              <ArrowLeft className="w-4 h-4 mr-1" /> Back
-            </Button>
-            <span className="px-2.5 py-1 rounded-md bg-cyan text-cyan-foreground text-[10px] font-bold tracking-wide">Admin</span>
-            <span className="text-xs font-semibold opacity-70">Owner Control Panel</span>
+    <CRMLayout>
+      <div className="max-w-6xl mx-auto px-6 py-6 space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold font-heading text-navy">Admin</h1>
+            <p className="text-sm text-muted-foreground">Owner Control Panel</p>
           </div>
           <Button size="sm" onClick={refresh} disabled={busy} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
             <RefreshCw className={`w-4 h-4 mr-1 ${busy ? "animate-spin" : ""}`} /> Refresh
           </Button>
         </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-6 py-6 space-y-8">
         <section className="bg-white rounded-xl shadow-elevated p-6">
           <h2 className="text-lg font-bold font-heading text-navy mb-4">Users ({users.length})</h2>
           <div className="overflow-x-auto">
