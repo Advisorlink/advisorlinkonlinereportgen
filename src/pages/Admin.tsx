@@ -252,9 +252,14 @@ export default function Admin() {
   const applyTemplate = (templateKey: string) => {
     if (!emailDialog.report) return;
     setSelectedTemplate(templateKey);
+    const firstName = getFirstName(emailDialog.report.client_name);
+    const isReferral = templateKey === "referral";
     setEmailDialog(prev => ({
       ...prev,
       body: getTemplateBody(templateKey, prev.report!),
+      subject: isReferral ? "🎁 Get a $50 Gift Card – Referral Offer" : "Super Performance Report",
+      htmlBody: isReferral ? buildReferralEmailHtml(firstName) : undefined,
+      isHtml: isReferral,
     }));
   };
 
