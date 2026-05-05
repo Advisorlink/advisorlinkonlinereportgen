@@ -513,6 +513,14 @@ export function ESignPdfEditor({
                       </span>
                       <button
                         type="button"
+                        className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full border border-destructive/50 bg-destructive text-white shadow-sm hover:bg-destructive/90 z-10"
+                        onPointerDown={(event) => { event.preventDefault(); event.stopPropagation(); removeField(field.id); }}
+                        aria-label={`Delete ${field.label}`}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
                         className="absolute -bottom-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground"
                         onPointerDown={(event) => startResize(event, field)}
                         aria-label="Resize field"
