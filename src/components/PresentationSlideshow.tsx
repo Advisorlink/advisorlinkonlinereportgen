@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Maximize, Minimize, X, FileText } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize, Minimize, X } from "lucide-react";
 
 const TOTAL_SLIDES = 15;
 const SLIDE_URLS = Array.from({ length: TOTAL_SLIDES }, (_, i) => `/slides/slide-${String(i + 1).padStart(2, "0")}.jpg`);
