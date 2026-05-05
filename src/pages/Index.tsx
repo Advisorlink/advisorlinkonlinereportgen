@@ -238,7 +238,7 @@ export default function Index() {
         </aside>
         <section ref={reportRef} className="min-h-0 space-y-0 overflow-y-auto pb-6">
           <CoverPage s={summary} />
-          <WhoWeArePage />
+          <WhoWeArePage s={summary} />
           <SnapshotPage s={summary} />
           <ProjectionPage s={summary} />
           <FundsPage s={summary} />
