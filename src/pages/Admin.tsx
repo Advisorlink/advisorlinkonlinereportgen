@@ -87,6 +87,7 @@ export default function Admin() {
   const [referralResponses, setReferralResponses] = useState<ReferralResponseRow[]>([]);
   const [referralLeads, setReferralLeads] = useState<ReferralLeadRow[]>([]);
   const [referralSearch, setReferralSearch] = useState("");
+  const [referrerFilter, setReferrerFilter] = useState("");
 
   // Resolve a usable inputs object — fall back to defaults so demo rows still
   // render a complete-looking report.
@@ -535,14 +536,33 @@ export default function Admin() {
                 <p className="text-xs text-muted-foreground">People who filled out referral forms</p>
               </div>
             </div>
-            <div className="relative w-full sm:w-72">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={referralSearch}
-                onChange={e => setReferralSearch(e.target.value)}
-                placeholder="Search referrals…"
-                className="pl-9"
-              />
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <div className="relative w-full sm:w-56">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={referralSearch}
+                  onChange={e => setReferralSearch(e.target.value)}
+                  placeholder="Search referrals..."
+                  className="pl-9"
+                />
+              </div>
+              <select
+                value={referrerFilter}
+                onChange={e => setReferrerFilter(e.target.value)}
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm w-full sm:w-auto"
+              >
+                <option value="">All Referrers</option>
+                {(() => {
+                  const names = new Map<string, string>();
+                  referralLeads.forEach(l => {
+                    const key = l.referrer_email.toLowerCase();
+                    if (!names.has(key)) names.set(key, l.referrer_name);
+                  });
+                  return Array.from(names.entries()).map(([email, name]) => (
+                    <option key={email} value={email}>{name}</option>
+                  ));
+                })()}
+              </select>
             </div>
           </div>
 
@@ -559,28 +579,29 @@ export default function Admin() {
 
             const q = referralSearch.trim().toLowerCase();
             const filtered = referralResponses.filter(r => {
-              if (!q) return true;
               const lead = leadMap.get(r.lead_id);
-              return (
+              const matchesSearch = !q || (
                 r.name.toLowerCase().includes(q) ||
                 r.email.toLowerCase().includes(q) ||
                 r.phone.includes(q) ||
                 (lead?.referrer_name ?? "").toLowerCase().includes(q) ||
                 (lead?.referrer_email ?? "").toLowerCase().includes(q)
               );
+              const matchesReferrer = !referrerFilter || (lead?.referrer_email?.toLowerCase() === referrerFilter);
+              return matchesSearch && matchesReferrer;
             });
 
             if (filtered.length === 0) {
               return (
                 <div className="text-center py-12 text-muted-foreground">
                   <Users className="w-10 h-10 mx-auto mb-3 opacity-40" />
-                  <p className="text-sm">{q ? "No referrals match that search" : "No referral responses yet"}</p>
+                  <p className="text-sm">{q || referrerFilter ? "No referrals match that filter" : "No referral responses yet"}</p>
                 </div>
               );
             }
 
             return (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-3">
                 {filtered.map(r => {
                   const lead = leadMap.get(r.lead_id);
                   const referrerEmail = lead?.referrer_email?.toLowerCase() ?? "";
@@ -589,75 +610,76 @@ export default function Admin() {
                   return (
                     <div
                       key={r.id}
-                      className="border border-border rounded-xl p-4 hover:shadow-md transition-shadow bg-gradient-to-br from-white to-secondary/30"
+                      className="border border-border rounded-xl p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-white to-secondary/30"
                     >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-full bg-navy/10 flex items-center justify-center text-navy font-bold text-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                        {/* Avatar + Name */}
+                        <div className="flex items-center gap-3 sm:w-48 shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-navy/10 flex items-center justify-center text-navy font-bold text-sm shrink-0">
                             {r.name.charAt(0).toUpperCase()}
                           </div>
-                          <div>
-                            <p className="font-semibold text-navy text-sm leading-tight">{r.name}</p>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-navy text-sm leading-tight truncate">{r.name}</p>
                             <p className="text-[11px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</p>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="space-y-1.5 text-xs mb-4">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Mail className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate">{r.email}</span>
+                        {/* Contact + Details */}
+                        <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-xs text-muted-foreground flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate max-w-[180px]">{r.email}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 shrink-0" />
+                            <span>{r.phone}</span>
+                          </div>
+                          {r.age && (
+                            <div className="flex items-center gap-1.5">
+                              <User className="w-3.5 h-3.5 shrink-0" />
+                              <span>Age: {r.age}</span>
+                            </div>
+                          )}
+                          {r.state && (
+                            <div className="flex items-center gap-1.5">
+                              <MapPin className="w-3.5 h-3.5 shrink-0" />
+                              <span>{r.state}</span>
+                            </div>
+                          )}
+                          {r.super_fund_name && (
+                            <div className="flex items-center gap-1.5">
+                              <Building className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate max-w-[160px]">{r.super_fund_name}</span>
+                            </div>
+                          )}
+                          {r.super_balance && (
+                            <div className="flex items-center gap-1.5">
+                              <DollarSign className="w-3.5 h-3.5 shrink-0" />
+                              <span>{r.super_balance}</span>
+                            </div>
+                          )}
+                          {r.had_review_before !== null && (
+                            <div className="flex items-center gap-1.5">
+                              <CheckCircle className="w-3.5 h-3.5 shrink-0" />
+                              <span>Previous review: {r.had_review_before ? "Yes" : "No"}</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Phone className="w-3.5 h-3.5 shrink-0" />
-                          <span>{r.phone}</span>
-                        </div>
-                        {r.age && (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <User className="w-3.5 h-3.5 shrink-0" />
-                            <span>Age: {r.age}</span>
-                          </div>
-                        )}
-                        {r.state && (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <MapPin className="w-3.5 h-3.5 shrink-0" />
-                            <span>{r.state}</span>
-                          </div>
-                        )}
-                        {r.super_fund_name && (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Building className="w-3.5 h-3.5 shrink-0" />
-                            <span className="truncate">{r.super_fund_name}</span>
-                          </div>
-                        )}
-                        {r.super_balance && (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <DollarSign className="w-3.5 h-3.5 shrink-0" />
-                            <span>Balance: {r.super_balance}</span>
-                          </div>
-                        )}
-                        {r.had_review_before !== null && (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <CheckCircle className="w-3.5 h-3.5 shrink-0" />
-                            <span>Previous review: {r.had_review_before ? "Yes" : "No"}</span>
-                          </div>
-                        )}
-                      </div>
 
-                      {lead && (
-                        <div className="border-t border-border pt-3">
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Referred by</p>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-xs font-semibold text-navy">{lead.referrer_name}</p>
-                              <p className="text-[11px] text-muted-foreground">{lead.referrer_email}</p>
+                        {/* Referrer info */}
+                        {lead && (
+                          <div className="flex items-center gap-3 sm:border-l sm:border-border sm:pl-4 shrink-0">
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Referred by</p>
+                              <p className="text-xs font-semibold text-navy truncate">{lead.referrer_name}</p>
+                              <p className="text-[11px] text-muted-foreground truncate">{lead.referrer_email}</p>
                             </div>
                             <span className="px-2.5 py-1 rounded-full bg-cyan/15 text-cyan text-[11px] font-bold whitespace-nowrap">
                               {referrerTotal} referral{referrerTotal !== 1 ? "s" : ""}
                             </span>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   );
                 })}
