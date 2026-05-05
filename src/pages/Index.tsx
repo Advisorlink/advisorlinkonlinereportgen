@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ClientForm } from "@/components/ClientForm";
 import { CoverPage, WhoWeArePage, SnapshotPage, FundsPage, ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage } from "@/components/report/pages";
@@ -7,17 +8,26 @@ import { importFromFile } from "@/lib/xlsx-import";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { supabase } from "@/integrations/supabase/client";
-import { Maximize2 } from "lucide-react";
+import { Maximize2, Presentation } from "lucide-react";
 import { toast } from "sonner";
 import { CRMLayout } from "@/components/CRMLayout";
 
 export default function Index() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { inputs, setInputs } = useClientInputs();
   const summary = useMemo(() => buildSummary(inputs), [inputs]);
   const fileRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+
+  const presentationState = location.state as { fromPresentation?: boolean; pausedSlide?: number } | null;
+  const isFromPresentation = presentationState?.fromPresentation === true;
+
+  const handleResumePresentation = () => {
+    navigate("/presentations", { state: { resumeSlide: presentationState?.pausedSlide ?? 0 } });
+  };
 
   const handleUpload = async (file: File) => {
     try {
@@ -200,6 +210,16 @@ export default function Index() {
             <span className="text-sm font-semibold text-navy">Report Generator</span>
           </div>
           <div className="flex items-center gap-2">
+            {isFromPresentation && (
+              <Button
+                size="sm"
+                onClick={handleResumePresentation}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5 animate-pulse"
+              >
+                <Presentation className="w-4 h-4" />
+                Resume Presentation
+              </Button>
+            )}
             <input
               ref={fileRef} type="file" accept=".xlsx,.xls" className="hidden"
               onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.currentTarget.value = ""; }}

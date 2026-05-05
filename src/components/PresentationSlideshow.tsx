@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Maximize, Minimize, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize, Minimize, X, FileText } from "lucide-react";
 
 const TOTAL_SLIDES = 15;
 const SLIDE_URLS = Array.from({ length: TOTAL_SLIDES }, (_, i) => `/slides/slide-${String(i + 1).padStart(2, "0")}.jpg`);
@@ -8,10 +8,12 @@ const SLIDE_URLS = Array.from({ length: TOTAL_SLIDES }, (_, i) => `/slides/slide
 interface Props {
   clientName: string;
   onClose: () => void;
+  onShareReport?: (currentSlide: number) => void;
+  initialSlide?: number;
 }
 
-export function PresentationSlideshow({ clientName, onClose }: Props) {
-  const [current, setCurrent] = useState(0);
+export function PresentationSlideshow({ clientName, onClose, onShareReport, initialSlide = 0 }: Props) {
+  const [current, setCurrent] = useState(initialSlide);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -70,6 +72,15 @@ export function PresentationSlideshow({ clientName, onClose }: Props) {
     const x = e.clientX - rect.left;
     if (x > rect.width / 2) next();
     else prev();
+  };
+
+  const handleShareReport = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Exit fullscreen first if needed
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    }
+    onShareReport?.(current);
   };
 
   return (
@@ -143,8 +154,18 @@ export function PresentationSlideshow({ clientName, onClose }: Props) {
             <ChevronRight className="w-6 h-6" />
           </button>
         )}
-      </div>
 
+        {/* Share Report button — bottom right */}
+        {onShareReport && (
+          <Button
+            onClick={handleShareReport}
+            className="absolute bottom-6 right-6 bg-white text-navy hover:bg-white/90 font-semibold shadow-lg px-6 py-2 h-auto text-base z-20"
+          >
+            <FileText className="w-5 h-5 mr-2" />
+            Share Report
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

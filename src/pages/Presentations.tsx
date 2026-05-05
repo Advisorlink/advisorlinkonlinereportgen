@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMeetingHost } from "@/hooks/useMeetingHost";
+import { useClientInputs } from "@/hooks/useClientInputs";
 import { CRMLayout } from "@/components/CRMLayout";
 import { PresentationSlideshow } from "@/components/PresentationSlideshow";
 import { Button } from "@/components/ui/button";
@@ -33,6 +35,9 @@ interface MeetingRow {
 
 export default function Presentations() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { setInputs } = useClientInputs();
   const {
     activeMeeting,
     clientConnected,
@@ -60,8 +65,20 @@ export default function Presentations() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const hostPreviewRef = useRef<HTMLVideoElement>(null);
   const [showSlideshow, setShowSlideshow] = useState(false);
+  const [pausedSlide, setPausedSlide] = useState<number | null>(null);
   const [guestName, setGuestName] = useState("");
   const [showGuestInput, setShowGuestInput] = useState(false);
+
+  // Auto-resume slideshow if navigated back from report page
+  useEffect(() => {
+    const state = location.state as { resumeSlide?: number } | null;
+    if (state?.resumeSlide != null && activeMeeting) {
+      setPausedSlide(state.resumeSlide);
+      setShowSlideshow(true);
+      // Clear the state so it doesn't re-trigger
+      window.history.replaceState({}, "");
+    }
+  }, [location.state, activeMeeting]);
 
   const loadData = async () => {
     const [{ data: r }, { data: m }] = await Promise.all([
@@ -119,6 +136,22 @@ export default function Presentations() {
     setConfirmOpen(false);
     const created = await startMeeting(selectedReport);
     if (created) loadData();
+  };
+
+  const handleShareReport = async (currentSlide: number) => {
+    if (!activeMeeting) return;
+    setPausedSlide(currentSlide);
+    setShowSlideshow(false);
+
+    // Try to load the client's report inputs if we have a report_id
+    const meetingData = activeMeeting as any;
+    if (meetingData.report_id) {
+      const { data } = await supabase.from("reports").select("inputs").eq("id", meetingData.report_id).single();
+      if (data?.inputs) {
+        setInputs(data.inputs as any);
+      }
+    }
+    navigate("/", { state: { fromPresentation: true, pausedSlide: currentSlide } });
   };
 
   const deleteMeeting = async (id: string) => {
@@ -283,7 +316,9 @@ export default function Presentations() {
         {showSlideshow && activeMeeting && (
           <PresentationSlideshow
             clientName={activeMeeting.client_name}
-            onClose={() => setShowSlideshow(false)}
+            onClose={() => { setShowSlideshow(false); setPausedSlide(null); }}
+            onShareReport={handleShareReport}
+            initialSlide={pausedSlide ?? 0}
           />
         )}
 
