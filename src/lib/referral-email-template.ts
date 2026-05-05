@@ -13,18 +13,22 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    @media only screen and (max-width: 620px) {
-      .container { width: 100% !important; border-radius: 0 !important; }
-      .outer { padding: 8px 0 !important; }
-      .px { padding-left: 20px !important; padding-right: 20px !important; }
-      .hero-section { padding: 32px 20px 36px !important; }
-      .hero-title { font-size: 36px !important; line-height: 42px !important; }
-      .hero-amount { font-size: 72px !important; line-height: 76px !important; }
+    @media only screen and (max-width: 700px) {
+      .container { width: 100% !important; max-width: 100% !important; border-radius: 18px !important; }
+      .outer { padding: 10px !important; background-color:#07101f !important; }
+      .px { padding-left: 16px !important; padding-right: 16px !important; }
+      .hero-section { padding: 14px 16px 30px !important; }
+      .gift-shell { width: 100% !important; max-width: 350px !important; padding: 3px 3px 9px !important; border-radius: 22px !important; border-right: 5px solid #020814 !important; border-bottom: 9px solid #020814 !important; }
+      .gift-card { width: 100% !important; border-radius: 19px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.16) !important; }
+      .gift-card-pad { padding-left: 20px !important; padding-right: 20px !important; }
+      .hero-title { font-size: 24px !important; line-height: 30px !important; }
+      .hero-amount { font-size: 74px !important; line-height: 78px !important; letter-spacing: -2px !important; text-shadow: 0 3px 0 #06101f, 0 8px 20px rgba(0,0,0,0.45), 0 0 22px rgba(12,246,218,0.55) !important; }
       .reward-amount { font-size: 36px !important; line-height: 40px !important; }
-      .card-3d { margin-left: 0 !important; margin-right: 0 !important; }
+      .card-3d { margin-left: 0 !important; margin-right: 0 !important; box-shadow: 0 7px 0 #07101f, 0 12px 22px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.08) !important; }
       .step-row { display: block !important; width: 100% !important; }
       .step-icon-cell { display: block !important; width: 100% !important; text-align: center !important; padding-bottom: 12px !important; padding-right: 0 !important; }
       .step-text-cell { display: block !important; width: 100% !important; text-align: center !important; }
+      .bonus-shell { padding: 3px 3px 9px !important; border-radius: 22px !important; background-image: linear-gradient(135deg,#ffd76a 0%,#0CF6DA 44%,#1b2c62 100%) !important; border-right: 5px solid #020814 !important; border-bottom: 9px solid #020814 !important; }
       .bonus-inner { padding: 28px 20px !important; }
     }
   </style>
@@ -44,23 +48,25 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
     <!-- 3D Gift Card -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;">
       <tr><td align="center">
-        <table role="presentation" cellpadding="0" cellspacing="0" class="card-3d" style="width:92%;max-width:460px;border-collapse:separate;border-radius:20px;overflow:hidden;background-image:linear-gradient(145deg,#1a2744 0%,#0d1a33 50%,#152038 100%);box-shadow:0 2px 4px rgba(0,200,220,0.15), 0 8px 24px rgba(0,0,0,0.4), 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);">
-          <tr><td style="padding:36px 28px 14px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" class="gift-shell" bgcolor="#0CF6DA" style="width:92%;max-width:466px;border-collapse:separate;border-radius:24px;background-color:#0CF6DA;background-image:linear-gradient(135deg,#0CF6DA 0%,#00a7ff 36%,#142148 72%,#050914 100%);box-shadow:0 10px 0 #06101f, 0 22px 42px rgba(0,0,0,0.58), 0 0 44px rgba(12,246,218,0.18);padding:4px 4px 12px;border-right:6px solid #020814;border-bottom:10px solid #020814;">
+        <tr><td>
+        <table role="presentation" cellpadding="0" cellspacing="0" class="gift-card card-3d" bgcolor="#14264a" style="width:100%;border-collapse:separate;border-radius:20px;overflow:hidden;background-color:#14264a;background-image:linear-gradient(145deg,#22365f 0%,#0d1a33 48%,#17223c 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -18px 35px rgba(0,0,0,0.24);border-top:1px solid rgba(255,255,255,0.22);border-left:1px solid rgba(255,255,255,0.14);">
+          <tr><td class="gift-card-pad" style="padding:36px 28px 14px;">
             <!-- Decorative line -->
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
               <td style="height:3px;background-image:linear-gradient(90deg,#00d4ff,#0CF6DA,#00d4ff);border-radius:2px;"></td>
             </tr></table>
           </td></tr>
-          <tr><td style="padding:8px 28px 4px;text-align:center;">
+          <tr><td class="gift-card-pad" style="padding:8px 28px 4px;text-align:center;">
             <p style="margin:0;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#0CF6DA;">Exclusive Client Reward</p>
           </td></tr>
-          <tr><td style="padding:4px 28px 0;text-align:center;">
+          <tr><td class="gift-card-pad" style="padding:4px 28px 0;text-align:center;">
             <p class="hero-amount" style="margin:0;font-size:88px;font-weight:900;color:#ffffff;line-height:92px;letter-spacing:-3px;text-shadow:0 4px 20px rgba(0,212,255,0.3), 0 1px 0 rgba(255,255,255,0.1);">$50</p>
           </td></tr>
-          <tr><td style="padding:2px 28px 8px;text-align:center;">
+          <tr><td class="gift-card-pad" style="padding:2px 28px 8px;text-align:center;">
             <p class="hero-title" style="margin:0;font-size:26px;font-weight:800;color:#ffffff;line-height:32px;letter-spacing:0.5px;">GIFT CARD</p>
           </td></tr>
-          <tr><td style="padding:4px 28px 28px;text-align:center;">
+          <tr><td class="gift-card-pad" style="padding:4px 28px 28px;text-align:center;">
             <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;border-collapse:separate;"><tr>
               <td style="background-color:rgba(12,246,218,0.12);border:1px solid rgba(12,246,218,0.25);border-radius:30px;padding:8px 22px;">
                 <p style="margin:0;font-size:13px;font-weight:700;color:#0CF6DA;letter-spacing:0.5px;">Just for referring friends &amp; family</p>
@@ -68,11 +74,13 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
             </tr></table>
           </td></tr>
           <!-- Bottom decorative line -->
-          <tr><td style="padding:0 28px 20px;">
+          <tr><td class="gift-card-pad" style="padding:0 28px 20px;">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
               <td style="height:3px;background-image:linear-gradient(90deg,#0CF6DA,#00d4ff,#0CF6DA);border-radius:2px;"></td>
             </tr></table>
           </td></tr>
+        </table>
+        </td></tr>
         </table>
       </td></tr>
     </table>
@@ -135,7 +143,9 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
 
   <!-- BUT WAIT — Premium 3D Banner -->
   <tr><td class="px" style="padding:0 36px 28px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:20px;overflow:hidden;background-image:linear-gradient(145deg,#0a2e4a 0%,#0d1a33 40%,#1a0a33 100%);box-shadow:0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(12,246,218,0.1), 0 0 80px rgba(12,246,218,0.06) inset;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="bonus-shell" bgcolor="#FFD700" style="border-collapse:separate;border-radius:24px;background-color:#FFD700;background-image:linear-gradient(135deg,#FFD700 0%,#0CF6DA 42%,#18285a 100%);box-shadow:0 9px 0 #06101f, 0 20px 38px rgba(0,0,0,0.52), 0 0 44px rgba(255,215,0,0.12);padding:4px 4px 12px;border-right:6px solid #020814;border-bottom:10px solid #020814;">
+    <tr><td>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#0d1a33" style="border-collapse:separate;border-radius:20px;overflow:hidden;background-color:#0d1a33;background-image:linear-gradient(145deg,#0a2e4a 0%,#0d1a33 40%,#1a0a33 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -20px 36px rgba(0,0,0,0.28);border-top:1px solid rgba(255,255,255,0.18);border-left:1px solid rgba(255,255,255,0.12);">
       <tr><td class="bonus-inner" style="padding:36px 32px;text-align:center;">
         <!-- Glowing accent -->
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 14px;border-collapse:separate;"><tr>
@@ -161,6 +171,8 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://rep
 
         <p style="margin:0;font-size:20px;font-weight:900;color:#0CF6DA;line-height:26px;letter-spacing:0;">PER REFERRAL!</p>
       </td></tr>
+    </table>
+    </td></tr>
     </table>
   </td></tr>
 
