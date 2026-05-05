@@ -16,7 +16,8 @@ const emptyEntry = (): ReferralEntry => ({ name: "", phone: "", email: "" });
 
 export default function ReferralForm() {
   const [params] = useSearchParams();
-  const clientName = params.get("name") || "";
+  const clientFullName = params.get("name") || "";
+  const clientFirstName = clientFullName.split(" ")[0];
   const clientEmail = params.get("email") || "";
 
   const [referrals, setReferrals] = useState<ReferralEntry[]>(
