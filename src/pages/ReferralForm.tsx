@@ -150,7 +150,7 @@ export default function ReferralForm() {
               Your Referrals
             </h2>
             <p className="text-[#7a7a8e] text-sm mb-6">
-              Add up to 7 people who might benefit from a free super performance review.
+              Add up to 5 people who might benefit from a free super performance review.
             </p>
 
             <div className="space-y-4">
