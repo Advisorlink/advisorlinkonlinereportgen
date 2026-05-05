@@ -574,20 +574,32 @@ export function ESignPdfEditor({
 
           <div className="space-y-2 border-t border-border pt-4">
             {fields.map((field) => (
-              <button
+              <div
                 key={field.id}
-                type="button"
-                onClick={() => setSelectedFieldId(field.id)}
                 className={`flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
                   selectedFieldId === field.id
                     ? "border-cyan bg-cyan/10 text-foreground"
                     : "border-border hover:bg-muted/60"
                 }`}
               >
-                {field.kind === "signature" ? <PenTool className="h-4 w-4 text-cyan" /> : <Type className="h-4 w-4 text-muted-foreground" />}
-                <span className="min-w-0 flex-1 truncate">{field.label}</span>
-                <span className="text-xs text-muted-foreground">P{field.pageIndex + 1}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedFieldId(field.id)}
+                  className="flex min-w-0 flex-1 items-center gap-2"
+                >
+                  {field.kind === "signature" ? <PenTool className="h-4 w-4 text-cyan" /> : <Type className="h-4 w-4 text-muted-foreground" />}
+                  <span className="min-w-0 flex-1 truncate">{field.label}</span>
+                  <span className="text-xs text-muted-foreground">P{field.pageIndex + 1}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); removeField(field.id); }}
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-destructive hover:bg-destructive/10 transition-colors"
+                  aria-label={`Delete ${field.label}`}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
             ))}
           </div>
         </aside>
@@ -649,8 +661,17 @@ function formatLabel(name: string) {
 
 function suggestedValue(name: string, clientData: Record<string, string>) {
   const normalized = name.toLowerCase().replace(/[\s_-]+/g, "_");
+  // Exact key match first
+  for (const [key, value] of Object.entries(clientData)) {
+    if (normalized === key && value) return value;
+  }
+  // Partial match
   for (const [key, value] of Object.entries(clientData)) {
     if (normalized.includes(key) && value) return value;
+  }
+  // Date-like field names that didn't match above
+  if (/\bdate\b/.test(normalized) && !/(birth|dob)/.test(normalized)) {
+    return clientData.date || "";
   }
   return "";
 }
