@@ -219,7 +219,7 @@ export function ESignNewRequest({ onBack }: { onBack: () => void }) {
           </label>
 
           <div className="flex justify-end">
-            <Button onClick={() => setStep("select-client")} disabled={!file} className="gap-2">
+            <Button onClick={handleProceedToEdit} disabled={!file} className="gap-2">
               Next <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
