@@ -77,11 +77,9 @@ export function PresentationSlideshow({ clientName, onClose }: Props) {
       ref={containerRef}
       className={`relative flex flex-col bg-black ${isFullscreen ? "w-screen h-screen" : "rounded-xl overflow-hidden"}`}
     >
-      {/* Top bar — auto-hide in fullscreen, show on hover */}
+      {/* Top bar — hidden by default, shows on hover */}
       <div
-        className={`flex items-center justify-between px-4 py-2 bg-black/80 backdrop-blur z-10 transition-opacity duration-300 ${
-          isFullscreen ? "absolute top-0 left-0 right-0 opacity-0 hover:opacity-100" : ""
-        }`}
+        className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-2 bg-black/80 backdrop-blur z-10 transition-opacity duration-300 opacity-0 hover:opacity-100"
       >
         <div className="flex items-center gap-3">
           <span className="text-white/70 text-sm font-medium">
