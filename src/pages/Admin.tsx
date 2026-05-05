@@ -87,6 +87,7 @@ export default function Admin() {
   const [referralResponses, setReferralResponses] = useState<ReferralResponseRow[]>([]);
   const [referralLeads, setReferralLeads] = useState<ReferralLeadRow[]>([]);
   const [referralSearch, setReferralSearch] = useState("");
+  const [referrerFilter, setReferrerFilter] = useState("");
 
   // Resolve a usable inputs object — fall back to defaults so demo rows still
   // render a complete-looking report.
