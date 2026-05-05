@@ -111,7 +111,7 @@ export default function ReferralLanding() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#f0f9f7] to-[#e8f4f8] flex items-center justify-center">
-        <div className="animate-pulse text-[#0BB5A0] text-lg">Loading...</div>
+        <div className="animate-pulse text-[#1E88E5] text-lg">Loading...</div>
       </div>
     );
   }
@@ -120,15 +120,15 @@ export default function ReferralLanding() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#f0f9f7] to-[#e8f4f8] flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-10 text-center">
-          <div className="w-20 h-20 bg-[#0BB5A0]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-[#0BB5A0]" />
+          <div className="w-20 h-20 bg-[#1E88E5]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-10 h-10 text-[#1E88E5]" />
           </div>
           <h1 className="text-3xl font-bold text-[#1a1a2e] mb-4 font-heading">
             Thank You!
           </h1>
           <p className="text-[#444455] text-lg leading-relaxed mb-3">
             Someone from the team will reach out within the next{" "}
-            <strong className="text-[#0BB5A0]">24-48 hours</strong> to get
+            <strong className="text-[#1E88E5]">24-48 hours</strong> to get
             your free report generated and confirm your details.
           </p>
           <p className="text-[#7a7a8e] text-sm">
@@ -154,7 +154,7 @@ export default function ReferralLanding() {
 
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Hero */}
-        <div className="bg-gradient-to-r from-[#0BB5A0] to-[#089e8c] rounded-2xl p-8 mb-8 text-white text-center shadow-lg">
+        <div className="bg-gradient-to-r from-[#1E88E5] to-[#1565C0] rounded-2xl p-8 mb-8 text-white text-center shadow-lg">
           <Sparkles className="w-10 h-10 mx-auto mb-3 opacity-90" />
           <h1 className="text-3xl font-bold mb-4 font-heading">
             Your Free Super Performance Report
@@ -180,8 +180,8 @@ export default function ReferralLanding() {
               key={title}
               className="bg-white rounded-xl p-5 text-center border border-[#e8e8ee] shadow-sm"
             >
-              <div className="w-10 h-10 bg-[#0BB5A0]/10 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Icon className="w-5 h-5 text-[#0BB5A0]" />
+              <div className="w-10 h-10 bg-[#1E88E5]/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Icon className="w-5 h-5 text-[#1E88E5]" />
               </div>
               <h3 className="font-bold text-[#1a1a2e] text-sm">{title}</h3>
               <p className="text-[#7a7a8e] text-xs mt-1">{desc}</p>
@@ -204,7 +204,7 @@ export default function ReferralLanding() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="John Smith"
-                    className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20"
+                    className="border-[#e0e0e8] focus:border-[#1E88E5] focus:ring-[#1E88E5]/20"
                   />
                 </FieldGroup>
                 <FieldGroup icon={Phone} label="Phone Number">
@@ -213,7 +213,7 @@ export default function ReferralLanding() {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="0400 000 000"
                     type="tel"
-                    className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20"
+                    className="border-[#e0e0e8] focus:border-[#1E88E5] focus:ring-[#1E88E5]/20"
                   />
                 </FieldGroup>
               </div>
@@ -224,7 +224,7 @@ export default function ReferralLanding() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="john@example.com"
                   type="email"
-                  className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20"
+                  className="border-[#e0e0e8] focus:border-[#1E88E5] focus:ring-[#1E88E5]/20"
                 />
               </FieldGroup>
 
@@ -243,7 +243,7 @@ export default function ReferralLanding() {
                     value={superFundName}
                     onChange={(e) => setSuperFundName(e.target.value)}
                     placeholder="e.g. Australian Super"
-                    className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20"
+                    className="border-[#e0e0e8] focus:border-[#1E88E5] focus:ring-[#1E88E5]/20"
                   />
                 </FieldGroup>
                 <FieldGroup icon={DollarSign} label="Approximate Super Balance">
@@ -251,7 +251,7 @@ export default function ReferralLanding() {
                     <select
                       value={superBalance}
                       onChange={(e) => setSuperBalance(e.target.value)}
-                      className="w-full h-10 rounded-md border border-[#e0e0e8] bg-white px-3 py-2 text-sm focus:border-[#0BB5A0] focus:ring-2 focus:ring-[#0BB5A0]/20 focus:outline-none appearance-none pr-10"
+                      className="w-full h-10 rounded-md border border-[#e0e0e8] bg-white px-3 py-2 text-sm focus:border-[#1E88E5] focus:ring-2 focus:ring-[#1E88E5]/20 focus:outline-none appearance-none pr-10"
                     >
                       <option value="">Select range</option>
                       {BALANCE_RANGES.map((r) => (
@@ -272,7 +272,7 @@ export default function ReferralLanding() {
                     type="number"
                     min="18"
                     max="100"
-                    className="border-[#e0e0e8] focus:border-[#0BB5A0] focus:ring-[#0BB5A0]/20"
+                    className="border-[#e0e0e8] focus:border-[#1E88E5] focus:ring-[#1E88E5]/20"
                   />
                 </FieldGroup>
                 <FieldGroup icon={MapPin} label="State">
@@ -280,7 +280,7 @@ export default function ReferralLanding() {
                     <select
                       value={state}
                       onChange={(e) => setState(e.target.value)}
-                      className="w-full h-10 rounded-md border border-[#e0e0e8] bg-white px-3 py-2 text-sm focus:border-[#0BB5A0] focus:ring-2 focus:ring-[#0BB5A0]/20 focus:outline-none appearance-none pr-10"
+                      className="w-full h-10 rounded-md border border-[#e0e0e8] bg-white px-3 py-2 text-sm focus:border-[#1E88E5] focus:ring-2 focus:ring-[#1E88E5]/20 focus:outline-none appearance-none pr-10"
                     >
                       <option value="">Select state</option>
                       {STATES.map((s) => (
@@ -304,8 +304,8 @@ export default function ReferralLanding() {
                       onClick={() => setHadReview(opt.value)}
                       className={`flex-1 py-3 rounded-xl border-2 text-sm font-semibold transition-all duration-200 ${
                         hadReview === opt.value
-                          ? "border-[#0BB5A0] bg-[#0BB5A0]/5 text-[#0BB5A0]"
-                          : "border-[#e0e0e8] text-[#7a7a8e] hover:border-[#0BB5A0]/40"
+                          ? "border-[#1E88E5] bg-[#1E88E5]/5 text-[#1E88E5]"
+                          : "border-[#e0e0e8] text-[#7a7a8e] hover:border-[#1E88E5]/40"
                       }`}
                     >
                       {opt.label}
@@ -320,7 +320,7 @@ export default function ReferralLanding() {
               <Button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="bg-[#0BB5A0] hover:bg-[#099e8c] text-white px-12 py-6 text-lg rounded-xl shadow-lg shadow-[#0BB5A0]/25 transition-all duration-200 hover:shadow-xl hover:shadow-[#0BB5A0]/30 w-full md:w-auto"
+                className="bg-[#1E88E5] hover:bg-[#1565C0] text-white px-12 py-6 text-lg rounded-xl shadow-lg shadow-[#1E88E5]/25 transition-all duration-200 hover:shadow-xl hover:shadow-[#1E88E5]/30 w-full md:w-auto"
               >
                 {submitting ? "Submitting..." : "Get My Free Report"}
               </Button>
@@ -347,7 +347,7 @@ function FieldGroup({
   return (
     <div>
       <label className="flex items-center gap-2 text-sm font-semibold text-[#1a1a2e] mb-2">
-        <Icon className="w-4 h-4 text-[#0BB5A0]" />
+        <Icon className="w-4 h-4 text-[#1E88E5]" />
         {label}
       </label>
       {children}

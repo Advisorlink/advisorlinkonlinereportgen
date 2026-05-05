@@ -47,7 +47,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
   <!-- TEAL HERO BANNER -->
   <tr><td class="px" style="padding:24px 32px 0;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:16px 16px 0 0;overflow:hidden;">
-      <tr><td class="hero" style="padding:32px;background-color:${teal};">
+      <tr><td class="hero" style="padding:32px;background-color:${brandBlue};">
         <p style="margin:0 0 6px;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.8);">Referral Reward Program</p>
         <p class="hero-title" style="margin:0;font-size:26px;font-weight:bold;color:#ffffff;line-height:34px;">Hey ${safeName}, want to earn a <span style="color:${gold};">$100 Gift Card</span>?</p>
       </td></tr>
@@ -102,7 +102,7 @@ export function buildReferralEmailHtml(firstName: string, logoUrl = "https://osq
       <!-- Reward Card -->
       <tr><td style="padding:0 24px 24px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:12px;overflow:hidden;">
-          <tr><td style="padding:28px 20px;text-align:center;background-color:${teal};border-radius:12px;">
+          <tr><td style="padding:28px 20px;text-align:center;background-color:${brandBlue};border-radius:12px;">
             <p style="margin:0 0 4px;font-size:28px;">&#127873;</p>
             <p style="margin:0;font-size:16px;font-weight:600;color:#ffffff;line-height:24px;">Refer <span style="color:${gold};font-weight:bold;">5 people</span> and receive a</p>
             <p class="reward-amount" style="margin:4px 0 0;font-size:44px;font-weight:800;color:${gold};line-height:48px;letter-spacing:-1px;">$100 <span style="color:#ffffff;">Gift Card</span></p>
