@@ -5,6 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Monitor, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+const iceServers = [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+  { urls: "stun:stun2.l.google.com:19302" },
+];
+
 export default function MeetingJoin() {
   const [meetingId, setMeetingId] = useState("");
   const [status, setStatus] = useState<"idle" | "connecting" | "waiting" | "connected" | "ended">("idle");
@@ -13,11 +19,6 @@ export default function MeetingJoin() {
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const clientIdRef = useRef(crypto.randomUUID());
-
-  const iceServers = [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" },
-  ];
 
   const setupPeerConnection = useCallback((ch: ReturnType<typeof supabase.channel>) => {
     // Close existing PC if any
@@ -121,10 +122,11 @@ export default function MeetingJoin() {
   }, [meetingId, setupPeerConnection]);
 
   useEffect(() => {
+    const clientId = clientIdRef.current;
     return () => {
       pcRef.current?.close();
       if (channelRef.current) {
-        channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId: clientIdRef.current } });
+        channelRef.current.send({ type: "broadcast", event: "leave", payload: { clientId } });
         channelRef.current.unsubscribe();
       }
     };
