@@ -206,6 +206,40 @@ export function AICallerScripts() {
               <DialogTitle>{editingScript ? "Edit Script" : "Create Script"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-5 py-2">
+              {/* Load from existing script */}
+              {!editingScript && scripts.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Load from existing script</Label>
+                  <Select onValueChange={(id) => {
+                    const s = scripts.find(sc => sc.id === id);
+                    if (!s) return;
+                    setName(`${s.name} (Copy)`);
+                    setDescription(s.description || "");
+                    setCallDirection((s.call_direction as "outbound" | "inbound") || "outbound");
+                    setSystemPrompt(s.system_prompt);
+                    setFirstMessage(s.first_message);
+                    setSecondMessage(s.second_message || "");
+                    setQuestions(s.questions.map(q => ({ ...q, id: crypto.randomUUID() })));
+                    setVoiceId(s.voice_id);
+                    setBgSound(s.background_sound || "office");
+                    setBgEnabled(s.background_sound_enabled);
+                    setMaxDuration(s.max_duration_seconds);
+                    toast.success("Script loaded — edit and save as new");
+                  }}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Load an existing script as a starting point..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {scripts.map(s => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name} {(s.call_direction || "outbound") === "inbound" ? "(Inbound)" : "(Outbound)"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               {/* Direction selector */}
               <div className="space-y-2">
                 <Label>Call Direction</Label>
