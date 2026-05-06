@@ -83,6 +83,27 @@ function serializeFollowUps(statements: string[]): string {
   return JSON.stringify(filtered);
 }
 
+function createFieldNameFromQuestion(question: string, fallbackIndex: number): string {
+  const generated = question
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 40);
+
+  return generated || `question_${fallbackIndex + 1}`;
+}
+
+function normalizeQuestionsForSave(items: Question[]): Question[] {
+  return items
+    .map((q, index) => {
+      const question = q.question.trim();
+      const fieldName = q.fieldName.trim() || createFieldNameFromQuestion(question, index);
+      return { id: q.id, question, fieldName };
+    })
+    .filter(q => q.question);
+}
+
 export function AICallerScripts() {
   const { user } = useAuth();
   const savedDraft = useRef<ScriptSetupDraft | null>(null);
@@ -227,6 +248,8 @@ export function AICallerScripts() {
     if (!name.trim()) { toast.error("Script name is required"); return; }
     if (!user) return;
 
+    const questionsToSave = normalizeQuestionsForSave(questions);
+
     const payload = {
       user_id: user.id,
       name: name.trim(),
@@ -235,7 +258,7 @@ export function AICallerScripts() {
       system_prompt: systemPrompt,
       first_message: firstMessage,
       second_message: serializeFollowUps(followUpStatements),
-      questions: questions.filter(q => q.question && q.fieldName).map(q => ({ id: q.id, question: q.question, fieldName: q.fieldName })) as any,
+      questions: questionsToSave as any,
       closing_statements: serializeFollowUps(closingStatements),
       voice_id: voiceId,
       voice_provider: "elevenlabs",
