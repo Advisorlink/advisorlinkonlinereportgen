@@ -86,6 +86,7 @@ export function AICallerScripts() {
   function resetForm() {
     setName("");
     setDescription("");
+    setCallDirection(directionFilter);
     setSystemPrompt("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
     setFirstMessage("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
     setSecondMessage("Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
