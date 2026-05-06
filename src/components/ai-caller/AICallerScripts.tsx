@@ -140,7 +140,7 @@ export function AICallerScripts() {
       callDirection,
       systemPrompt,
       firstMessage,
-      secondMessage,
+      followUpStatements,
       questions,
       voiceId,
       bgSound,
