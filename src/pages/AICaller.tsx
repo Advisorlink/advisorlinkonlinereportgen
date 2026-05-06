@@ -27,16 +27,22 @@ export default function AICaller() {
     <CRMLayout>
       <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
         {/* Hero header */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-accent/30 p-6 sm:p-8">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNnKSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==')] opacity-60" />
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-navy via-navy to-cyan/20 p-6 sm:p-8 border border-cyan/10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(195_95%_50%/0.08),transparent_60%)]" />
+          <div className="absolute top-4 right-6 opacity-[0.04]">
+            <span className="text-[120px] font-black tracking-tighter text-white select-none">LEAP</span>
+          </div>
           <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                <Phone className="w-5 h-5 text-white" />
+            <div className="flex items-center gap-4 mb-1">
+              <div className="w-12 h-12 rounded-xl bg-cyan/15 backdrop-blur-sm flex items-center justify-center border border-cyan/20">
+                <Phone className="w-5 h-5 text-cyan" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight font-heading">AI Dialer</h1>
-                <p className="text-sm text-white/70">Automated AI-powered calling with real Australian voices</p>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-heading">L.E.A.P</h1>
+                  <span className="px-2.5 py-0.5 rounded-md bg-cyan/15 text-cyan text-[10px] font-bold tracking-widest uppercase border border-cyan/20">Beta</span>
+                </div>
+                <p className="text-sm text-white/50 mt-0.5">Lead Engagement Automation Platform</p>
               </div>
             </div>
           </div>
