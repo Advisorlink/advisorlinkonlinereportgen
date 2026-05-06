@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,25 @@ const VOICES = [
   { id: "voice6", name: "Declan", accent: "Australian", gender: "Male" },
   { id: "voice7", name: "Ryan", accent: "Australian", gender: "Male" },
 ];
+
+const SCRIPT_SETUP_DRAFT_KEY = "ai-caller-script-setup-draft";
+
+type ScriptSetupDraft = {
+  dialogOpen: boolean;
+  editingScriptId: string | null;
+  directionFilter: "outbound" | "inbound";
+  name: string;
+  description: string;
+  callDirection: "outbound" | "inbound";
+  systemPrompt: string;
+  firstMessage: string;
+  secondMessage: string;
+  questions: Question[];
+  voiceId: string;
+  bgSound: string;
+  bgEnabled: boolean;
+  maxDuration: number;
+};
 
 export function AICallerScripts() {
   const { user } = useAuth();
