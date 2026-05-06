@@ -202,6 +202,21 @@ export function AICallerCampaigns() {
     }
   }
 
+  async function resetCampaign(id: string) {
+    if (!confirm("This will reset the campaign back to draft, clear all call logs for it, and reset all contacts to pending. Continue?")) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "reset-campaign", campaignId: id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Campaign reset to draft — ready to start again");
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reset campaign");
+    }
+  }
+
   const statusColor: Record<string, string> = {
     draft: "bg-muted text-muted-foreground",
     active: "bg-emerald-500/20 text-emerald-400",
@@ -336,7 +351,7 @@ export function AICallerCampaigns() {
                       {c.ai_caller_scripts?.name || "No script"} · {c.total_contacts} contacts · {c.calls_completed} calls · {c.leads_generated} leads
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap justify-end">
                     {c.status === "draft" && (
                       <>
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}>
@@ -361,14 +376,21 @@ export function AICallerCampaigns() {
                     {c.status === "paused" && (
                       <>
                         <Button variant="outline" size="sm" className="gap-1" onClick={() => resumeCampaign(c.id)}>
-                          <RotateCcw className="w-3 h-3" /> Resume
+                          <Play className="w-3 h-3" /> Resume
                         </Button>
                         <Button variant="destructive" size="sm" className="gap-1" onClick={() => stopCampaign(c.id)}>
                           <Square className="w-3 h-3" /> Stop
                         </Button>
                       </>
                     )}
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteCampaign(c.id)}>
+                    {(c.status === "completed" || c.status === "active" || c.status === "paused") && (
+                      <Button variant="outline" size="sm" className="gap-1" onClick={() => resetCampaign(c.id)}>
+                        <RotateCcw className="w-3 h-3" /> Reset
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                      if (confirm("Delete this campaign and all its contacts?")) deleteCampaign(c.id);
+                    }}>
                       <Trash2 className="w-4 h-4 text-destructive" />
                     </Button>
                   </div>
