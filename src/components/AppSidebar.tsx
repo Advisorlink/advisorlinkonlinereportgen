@@ -1,4 +1,4 @@
-import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature } from "lucide-react";
+import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
