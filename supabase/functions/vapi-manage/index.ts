@@ -8,6 +8,18 @@ const corsHeaders = {
 
 const VAPI_BASE = "https://api.vapi.ai";
 
+const VOICE_ID_MAP: Record<string, string> = {
+  voice1: "4uJW3zTppOdNDWtKUtux",
+  voice2: "vVnXvLYPFjIyE2YrjUBE",
+  voice3: "tyepWYJJwJM9TTFIg5U7",
+  voice4: "w9rPM8AIZle60Nbpw7nl",
+  voice5: "DTLT09E2cxHF0DqjKVbc",
+};
+
+function resolveVoiceId(shortId: string | undefined): string {
+  if (!shortId) return VOICE_ID_MAP.voice1;
+  return VOICE_ID_MAP[shortId] || shortId;
+}
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
