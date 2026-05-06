@@ -250,40 +250,42 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
           />
           {/* Additional funds */}
           {(value.additionalFunds ?? []).map((fund, idx) => (
-            <div key={idx} className="space-y-3">
-              <div className="col-span-2 flex justify-end -mt-1 -mb-1">
-                <Button
-                  variant="ghost" size="sm"
-                  className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 h-7 text-[11px]"
-                  onClick={() => {
-                    const next = [...(value.additionalFunds ?? [])];
-                    next.splice(idx, 1);
-                    onChange({ ...value, additionalFunds: next });
-                  }}
-                >
-                  <Trash2 className="w-3 h-3 mr-1" /> Remove
-                </Button>
-              </div>
-              <Field label="Fund name"><Input value={fund.fundName} onChange={e => updateFund(idx, "fundName", e.target.value)} /></Field>
-              <Field label="Investment option"><Input value={fund.modelLabel} onChange={e => updateFund(idx, "modelLabel", e.target.value)} /></Field>
-              <Field label="Super balance"><NumInput v={fund.superBalance} on={n => updateFund(idx, "superBalance", n)} /></Field>
-              <Field label="Growth assets %"><PctInput v={fund.growthAssetsPct} on={n => updateFund(idx, "growthAssetsPct", n)} /></Field>
-              <Field label="5-year net return %"><PctInput v={fund.grossReturn} on={n => updateFund(idx, "grossReturn", n)} /></Field>
-              <Field label="Admin fee - flat $"><NumInput v={fund.adminFeeFlat} on={n => updateFund(idx, "adminFeeFlat", n)} /></Field>
-              <Field label="Admin fee - %"><PctInput v={fund.adminFeePct} on={n => updateFund(idx, "adminFeePct", n)} /></Field>
-              <Field label="Investment risk profile"><Input value={fund.investmentRiskProfile || ""} onChange={e => updateFund(idx, "investmentRiskProfile", e.target.value)} /></Field>
-            </Group>
-            <InvestmentOptionsSection
-              options={fund.investmentOptions ?? []}
-              onChange={(opts) => {
-                const funds = [...(value.additionalFunds ?? [])];
-                funds[idx] = { ...funds[idx], investmentOptions: opts };
-                onChange({ ...value, additionalFunds: funds });
-              }}
-              fundLabel={`Fund ${idx + 2}`}
-              primaryReturn={fund.grossReturn}
-              primaryGrowth={fund.growthAssetsPct}
-            />
+             <div key={idx} className="space-y-3">
+              <Group title={`Fund ${idx + 2}`}>
+                <div className="col-span-2 flex justify-end -mt-1 -mb-1">
+                  <Button
+                    variant="ghost" size="sm"
+                    className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 h-7 text-[11px]"
+                    onClick={() => {
+                      const next = [...(value.additionalFunds ?? [])];
+                      next.splice(idx, 1);
+                      onChange({ ...value, additionalFunds: next });
+                    }}
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" /> Remove
+                  </Button>
+                </div>
+                <Field label="Fund name"><Input value={fund.fundName} onChange={e => updateFund(idx, "fundName", e.target.value)} /></Field>
+                <Field label="Investment option"><Input value={fund.modelLabel} onChange={e => updateFund(idx, "modelLabel", e.target.value)} /></Field>
+                <Field label="Super balance"><NumInput v={fund.superBalance} on={n => updateFund(idx, "superBalance", n)} /></Field>
+                <Field label="Growth assets %"><PctInput v={fund.growthAssetsPct} on={n => updateFund(idx, "growthAssetsPct", n)} /></Field>
+                <Field label="5-year net return %"><PctInput v={fund.grossReturn} on={n => updateFund(idx, "grossReturn", n)} /></Field>
+                <Field label="Admin fee - flat $"><NumInput v={fund.adminFeeFlat} on={n => updateFund(idx, "adminFeeFlat", n)} /></Field>
+                <Field label="Admin fee - %"><PctInput v={fund.adminFeePct} on={n => updateFund(idx, "adminFeePct", n)} /></Field>
+                <Field label="Investment risk profile"><Input value={fund.investmentRiskProfile || ""} onChange={e => updateFund(idx, "investmentRiskProfile", e.target.value)} /></Field>
+              </Group>
+              <InvestmentOptionsSection
+                options={fund.investmentOptions ?? []}
+                onChange={(opts) => {
+                  const funds = [...(value.additionalFunds ?? [])];
+                  funds[idx] = { ...funds[idx], investmentOptions: opts };
+                  onChange({ ...value, additionalFunds: funds });
+                }}
+                fundLabel={`Fund ${idx + 2}`}
+                primaryReturn={fund.grossReturn}
+                primaryGrowth={fund.growthAssetsPct}
+              />
+            </div>
           ))}
           <Button
             variant="outline"
