@@ -351,7 +351,7 @@ export function AICallerCampaigns() {
                       {c.ai_caller_scripts?.name || "No script"} · {c.total_contacts} contacts · {c.calls_completed} calls · {c.leads_generated} leads
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap justify-end">
                     {c.status === "draft" && (
                       <>
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}>
@@ -376,14 +376,21 @@ export function AICallerCampaigns() {
                     {c.status === "paused" && (
                       <>
                         <Button variant="outline" size="sm" className="gap-1" onClick={() => resumeCampaign(c.id)}>
-                          <RotateCcw className="w-3 h-3" /> Resume
+                          <Play className="w-3 h-3" /> Resume
                         </Button>
                         <Button variant="destructive" size="sm" className="gap-1" onClick={() => stopCampaign(c.id)}>
                           <Square className="w-3 h-3" /> Stop
                         </Button>
                       </>
                     )}
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteCampaign(c.id)}>
+                    {(c.status === "completed" || c.status === "active" || c.status === "paused") && (
+                      <Button variant="outline" size="sm" className="gap-1" onClick={() => resetCampaign(c.id)}>
+                        <RotateCcw className="w-3 h-3" /> Reset
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                      if (confirm("Delete this campaign and all its contacts?")) deleteCampaign(c.id);
+                    }}>
                       <Trash2 className="w-4 h-4 text-destructive" />
                     </Button>
                   </div>
