@@ -80,7 +80,9 @@ export interface ClientInputs {
 
   // Multiple funds support
   additionalFunds?: FundEntry[];
-}
+
+  // Investment options for primary fund
+  investmentOptions?: InvestmentOption[];
 
 // Risk profile lookup (mirrors XLSX J27/J28 array formulas via growth-assets %)
 export function inferRiskProfile(growthPct: number): RiskProfile {
