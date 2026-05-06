@@ -75,7 +75,7 @@ export function AppSidebar() {
                         <span className="text-sm font-medium flex-1">{item.title}</span>
                       )}
                       {!collapsed && item.badge && (
-                        <span className="ml-auto px-1.5 py-0.5 rounded-full bg-cyan text-[10px] font-bold text-white leading-none">
+                        <span className={`ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white leading-none ${(item as any).badgeColor || "bg-cyan"}`}>
                           {item.badge}
                         </span>
                       )}
