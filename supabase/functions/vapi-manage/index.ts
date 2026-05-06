@@ -418,6 +418,167 @@ After all questions are asked, thank them for their time and let them know someo
       });
     }
 
+    if (action === "start-campaign") {
+      const { campaignId } = body;
+      if (!campaignId) throw new Error("campaignId is required");
+
+      // Fetch campaign with script
+      const { data: campaign, error: campErr } = await supabase
+        .from("ai_caller_campaigns")
+        .select("*, ai_caller_scripts(*)")
+        .eq("id", campaignId)
+        .single();
+      if (campErr || !campaign) throw new Error("Campaign not found");
+
+      const script = (campaign as any).ai_caller_scripts;
+      if (!script) throw new Error("Campaign has no script");
+
+      const phoneNumberId = (campaign as any).phone_number_id;
+      if (!phoneNumberId) throw new Error("Campaign has no phone number assigned. Edit the campaign and select a phone number.");
+
+      // Fetch pending contacts
+      const { data: contacts } = await supabase
+        .from("ai_caller_contacts")
+        .select("*")
+        .eq("campaign_id", campaignId)
+        .eq("call_status", "pending");
+
+      if (!contacts || contacts.length === 0) throw new Error("No pending contacts to call");
+
+      // Create Vapi assistant from script
+      const questions = script.questions || [];
+      const extractionProperties: Record<string, any> = {};
+      for (const q of questions) {
+        extractionProperties[q.fieldName] = { type: "string", description: q.question };
+      }
+
+      const systemPrompt = `${script.system_prompt}
+
+IMPORTANT RULES:
+- You MUST follow this script exactly. Do not deviate or make up information.
+- Ask each question one at a time and wait for the response before moving on.
+- Be conversational and natural, like a real Australian person calling.
+- If the person says they're not interested, politely thank them and end the call.
+- If they ask who you are, say you're calling from Advisor Link.
+- NEVER hallucinate or make up facts. Only relay information from your script.
+
+QUESTIONS TO ASK (in order):
+${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
+
+After all questions are asked, thank them for their time and let them know someone will be in touch.`;
+
+      const assistantPayload: any = {
+        name: `${script.name} - Campaign`,
+        model: {
+          provider: "openai",
+          model: script.model || "gpt-4o",
+          messages: [{ role: "system", content: systemPrompt }],
+          tools: questions.length > 0 ? [{
+            type: "function",
+            function: {
+              name: "extract_lead_data",
+              description: "Extract and save the lead's answers to qualification questions",
+              parameters: { type: "object", properties: extractionProperties, required: questions.map((q: any) => q.fieldName) },
+            },
+            async: false,
+          }] : undefined,
+        },
+        voice: {
+          provider: script.voice_provider || "elevenlabs",
+          voiceId: resolveVoiceId(script.voice_id),
+        },
+        firstMessage: script.first_message || "Hi there, how are you today?",
+        endCallFunctionEnabled: true,
+        maxDurationSeconds: script.max_duration_seconds || 300,
+        silenceTimeoutSeconds: 30,
+        responseDelaySeconds: 0.5,
+        backgroundSound: script.background_sound_enabled ? (script.background_sound || "office") : undefined,
+        transcriber: { provider: "deepgram", model: "nova-2", language: "en-AU" },
+      };
+
+      const assistantRes = await fetch(`${VAPI_BASE}/assistant`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${VAPI_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify(assistantPayload),
+      });
+      if (!assistantRes.ok) {
+        const errText = await assistantRes.text();
+        throw new Error(`Failed to create assistant: ${errText}`);
+      }
+      const assistant = await assistantRes.json();
+
+      // Update campaign status
+      await supabase.from("ai_caller_campaigns").update({
+        status: "active",
+        started_at: new Date().toISOString(),
+      } as any).eq("id", campaignId);
+
+      // Start calling contacts (fire calls with small delays)
+      const webhookUrl = `${supabaseUrl}/functions/v1/vapi-webhook`;
+      const results: any[] = [];
+
+      for (const contact of contacts) {
+        try {
+          const callPayload = {
+            assistantId: assistant.id,
+            customer: { number: contact.phone },
+            phoneNumberId,
+            metadata: { contactId: contact.id, campaignId },
+            server: { url: webhookUrl },
+          };
+
+          const callRes = await fetch(`${VAPI_BASE}/call/phone`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${VAPI_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify(callPayload),
+          });
+
+          if (!callRes.ok) {
+            const errText = await callRes.text();
+            console.error(`Call failed for ${contact.phone}:`, errText);
+            results.push({ contactId: contact.id, phone: contact.phone, error: errText });
+            continue;
+          }
+
+          const call = await callRes.json();
+
+          // Log the call
+          await supabase.from("ai_caller_call_logs").insert({
+            campaign_id: campaignId,
+            contact_id: contact.id,
+            vapi_call_id: call.id,
+            status: "initiated",
+            started_at: new Date().toISOString(),
+          });
+
+          // Update contact
+          await supabase.from("ai_caller_contacts").update({
+            call_status: "calling",
+            call_attempts: (contact.call_attempts || 0) + 1,
+            last_called_at: new Date().toISOString(),
+            vapi_call_id: call.id,
+          }).eq("id", contact.id);
+
+          results.push({ contactId: contact.id, phone: contact.phone, callId: call.id });
+
+          // Small delay between calls to avoid rate limiting
+          await new Promise(r => setTimeout(r, 2000));
+        } catch (err: any) {
+          console.error(`Error calling ${contact.phone}:`, err);
+          results.push({ contactId: contact.id, phone: contact.phone, error: err.message });
+        }
+      }
+
+      return new Response(JSON.stringify({ 
+        assistantId: assistant.id, 
+        callsInitiated: results.filter(r => r.callId).length,
+        callsFailed: results.filter(r => r.error).length,
+        results 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     throw new Error(`Unknown action: ${action}`);
   } catch (e) {
     console.error("vapi-manage error:", e);
