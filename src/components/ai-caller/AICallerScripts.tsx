@@ -102,11 +102,8 @@ export function AICallerScripts() {
   const [callDirection, setCallDirection] = useState<"outbound" | "inbound">(savedDraft.current?.callDirection ?? "outbound");
   const [systemPrompt, setSystemPrompt] = useState(savedDraft.current?.systemPrompt ?? "You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
   const [firstMessage, setFirstMessage] = useState(savedDraft.current?.firstMessage ?? "G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
-  const [secondMessage, setSecondMessage] = useState(savedDraft.current?.secondMessage ?? "Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
-  const [questions, setQuestions] = useState<Question[]>(savedDraft.current?.questions ?? [
-    { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
-    { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
-    { id: crypto.randomUUID(), question: "Have you ever had your super reviewed before?", fieldName: "had_review" },
+  const [followUpStatements, setFollowUpStatements] = useState<string[]>(savedDraft.current?.followUpStatements ?? [
+    "Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?"
   ]);
   const [voiceId, setVoiceId] = useState(savedDraft.current?.voiceId ?? "sarah");
   const [bgSound, setBgSound] = useState(savedDraft.current?.bgSound ?? "office");
