@@ -226,6 +226,97 @@ After all questions are asked, thank them for their time and let them know someo
       });
     }
 
+    if (action === "search-twilio-numbers") {
+      const { twilioAccountSid, twilioAuthToken, country, areaCode, contains } = body;
+      if (!twilioAccountSid || !twilioAuthToken) {
+        throw new Error("twilioAccountSid and twilioAuthToken are required");
+      }
+      const cc = country || "AU";
+      const params = new URLSearchParams();
+      if (areaCode) params.set("AreaCode", areaCode);
+      if (contains) params.set("Contains", contains);
+      params.set("VoiceEnabled", "true");
+      params.set("PageSize", "20");
+
+      const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/AvailablePhoneNumbers/${cc}/Local.json?${params.toString()}`;
+      const twilioRes = await fetch(twilioUrl, {
+        headers: {
+          Authorization: "Basic " + btoa(`${twilioAccountSid}:${twilioAuthToken}`),
+        },
+      });
+      if (!twilioRes.ok) {
+        const errText = await twilioRes.text();
+        throw new Error(`Twilio search failed [${twilioRes.status}]: ${errText}`);
+      }
+      const result = await twilioRes.json();
+      const numbers = (result.available_phone_numbers || []).map((n: any) => ({
+        phoneNumber: n.phone_number,
+        friendlyName: n.friendly_name,
+        locality: n.locality,
+        region: n.region,
+        capabilities: n.capabilities,
+      }));
+      return new Response(JSON.stringify({ numbers }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "buy-twilio-number") {
+      const { twilioAccountSid, twilioAuthToken, phoneNumber } = body;
+      if (!twilioAccountSid || !twilioAuthToken || !phoneNumber) {
+        throw new Error("twilioAccountSid, twilioAuthToken, and phoneNumber are required");
+      }
+
+      // 1. Buy on Twilio
+      const buyUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/IncomingPhoneNumbers.json`;
+      const buyRes = await fetch(buyUrl, {
+        method: "POST",
+        headers: {
+          Authorization: "Basic " + btoa(`${twilioAccountSid}:${twilioAuthToken}`),
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ PhoneNumber: phoneNumber }),
+      });
+      if (!buyRes.ok) {
+        const errText = await buyRes.text();
+        throw new Error(`Twilio buy failed [${buyRes.status}]: ${errText}`);
+      }
+      const purchased = await buyRes.json();
+
+      // 2. Import to Vapi
+      const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${VAPI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          provider: "twilio",
+          number: purchased.phone_number,
+          twilioAccountSid,
+          twilioAuthToken,
+        }),
+      });
+      if (!vapiRes.ok) {
+        const errText = await vapiRes.text();
+        // Number was bought but import failed - still return success with warning
+        return new Response(JSON.stringify({
+          purchased: { sid: purchased.sid, phoneNumber: purchased.phone_number },
+          vapiImportError: errText,
+          warning: "Number purchased on Twilio but failed to import to Vapi. You can import it manually.",
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const vapiNumber = await vapiRes.json();
+      return new Response(JSON.stringify({
+        purchased: { sid: purchased.sid, phoneNumber: purchased.phone_number },
+        vapiNumber,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     throw new Error(`Unknown action: ${action}`);
   } catch (e) {
     console.error("vapi-manage error:", e);
