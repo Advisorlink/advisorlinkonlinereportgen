@@ -9,6 +9,24 @@ const corsHeaders = {
 const VAPI_BASE = "https://api.vapi.ai";
 const TWILIO_GATEWAY = "https://connector-gateway.lovable.dev/twilio";
 
+// Normalize Australian phone numbers to E.164 format
+function normalizeAUPhone(phone: string): string {
+  let cleaned = phone.replace(/[\s\-\(\)]/g, "");
+  // If starts with 0 (local AU format like 0412345678), convert to +61
+  if (cleaned.startsWith("0") && cleaned.length === 10) {
+    cleaned = "+61" + cleaned.slice(1);
+  }
+  // If starts with 61 without +, add +
+  if (cleaned.startsWith("61") && !cleaned.startsWith("+") && cleaned.length >= 11) {
+    cleaned = "+" + cleaned;
+  }
+  // Validate: must start with + and be 10-15 digits
+  if (!cleaned.startsWith("+")) {
+    cleaned = "+" + cleaned;
+  }
+  return cleaned;
+}
+
 const VOICE_ID_MAP: Record<string, string> = {
   voice1: "DTLT09E2cxHF0DqjKVbc",
   voice2: "4yye0QE5YPsKbMOCGGlj",
