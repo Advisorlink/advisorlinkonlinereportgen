@@ -32,6 +32,7 @@ import {
   Volume2,
   Loader2,
   Sparkles,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -510,6 +511,21 @@ export function AICallerLeads() {
                       <span className="text-xs text-muted-foreground font-mono tabular-nums w-10 text-right">
                         {formatTime(duration)}
                       </span>
+                      <a
+                        href={recordingUrl}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-full ml-1"
+                          title="Download recording"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </Button>
+                      </a>
                     </div>
                   </div>
                 </CardContent>
