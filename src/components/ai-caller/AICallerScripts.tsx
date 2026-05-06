@@ -209,6 +209,12 @@ export function AICallerScripts() {
               </div>
 
               <div className="space-y-2">
+                <Label>Follow-Up Statement</Label>
+                <p className="text-xs text-muted-foreground">Said after the client responds to the opening message, before questions begin</p>
+                <Textarea value={secondMessage} onChange={e => setSecondMessage(e.target.value)} rows={3} placeholder="e.g. Great to hear! The reason for my call today is..." />
+              </div>
+
+              <div className="space-y-2">
                 <Label>System Prompt / Personality</Label>
                 <Textarea value={systemPrompt} onChange={e => setSystemPrompt(e.target.value)} rows={4} placeholder="Define how the AI should behave..." />
               </div>
