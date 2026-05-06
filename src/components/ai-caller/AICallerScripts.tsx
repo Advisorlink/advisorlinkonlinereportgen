@@ -9,7 +9,7 @@ import { Phone, PhoneIncoming, PhoneOutgoing } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, GripVertical, Play, Volume2, Pencil } from "lucide-react";
+import { Plus, Trash2, GripVertical, Play, Volume2, Pencil, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -170,6 +170,22 @@ export function AICallerScripts() {
     await supabase.from("ai_caller_scripts").delete().eq("id", id);
     toast.success("Script deleted");
     loadScripts();
+  }
+
+  function cloneScript(script: Script) {
+    setEditingScript(null);
+    setName(`${script.name} (Copy)`);
+    setDescription(script.description || "");
+    setCallDirection((script.call_direction as "outbound" | "inbound") || "outbound");
+    setSystemPrompt(script.system_prompt);
+    setFirstMessage(script.first_message);
+    setSecondMessage(script.second_message || "");
+    setQuestions(script.questions.map(q => ({ ...q, id: crypto.randomUUID() })));
+    setVoiceId(script.voice_id);
+    setBgSound(script.background_sound || "office");
+    setBgEnabled(script.background_sound_enabled);
+    setMaxDuration(script.max_duration_seconds);
+    setDialogOpen(true);
   }
 
   const filteredScripts = scripts.filter(s => (s.call_direction || "outbound") === directionFilter);
@@ -385,6 +401,9 @@ export function AICallerScripts() {
                     </div>
                   </div>
                   <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" title="Clone" onClick={() => cloneScript(s)}>
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(s)}>
                       <Pencil className="w-3.5 h-3.5" />
                     </Button>
