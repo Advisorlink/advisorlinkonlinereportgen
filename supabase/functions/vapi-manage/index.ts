@@ -35,6 +35,7 @@ serve(async (req) => {
   try {
     const VAPI_API_KEY = Deno.env.get("VAPI_API_KEY");
     if (!VAPI_API_KEY) throw new Error("VAPI_API_KEY is not configured");
+    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -106,6 +107,7 @@ After all questions are asked, thank them for their time and let them know someo
           voiceId: resolveVoiceId(script.voice_id),
           inputMinCharacters: 10,
           fillerInjectionEnabled: false,
+          ...(ELEVENLABS_API_KEY ? { credentials: { apiKey: ELEVENLABS_API_KEY } } : {}),
         },
         firstMessage: script.first_message || "Hi there, how are you today?",
         endCallFunctionEnabled: true,
@@ -503,6 +505,7 @@ After all questions are asked, thank them for their time and let them know someo
           voiceId: resolveVoiceId(script.voice_id),
           inputMinCharacters: 10,
           fillerInjectionEnabled: false,
+          ...(ELEVENLABS_API_KEY ? { credentials: { apiKey: ELEVENLABS_API_KEY } } : {}),
         },
         firstMessage: script.first_message || "Hi there, how are you today?",
         endCallFunctionEnabled: true,
