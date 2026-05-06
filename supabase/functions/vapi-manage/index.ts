@@ -19,6 +19,12 @@ function resolveVoiceId(shortId: string | undefined): string {
   if (!shortId) return VOICE_ID_MAP.voice1;
   return VOICE_ID_MAP[shortId] || shortId;
 }
+
+function resolveVoiceProvider(provider: string | undefined): string {
+  if (!provider || provider === "elevenlabs") return "11labs";
+  return provider;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -89,7 +95,7 @@ After all questions are asked, thank them for their time and let them know someo
           }] : undefined,
         },
         voice: {
-          provider: "11labs",
+          provider: resolveVoiceProvider(script.voice_provider),
           voiceId: resolveVoiceId(script.voice_id),
         },
         firstMessage: script.first_message || "Hi there, how are you today?",
@@ -484,7 +490,7 @@ After all questions are asked, thank them for their time and let them know someo
           }] : undefined,
         },
         voice: {
-          provider: script.voice_provider || "elevenlabs",
+          provider: resolveVoiceProvider(script.voice_provider),
           voiceId: resolveVoiceId(script.voice_id),
         },
         firstMessage: script.first_message || "Hi there, how are you today?",
