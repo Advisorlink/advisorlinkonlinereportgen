@@ -90,6 +90,7 @@ export interface ClientInputs {
 
   // Investment options for primary fund
   investmentOptions?: InvestmentOption[];
+  primaryAllocationPct?: number; // 0-1, portion remaining in the primary/original option
 }
 
 // Risk profile lookup (mirrors XLSX J27/J28 array formulas via growth-assets %)
