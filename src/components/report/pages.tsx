@@ -398,12 +398,31 @@ export function FundsPage({ s }: { s: ReportSummary }) {
               <SectionCard key={idx} title={`Fund ${idx + 1}: ${f.fundName}`} icon="◆">
                 <Row label="Investment option" value={f.modelLabel} />
                 <Row label="Balance" value={fmtMoney(f.superBalance)} />
-                <Row label="Growth assets" value={fmtPct(f.growthAssetsPct, 0)} />
-                <Row label="Investment risk profile" value={f.investmentRiskProfile || inferRiskProfile(f.growthAssetsPct)} />
-                <Row label="5-year net return" value={fmtPct(f.grossReturn)} />
+                <Row label="Growth assets" value={fmtPct(resolvedFundGrowth(f), 0)} />
+                <Row label="Investment risk profile" value={f.investmentRiskProfile || inferRiskProfile(resolvedFundGrowth(f))} />
+                <Row label="5-year net return" value={fmtPct(resolvedFundReturn(f))} />
                 <Row label="Admin fee - flat" value={fmtMoney(f.adminFeeFlat)} />
                 <Row label="Admin fee - %" value={fmtPct(f.adminFeePct, 2)} />
                 <Row label="Effective admin fee %" value={fmtPct(f.superBalance > 0 ? f.adminFeeFlat / f.superBalance + f.adminFeePct : 0, 2)} />
+                {f.investmentOptions && f.investmentOptions.length > 0 && (
+                  <div className="mt-3 pt-2 border-t border-border">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1.5">Investment Options Breakdown</div>
+                    {f.investmentOptions.map((opt, oi) => (
+                      <div key={oi} className="flex items-baseline justify-between py-1 text-[11px]">
+                        <span className="text-muted-foreground">{opt.name || `Option ${oi + 1}`}</span>
+                        <span className="tabular-nums text-foreground">
+                          {fmtPct(opt.allocationPct, 0)} alloc · {fmtPct(opt.fiveYearReturn)} return · {fmtPct(opt.growthAssetsPct, 0)} growth
+                        </span>
+                      </div>
+                    ))}
+                    <div className="flex items-baseline justify-between py-1.5 mt-1 border-t border-border text-[11px] font-semibold">
+                      <span className="text-navy">Weighted Average</span>
+                      <span className="tabular-nums text-navy">
+                        {fmtPct(resolvedFundReturn(f))} return · {fmtPct(resolvedFundGrowth(f), 0)} growth
+                      </span>
+                    </div>
+                  </div>
+                )}
               </SectionCard>
             ))}
           </div>
