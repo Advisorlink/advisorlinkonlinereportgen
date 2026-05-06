@@ -19,6 +19,13 @@ const VOICE_ID_MAP: Record<string, string> = {
   voice7: "sclx1MZrNqboRcmLWoDb",
 };
 
+const VAPI_VOICE_FALLBACKS: Record<string, string> = {
+  voice4: "Elliot",
+  voice5: "Rohan",
+  voice6: "Zac",
+  voice7: "Dan",
+};
+
 function resolveVoiceId(shortId: string | undefined): string {
   if (!shortId) return VOICE_ID_MAP.voice1;
   return VOICE_ID_MAP[shortId] || shortId;
@@ -29,13 +36,32 @@ function resolveVoiceProvider(provider: string | undefined): string {
   return provider;
 }
 
+function buildVoiceConfig(script: any, supabaseUrl: string) {
+  const provider = resolveVoiceProvider(script.voice_provider);
+  const shortVoiceId = script.voice_id;
+  const voiceId = resolveVoiceId(shortVoiceId);
+
+  if (provider === "11labs" && VAPI_VOICE_FALLBACKS[shortVoiceId]) {
+    return {
+      provider: "vapi",
+      voiceId: VAPI_VOICE_FALLBACKS[shortVoiceId],
+    };
+  }
+
+  return {
+    provider,
+    voiceId,
+    inputMinCharacters: 10,
+    fillerInjectionEnabled: false,
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const VAPI_API_KEY = Deno.env.get("VAPI_API_KEY");
     if (!VAPI_API_KEY) throw new Error("VAPI_API_KEY is not configured");
-    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -102,13 +128,7 @@ After all questions are asked, thank them for their time and let them know someo
             async: false,
           }] : undefined,
         },
-        voice: {
-          provider: resolveVoiceProvider(script.voice_provider),
-          voiceId: resolveVoiceId(script.voice_id),
-          inputMinCharacters: 10,
-          fillerInjectionEnabled: false,
-          ...(ELEVENLABS_API_KEY ? { credentials: { apiKey: ELEVENLABS_API_KEY } } : {}),
-        },
+        voice: buildVoiceConfig(script, supabaseUrl),
         firstMessage: script.first_message || "Hi there, how are you today?",
         endCallFunctionEnabled: true,
         recordingEnabled: true,
@@ -500,13 +520,7 @@ After all questions are asked, thank them for their time and let them know someo
             async: false,
           }] : undefined,
         },
-        voice: {
-          provider: resolveVoiceProvider(script.voice_provider),
-          voiceId: resolveVoiceId(script.voice_id),
-          inputMinCharacters: 10,
-          fillerInjectionEnabled: false,
-          ...(ELEVENLABS_API_KEY ? { credentials: { apiKey: ELEVENLABS_API_KEY } } : {}),
-        },
+        voice: buildVoiceConfig(script, supabaseUrl),
         firstMessage: script.first_message || "Hi there, how are you today?",
         endCallFunctionEnabled: true,
         recordingEnabled: true,
