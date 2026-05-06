@@ -58,13 +58,28 @@ type ScriptSetupDraft = {
   callDirection: "outbound" | "inbound";
   systemPrompt: string;
   firstMessage: string;
-  secondMessage: string;
+  followUpStatements: string[];
   questions: Question[];
   voiceId: string;
   bgSound: string;
   bgEnabled: boolean;
   maxDuration: number;
 };
+
+function parseFollowUps(secondMessage: string | null | undefined): string[] {
+  if (!secondMessage) return [""];
+  try {
+    const parsed = JSON.parse(secondMessage);
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+  } catch { /* not JSON, treat as single statement */ }
+  return [secondMessage];
+}
+
+function serializeFollowUps(statements: string[]): string {
+  const filtered = statements.filter(s => s.trim());
+  if (filtered.length === 0) return "";
+  return JSON.stringify(filtered);
+}
 
 export function AICallerScripts() {
   const { user } = useAuth();
@@ -87,11 +102,13 @@ export function AICallerScripts() {
   const [callDirection, setCallDirection] = useState<"outbound" | "inbound">(savedDraft.current?.callDirection ?? "outbound");
   const [systemPrompt, setSystemPrompt] = useState(savedDraft.current?.systemPrompt ?? "You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
   const [firstMessage, setFirstMessage] = useState(savedDraft.current?.firstMessage ?? "G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
-  const [secondMessage, setSecondMessage] = useState(savedDraft.current?.secondMessage ?? "Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
+  const [followUpStatements, setFollowUpStatements] = useState<string[]>(savedDraft.current?.followUpStatements ?? [
+    "Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?"
+  ]);
   const [questions, setQuestions] = useState<Question[]>(savedDraft.current?.questions ?? [
     { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
     { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
-    { id: crypto.randomUUID(), question: "Have you ever had your super reviewed before?", fieldName: "had_review" },
+    { id: crypto.randomUUID(), question: "Have you ever had your super review before?", fieldName: "had_review" },
   ]);
   const [voiceId, setVoiceId] = useState(savedDraft.current?.voiceId ?? "sarah");
   const [bgSound, setBgSound] = useState(savedDraft.current?.bgSound ?? "office");
@@ -123,7 +140,7 @@ export function AICallerScripts() {
       callDirection,
       systemPrompt,
       firstMessage,
-      secondMessage,
+      followUpStatements,
       questions,
       voiceId,
       bgSound,
@@ -133,7 +150,7 @@ export function AICallerScripts() {
 
     sessionStorage.setItem(SCRIPT_SETUP_DRAFT_KEY, JSON.stringify(draft));
     savedDraft.current = draft;
-  }, [bgEnabled, bgSound, callDirection, description, dialogOpen, directionFilter, editingScript, firstMessage, maxDuration, name, questions, secondMessage, systemPrompt, voiceId]);
+  }, [bgEnabled, bgSound, callDirection, description, dialogOpen, directionFilter, editingScript, firstMessage, maxDuration, name, questions, followUpStatements, systemPrompt, voiceId]);
 
   async function loadScripts() {
     setLoading(true);
@@ -151,7 +168,7 @@ export function AICallerScripts() {
     setCallDirection(directionFilter);
     setSystemPrompt("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
     setFirstMessage("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
-    setSecondMessage("Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
+    setFollowUpStatements(["Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?"]);
     setQuestions([
       { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
       { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
@@ -177,7 +194,7 @@ export function AICallerScripts() {
     setCallDirection((script.call_direction as "outbound" | "inbound") || "outbound");
     setSystemPrompt(script.system_prompt);
     setFirstMessage(script.first_message);
-    setSecondMessage(script.second_message || "");
+    setFollowUpStatements(parseFollowUps(script.second_message));
     setQuestions(script.questions.length > 0 ? script.questions : []);
     setVoiceId(script.voice_id);
     setBgSound(script.background_sound || "office");
@@ -209,7 +226,7 @@ export function AICallerScripts() {
       call_direction: callDirection,
       system_prompt: systemPrompt,
       first_message: firstMessage,
-      second_message: secondMessage,
+      second_message: serializeFollowUps(followUpStatements),
       questions: questions.filter(q => q.question && q.fieldName).map(q => ({ id: q.id, question: q.question, fieldName: q.fieldName })) as any,
       voice_id: voiceId,
       voice_provider: "elevenlabs",
@@ -248,7 +265,7 @@ export function AICallerScripts() {
     setCallDirection((script.call_direction as "outbound" | "inbound") || "outbound");
     setSystemPrompt(script.system_prompt);
     setFirstMessage(script.first_message);
-    setSecondMessage(script.second_message || "");
+    setFollowUpStatements(parseFollowUps(script.second_message));
     setQuestions(script.questions.map(q => ({ ...q, id: crypto.randomUUID() })));
     setVoiceId(script.voice_id);
     setBgSound(script.background_sound || "office");
@@ -291,7 +308,7 @@ export function AICallerScripts() {
                     setCallDirection((s.call_direction as "outbound" | "inbound") || "outbound");
                     setSystemPrompt(s.system_prompt);
                     setFirstMessage(s.first_message);
-                    setSecondMessage(s.second_message || "");
+                    setFollowUpStatements(parseFollowUps(s.second_message));
                     setQuestions(s.questions.map(q => ({ ...q, id: crypto.randomUUID() })));
                     setVoiceId(s.voice_id);
                     setBgSound(s.background_sound || "office");
@@ -380,10 +397,42 @@ export function AICallerScripts() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Follow-Up Statement</Label>
-                <p className="text-xs text-muted-foreground">Said after the client responds to the opening message, before questions begin</p>
-                <Textarea value={secondMessage} onChange={e => setSecondMessage(e.target.value)} rows={3} placeholder="e.g. Great to hear! The reason for my call today is..." />
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Follow-Up Statements</Label>
+                    <p className="text-xs text-muted-foreground">Said after the client responds, before questions begin. Add as many as needed.</p>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setFollowUpStatements([...followUpStatements, ""])} className="gap-1 shrink-0">
+                    <Plus className="w-3 h-3" /> Add Statement
+                  </Button>
+                </div>
+                {followUpStatements.map((stmt, i) => (
+                  <div key={i} className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 border border-border">
+                    <span className="text-xs text-muted-foreground mt-2.5 font-mono w-5 shrink-0">{i + 1}.</span>
+                    <Textarea
+                      value={stmt}
+                      onChange={e => {
+                        const updated = [...followUpStatements];
+                        updated[i] = e.target.value;
+                        setFollowUpStatements(updated);
+                      }}
+                      rows={2}
+                      placeholder={`Follow-up statement ${i + 1}...`}
+                      className="flex-1"
+                    />
+                    {followUpStatements.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 mt-1"
+                        onClick={() => setFollowUpStatements(followUpStatements.filter((_, idx) => idx !== i))}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
               </div>
 
               <div className="space-y-2">
