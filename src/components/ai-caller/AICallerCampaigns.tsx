@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Upload, Play, Trash2, Users, Loader2 } from "lucide-react";
+import { Plus, Upload, Play, Trash2, Users, Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -17,6 +17,7 @@ export function AICallerCampaigns() {
   const [phoneNumbers, setPhoneNumbers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState<any>(null);
   const [name, setName] = useState("");
   const [scriptId, setScriptId] = useState("");
   const [phoneNumberId, setPhoneNumberId] = useState("");
@@ -95,11 +96,44 @@ export function AICallerCampaigns() {
     if (contactError) { toast.error(contactError.message); return; }
 
     toast.success(`Campaign created with ${validContacts.length} contacts`);
+    resetDialog();
+    load();
+  }
+
+  function resetDialog() {
     setDialogOpen(false);
+    setEditingCampaign(null);
     setName("");
     setScriptId("");
     setPhoneNumberId("");
     setContacts([]);
+  }
+
+  async function openEditDialog(campaign: any) {
+    setEditingCampaign(campaign);
+    setName(campaign.name);
+    setScriptId(campaign.script_id);
+    setPhoneNumberId(campaign.phone_number_id || "");
+    // Load existing contacts
+    const { data } = await supabase.from("ai_caller_contacts").select("*").eq("campaign_id", campaign.id);
+    setContacts((data || []).map((c: any) => ({ name: c.name, phone: c.phone, email: c.email || "" })));
+    setDialogOpen(true);
+  }
+
+  async function updateCampaign() {
+    if (!editingCampaign) return;
+    if (!name.trim() || !scriptId) { toast.error("Name and script are required"); return; }
+    if (!phoneNumberId) { toast.error("Select a phone number to call from"); return; }
+
+    const { error } = await supabase.from("ai_caller_campaigns").update({
+      name: name.trim(),
+      script_id: scriptId,
+      phone_number_id: phoneNumberId,
+    } as any).eq("id", editingCampaign.id);
+
+    if (error) { toast.error(error.message); return; }
+    toast.success("Campaign updated");
+    resetDialog();
     load();
   }
 
@@ -140,13 +174,13 @@ export function AICallerCampaigns() {
           <h2 className="text-lg font-semibold text-foreground">Campaigns</h2>
           <p className="text-sm text-muted-foreground">Manage your calling campaigns</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetDialog(); else setDialogOpen(true); }}>
           <DialogTrigger asChild>
-            <Button className="gap-2"><Plus className="w-4 h-4" /> New Campaign</Button>
+            <Button className="gap-2" onClick={() => { setEditingCampaign(null); setDialogOpen(true); }}><Plus className="w-4 h-4" /> New Campaign</Button>
           </DialogTrigger>
           <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create Campaign</DialogTitle>
+              <DialogTitle>{editingCampaign ? "Edit Campaign" : "Create Campaign"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div className="space-y-2">
@@ -224,7 +258,11 @@ export function AICallerCampaigns() {
                 )}
               </div>
 
-              <Button onClick={createCampaign} className="w-full">Create Campaign</Button>
+              {editingCampaign ? (
+                <Button onClick={updateCampaign} className="w-full">Save Changes</Button>
+              ) : (
+                <Button onClick={createCampaign} className="w-full">Create Campaign</Button>
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -258,10 +296,15 @@ export function AICallerCampaigns() {
                   </div>
                   <div className="flex gap-2">
                     {c.status === "draft" && (
-                      <Button size="sm" className="gap-1" onClick={() => startCampaign(c.id)} disabled={starting !== null}>
-                        {starting === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
-                        {starting === c.id ? "Starting..." : "Start"}
-                      </Button>
+                      <>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}>
+                          <Pencil className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                        <Button size="sm" className="gap-1" onClick={() => startCampaign(c.id)} disabled={starting !== null}>
+                          {starting === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
+                          {starting === c.id ? "Starting..." : "Start"}
+                        </Button>
+                      </>
                     )}
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteCampaign(c.id)}>
                       <Trash2 className="w-4 h-4 text-destructive" />
