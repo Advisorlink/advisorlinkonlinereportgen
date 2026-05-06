@@ -22,7 +22,7 @@ import { toast } from "sonner";
 
 export interface ESignField {
   id: string;
-  kind: "text" | "signature";
+  kind: "text" | "signature" | "date";
   pageIndex: number;
   x: number;
   y: number;
@@ -53,7 +53,7 @@ interface Props {
   onContinue: (editedFile: File, fields: ESignField[]) => void;
 }
 
-type Tool = "select" | "text" | "signature";
+type Tool = "select" | "text" | "signature" | "date";
 type DragState =
   | { type: "move"; fieldId: string; offsetX: number; offsetY: number }
   | { type: "resize"; fieldId: string; startX: number; startY: number; startWidth: number; startHeight: number };
@@ -250,25 +250,44 @@ export function ESignPdfEditor({
   const signatureFields = fields.filter((field) => field.kind === "signature");
   const textFields = fields.filter((field) => field.kind === "text");
 
+  const dateFields = fields.filter((field) => field.kind === "date");
+
   const addField = (pageIndex: number, x: number, y: number) => {
     if (tool === "select") return;
 
-    const field: ESignField =
-      tool === "signature"
-        ? createSignatureField(pageIndex, x, y, `Signature ${signatureFields.length + 1}`)
-        : {
-            id: `field-${Date.now()}`,
-            kind: "text",
-            pageIndex,
-            x: clamp(x, 0, 0.72),
-            y: clamp(y, 0, 0.94),
-            width: 0.28,
-            height: 0.04,
-            label: `Text ${textFields.length + 1}`,
-            value: "",
-            required: false,
-            source: "manual",
-          };
+    let field: ESignField;
+
+    if (tool === "signature") {
+      field = createSignatureField(pageIndex, x, y, `Signature ${signatureFields.length + 1}`);
+    } else if (tool === "date") {
+      field = {
+        id: `field-${Date.now()}`,
+        kind: "date",
+        pageIndex,
+        x: clamp(x, 0, 0.78),
+        y: clamp(y, 0, 0.94),
+        width: 0.18,
+        height: 0.035,
+        label: `Date ${dateFields.length + 1}`,
+        value: todayFormatted,
+        required: false,
+        source: "manual",
+      };
+    } else {
+      field = {
+        id: `field-${Date.now()}`,
+        kind: "text",
+        pageIndex,
+        x: clamp(x, 0, 0.72),
+        y: clamp(y, 0, 0.94),
+        width: 0.28,
+        height: 0.04,
+        label: `Text ${textFields.length + 1}`,
+        value: "",
+        required: false,
+        source: "manual",
+      };
+    }
 
     setFields((prev) => [...prev, field]);
     setSelectedFieldId(field.id);
@@ -388,14 +407,14 @@ export function ESignPdfEditor({
 
         const { x, y, width, height } = toPdfRect(page, field);
 
-        if (field.kind === "text" && field.source !== "acroform") {
+        if ((field.kind === "text" || field.kind === "date") && field.source !== "acroform") {
           page.drawRectangle({
             x,
             y,
             width,
             height,
             borderWidth: 0.7,
-            borderColor: rgb(0.03, 0.41, 0.56),
+            borderColor: field.kind === "date" ? rgb(0.45, 0.27, 0.07) : rgb(0.03, 0.41, 0.56),
             color: rgb(0.96, 0.99, 1),
             opacity: 0.92,
           });
@@ -468,6 +487,7 @@ export function ESignPdfEditor({
         <div className="flex flex-wrap gap-2">
           <ToolButton active={tool === "select"} onClick={() => setTool("select")} icon={MousePointer2} label="Select" />
           <ToolButton active={tool === "text"} onClick={() => setTool("text")} icon={Type} label="Text" />
+          <ToolButton active={tool === "date"} onClick={() => setTool("date")} icon={CalendarDays} label="Date" />
           <ToolButton active={tool === "signature"} onClick={() => setTool("signature")} icon={PenTool} label="Signature" />
         </div>
       </div>
