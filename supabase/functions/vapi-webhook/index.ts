@@ -75,15 +75,13 @@ async function extractLeadAnswers(
               parameters: {
                 type: "object",
                 properties: {
-                  fields: {
-                    type: "object",
-                    properties: {
-                      super_fund_name: { type: "string" },
-                      balance: { type: "string" },
-                      age: { type: "string" },
-                      had_review_before: { type: "string" },
-                    },
-                    additionalProperties: { type: "string" },
+              super_fund_name: { type: "string" },
+              balance: { type: "string" },
+              age: { type: "string" },
+              had_review_before: { type: "string" },
+              campaign_answers: {
+                type: "object",
+                additionalProperties: { type: "string" },
                   },
                   summary: {
                     type: "string",
@@ -91,7 +89,7 @@ async function extractLeadAnswers(
                       "Concise call summary based only on the transcript",
                   },
                 },
-                required: ["fields", "summary"],
+            required: ["super_fund_name", "balance", "age", "had_review_before", "campaign_answers", "summary"],
               },
             },
           },
@@ -116,8 +114,16 @@ async function extractLeadAnswers(
 
   try {
     const parsed = JSON.parse(rawArgs);
+    const fields = {
+      super_fund_name: parsed.super_fund_name,
+      balance: parsed.balance,
+      age: parsed.age,
+      had_review_before: parsed.had_review_before,
+      ...(parsed.campaign_answers || {}),
+      ...(parsed.fields || {}),
+    };
     return {
-      fields: stripEmptyFields(parsed.fields || {}),
+      fields: stripEmptyFields(fields),
       summary: parsed.summary || summary,
     };
   } catch {
