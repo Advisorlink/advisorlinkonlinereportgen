@@ -291,7 +291,7 @@ ${closingMsg}
 After all questions are asked, follow the closing statements above to wrap up the call.`;
 
       const assistantPayload: any = {
-        name: script.name,
+        name: (script.name || "Assistant").substring(0, 40),
         model: {
           provider: "openai",
           model: script.model || "gpt-4o",
@@ -777,7 +777,7 @@ ${closingMsg}
 After all questions are asked, follow the closing statements above to wrap up the call.`;
 
       const assistantPayload: any = {
-        name: `${script.name} - Campaign`,
+        name: `${script.name} - Campaign`.substring(0, 40),
         model: {
           provider: "openai",
           model: script.model || "gpt-4o",
@@ -1224,7 +1224,7 @@ ${closingMsg}
 After all questions are asked, follow the closing statements above to wrap up the call.`;
 
       const assistantPayload: any = {
-        name: `${(script as any).name} - Inbound`,
+        name: `${(script as any).name} - Inbound`.substring(0, 40),
         model: {
           provider: "openai",
           model: (script as any).model || "gpt-4o",
