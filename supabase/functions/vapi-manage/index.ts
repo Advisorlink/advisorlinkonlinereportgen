@@ -9,12 +9,9 @@ const corsHeaders = {
 const VAPI_BASE = "https://api.vapi.ai";
 
 const VOICE_ID_MAP: Record<string, string> = {
-  voice1: "4uJW3zTppOdNDWtKUtux",
-  voice2: "vVnXvLYPFjIyE2YrjUBE",
-  voice3: "tyepWYJJwJM9TTFIg5U7",
-  voice4: "w9rPM8AIZle60Nbpw7nl",
-  voice5: "DTLT09E2cxHF0DqjKVbc",
-  voice6: "4yye0QE5YPsKbMOCGGlj",
+  voice1: "DTLT09E2cxHF0DqjKVbc",
+  voice2: "4yye0QE5YPsKbMOCGGlj",
+  voice3: "w9rPM8AIZle60Nbpw7nl",
 };
 
 function resolveVoiceId(shortId: string | undefined): string {
