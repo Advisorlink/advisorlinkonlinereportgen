@@ -96,11 +96,44 @@ export function AICallerCampaigns() {
     if (contactError) { toast.error(contactError.message); return; }
 
     toast.success(`Campaign created with ${validContacts.length} contacts`);
+    resetDialog();
+    load();
+  }
+
+  function resetDialog() {
     setDialogOpen(false);
+    setEditingCampaign(null);
     setName("");
     setScriptId("");
     setPhoneNumberId("");
     setContacts([]);
+  }
+
+  async function openEditDialog(campaign: any) {
+    setEditingCampaign(campaign);
+    setName(campaign.name);
+    setScriptId(campaign.script_id);
+    setPhoneNumberId(campaign.phone_number_id || "");
+    // Load existing contacts
+    const { data } = await supabase.from("ai_caller_contacts").select("*").eq("campaign_id", campaign.id);
+    setContacts((data || []).map((c: any) => ({ name: c.name, phone: c.phone, email: c.email || "" })));
+    setDialogOpen(true);
+  }
+
+  async function updateCampaign() {
+    if (!editingCampaign) return;
+    if (!name.trim() || !scriptId) { toast.error("Name and script are required"); return; }
+    if (!phoneNumberId) { toast.error("Select a phone number to call from"); return; }
+
+    const { error } = await supabase.from("ai_caller_campaigns").update({
+      name: name.trim(),
+      script_id: scriptId,
+      phone_number_id: phoneNumberId,
+    } as any).eq("id", editingCampaign.id);
+
+    if (error) { toast.error(error.message); return; }
+    toast.success("Campaign updated");
+    resetDialog();
     load();
   }
 
