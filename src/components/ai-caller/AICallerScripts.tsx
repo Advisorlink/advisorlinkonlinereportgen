@@ -105,6 +105,11 @@ export function AICallerScripts() {
   const [followUpStatements, setFollowUpStatements] = useState<string[]>(savedDraft.current?.followUpStatements ?? [
     "Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?"
   ]);
+  const [questions, setQuestions] = useState<Question[]>(savedDraft.current?.questions ?? [
+    { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
+    { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
+    { id: crypto.randomUUID(), question: "Have you ever had your super review before?", fieldName: "had_review" },
+  ]);
   const [voiceId, setVoiceId] = useState(savedDraft.current?.voiceId ?? "sarah");
   const [bgSound, setBgSound] = useState(savedDraft.current?.bgSound ?? "office");
   const [bgEnabled, setBgEnabled] = useState(savedDraft.current?.bgEnabled ?? true);
