@@ -202,7 +202,7 @@ export function existingReturnPct(i: ClientInputs): number {
   const funds = getAllFunds(i);
   const total = funds.reduce((s, f) => s + f.superBalance, 0) + (i.secondBalance ?? 0);
   if (total === 0) return 0;
-  let weighted = funds.reduce((s, f) => s + f.superBalance * f.grossReturn, 0);
+  let weighted = funds.reduce((s, f) => s + f.superBalance * resolvedFundReturn(f), 0);
   weighted += (i.secondBalance ?? 0) * (i.secondReturn ?? 0);
   return weighted / total;
 }
