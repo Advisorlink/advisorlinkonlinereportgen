@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ClientInputsProvider } from "@/hooks/useClientInputs";
 import { MeetingHostProvider } from "@/hooks/useMeetingHost";
 import { ProtectedApp } from "@/components/ProtectedApp";
+import AICaller from "./pages/AICaller.tsx";
 import Auth from "./pages/Auth.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Presentations from "./pages/Presentations.tsx";
