@@ -3,7 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 const VAPI_BASE = "https://api.vapi.ai";
@@ -17,7 +18,11 @@ function normalizeAUPhone(phone: string): string {
     cleaned = "+61" + cleaned.slice(1);
   }
   // If starts with 61 without +, add +
-  if (cleaned.startsWith("61") && !cleaned.startsWith("+") && cleaned.length >= 11) {
+  if (
+    cleaned.startsWith("61") &&
+    !cleaned.startsWith("+") &&
+    cleaned.length >= 11
+  ) {
     cleaned = "+" + cleaned;
   }
   // Validate: must start with + and be 10-15 digits
@@ -74,8 +79,137 @@ function buildVoiceConfig(script: any, supabaseUrl: string) {
   };
 }
 
+function hasMeaningfulFields(
+  fields: Record<string, unknown> | null | undefined,
+) {
+  return (
+    !!fields &&
+    Object.values(fields).some(
+      (value) => value != null && String(value).trim() !== "",
+    )
+  );
+}
+
+function stripEmptyFields(fields: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(fields).filter(
+      ([, value]) => value != null && String(value).trim() !== "",
+    ),
+  );
+}
+
+async function extractLeadAnswers(
+  transcript: string,
+  summary: string,
+  questions: any[] = [],
+) {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY || !transcript?.trim()) return { fields: {}, summary };
+
+  const questionText = questions.length
+    ? questions
+        .map(
+          (q, i) =>
+            `${i + 1}. ${q.question || q.label || q.fieldName} -> ${q.fieldName}`,
+        )
+        .join("\n")
+    : "No custom campaign questions were found.";
+
+  const resp = await fetch(
+    "https://ai.gateway.lovable.dev/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        temperature: 0,
+        messages: [
+          {
+            role: "system",
+            content:
+              "Extract lead data from Australian superannuation call transcripts. Only use answers spoken by the client/User. Never guess. Leave unknown fields blank.",
+          },
+          {
+            role: "user",
+            content: `Campaign questions:\n${questionText}\n\nExisting summary:\n${summary || ""}\n\nTranscript:\n${transcript}\n\nReturn the client's answers for standard fields super_fund_name, balance, age, had_review_before and any campaign question fieldName. Balance must be raw digits if possible. had_review_before must be Yes, No, or blank.`,
+          },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "save_extracted_lead",
+              description: "Save explicitly stated lead answers",
+              parameters: {
+                type: "object",
+                properties: {
+                  super_fund_name: { type: "string" },
+                  balance: { type: "string" },
+                  age: { type: "string" },
+                  had_review_before: { type: "string" },
+                  campaign_answers: {
+                    type: "object",
+                    additionalProperties: { type: "string" },
+                  },
+                  summary: { type: "string" },
+                },
+                required: [
+                  "super_fund_name",
+                  "balance",
+                  "age",
+                  "had_review_before",
+                  "campaign_answers",
+                  "summary",
+                ],
+              },
+            },
+          },
+        ],
+        tool_choice: {
+          type: "function",
+          function: { name: "save_extracted_lead" },
+        },
+      }),
+    },
+  );
+
+  if (!resp.ok) {
+    console.error(
+      "lead reprocess extraction failed",
+      resp.status,
+      await resp.text(),
+    );
+    return { fields: {}, summary };
+  }
+
+  try {
+    const result = await resp.json();
+    const args =
+      result.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    const parsed = args ? JSON.parse(args) : null;
+    const fields = {
+      super_fund_name: parsed?.super_fund_name,
+      balance: parsed?.balance,
+      age: parsed?.age,
+      had_review_before: parsed?.had_review_before,
+      ...(parsed?.campaign_answers || {}),
+      ...(parsed?.fields || {}),
+    };
+    return {
+      fields: stripEmptyFields(fields),
+      summary: parsed?.summary || summary,
+    };
+  } catch {
+    return { fields: {}, summary };
+  }
+}
+
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
 
   try {
     const VAPI_API_KEY = Deno.env.get("VAPI_API_KEY");
@@ -89,7 +223,10 @@ serve(async (req) => {
     if (!authHeader) throw new Error("Missing authorization");
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
     if (authError || !user) throw new Error("Unauthorized");
 
     const body = await req.json();
@@ -108,7 +245,9 @@ serve(async (req) => {
         };
       }
 
-      const secondMessage = script.second_message ? `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${script.second_message}"\n` : "";
+      const secondMessage = script.second_message
+        ? `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${script.second_message}"\n`
+        : "";
 
       const systemPrompt = `${script.system_prompt}
 
@@ -132,19 +271,25 @@ After all questions are asked, thank them for their time and let them know someo
           provider: "openai",
           model: script.model || "gpt-4o",
           messages: [{ role: "system", content: systemPrompt }],
-          tools: questions.length > 0 ? [{
-            type: "function",
-            function: {
-              name: "extract_lead_data",
-              description: "Extract and save the lead's answers to qualification questions",
-              parameters: {
-                type: "object",
-                properties: extractionProperties,
-                required: questions.map((q: any) => q.fieldName),
-              },
-            },
-            async: false,
-          }] : undefined,
+          tools:
+            questions.length > 0
+              ? [
+                  {
+                    type: "function",
+                    function: {
+                      name: "extract_lead_data",
+                      description:
+                        "Extract and save the lead's answers to qualification questions",
+                      parameters: {
+                        type: "object",
+                        properties: extractionProperties,
+                        required: questions.map((q: any) => q.fieldName),
+                      },
+                    },
+                    async: false,
+                  },
+                ]
+              : undefined,
         },
         voice: buildVoiceConfig(script, supabaseUrl),
         firstMessage: script.first_message || "Hi there, how are you today?",
@@ -153,7 +298,9 @@ After all questions are asked, thank them for their time and let them know someo
         maxDurationSeconds: script.max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
         responseDelaySeconds: 0.5,
-        backgroundSound: script.background_sound_enabled ? (script.background_sound || "office") : undefined,
+        backgroundSound: script.background_sound_enabled
+          ? script.background_sound || "office"
+          : undefined,
         transcriber: {
           provider: "deepgram",
           model: "nova-2",
@@ -173,7 +320,9 @@ After all questions are asked, thank them for their time and let them know someo
 
       if (!vapiRes.ok) {
         const errText = await vapiRes.text();
-        throw new Error(`Vapi create assistant failed [${vapiRes.status}]: ${errText}`);
+        throw new Error(
+          `Vapi create assistant failed [${vapiRes.status}]: ${errText}`,
+        );
       }
 
       const assistant = await vapiRes.json();
@@ -185,11 +334,41 @@ After all questions are asked, thank them for their time and let them know someo
     if (action === "list-voices") {
       // Return curated Australian ElevenLabs community voices
       const voices = [
-        { id: "voice1", name: "Olivia", accent: "Australian", gender: "Female", description: "Warm, professional" },
-        { id: "voice2", name: "Jack", accent: "Australian", gender: "Male", description: "Confident, natural" },
-        { id: "voice3", name: "Mia", accent: "Australian", gender: "Female", description: "Friendly, clear" },
-        { id: "voice4", name: "Liam", accent: "Australian", gender: "Male", description: "Conversational, relaxed" },
-        { id: "voice5", name: "Sophie", accent: "Australian", gender: "Female", description: "Energetic, bright" },
+        {
+          id: "voice1",
+          name: "Olivia",
+          accent: "Australian",
+          gender: "Female",
+          description: "Warm, professional",
+        },
+        {
+          id: "voice2",
+          name: "Jack",
+          accent: "Australian",
+          gender: "Male",
+          description: "Confident, natural",
+        },
+        {
+          id: "voice3",
+          name: "Mia",
+          accent: "Australian",
+          gender: "Female",
+          description: "Friendly, clear",
+        },
+        {
+          id: "voice4",
+          name: "Liam",
+          accent: "Australian",
+          gender: "Male",
+          description: "Conversational, relaxed",
+        },
+        {
+          id: "voice5",
+          name: "Sophie",
+          accent: "Australian",
+          gender: "Female",
+          description: "Energetic, bright",
+        },
       ];
       return new Response(JSON.stringify({ voices }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -198,19 +377,25 @@ After all questions are asked, thank them for their time and let them know someo
 
     if (action === "voice-previews") {
       const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-      if (!ELEVENLABS_API_KEY) throw new Error("ELEVENLABS_API_KEY is not configured");
+      if (!ELEVENLABS_API_KEY)
+        throw new Error("ELEVENLABS_API_KEY is not configured");
 
       const previews: Record<string, string> = {};
       for (const [shortId, elId] of Object.entries(VOICE_ID_MAP)) {
         try {
-          const res = await fetch(`https://api.elevenlabs.io/v1/voices/${elId}`, {
-            headers: { "xi-api-key": ELEVENLABS_API_KEY },
-          });
+          const res = await fetch(
+            `https://api.elevenlabs.io/v1/voices/${elId}`,
+            {
+              headers: { "xi-api-key": ELEVENLABS_API_KEY },
+            },
+          );
           if (res.ok) {
             const data = await res.json();
             if (data.preview_url) previews[shortId] = data.preview_url;
           }
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
       return new Response(JSON.stringify({ previews }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -220,12 +405,18 @@ After all questions are asked, thank them for their time and let them know someo
     if (action === "preview-voice") {
       const { voiceId, text } = body;
       if (!voiceId || !text) throw new Error("voiceId and text are required");
-      
+
       const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
       if (!ELEVENLABS_API_KEY) {
-        return new Response(JSON.stringify({ error: "ELEVENLABS_API_KEY not configured", fallback: true }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({
+            error: "ELEVENLABS_API_KEY not configured",
+            fallback: true,
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
       }
 
       const ttsRes = await fetch(
@@ -241,7 +432,7 @@ After all questions are asked, thank them for their time and let them know someo
             model_id: "eleven_turbo_v2_5",
             voice_settings: { stability: 0.5, similarity_boost: 0.75 },
           }),
-        }
+        },
       );
 
       if (!ttsRes.ok) {
@@ -250,7 +441,8 @@ After all questions are asked, thank them for their time and let them know someo
       }
 
       const audioBuffer = await ttsRes.arrayBuffer();
-      const { encode: base64Encode } = await import("https://deno.land/std@0.168.0/encoding/base64.ts");
+      const { encode: base64Encode } =
+        await import("https://deno.land/std@0.168.0/encoding/base64.ts");
       const audioBase64 = base64Encode(audioBuffer);
 
       return new Response(JSON.stringify({ audioBase64 }), {
@@ -279,7 +471,9 @@ After all questions are asked, thank them for their time and let them know someo
 
       if (!vapiRes.ok) {
         const errText = await vapiRes.text();
-        throw new Error(`Vapi make call failed [${vapiRes.status}]: ${errText}`);
+        throw new Error(
+          `Vapi make call failed [${vapiRes.status}]: ${errText}`,
+        );
       }
 
       const call = await vapiRes.json();
@@ -294,12 +488,15 @@ After all questions are asked, thank them for their time and let them know someo
       });
 
       // Update contact status
-      await supabase.from("ai_caller_contacts").update({
-        call_status: "calling",
-        call_attempts: supabase.rpc ? 1 : 1,
-        last_called_at: new Date().toISOString(),
-        vapi_call_id: call.id,
-      }).eq("id", contactId);
+      await supabase
+        .from("ai_caller_contacts")
+        .update({
+          call_status: "calling",
+          call_attempts: supabase.rpc ? 1 : 1,
+          last_called_at: new Date().toISOString(),
+          vapi_call_id: call.id,
+        })
+        .eq("id", contactId);
 
       return new Response(JSON.stringify({ call }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -312,7 +509,9 @@ After all questions are asked, thank them for their time and let them know someo
       });
       if (!vapiRes.ok) {
         const errText = await vapiRes.text();
-        throw new Error(`Vapi list phone numbers failed [${vapiRes.status}]: ${errText}`);
+        throw new Error(
+          `Vapi list phone numbers failed [${vapiRes.status}]: ${errText}`,
+        );
       }
       const phoneNumbers = await vapiRes.json();
       return new Response(JSON.stringify({ phoneNumbers }), {
@@ -326,7 +525,9 @@ After all questions are asked, thank them for their time and let them know someo
         throw new Error("number (E.164) is required");
       }
       if (!twilioAccountSid || !twilioAuthToken) {
-        throw new Error("twilioAccountSid and twilioAuthToken are required for Vapi import");
+        throw new Error(
+          "twilioAccountSid and twilioAuthToken are required for Vapi import",
+        );
       }
       const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
         method: "POST",
@@ -343,7 +544,9 @@ After all questions are asked, thank them for their time and let them know someo
       });
       if (!vapiRes.ok) {
         const errText = await vapiRes.text();
-        throw new Error(`Vapi import number failed [${vapiRes.status}]: ${errText}`);
+        throw new Error(
+          `Vapi import number failed [${vapiRes.status}]: ${errText}`,
+        );
       }
       const phoneNumber = await vapiRes.json();
       return new Response(JSON.stringify({ phoneNumber }), {
@@ -375,9 +578,9 @@ After all questions are asked, thank them for their time and let them know someo
           `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/AvailablePhoneNumbers/${cc}/${numType}.json?${params.toString()}`,
           {
             headers: {
-              "Authorization": `Basic ${basicAuth}`,
+              Authorization: `Basic ${basicAuth}`,
             },
-          }
+          },
         );
         if (res.ok) {
           twilioRes = res;
@@ -388,7 +591,9 @@ After all questions are asked, thank them for their time and let them know someo
         throw new Error(`Twilio search failed [${res.status}]: ${lastErr}`);
       }
       if (!twilioRes) {
-        throw new Error(`No available number types found for ${cc}. Last error: ${lastErr}`);
+        throw new Error(
+          `No available number types found for ${cc}. Last error: ${lastErr}`,
+        );
       }
       const result = await twilioRes.json();
       const numbers = (result.available_phone_numbers || []).map((n: any) => ({
@@ -419,14 +624,17 @@ After all questions are asked, thank them for their time and let them know someo
       const buyParams: Record<string, string> = { PhoneNumber: phoneNumber };
       if (ADDRESS_SID) buyParams.AddressSid = ADDRESS_SID;
 
-      const buyRes = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/IncomingPhoneNumbers.json`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Basic ${basicAuth}`,
-          "Content-Type": "application/x-www-form-urlencoded",
+      const buyRes = await fetch(
+        `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/IncomingPhoneNumbers.json`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Basic ${basicAuth}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams(buyParams),
         },
-        body: new URLSearchParams(buyParams),
-      });
+      );
       if (!buyRes.ok) {
         const errText = await buyRes.text();
         throw new Error(`Twilio buy failed [${buyRes.status}]: ${errText}`);
@@ -453,21 +661,34 @@ After all questions are asked, thank them for their time and let them know someo
       });
       if (!vapiRes.ok) {
         const errText = await vapiRes.text();
-        return new Response(JSON.stringify({
-          purchased: { sid: purchased.sid, phoneNumber: purchased.phone_number },
-          vapiImportError: errText,
-          warning: "Number purchased on Twilio but failed to import to Vapi. You can import it manually.",
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({
+            purchased: {
+              sid: purchased.sid,
+              phoneNumber: purchased.phone_number,
+            },
+            vapiImportError: errText,
+            warning:
+              "Number purchased on Twilio but failed to import to Vapi. You can import it manually.",
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
       }
       const vapiNumber = await vapiRes.json();
-      return new Response(JSON.stringify({
-        purchased: { sid: purchased.sid, phoneNumber: purchased.phone_number },
-        vapiNumber,
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          purchased: {
+            sid: purchased.sid,
+            phoneNumber: purchased.phone_number,
+          },
+          vapiNumber,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     if (action === "start-campaign") {
@@ -486,7 +707,10 @@ After all questions are asked, thank them for their time and let them know someo
       if (!script) throw new Error("Campaign has no script");
 
       const phoneNumberId = (campaign as any).phone_number_id;
-      if (!phoneNumberId) throw new Error("Campaign has no phone number assigned. Edit the campaign and select a phone number.");
+      if (!phoneNumberId)
+        throw new Error(
+          "Campaign has no phone number assigned. Edit the campaign and select a phone number.",
+        );
 
       // Fetch pending contacts
       const { data: contacts } = await supabase
@@ -495,16 +719,22 @@ After all questions are asked, thank them for their time and let them know someo
         .eq("campaign_id", campaignId)
         .eq("call_status", "pending");
 
-      if (!contacts || contacts.length === 0) throw new Error("No pending contacts to call");
+      if (!contacts || contacts.length === 0)
+        throw new Error("No pending contacts to call");
 
       // Create Vapi assistant from script
       const questions = script.questions || [];
       const extractionProperties: Record<string, any> = {};
       for (const q of questions) {
-        extractionProperties[q.fieldName] = { type: "string", description: q.question };
+        extractionProperties[q.fieldName] = {
+          type: "string",
+          description: q.question,
+        };
       }
 
-      const secondMessage = script.second_message ? `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${script.second_message}"\n` : "";
+      const secondMessage = script.second_message
+        ? `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${script.second_message}"\n`
+        : "";
 
       const systemPrompt = `${script.system_prompt}
 
@@ -528,15 +758,25 @@ After all questions are asked, thank them for their time and let them know someo
           provider: "openai",
           model: script.model || "gpt-4o",
           messages: [{ role: "system", content: systemPrompt }],
-          tools: questions.length > 0 ? [{
-            type: "function",
-            function: {
-              name: "extract_lead_data",
-              description: "Extract and save the lead's answers to qualification questions",
-              parameters: { type: "object", properties: extractionProperties, required: questions.map((q: any) => q.fieldName) },
-            },
-            async: false,
-          }] : undefined,
+          tools:
+            questions.length > 0
+              ? [
+                  {
+                    type: "function",
+                    function: {
+                      name: "extract_lead_data",
+                      description:
+                        "Extract and save the lead's answers to qualification questions",
+                      parameters: {
+                        type: "object",
+                        properties: extractionProperties,
+                        required: questions.map((q: any) => q.fieldName),
+                      },
+                    },
+                    async: false,
+                  },
+                ]
+              : undefined,
         },
         voice: buildVoiceConfig(script, supabaseUrl),
         firstMessage: script.first_message || "Hi there, how are you today?",
@@ -545,14 +785,23 @@ After all questions are asked, thank them for their time and let them know someo
         maxDurationSeconds: script.max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
         responseDelaySeconds: 0.5,
-        backgroundSound: script.background_sound_enabled ? (script.background_sound || "office") : undefined,
-        transcriber: { provider: "deepgram", model: "nova-2", language: "en-AU" },
+        backgroundSound: script.background_sound_enabled
+          ? script.background_sound || "office"
+          : undefined,
+        transcriber: {
+          provider: "deepgram",
+          model: "nova-2",
+          language: "en-AU",
+        },
         serverUrl: `${supabaseUrl}/functions/v1/vapi-webhook`,
       };
 
       const assistantRes = await fetch(`${VAPI_BASE}/assistant`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${VAPI_API_KEY}`, "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${VAPI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(assistantPayload),
       });
       if (!assistantRes.ok) {
@@ -562,10 +811,13 @@ After all questions are asked, thank them for their time and let them know someo
       const assistant = await assistantRes.json();
 
       // Update campaign status
-      await supabase.from("ai_caller_campaigns").update({
-        status: "active",
-        started_at: new Date().toISOString(),
-      } as any).eq("id", campaignId);
+      await supabase
+        .from("ai_caller_campaigns")
+        .update({
+          status: "active",
+          started_at: new Date().toISOString(),
+        } as any)
+        .eq("id", campaignId);
 
       // Start calling contacts (fire calls with small delays)
       const results: any[] = [];
@@ -581,14 +833,21 @@ After all questions are asked, thank them for their time and let them know someo
 
           const callRes = await fetch(`${VAPI_BASE}/call/phone`, {
             method: "POST",
-            headers: { Authorization: `Bearer ${VAPI_API_KEY}`, "Content-Type": "application/json" },
+            headers: {
+              Authorization: `Bearer ${VAPI_API_KEY}`,
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify(callPayload),
           });
 
           if (!callRes.ok) {
             const errText = await callRes.text();
             console.error(`Call failed for ${contact.phone}:`, errText);
-            results.push({ contactId: contact.id, phone: contact.phone, error: errText });
+            results.push({
+              contactId: contact.id,
+              phone: contact.phone,
+              error: errText,
+            });
             continue;
           }
 
@@ -604,31 +863,45 @@ After all questions are asked, thank them for their time and let them know someo
           });
 
           // Update contact
-          await supabase.from("ai_caller_contacts").update({
-            call_status: "calling",
-            call_attempts: (contact.call_attempts || 0) + 1,
-            last_called_at: new Date().toISOString(),
-            vapi_call_id: call.id,
-          }).eq("id", contact.id);
+          await supabase
+            .from("ai_caller_contacts")
+            .update({
+              call_status: "calling",
+              call_attempts: (contact.call_attempts || 0) + 1,
+              last_called_at: new Date().toISOString(),
+              vapi_call_id: call.id,
+            })
+            .eq("id", contact.id);
 
-          results.push({ contactId: contact.id, phone: contact.phone, callId: call.id });
+          results.push({
+            contactId: contact.id,
+            phone: contact.phone,
+            callId: call.id,
+          });
 
           // Small delay between calls to avoid rate limiting
-          await new Promise(r => setTimeout(r, 2000));
+          await new Promise((r) => setTimeout(r, 2000));
         } catch (err: any) {
           console.error(`Error calling ${contact.phone}:`, err);
-          results.push({ contactId: contact.id, phone: contact.phone, error: err.message });
+          results.push({
+            contactId: contact.id,
+            phone: contact.phone,
+            error: err.message,
+          });
         }
       }
 
-      return new Response(JSON.stringify({ 
-        assistantId: assistant.id, 
-        callsInitiated: results.filter(r => r.callId).length,
-        callsFailed: results.filter(r => r.error).length,
-        results 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          assistantId: assistant.id,
+          callsInitiated: results.filter((r) => r.callId).length,
+          callsFailed: results.filter((r) => r.error).length,
+          results,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     if (action === "stop-campaign") {
@@ -636,10 +909,13 @@ After all questions are asked, thank them for their time and let them know someo
       if (!campaignId) throw new Error("campaignId is required");
 
       // Update campaign status
-      await supabase.from("ai_caller_campaigns").update({
-        status: "completed",
-        completed_at: new Date().toISOString(),
-      } as any).eq("id", campaignId);
+      await supabase
+        .from("ai_caller_campaigns")
+        .update({
+          status: "completed",
+          completed_at: new Date().toISOString(),
+        } as any)
+        .eq("id", campaignId);
 
       // Get active calls for this campaign
       const { data: activeCalls } = await supabase
@@ -650,7 +926,7 @@ After all questions are asked, thank them for their time and let them know someo
 
       // End active calls via Vapi
       let ended = 0;
-      for (const call of (activeCalls || [])) {
+      for (const call of activeCalls || []) {
         if (!call.vapi_call_id) continue;
         try {
           const endRes = await fetch(`${VAPI_BASE}/call/${call.vapi_call_id}`, {
@@ -659,21 +935,29 @@ After all questions are asked, thank them for their time and let them know someo
           });
           if (endRes.ok) ended++;
           await endRes.text();
-        } catch { /* best effort */ }
+        } catch {
+          /* best effort */
+        }
       }
 
-      return new Response(JSON.stringify({ stopped: true, callsEnded: ended }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ stopped: true, callsEnded: ended }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     if (action === "pause-campaign") {
       const { campaignId } = body;
       if (!campaignId) throw new Error("campaignId is required");
 
-      await supabase.from("ai_caller_campaigns").update({
-        status: "paused",
-      } as any).eq("id", campaignId);
+      await supabase
+        .from("ai_caller_campaigns")
+        .update({
+          status: "paused",
+        } as any)
+        .eq("id", campaignId);
 
       return new Response(JSON.stringify({ paused: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -684,9 +968,12 @@ After all questions are asked, thank them for their time and let them know someo
       const { campaignId } = body;
       if (!campaignId) throw new Error("campaignId is required");
 
-      await supabase.from("ai_caller_campaigns").update({
-        status: "active",
-      } as any).eq("id", campaignId);
+      await supabase
+        .from("ai_caller_campaigns")
+        .update({
+          status: "active",
+        } as any)
+        .eq("id", campaignId);
 
       return new Response(JSON.stringify({ resumed: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -698,27 +985,110 @@ After all questions are asked, thank them for their time and let them know someo
       if (!campaignId) throw new Error("campaignId is required");
 
       // Reset campaign status back to draft
-      await supabase.from("ai_caller_campaigns").update({
-        status: "draft",
-        started_at: null,
-        completed_at: null,
-        calls_completed: 0,
-        calls_answered: 0,
-        leads_generated: 0,
-      } as any).eq("id", campaignId);
+      await supabase
+        .from("ai_caller_campaigns")
+        .update({
+          status: "draft",
+          started_at: null,
+          completed_at: null,
+          calls_completed: 0,
+          calls_answered: 0,
+          leads_generated: 0,
+        } as any)
+        .eq("id", campaignId);
 
       // Reset all contacts back to pending
-      await supabase.from("ai_caller_contacts").update({
-        call_status: "pending",
-        call_attempts: 0,
-        last_called_at: null,
-        vapi_call_id: null,
-      } as any).eq("campaign_id", campaignId);
+      await supabase
+        .from("ai_caller_contacts")
+        .update({
+          call_status: "pending",
+          call_attempts: 0,
+          last_called_at: null,
+          vapi_call_id: null,
+        } as any)
+        .eq("campaign_id", campaignId);
 
       // Delete call logs for this campaign
-      await supabase.from("ai_caller_call_logs").delete().eq("campaign_id", campaignId);
+      await supabase
+        .from("ai_caller_call_logs")
+        .delete()
+        .eq("campaign_id", campaignId);
 
       return new Response(JSON.stringify({ reset: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "reprocess-lead") {
+      const { leadId } = body;
+      if (!leadId) throw new Error("leadId is required");
+
+      const { data: lead, error: leadErr } = await supabase
+        .from("ai_caller_leads")
+        .select("*")
+        .eq("id", leadId)
+        .single();
+      if (leadErr || !lead) throw new Error("Lead not found");
+
+      let transcript = (lead as any).full_transcript || "";
+      let recordingUrl = (lead as any).recording_url || null;
+      if ((lead as any).contact_id && (!transcript || !recordingUrl)) {
+        const { data: log } = await supabase
+          .from("ai_caller_call_logs")
+          .select("transcript, recording_url")
+          .eq("contact_id", (lead as any).contact_id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+        transcript = transcript || log?.transcript || "";
+        recordingUrl = recordingUrl || log?.recording_url || null;
+      }
+
+      let questions: any[] = [];
+      if ((lead as any).campaign_id) {
+        const { data: campaign } = await supabase
+          .from("ai_caller_campaigns")
+          .select("ai_caller_scripts(questions)")
+          .eq("id", (lead as any).campaign_id)
+          .single();
+        questions = (campaign as any)?.ai_caller_scripts?.questions || [];
+      }
+
+      const existingFields = ((lead as any).extracted_fields || {}) as Record<
+        string,
+        unknown
+      >;
+      const extracted = hasMeaningfulFields(existingFields)
+        ? {
+            fields: existingFields,
+            summary: (lead as any).transcript_summary || "",
+          }
+        : await extractLeadAnswers(
+            transcript,
+            (lead as any).transcript_summary || "",
+            questions,
+          );
+
+      const updates = {
+        extracted_fields: stripEmptyFields({
+          ...existingFields,
+          ...extracted.fields,
+        }),
+        transcript_summary:
+          extracted.summary || (lead as any).transcript_summary,
+        full_transcript: transcript || (lead as any).full_transcript,
+        recording_url: recordingUrl,
+      } as any;
+
+      const { data: updated, error: updateErr } = await supabase
+        .from("ai_caller_leads")
+        .update(updates)
+        .eq("id", leadId)
+        .select()
+        .single();
+      if (updateErr) throw updateErr;
+
+      return new Response(JSON.stringify({ lead: updated }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -734,14 +1104,19 @@ After all questions are asked, thank them for their time and let them know someo
           headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
         });
         await endRes.text();
-      } catch { /* best effort */ }
+      } catch {
+        /* best effort */
+      }
 
       // Update call log status
-      await supabase.from("ai_caller_call_logs").update({
-        status: "failed",
-        error_message: "Manually stopped",
-        ended_at: new Date().toISOString(),
-      }).eq("vapi_call_id", callId);
+      await supabase
+        .from("ai_caller_call_logs")
+        .update({
+          status: "failed",
+          error_message: "Manually stopped",
+          ended_at: new Date().toISOString(),
+        })
+        .eq("vapi_call_id", callId);
 
       return new Response(JSON.stringify({ stopped: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -758,7 +1133,10 @@ After all questions are asked, thank them for their time and let them know someo
     }
 
     if (action === "clear-call-logs") {
-      await supabase.from("ai_caller_call_logs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      await supabase
+        .from("ai_caller_call_logs")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
       return new Response(JSON.stringify({ cleared: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
