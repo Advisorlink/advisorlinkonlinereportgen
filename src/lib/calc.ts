@@ -4,6 +4,13 @@
 export type IncomeFrequency = "Weekly" | "Monthly" | "Annually";
 export type RiskProfile = "High Growth" | "Growth" | "Balanced" | "Moderate" | "Conservative";
 
+export interface InvestmentOption {
+  name: string;
+  allocationPct: number; // 0-1, portion of the fund balance in this option
+  growthAssetsPct: number;
+  fiveYearReturn: number; // decimal e.g. 0.066
+}
+
 export interface FundEntry {
   fundName: string;
   modelLabel: string;
@@ -13,6 +20,28 @@ export interface FundEntry {
   adminFeeFlat: number;
   adminFeePct: number;
   investmentRiskProfile?: string;
+  investmentOptions?: InvestmentOption[];
+}
+
+// Compute weighted averages from investment options if present
+export function resolvedFundReturn(f: FundEntry): number {
+  if (f.investmentOptions && f.investmentOptions.length > 0) {
+    const totalAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0);
+    if (totalAlloc > 0) {
+      return f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.fiveYearReturn, 0) / totalAlloc;
+    }
+  }
+  return f.grossReturn;
+}
+
+export function resolvedFundGrowth(f: FundEntry): number {
+  if (f.investmentOptions && f.investmentOptions.length > 0) {
+    const totalAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0);
+    if (totalAlloc > 0) {
+      return f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.growthAssetsPct, 0) / totalAlloc;
+    }
+  }
+  return f.growthAssetsPct;
 }
 
 export interface ClientInputs {
