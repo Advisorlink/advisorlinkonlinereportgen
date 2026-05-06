@@ -94,6 +94,7 @@ serve(async (req) => {
             extracted_fields: extractedFields,
             transcript_summary: summary,
             full_transcript: transcript,
+            recording_url: recordingUrl || null,
             call_duration_seconds: Math.round(duration),
             qualification_score: hasExtractedData ? Math.min(100, Object.keys(extractedFields).length * 20) : 30,
             status: "new",
