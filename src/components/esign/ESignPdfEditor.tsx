@@ -673,8 +673,20 @@ function formatLabel(name: string) {
 }
 
 function suggestedValue(name: string, clientData: Record<string, string>) {
-  const normalized = name.toLowerCase().replace(/[\s_-]+/g, "_");
-  // Exact key match first
+  const raw = name.toLowerCase().trim();
+  const normalized = raw.replace(/[\s_-]+/g, "_");
+
+  // Check for date-of-birth first (must come before generic date check)
+  if (/(birth|dob)/i.test(raw)) {
+    return clientData.dob || "";
+  }
+
+  // Date-like field names — broad match for any field containing "date"
+  if (/date/i.test(raw)) {
+    return clientData.date || "";
+  }
+
+  // Exact key match
   for (const [key, value] of Object.entries(clientData)) {
     if (normalized === key && value) return value;
   }
@@ -682,10 +694,13 @@ function suggestedValue(name: string, clientData: Record<string, string>) {
   for (const [key, value] of Object.entries(clientData)) {
     if (normalized.includes(key) && value) return value;
   }
-  // Date-like field names that didn't match above (broad match)
-  if (/date/i.test(normalized) && !/(birth|dob)/i.test(normalized)) {
-    return clientData.date || "";
-  }
+
+  // Keyword fallback for common labels
+  if (/\b(name|full.?name|client.?name)\b/i.test(raw)) return clientData.name || "";
+  if (/\b(email|e.?mail)\b/i.test(raw)) return clientData.email || "";
+  if (/\b(phone|mobile|tel)\b/i.test(raw)) return clientData.phone || "";
+  if (/\b(address|street|residential)\b/i.test(raw)) return clientData.address || "";
+
   return "";
 }
 
