@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CRMLayout } from "@/components/CRMLayout";
+import { ESignTemplates } from "@/components/esign/ESignTemplates";
 import {
   FileSignature,
   Eye,
@@ -38,9 +39,9 @@ const menuItems = [
     label: "Templates",
     icon: LayoutTemplate,
     description: "Create reusable templates to speed up your workflow",
-    gradient: "from-muted-foreground/10 to-muted/10",
-    iconColor: "text-muted-foreground",
-    available: false,
+    gradient: "from-cyan/20 to-cyan/5",
+    iconColor: "text-cyan",
+    available: true,
   },
   {
     id: "archive",
@@ -61,11 +62,17 @@ const stats = [
 
 export default function ESign() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [templateFile, setTemplateFile] = useState<File | null>(null);
+  const [templateName, setTemplateName] = useState("");
 
   if (activeSection === "esign") {
     return (
       <CRMLayout>
-        <ESignNewRequest onBack={() => setActiveSection(null)} />
+        <ESignNewRequest
+          onBack={() => { setActiveSection(null); setTemplateFile(null); setTemplateName(""); }}
+          initialFile={templateFile}
+          initialFileName={templateName}
+        />
       </CRMLayout>
     );
   }
@@ -74,6 +81,21 @@ export default function ESign() {
     return (
       <CRMLayout>
         <ESignDocumentList onBack={() => setActiveSection(null)} />
+      </CRMLayout>
+    );
+  }
+
+  if (activeSection === "templates") {
+    return (
+      <CRMLayout>
+        <ESignTemplates
+          onBack={() => setActiveSection(null)}
+          onSelectTemplate={(file, name) => {
+            setTemplateFile(file);
+            setTemplateName(name);
+            setActiveSection("esign");
+          }}
+        />
       </CRMLayout>
     );
   }
