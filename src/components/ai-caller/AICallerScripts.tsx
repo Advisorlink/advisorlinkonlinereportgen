@@ -131,7 +131,7 @@ export function AICallerScripts() {
       description: description.trim() || null,
       system_prompt: systemPrompt,
       first_message: firstMessage,
-      questions: questions.filter(q => q.question && q.fieldName),
+      questions: questions.filter(q => q.question && q.fieldName).map(q => ({ id: q.id, question: q.question, fieldName: q.fieldName })) as any,
       voice_id: voiceId,
       voice_provider: "elevenlabs",
       background_sound: bgSound,
