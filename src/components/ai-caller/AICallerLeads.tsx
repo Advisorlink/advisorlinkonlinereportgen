@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   Search, Users, Phone, Mail, Clock, FileText, ChevronLeft, ChevronDown,
   Send, Play, Pause, SkipBack, SkipForward, Star, MessageSquare,
-  DollarSign, User, Building, ShieldCheck, Volume2
+  DollarSign, User, Building, ShieldCheck, Volume2, Loader2, Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,6 +24,7 @@ export function AICallerLeads() {
   const [addingNote, setAddingNote] = useState(false);
   const [notesLoading, setNotesLoading] = useState(false);
   const [transcriptOpen, setTranscriptOpen] = useState(false);
+  const [extractingLeadId, setExtractingLeadId] = useState<string | null>(null);
 
   // Audio player state
   const audioRef = useRef<HTMLAudioElement | null>(null);
