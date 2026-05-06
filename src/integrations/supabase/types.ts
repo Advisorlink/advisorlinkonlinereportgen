@@ -259,6 +259,7 @@ export type Database = {
           notes: string | null
           phone: string
           qualification_score: number | null
+          recording_url: string | null
           status: string
           transcript_summary: string | null
           updated_at: string
@@ -276,6 +277,7 @@ export type Database = {
           notes?: string | null
           phone: string
           qualification_score?: number | null
+          recording_url?: string | null
           status?: string
           transcript_summary?: string | null
           updated_at?: string
@@ -293,6 +295,7 @@ export type Database = {
           notes?: string | null
           phone?: string
           qualification_score?: number | null
+          recording_url?: string | null
           status?: string
           transcript_summary?: string | null
           updated_at?: string
