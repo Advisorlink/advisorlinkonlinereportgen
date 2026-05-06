@@ -62,11 +62,17 @@ const stats = [
 
 export default function ESign() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [templateFile, setTemplateFile] = useState<File | null>(null);
+  const [templateName, setTemplateName] = useState("");
 
   if (activeSection === "esign") {
     return (
       <CRMLayout>
-        <ESignNewRequest onBack={() => setActiveSection(null)} />
+        <ESignNewRequest
+          onBack={() => { setActiveSection(null); setTemplateFile(null); setTemplateName(""); }}
+          initialFile={templateFile}
+          initialFileName={templateName}
+        />
       </CRMLayout>
     );
   }
@@ -75,6 +81,21 @@ export default function ESign() {
     return (
       <CRMLayout>
         <ESignDocumentList onBack={() => setActiveSection(null)} />
+      </CRMLayout>
+    );
+  }
+
+  if (activeSection === "templates") {
+    return (
+      <CRMLayout>
+        <ESignTemplates
+          onBack={() => setActiveSection(null)}
+          onSelectTemplate={(file, name) => {
+            setTemplateFile(file);
+            setTemplateName(name);
+            setActiveSection("esign");
+          }}
+        />
       </CRMLayout>
     );
   }
