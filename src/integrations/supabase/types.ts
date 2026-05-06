@@ -113,6 +113,7 @@ export type Database = {
           id: string
           leads_generated: number
           name: string
+          phone_number_id: string | null
           scheduled_at: string | null
           script_id: string
           started_at: string | null
@@ -129,6 +130,7 @@ export type Database = {
           id?: string
           leads_generated?: number
           name: string
+          phone_number_id?: string | null
           scheduled_at?: string | null
           script_id: string
           started_at?: string | null
@@ -145,6 +147,7 @@ export type Database = {
           id?: string
           leads_generated?: number
           name?: string
+          phone_number_id?: string | null
           scheduled_at?: string | null
           script_id?: string
           started_at?: string | null
