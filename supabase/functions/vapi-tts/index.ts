@@ -45,14 +45,14 @@ serve(async (req) => {
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
     if (!apiKey) throw new Error("ELEVENLABS_API_KEY is not configured");
 
+    const body = await req.json().catch(() => ({}));
+    const message = body.message || body;
     const url = new URL(req.url);
-    const voiceId = url.searchParams.get("voiceId") || "";
+    const voiceId = url.searchParams.get("voiceId") || body.voiceId || message?.voiceId || "";
     if (!ALLOWED_VOICE_IDS.has(voiceId)) {
       return new Response("Voice is not allowed", { status: 400, headers: corsHeaders });
     }
 
-    const body = await req.json().catch(() => ({}));
-    const message = body.message || body;
     if (message?.type && message.type !== "voice-request") {
       return new Response("Unsupported message type", { status: 400, headers: corsHeaders });
     }
