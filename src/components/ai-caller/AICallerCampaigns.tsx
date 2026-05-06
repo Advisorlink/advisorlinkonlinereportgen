@@ -202,6 +202,21 @@ export function AICallerCampaigns() {
     }
   }
 
+  async function resetCampaign(id: string) {
+    if (!confirm("This will reset the campaign back to draft, clear all call logs for it, and reset all contacts to pending. Continue?")) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "reset-campaign", campaignId: id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Campaign reset to draft — ready to start again");
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reset campaign");
+    }
+  }
+
   const statusColor: Record<string, string> = {
     draft: "bg-muted text-muted-foreground",
     active: "bg-emerald-500/20 text-emerald-400",
