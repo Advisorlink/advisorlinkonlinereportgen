@@ -1,0 +1,1 @@
+ALTER TABLE public.ai_caller_leads ADD COLUMN IF NOT EXISTS recording_url text;

@@ -21,7 +21,7 @@ const navItems = [
   { title: "Presentations", url: "/presentations", icon: Monitor },
   { title: "Report Generator", url: "/", icon: FileText },
   { title: "E-Sign Docs", url: "/esign", icon: FileSignature },
-  { title: "Dialer", url: "/ai-caller", icon: PhoneCall },
+  { title: "Dialer", url: "/ai-caller", icon: PhoneCall, badge: "LEAP", badgeColor: "bg-emerald-500" },
   { title: "Referrals", url: "/referrals", icon: Gift, badge: "12 new" },
   { title: "Client Reports", url: "/admin", icon: Settings },
 ];
@@ -75,7 +75,7 @@ export function AppSidebar() {
                         <span className="text-sm font-medium flex-1">{item.title}</span>
                       )}
                       {!collapsed && item.badge && (
-                        <span className="ml-auto px-1.5 py-0.5 rounded-full bg-cyan text-[10px] font-bold text-white leading-none">
+                        <span className={`ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white leading-none ${(item as any).badgeColor || "bg-cyan"}`}>
                           {item.badge}
                         </span>
                       )}
