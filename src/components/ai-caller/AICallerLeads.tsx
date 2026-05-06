@@ -32,6 +32,7 @@ import {
   Volume2,
   Loader2,
   Sparkles,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
