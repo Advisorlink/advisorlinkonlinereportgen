@@ -174,13 +174,13 @@ export function AICallerCampaigns() {
           <h2 className="text-lg font-semibold text-foreground">Campaigns</h2>
           <p className="text-sm text-muted-foreground">Manage your calling campaigns</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetDialog(); else setDialogOpen(true); }}>
           <DialogTrigger asChild>
-            <Button className="gap-2"><Plus className="w-4 h-4" /> New Campaign</Button>
+            <Button className="gap-2" onClick={() => { setEditingCampaign(null); setDialogOpen(true); }}><Plus className="w-4 h-4" /> New Campaign</Button>
           </DialogTrigger>
           <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create Campaign</DialogTitle>
+              <DialogTitle>{editingCampaign ? "Edit Campaign" : "Create Campaign"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div className="space-y-2">
@@ -258,7 +258,11 @@ export function AICallerCampaigns() {
                 )}
               </div>
 
-              <Button onClick={createCampaign} className="w-full">Create Campaign</Button>
+              {editingCampaign ? (
+                <Button onClick={updateCampaign} className="w-full">Save Changes</Button>
+              ) : (
+                <Button onClick={createCampaign} className="w-full">Create Campaign</Button>
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -292,10 +296,15 @@ export function AICallerCampaigns() {
                   </div>
                   <div className="flex gap-2">
                     {c.status === "draft" && (
-                      <Button size="sm" className="gap-1" onClick={() => startCampaign(c.id)} disabled={starting !== null}>
-                        {starting === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
-                        {starting === c.id ? "Starting..." : "Start"}
-                      </Button>
+                      <>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}>
+                          <Pencil className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                        <Button size="sm" className="gap-1" onClick={() => startCampaign(c.id)} disabled={starting !== null}>
+                          {starting === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
+                          {starting === c.id ? "Starting..." : "Start"}
+                        </Button>
+                      </>
                     )}
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteCampaign(c.id)}>
                       <Trash2 className="w-4 h-4 text-destructive" />
