@@ -39,9 +39,9 @@ const menuItems = [
     label: "Templates",
     icon: LayoutTemplate,
     description: "Create reusable templates to speed up your workflow",
-    gradient: "from-muted-foreground/10 to-muted/10",
-    iconColor: "text-muted-foreground",
-    available: false,
+    gradient: "from-cyan/20 to-cyan/5",
+    iconColor: "text-cyan",
+    available: true,
   },
   {
     id: "archive",
