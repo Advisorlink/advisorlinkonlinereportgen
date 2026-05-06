@@ -574,7 +574,7 @@ export function ESignPdfEditor({
             <div className="space-y-3">
               <div className="rounded-lg border border-border bg-muted/30 p-3">
                 <p className="text-sm font-semibold text-foreground">
-                  {selectedField.kind === "signature" ? "Signature box" : "Text box"}
+                  {selectedField.kind === "signature" ? "Signature box" : selectedField.kind === "date" ? "Date box" : "Text box"}
                 </p>
                 <p className="text-xs text-muted-foreground">Page {selectedField.pageIndex + 1}</p>
               </div>
