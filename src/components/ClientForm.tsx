@@ -241,6 +241,13 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
             <Field label="Admin fee - %"><PctInput v={value.adminFeePct} on={n => set("adminFeePct", n)} /></Field>
             <Field label="Investment risk profile"><Input value={value.investmentRiskProfile || ""} onChange={e => set("investmentRiskProfile", e.target.value)} /></Field>
           </Group>
+          <InvestmentOptionsSection
+            options={value.investmentOptions ?? []}
+            onChange={(opts) => onChange({ ...value, investmentOptions: opts })}
+            fundLabel="Fund 1"
+            primaryReturn={value.grossReturn}
+            primaryGrowth={value.growthAssetsPct}
+          />
           {/* Additional funds */}
           {(value.additionalFunds ?? []).map((fund, idx) => (
             <Group key={idx} title={`Fund ${idx + 2}`}>
