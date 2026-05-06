@@ -160,6 +160,48 @@ export function AICallerCampaigns() {
     }
   }
 
+  async function stopCampaign(id: string) {
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "stop-campaign", campaignId: id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Campaign stopped. ${data.callsEnded || 0} active calls ended.`);
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to stop campaign");
+    }
+  }
+
+  async function pauseCampaign(id: string) {
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "pause-campaign", campaignId: id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Campaign paused");
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to pause campaign");
+    }
+  }
+
+  async function resumeCampaign(id: string) {
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "resume-campaign", campaignId: id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Campaign resumed");
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to resume campaign");
+    }
+  }
+
   const statusColor: Record<string, string> = {
     draft: "bg-muted text-muted-foreground",
     active: "bg-emerald-500/20 text-emerald-400",
