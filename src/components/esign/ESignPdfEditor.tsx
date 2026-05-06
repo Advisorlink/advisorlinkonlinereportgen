@@ -408,18 +408,19 @@ export function ESignPdfEditor({
 
         const { x, y, width, height } = toPdfRect(page, field);
 
-        if ((field.kind === "text" || field.kind === "date") && field.source !== "acroform") {
-          page.drawRectangle({
-            x,
-            y,
-            width,
-            height,
-            borderWidth: 0.7,
-            borderColor: field.kind === "date" ? rgb(0.45, 0.27, 0.07) : rgb(0.03, 0.41, 0.56),
-            color: rgb(0.96, 0.99, 1),
-            opacity: 0.92,
-          });
+        if (field.kind === "text" && field.source !== "acroform") {
+          // Only render text fields that have a value — skip empty ones entirely
           if (field.value) {
+            page.drawRectangle({
+              x,
+              y,
+              width,
+              height,
+              borderWidth: 0.7,
+              borderColor: rgb(0.03, 0.41, 0.56),
+              color: rgb(0.96, 0.99, 1),
+              opacity: 0.92,
+            });
             page.drawText(field.value, {
               x: x + 5,
               y: y + Math.max(4, height / 2 - 5),
@@ -429,6 +430,28 @@ export function ESignPdfEditor({
               maxWidth: width - 10,
             });
           }
+        }
+
+        if (field.kind === "date") {
+          // Date boxes render like signature boxes — placeholder for signer to fill
+          page.drawRectangle({
+            x,
+            y,
+            width,
+            height,
+            borderWidth: 1.4,
+            borderColor: rgb(0.55, 0.35, 0.05),
+            color: rgb(1, 0.98, 0.93),
+            opacity: 0.65,
+          });
+          page.drawText("Date", {
+            x: x + 5,
+            y: y + height / 2 - 5,
+            size: clamp(height * 0.35, 7, 11),
+            font: boldFont,
+            color: rgb(0.55, 0.35, 0.05),
+            maxWidth: width - 10,
+          });
         }
 
         if (field.kind === "signature") {
