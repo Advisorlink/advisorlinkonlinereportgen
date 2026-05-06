@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Phone, Loader2, RefreshCw, Search, ShoppingCart, Upload } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Phone, Loader2, RefreshCw, Search, ShoppingCart, Upload, PhoneIncoming } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
@@ -14,6 +15,7 @@ interface PhoneNumber {
   number: string;
   provider: string;
   name?: string;
+  assistantId?: string;
 }
 
 interface AvailableNumber {
@@ -23,11 +25,23 @@ interface AvailableNumber {
   region: string;
 }
 
+interface InboundScript {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
 export function AICallerPhoneNumbers() {
   const [numbers, setNumbers] = useState<PhoneNumber[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogTab, setDialogTab] = useState("buy");
+
+  // Inbound scripts
+  const [inboundScripts, setInboundScripts] = useState<InboundScript[]>([]);
+  const [assigningNumberId, setAssigningNumberId] = useState<string | null>(null);
+  const [assigningScriptId, setAssigningScriptId] = useState<string>("");
+  const [savingInbound, setSavingInbound] = useState(false);
 
   // Search/Buy state
   const [areaCode, setAreaCode] = useState("");
@@ -36,13 +50,13 @@ export function AICallerPhoneNumbers() {
   const [availableNumbers, setAvailableNumbers] = useState<AvailableNumber[]>([]);
   const [buying, setBuying] = useState<string | null>(null);
 
-  // Import state (Vapi needs raw Twilio creds for import)
+  // Import state
   const [importNumber, setImportNumber] = useState("");
   const [twilioSid, setTwilioSid] = useState("");
   const [twilioAuth, setTwilioAuth] = useState("");
   const [importing, setImporting] = useState(false);
 
-  useEffect(() => { loadNumbers(); }, []);
+  useEffect(() => { loadNumbers(); loadInboundScripts(); }, []);
 
   async function loadNumbers() {
     setLoading(true);
@@ -57,6 +71,7 @@ export function AICallerPhoneNumbers() {
         number: p.number || p.twilioPhoneNumber || "Unknown",
         provider: p.provider || "twilio",
         name: p.name,
+        assistantId: p.assistantId || null,
       }));
       setNumbers(nums);
     } catch (e: any) {
@@ -64,6 +79,15 @@ export function AICallerPhoneNumbers() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function loadInboundScripts() {
+    const { data } = await supabase
+      .from("ai_caller_scripts")
+      .select("id, name, description")
+      .eq("call_direction", "inbound")
+      .order("created_at", { ascending: false });
+    setInboundScripts(data || []);
   }
 
   async function searchNumbers() {
@@ -95,10 +119,7 @@ export function AICallerPhoneNumbers() {
     setBuying(phoneNumber);
     try {
       const { data, error } = await supabase.functions.invoke("vapi-manage", {
-        body: {
-          action: "buy-twilio-number",
-          phoneNumber,
-        },
+        body: { action: "buy-twilio-number", phoneNumber },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -146,6 +167,28 @@ export function AICallerPhoneNumbers() {
       toast.error(e.message || "Failed to import number");
     } finally {
       setImporting(false);
+    }
+  }
+
+  async function assignInboundScript(phoneNumberId: string, scriptId: string) {
+    setSavingInbound(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: {
+          action: "assign-inbound-script",
+          phoneNumberId,
+          scriptId: scriptId || null,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(scriptId ? "Inbound script assigned! Calls to this number will now be answered by your AI." : "Inbound script removed.");
+      setAssigningNumberId(null);
+      loadNumbers();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to assign script");
+    } finally {
+      setSavingInbound(false);
     }
   }
 
@@ -262,7 +305,7 @@ export function AICallerPhoneNumbers() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {numbers.map(n => (
             <Card key={n.id} className="bg-card border-border">
-              <CardContent className="pt-4 pb-3 px-4">
+              <CardContent className="pt-4 pb-3 px-4 space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg bg-cyan/20 flex items-center justify-center shrink-0">
                     <Phone className="w-4 h-4 text-cyan" />
@@ -271,6 +314,67 @@ export function AICallerPhoneNumbers() {
                     <p className="text-sm font-semibold text-foreground truncate">{n.number}</p>
                     <p className="text-[10px] text-muted-foreground capitalize">{n.provider}</p>
                   </div>
+                </div>
+
+                {/* Inbound script assignment */}
+                <div className="border-t border-border pt-2">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <PhoneIncoming className="w-3 h-3 text-emerald-400" />
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Inbound Script</span>
+                  </div>
+
+                  {assigningNumberId === n.id ? (
+                    <div className="space-y-2">
+                      <Select value={assigningScriptId} onValueChange={setAssigningScriptId}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Select inbound script..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None (no inbound)</SelectItem>
+                          {inboundScripts.map(s => (
+                            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className="flex gap-1.5">
+                        <Button
+                          size="sm"
+                          className="flex-1 h-7 text-xs"
+                          disabled={savingInbound}
+                          onClick={() => assignInboundScript(n.id, assigningScriptId === "none" ? "" : assigningScriptId)}
+                        >
+                          {savingInbound ? <Loader2 className="w-3 h-3 animate-spin" /> : "Save"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={() => setAssigningNumberId(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                      {inboundScripts.length === 0 && (
+                        <p className="text-[10px] text-muted-foreground">No inbound scripts found. Create one in the Scripts tab first.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full h-7 text-xs gap-1.5"
+                      onClick={() => {
+                        setAssigningNumberId(n.id);
+                        setAssigningScriptId(n.assistantId ? "" : "none");
+                      }}
+                    >
+                      {n.assistantId ? (
+                        <><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" /> Active — Change Script</>
+                      ) : (
+                        "Assign Inbound Script"
+                      )}
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
