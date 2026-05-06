@@ -481,7 +481,45 @@ export function AICallerScripts() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {/* Closing Statements */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Closing Statements</Label>
+                    <p className="text-xs text-muted-foreground">Script for the AI to follow when closing the call. Add as many as needed.</p>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setClosingStatements([...closingStatements, ""])} className="gap-1 shrink-0">
+                    <Plus className="w-3 h-3" /> Add Statement
+                  </Button>
+                </div>
+                {closingStatements.map((stmt, i) => (
+                  <div key={i} className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 border border-border">
+                    <span className="text-xs text-muted-foreground mt-2.5 font-mono w-5 shrink-0">{i + 1}.</span>
+                    <Textarea
+                      value={stmt}
+                      onChange={e => {
+                        const updated = [...closingStatements];
+                        updated[i] = e.target.value;
+                        setClosingStatements(updated);
+                      }}
+                      rows={2}
+                      placeholder={`Closing statement ${i + 1}...`}
+                      className="flex-1"
+                    />
+                    {closingStatements.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 mt-1"
+                        onClick={() => setClosingStatements(closingStatements.filter((_, idx) => idx !== i))}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label>Office Background Sound</Label>
