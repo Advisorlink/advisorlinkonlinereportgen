@@ -18,13 +18,17 @@ interface ReportRow {
 
 type Step = "upload" | "select-client" | "fill-details" | "edit-pdf" | "confirm-send";
 
-export function ESignNewRequest({ onBack }: { onBack: () => void }) {
+export function ESignNewRequest({ onBack, initialFile, initialFileName }: {
+  onBack: () => void;
+  initialFile?: File | null;
+  initialFileName?: string;
+}) {
   const { user } = useAuth();
-  const [step, setStep] = useState<Step>("upload");
-  const [file, setFile] = useState<File | null>(null);
+  const [step, setStep] = useState<Step>(initialFile ? "select-client" : "upload");
+  const [file, setFile] = useState<File | null>(initialFile || null);
   const [editedFile, setEditedFile] = useState<File | null>(null);
   const [esignFields, setEsignFields] = useState<ESignField[]>([]);
-  const [fileName, setFileName] = useState("");
+  const [fileName, setFileName] = useState(initialFileName || "");
 
   // Client selection
   const [reports, setReports] = useState<ReportRow[]>([]);
