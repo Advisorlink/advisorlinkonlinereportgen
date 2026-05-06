@@ -68,27 +68,35 @@ type ScriptSetupDraft = {
 
 export function AICallerScripts() {
   const { user } = useAuth();
+  const savedDraft = useRef<ScriptSetupDraft | null>(null);
+  if (savedDraft.current === null && typeof window !== "undefined") {
+    try {
+      savedDraft.current = JSON.parse(sessionStorage.getItem(SCRIPT_SETUP_DRAFT_KEY) || "null");
+    } catch {
+      savedDraft.current = null;
+    }
+  }
   const [scripts, setScripts] = useState<Script[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(savedDraft.current?.dialogOpen ?? false);
   const [editingScript, setEditingScript] = useState<Script | null>(null);
-  const [directionFilter, setDirectionFilter] = useState<"outbound" | "inbound">("outbound");
+  const [directionFilter, setDirectionFilter] = useState<"outbound" | "inbound">(savedDraft.current?.directionFilter ?? "outbound");
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [callDirection, setCallDirection] = useState<"outbound" | "inbound">("outbound");
-  const [systemPrompt, setSystemPrompt] = useState("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
-  const [firstMessage, setFirstMessage] = useState("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
-  const [secondMessage, setSecondMessage] = useState("Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
-  const [questions, setQuestions] = useState<Question[]>([
+  const [name, setName] = useState(savedDraft.current?.name ?? "");
+  const [description, setDescription] = useState(savedDraft.current?.description ?? "");
+  const [callDirection, setCallDirection] = useState<"outbound" | "inbound">(savedDraft.current?.callDirection ?? "outbound");
+  const [systemPrompt, setSystemPrompt] = useState(savedDraft.current?.systemPrompt ?? "You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
+  const [firstMessage, setFirstMessage] = useState(savedDraft.current?.firstMessage ?? "G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
+  const [secondMessage, setSecondMessage] = useState(savedDraft.current?.secondMessage ?? "Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
+  const [questions, setQuestions] = useState<Question[]>(savedDraft.current?.questions ?? [
     { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
     { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
     { id: crypto.randomUUID(), question: "Have you ever had your super reviewed before?", fieldName: "had_review" },
   ]);
-  const [voiceId, setVoiceId] = useState("sarah");
-  const [bgSound, setBgSound] = useState("office");
-  const [bgEnabled, setBgEnabled] = useState(true);
-  const [maxDuration, setMaxDuration] = useState(300);
+  const [voiceId, setVoiceId] = useState(savedDraft.current?.voiceId ?? "sarah");
+  const [bgSound, setBgSound] = useState(savedDraft.current?.bgSound ?? "office");
+  const [bgEnabled, setBgEnabled] = useState(savedDraft.current?.bgEnabled ?? true);
+  const [maxDuration, setMaxDuration] = useState(savedDraft.current?.maxDuration ?? 300);
 
   useEffect(() => { loadScripts(); }, []);
 
