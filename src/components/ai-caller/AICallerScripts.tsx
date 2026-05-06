@@ -36,12 +36,11 @@ interface Script {
 }
 
 const VOICES = [
-  { id: "sarah", name: "Sarah", accent: "Australian", gender: "Female" },
-  { id: "laura", name: "Laura", accent: "Australian", gender: "Female" },
-  { id: "charlie", name: "Charlie", accent: "Australian", gender: "Male" },
-  { id: "callum", name: "Callum", accent: "Australian", gender: "Male" },
-  { id: "matilda", name: "Matilda", accent: "Australian", gender: "Female" },
-  { id: "jessica", name: "Jessica", accent: "Australian", gender: "Female" },
+  { id: "voice1", name: "Olivia", accent: "Australian", gender: "Female" },
+  { id: "voice2", name: "Jack", accent: "Australian", gender: "Male" },
+  { id: "voice3", name: "Mia", accent: "Australian", gender: "Female" },
+  { id: "voice4", name: "Liam", accent: "Australian", gender: "Male" },
+  { id: "voice5", name: "Sophie", accent: "Australian", gender: "Female" },
 ];
 
 export function AICallerScripts() {

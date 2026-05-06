@@ -15,12 +15,11 @@ interface Voice {
 }
 
 const VOICES: Voice[] = [
-  { id: "sarah", elevenLabsId: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", accent: "Australian", gender: "Female", description: "Warm, professional" },
-  { id: "laura", elevenLabsId: "FGY2WhTYpPnrIDTdsKH5", name: "Laura", accent: "Australian", gender: "Female", description: "Friendly, clear" },
-  { id: "charlie", elevenLabsId: "IKne3meq5aSn9XLyUdCD", name: "Charlie", accent: "Australian", gender: "Male", description: "Confident, natural" },
-  { id: "callum", elevenLabsId: "N2lVS1w4EtoT3dr4eOWO", name: "Callum", accent: "Australian", gender: "Male", description: "Conversational, relaxed" },
-  { id: "matilda", elevenLabsId: "XrExE9yKIg1WjnnlVkGX", name: "Matilda", accent: "Australian", gender: "Female", description: "Energetic, bright" },
-  { id: "jessica", elevenLabsId: "cgSgspJ2msm6clMCkdW9", name: "Jessica", accent: "Australian", gender: "Female", description: "Soft, empathetic" },
+  { id: "voice1", elevenLabsId: "4uJW3zTppOdNDWtKUtux", name: "Olivia", accent: "Australian", gender: "Female", description: "Warm, professional" },
+  { id: "voice2", elevenLabsId: "vVnXvLYPFjIyE2YrjUBE", name: "Jack", accent: "Australian", gender: "Male", description: "Confident, natural" },
+  { id: "voice3", elevenLabsId: "tyepWYJJwJM9TTFIg5U7", name: "Mia", accent: "Australian", gender: "Female", description: "Friendly, clear" },
+  { id: "voice4", elevenLabsId: "w9rPM8AIZle60Nbpw7nl", name: "Liam", accent: "Australian", gender: "Male", description: "Conversational, relaxed" },
+  { id: "voice5", elevenLabsId: "DTLT09E2cxHF0DqjKVbc", name: "Sophie", accent: "Australian", gender: "Female", description: "Energetic, bright" },
 ];
 
 export function AICallerVoices() {
