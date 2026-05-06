@@ -151,8 +151,3 @@ export function AICallerVoices() {
     </div>
   );
 }
-
-function toast(msg: string) {
-  // Simple fallback if sonner isn't imported
-  console.log(msg);
-}
