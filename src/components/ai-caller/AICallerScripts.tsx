@@ -236,6 +236,7 @@ export function AICallerScripts() {
       first_message: firstMessage,
       second_message: serializeFollowUps(followUpStatements),
       questions: questions.filter(q => q.question && q.fieldName).map(q => ({ id: q.id, question: q.question, fieldName: q.fieldName })) as any,
+      closing_statements: serializeFollowUps(closingStatements),
       voice_id: voiceId,
       voice_provider: "elevenlabs",
       background_sound: bgSound,
