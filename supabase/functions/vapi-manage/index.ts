@@ -675,6 +675,77 @@ After all questions are asked, thank them for their time and let them know someo
       });
     }
 
+    if (action === "reset-campaign") {
+      const { campaignId } = body;
+      if (!campaignId) throw new Error("campaignId is required");
+
+      // Reset campaign status back to draft
+      await supabase.from("ai_caller_campaigns").update({
+        status: "draft",
+        started_at: null,
+        completed_at: null,
+        calls_completed: 0,
+        calls_answered: 0,
+        leads_generated: 0,
+      } as any).eq("id", campaignId);
+
+      // Reset all contacts back to pending
+      await supabase.from("ai_caller_contacts").update({
+        call_status: "pending",
+        call_attempts: 0,
+        last_called_at: null,
+        vapi_call_id: null,
+      } as any).eq("campaign_id", campaignId);
+
+      // Delete call logs for this campaign
+      await supabase.from("ai_caller_call_logs").delete().eq("campaign_id", campaignId);
+
+      return new Response(JSON.stringify({ reset: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "stop-call") {
+      const { callId } = body;
+      if (!callId) throw new Error("callId (vapi_call_id) is required");
+
+      // Try to end the call on Vapi
+      try {
+        const endRes = await fetch(`${VAPI_BASE}/call/${callId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
+        });
+        await endRes.text();
+      } catch { /* best effort */ }
+
+      // Update call log status
+      await supabase.from("ai_caller_call_logs").update({
+        status: "failed",
+        error_message: "Manually stopped",
+        ended_at: new Date().toISOString(),
+      }).eq("vapi_call_id", callId);
+
+      return new Response(JSON.stringify({ stopped: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "delete-call-log") {
+      const { logId } = body;
+      if (!logId) throw new Error("logId is required");
+      await supabase.from("ai_caller_call_logs").delete().eq("id", logId);
+      return new Response(JSON.stringify({ deleted: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "clear-call-logs") {
+      await supabase.from("ai_caller_call_logs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      return new Response(JSON.stringify({ cleared: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     throw new Error(`Unknown action: ${action}`);
   } catch (e) {
     console.error("vapi-manage error:", e);
