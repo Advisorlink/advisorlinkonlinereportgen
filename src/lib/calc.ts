@@ -170,6 +170,7 @@ export function getAllFunds(i: ClientInputs): FundEntry[] {
     adminFeeFlat: i.adminFeeFlat,
     adminFeePct: i.adminFeePct,
     investmentRiskProfile: i.investmentRiskProfile,
+    investmentOptions: i.investmentOptions,
   };
   const funds = [primary];
   if (i.additionalFunds) {
