@@ -743,16 +743,14 @@ After all questions are asked, thank them for their time and let them know someo
         };
       }
 
-      const secondMessage = script.second_message
-        ? `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${script.second_message}"\n`
-        : "";
+      const secondMessage = formatFollowUps(script.second_message);
 
       const systemPrompt = `${script.system_prompt}
 
 IMPORTANT RULES:
 - You MUST follow this script exactly. Do not deviate or make up information.
-- After your opening message, wait for the client to respond. Then deliver the follow-up statement below (if provided).
-- After the follow-up, ask each question one at a time and wait for the response before moving on.
+- After your opening message, wait for the client to respond. Then deliver the follow-up statement(s) below (if provided).
+- After the follow-up(s), ask each question one at a time and wait for the response before moving on.
 - Be conversational and natural, like a real Australian person calling.
 - If the person says they're not interested, politely thank them and end the call.
 - If they ask who you are, say you're calling from Advisor Link.
