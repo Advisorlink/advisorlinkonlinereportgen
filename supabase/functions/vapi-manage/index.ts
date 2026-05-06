@@ -89,7 +89,7 @@ After all questions are asked, thank them for their time and let them know someo
           }] : undefined,
         },
         voice: {
-          provider: script.voice_provider || "elevenlabs",
+          provider: "11labs",
           voiceId: resolveVoiceId(script.voice_id),
         },
         firstMessage: script.first_message || "Hi there, how are you today?",
