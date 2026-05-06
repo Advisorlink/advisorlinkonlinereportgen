@@ -1,4 +1,4 @@
-import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature } from "lucide-react";
+import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -21,6 +21,7 @@ const navItems = [
   { title: "Presentations", url: "/presentations", icon: Monitor },
   { title: "Report Generator", url: "/", icon: FileText },
   { title: "E-Sign Docs", url: "/esign", icon: FileSignature },
+  { title: "AI Caller", url: "/ai-caller", icon: PhoneCall },
   { title: "Referrals", url: "/referrals", icon: Gift, badge: "12 new" },
   { title: "Client Reports", url: "/admin", icon: Settings },
 ];

@@ -41,6 +41,298 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_caller_call_logs: {
+        Row: {
+          campaign_id: string | null
+          contact_id: string | null
+          cost: number | null
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          error_message: string | null
+          id: string
+          recording_url: string | null
+          started_at: string | null
+          status: string
+          transcript: string | null
+          vapi_call_id: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          contact_id?: string | null
+          cost?: number | null
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          error_message?: string | null
+          id?: string
+          recording_url?: string | null
+          started_at?: string | null
+          status?: string
+          transcript?: string | null
+          vapi_call_id?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          contact_id?: string | null
+          cost?: number | null
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          error_message?: string | null
+          id?: string
+          recording_url?: string | null
+          started_at?: string | null
+          status?: string
+          transcript?: string | null
+          vapi_call_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_caller_call_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ai_caller_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_caller_call_logs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "ai_caller_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_caller_campaigns: {
+        Row: {
+          calls_answered: number
+          calls_completed: number
+          completed_at: string | null
+          created_at: string
+          id: string
+          leads_generated: number
+          name: string
+          scheduled_at: string | null
+          script_id: string
+          started_at: string | null
+          status: string
+          total_contacts: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          calls_answered?: number
+          calls_completed?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          leads_generated?: number
+          name: string
+          scheduled_at?: string | null
+          script_id: string
+          started_at?: string | null
+          status?: string
+          total_contacts?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          calls_answered?: number
+          calls_completed?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          leads_generated?: number
+          name?: string
+          scheduled_at?: string | null
+          script_id?: string
+          started_at?: string | null
+          status?: string
+          total_contacts?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_caller_campaigns_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "ai_caller_scripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_caller_contacts: {
+        Row: {
+          call_attempts: number
+          call_status: string
+          campaign_id: string
+          created_at: string
+          email: string | null
+          id: string
+          last_called_at: string | null
+          name: string
+          phone: string
+          vapi_call_id: string | null
+        }
+        Insert: {
+          call_attempts?: number
+          call_status?: string
+          campaign_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_called_at?: string | null
+          name: string
+          phone: string
+          vapi_call_id?: string | null
+        }
+        Update: {
+          call_attempts?: number
+          call_status?: string
+          campaign_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_called_at?: string | null
+          name?: string
+          phone?: string
+          vapi_call_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_caller_contacts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ai_caller_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_caller_leads: {
+        Row: {
+          call_duration_seconds: number | null
+          campaign_id: string | null
+          contact_id: string | null
+          created_at: string
+          email: string | null
+          extracted_fields: Json
+          full_transcript: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string
+          qualification_score: number | null
+          status: string
+          transcript_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          call_duration_seconds?: number | null
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          email?: string | null
+          extracted_fields?: Json
+          full_transcript?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone: string
+          qualification_score?: number | null
+          status?: string
+          transcript_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          call_duration_seconds?: number | null
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          email?: string | null
+          extracted_fields?: Json
+          full_transcript?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string
+          qualification_score?: number | null
+          status?: string
+          transcript_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_caller_leads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ai_caller_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_caller_leads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "ai_caller_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_caller_scripts: {
+        Row: {
+          background_sound: string | null
+          background_sound_enabled: boolean
+          created_at: string
+          description: string | null
+          first_message: string
+          id: string
+          max_duration_seconds: number
+          model: string
+          name: string
+          questions: Json
+          system_prompt: string
+          updated_at: string
+          user_id: string
+          voice_id: string
+          voice_provider: string
+        }
+        Insert: {
+          background_sound?: string | null
+          background_sound_enabled?: boolean
+          created_at?: string
+          description?: string | null
+          first_message?: string
+          id?: string
+          max_duration_seconds?: number
+          model?: string
+          name: string
+          questions?: Json
+          system_prompt?: string
+          updated_at?: string
+          user_id: string
+          voice_id?: string
+          voice_provider?: string
+        }
+        Update: {
+          background_sound?: string | null
+          background_sound_enabled?: boolean
+          created_at?: string
+          description?: string | null
+          first_message?: string
+          id?: string
+          max_duration_seconds?: number
+          model?: string
+          name?: string
+          questions?: Json
+          system_prompt?: string
+          updated_at?: string
+          user_id?: string
+          voice_id?: string
+          voice_provider?: string
+        }
+        Relationships: []
+      }
       app_config: {
         Row: {
           id: number
