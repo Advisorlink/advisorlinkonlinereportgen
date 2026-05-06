@@ -232,6 +232,12 @@ export function AICallerLeads() {
             </Card>
           ))}
         </div>
+        {extractingLeadId === selectedLead.id && (
+          <div className="flex items-center gap-2 rounded-xl border border-cyan/15 bg-cyan/5 px-4 py-3 text-sm text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin text-cyan" />
+            <span>Reading the call transcript and filling the client’s answers…</span>
+          </div>
+        )}
 
         {/* Additional extracted fields */}
         {(() => {
@@ -270,6 +276,14 @@ export function AICallerLeads() {
                 </div>
                 <CardContent className="pt-0">
                   <p className="text-sm text-foreground/80 leading-relaxed">{selectedLead.transcript_summary}</p>
+                </CardContent>
+              </Card>
+            )}
+            {!selectedLead.transcript_summary && extractingLeadId !== selectedLead.id && (
+              <Card className="bg-card border-border">
+                <CardContent className="p-5 flex items-center gap-3 text-sm text-muted-foreground">
+                  <Sparkles className="w-4 h-4 text-cyan" />
+                  <span>No summary was found in this call yet.</span>
                 </CardContent>
               </Card>
             )}
@@ -326,6 +340,14 @@ export function AICallerLeads() {
                       <span className="text-xs text-muted-foreground font-mono tabular-nums w-10 text-right">{formatTime(duration)}</span>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            )}
+            {!recordingUrl && (
+              <Card className="bg-card border-border">
+                <CardContent className="p-5 flex items-center gap-3 text-sm text-muted-foreground">
+                  <Volume2 className="w-4 h-4 text-cyan" />
+                  <span>{extractingLeadId === selectedLead.id ? "Checking the call log for the recording…" : "No browser-playable recording was saved for this lead."}</span>
                 </CardContent>
               </Card>
             )}
