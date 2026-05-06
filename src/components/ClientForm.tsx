@@ -1,5 +1,6 @@
 import { useState } from "react";
-import type { ClientInputs, IncomeFrequency, FundEntry } from "@/lib/calc";
+import type { ClientInputs, IncomeFrequency, FundEntry, InvestmentOption } from "@/lib/calc";
+import { resolvedFundReturn, resolvedFundGrowth } from "@/lib/calc";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
