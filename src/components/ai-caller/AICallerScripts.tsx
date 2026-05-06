@@ -170,6 +170,7 @@ export function AICallerScripts() {
   }
 
   function openEdit(script: Script) {
+    clearSavedDraft();
     setEditingScript(script);
     setName(script.name);
     setDescription(script.description || "");
@@ -240,6 +241,7 @@ export function AICallerScripts() {
   }
 
   function cloneScript(script: Script) {
+    clearSavedDraft();
     setEditingScript(null);
     setName(`${script.name} (Copy)`);
     setDescription(script.description || "");
@@ -264,11 +266,15 @@ export function AICallerScripts() {
           <h2 className="text-lg font-semibold text-foreground">Call Scripts</h2>
           <p className="text-sm text-muted-foreground">Define what your AI caller says and asks</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
+        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) { clearSavedDraft(); resetForm(); } }}>
           <DialogTrigger asChild>
             <Button className="gap-2"><Plus className="w-4 h-4" /> New Script</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogContent
+            className="max-w-2xl max-h-[85vh] overflow-y-auto"
+            onInteractOutside={(event) => event.preventDefault()}
+            onEscapeKeyDown={(event) => event.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle>{editingScript ? "Edit Script" : "Create Script"}</DialogTitle>
             </DialogHeader>
