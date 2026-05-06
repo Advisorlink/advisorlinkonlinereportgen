@@ -1142,6 +1142,132 @@ After all questions are asked, thank them for their time and let them know someo
       });
     }
 
+    if (action === "assign-inbound-script") {
+      const { phoneNumberId, scriptId } = body;
+      if (!phoneNumberId) throw new Error("phoneNumberId is required");
+
+      if (!scriptId) {
+        // Remove inbound assistant from number
+        const vapiRes = await fetch(`${VAPI_BASE}/phone-number/${phoneNumberId}`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${VAPI_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ assistantId: null }),
+        });
+        if (!vapiRes.ok) {
+          const errText = await vapiRes.text();
+          throw new Error(`Failed to remove inbound assistant [${vapiRes.status}]: ${errText}`);
+        }
+        return new Response(JSON.stringify({ success: true, removed: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Fetch the script
+      const { data: script, error: scriptErr } = await supabase
+        .from("ai_caller_scripts")
+        .select("*")
+        .eq("id", scriptId)
+        .single();
+      if (scriptErr || !script) throw new Error("Script not found");
+
+      // Build assistant for inbound
+      const questions = (script as any).questions || [];
+      const extractionProperties: Record<string, any> = {};
+      for (const q of questions) {
+        extractionProperties[q.fieldName] = { type: "string", description: q.question };
+      }
+
+      const secondMessage = (script as any).second_message
+        ? `\nFOLLOW-UP STATEMENT (say this after the caller responds to your greeting, before asking questions):\n"${(script as any).second_message}"\n`
+        : "";
+
+      const systemPrompt = `${(script as any).system_prompt}
+
+IMPORTANT RULES:
+- This is an INBOUND call — the person called YOU. Be welcoming and helpful.
+- You MUST follow this script exactly. Do not deviate or make up information.
+- After your greeting, wait for the caller to respond. Then deliver the follow-up statement below (if provided).
+- After the follow-up, ask each question one at a time and wait for the response before moving on.
+- Be conversational and natural, like a real Australian person.
+- If they ask who you are, say you're from Advisor Link.
+- NEVER hallucinate or make up facts. Only relay information from your script.
+${secondMessage}
+QUESTIONS TO ASK (in order):
+${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
+
+After all questions are asked, thank them for their time and let them know someone will be in touch.`;
+
+      const assistantPayload: any = {
+        name: `${(script as any).name} - Inbound`,
+        model: {
+          provider: "openai",
+          model: (script as any).model || "gpt-4o",
+          messages: [{ role: "system", content: systemPrompt }],
+          tools: questions.length > 0 ? [{
+            type: "function",
+            function: {
+              name: "extract_lead_data",
+              description: "Extract and save the caller's answers to qualification questions",
+              parameters: {
+                type: "object",
+                properties: extractionProperties,
+                required: questions.map((q: any) => q.fieldName),
+              },
+            },
+            async: false,
+          }] : undefined,
+        },
+        voice: buildVoiceConfig(script as any, supabaseUrl),
+        firstMessage: (script as any).first_message || "G'day! Thanks for calling Advisor Link. How can I help you today?",
+        endCallFunctionEnabled: true,
+        recordingEnabled: true,
+        maxDurationSeconds: (script as any).max_duration_seconds || 300,
+        silenceTimeoutSeconds: 30,
+        responseDelaySeconds: 0.5,
+        backgroundSound: (script as any).background_sound_enabled
+          ? (script as any).background_sound || "office"
+          : undefined,
+        transcriber: { provider: "deepgram", model: "nova-2", language: "en-AU" },
+        serverUrl: `${supabaseUrl}/functions/v1/vapi-webhook`,
+      };
+
+      // Create the assistant
+      const assistantRes = await fetch(`${VAPI_BASE}/assistant`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${VAPI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(assistantPayload),
+      });
+      if (!assistantRes.ok) {
+        const errText = await assistantRes.text();
+        throw new Error(`Vapi create inbound assistant failed [${assistantRes.status}]: ${errText}`);
+      }
+      const assistant = await assistantRes.json();
+
+      // Assign to phone number
+      const patchRes = await fetch(`${VAPI_BASE}/phone-number/${phoneNumberId}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${VAPI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ assistantId: assistant.id }),
+      });
+      if (!patchRes.ok) {
+        const errText = await patchRes.text();
+        throw new Error(`Failed to assign assistant to number [${patchRes.status}]: ${errText}`);
+      }
+
+      return new Response(JSON.stringify({ success: true, assistantId: assistant.id }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     throw new Error(`Unknown action: ${action}`);
   } catch (e) {
     console.error("vapi-manage error:", e);
