@@ -250,7 +250,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
           />
           {/* Additional funds */}
           {(value.additionalFunds ?? []).map((fund, idx) => (
-            <Group key={idx} title={`Fund ${idx + 2}`}>
+            <div key={idx} className="space-y-3">
               <div className="col-span-2 flex justify-end -mt-1 -mb-1">
                 <Button
                   variant="ghost" size="sm"
