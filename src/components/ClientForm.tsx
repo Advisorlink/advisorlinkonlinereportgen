@@ -273,6 +273,17 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
               <Field label="Admin fee - %"><PctInput v={fund.adminFeePct} on={n => updateFund(idx, "adminFeePct", n)} /></Field>
               <Field label="Investment risk profile"><Input value={fund.investmentRiskProfile || ""} onChange={e => updateFund(idx, "investmentRiskProfile", e.target.value)} /></Field>
             </Group>
+            <InvestmentOptionsSection
+              options={fund.investmentOptions ?? []}
+              onChange={(opts) => {
+                const funds = [...(value.additionalFunds ?? [])];
+                funds[idx] = { ...funds[idx], investmentOptions: opts };
+                onChange({ ...value, additionalFunds: funds });
+              }}
+              fundLabel={`Fund ${idx + 2}`}
+              primaryReturn={fund.grossReturn}
+              primaryGrowth={fund.growthAssetsPct}
+            />
           ))}
           <Button
             variant="outline"
