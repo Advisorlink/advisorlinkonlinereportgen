@@ -270,9 +270,12 @@ After all questions are asked, thank them for their time and let them know someo
 
     if (action === "import-phone-number") {
       const { number, twilioAccountSid, twilioAuthToken } = body;
-      if (!number || !twilioAccountSid || !twilioAuthToken) {
-        throw new Error("number (E.164), twilioAccountSid, and twilioAuthToken are required");
+      if (!number) {
+        throw new Error("number (E.164) is required");
       }
+      // Use provided creds or fall back to connector creds for Vapi import
+      const sid = twilioAccountSid || await getTwilioAccountSid();
+      const auth = twilioAuthToken || await getTwilioAuthToken();
       const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
         method: "POST",
         headers: {
@@ -282,8 +285,8 @@ After all questions are asked, thank them for their time and let them know someo
         body: JSON.stringify({
           provider: "twilio",
           number,
-          twilioAccountSid,
-          twilioAuthToken,
+          twilioAccountSid: sid,
+          twilioAuthToken: auth,
         }),
       });
       if (!vapiRes.ok) {
