@@ -29,13 +29,34 @@ function resolveVoiceProvider(provider: string | undefined): string {
   return provider;
 }
 
+function buildVoiceConfig(script: any, supabaseUrl: string) {
+  const provider = resolveVoiceProvider(script.voice_provider);
+  const voiceId = resolveVoiceId(script.voice_id);
+
+  if (provider === "11labs") {
+    return {
+      provider: "custom-voice",
+      server: {
+        url: `${supabaseUrl}/functions/v1/vapi-tts?voiceId=${encodeURIComponent(voiceId)}`,
+        timeoutSeconds: 20,
+      },
+    };
+  }
+
+  return {
+    provider,
+    voiceId,
+    inputMinCharacters: 10,
+    fillerInjectionEnabled: false,
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const VAPI_API_KEY = Deno.env.get("VAPI_API_KEY");
     if (!VAPI_API_KEY) throw new Error("VAPI_API_KEY is not configured");
-    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
