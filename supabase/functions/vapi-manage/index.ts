@@ -74,6 +74,68 @@ function buildVoiceConfig(script: any, supabaseUrl: string) {
   };
 }
 
+function hasMeaningfulFields(fields: Record<string, unknown> | null | undefined) {
+  return !!fields && Object.values(fields).some((value) => value != null && String(value).trim() !== "");
+}
+
+function stripEmptyFields(fields: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(fields).filter(([, value]) => value != null && String(value).trim() !== "")
+  );
+}
+
+async function extractLeadAnswers(transcript: string, summary: string, questions: any[] = []) {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY || !transcript?.trim()) return { fields: {}, summary };
+
+  const questionText = questions.length
+    ? questions.map((q, i) => `${i + 1}. ${q.question || q.label || q.fieldName} -> ${q.fieldName}`).join("\n")
+    : "No custom campaign questions were found.";
+
+  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-3-flash-preview",
+      temperature: 0,
+      messages: [
+        { role: "system", content: "Extract lead data from Australian superannuation call transcripts. Only use answers spoken by the client/User. Never guess. Leave unknown fields blank." },
+        { role: "user", content: `Campaign questions:\n${questionText}\n\nExisting summary:\n${summary || ""}\n\nTranscript:\n${transcript}\n\nReturn the client's answers for standard fields super_fund_name, balance, age, had_review_before and any campaign question fieldName. Balance must be raw digits if possible. had_review_before must be Yes, No, or blank.` },
+      ],
+      tools: [{
+        type: "function",
+        function: {
+          name: "save_extracted_lead",
+          description: "Save explicitly stated lead answers",
+          parameters: {
+            type: "object",
+            properties: {
+              fields: { type: "object", additionalProperties: { type: "string" } },
+              summary: { type: "string" },
+            },
+            required: ["fields", "summary"],
+          },
+        },
+      }],
+      tool_choice: { type: "function", function: { name: "save_extracted_lead" } },
+    }),
+  });
+
+  if (!resp.ok) {
+    console.error("lead reprocess extraction failed", resp.status, await resp.text());
+    return { fields: {}, summary };
+  }
+
+  try {
+    const result = await resp.json();
+    const args = result.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    const parsed = args ? JSON.parse(args) : null;
+    return { fields: stripEmptyFields(parsed?.fields || {}), summary: parsed?.summary || summary };
+  } catch {
+    return { fields: {}, summary };
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
