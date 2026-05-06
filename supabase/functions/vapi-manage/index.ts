@@ -79,7 +79,7 @@ After all questions are asked, thank them for their time and let them know someo
         },
         voice: {
           provider: script.voice_provider || "elevenlabs",
-          voiceId: script.voice_id || "sarah",
+          voiceId: resolveVoiceId(script.voice_id),
         },
         firstMessage: script.first_message || "Hi there, how are you today?",
         endCallFunctionEnabled: true,
@@ -115,16 +115,13 @@ After all questions are asked, thank them for their time and let them know someo
     }
 
     if (action === "list-voices") {
-      // Return curated Australian-friendly ElevenLabs voices
+      // Return curated Australian ElevenLabs community voices
       const voices = [
-        { id: "sarah", name: "Sarah", accent: "Australian", gender: "Female", description: "Warm, professional" },
-        { id: "laura", name: "Laura", accent: "Australian", gender: "Female", description: "Friendly, clear" },
-        { id: "charlie", name: "Charlie", accent: "Australian", gender: "Male", description: "Confident, natural" },
-        { id: "george", name: "George", accent: "Australian/British", gender: "Male", description: "Authoritative, calm" },
-        { id: "callum", name: "Callum", accent: "Australian", gender: "Male", description: "Conversational, relaxed" },
-        { id: "river", name: "River", accent: "Neutral", gender: "Non-binary", description: "Smooth, versatile" },
-        { id: "matilda", name: "Matilda", accent: "Australian", gender: "Female", description: "Energetic, bright" },
-        { id: "jessica", name: "Jessica", accent: "Australian", gender: "Female", description: "Soft, empathetic" },
+        { id: "voice1", name: "Olivia", accent: "Australian", gender: "Female", description: "Warm, professional" },
+        { id: "voice2", name: "Jack", accent: "Australian", gender: "Male", description: "Confident, natural" },
+        { id: "voice3", name: "Mia", accent: "Australian", gender: "Female", description: "Friendly, clear" },
+        { id: "voice4", name: "Liam", accent: "Australian", gender: "Male", description: "Conversational, relaxed" },
+        { id: "voice5", name: "Sophie", accent: "Australian", gender: "Female", description: "Energetic, bright" },
       ];
       return new Response(JSON.stringify({ voices }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
