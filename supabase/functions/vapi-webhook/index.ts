@@ -117,6 +117,16 @@ serve(async (req) => {
       const endedReason = message?.endedReason || call?.endedReason || "unknown";
       const recordingUrl = message?.recordingUrl || call?.recordingUrl || null;
       const vapiCallId = call?.id || message?.callId || null;
+      let scriptQuestions: any[] = [];
+
+      if (campaignId) {
+        const { data: campaign } = await supabase
+          .from("ai_caller_campaigns")
+          .select("ai_caller_scripts(questions)")
+          .eq("id", campaignId)
+          .single();
+        scriptQuestions = (campaign as any)?.ai_caller_scripts?.questions || [];
+      }
 
       // Extract structured data from tool calls
       let extractedFields: Record<string, string> = {};
@@ -136,6 +146,14 @@ serve(async (req) => {
       if (message?.analysis?.structuredData) {
         extractedFields = { ...extractedFields, ...message.analysis.structuredData };
       }
+
+      if (!hasMeaningfulFields(extractedFields) && transcript) {
+        const aiExtracted = await extractLeadAnswers(transcript, summary, scriptQuestions);
+        extractedFields = { ...extractedFields, ...aiExtracted.fields };
+        if (aiExtracted.summary) message.summary = aiExtracted.summary;
+      }
+
+      const finalSummary = message?.summary || summary;
 
       // Update call log
       if (vapiCallId) {
@@ -177,7 +195,7 @@ serve(async (req) => {
             phone: contact.phone,
             email: contact.email,
             extracted_fields: extractedFields,
-            transcript_summary: summary,
+            transcript_summary: finalSummary,
             full_transcript: transcript,
             recording_url: recordingUrl || null,
             call_duration_seconds: Math.round(duration),
