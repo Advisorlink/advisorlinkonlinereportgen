@@ -451,12 +451,31 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           <SectionCard title="Current fund" icon="◆">
             <Row label="Fund name" value={i.fundName} />
             <Row label="Investment option" value={i.modelLabel} />
-            <Row label="Growth assets" value={fmtPct(i.growthAssetsPct, 0)} />
+            <Row label="Growth assets" value={fmtPct(funds[0] ? resolvedFundGrowth(funds[0]) : i.growthAssetsPct, 0)} />
             <Row label="Investment risk profile" value={i.investmentRiskProfile || s.riskProfile} />
-            <Row label="5-year net return" value={fmtPct(i.grossReturn)} />
+            <Row label="5-year net return" value={fmtPct(funds[0] ? resolvedFundReturn(funds[0]) : i.grossReturn)} />
             <Row label="Admin fee - flat" value={fmtMoney(i.adminFeeFlat)} />
             <Row label="Admin fee - % of balance" value={fmtPct(i.adminFeePct, 2)} />
             <Row label="Effective admin fee %" value={fmtPct(s.existingAdminPct, 2)} />
+            {i.investmentOptions && i.investmentOptions.length > 0 && (
+              <div className="mt-3 pt-2 border-t border-border">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1.5">Investment Options Breakdown</div>
+                {i.investmentOptions.map((opt, oi) => (
+                  <div key={oi} className="flex items-baseline justify-between py-1 text-[11px]">
+                    <span className="text-muted-foreground">{opt.name || `Option ${oi + 1}`}</span>
+                    <span className="tabular-nums text-foreground">
+                      {fmtPct(opt.allocationPct, 0)} alloc · {fmtPct(opt.fiveYearReturn)} return · {fmtPct(opt.growthAssetsPct, 0)} growth
+                    </span>
+                  </div>
+                ))}
+                <div className="flex items-baseline justify-between py-1.5 mt-1 border-t border-border text-[11px] font-semibold">
+                  <span className="text-navy">Weighted Average</span>
+                  <span className="tabular-nums text-navy">
+                    {fmtPct(funds[0] ? resolvedFundReturn(funds[0]) : i.grossReturn)} return · {fmtPct(funds[0] ? resolvedFundGrowth(funds[0]) : i.growthAssetsPct, 0)} growth
+                  </span>
+                </div>
+              </div>
+            )}
           </SectionCard>
           <SectionCard title="Comparison scenario" icon="◉">
             <Row label="Scenario" value="Aligned to risk profile" />
