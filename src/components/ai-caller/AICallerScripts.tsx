@@ -106,6 +106,7 @@ export function AICallerScripts() {
     setEditingScript(script);
     setName(script.name);
     setDescription(script.description || "");
+    setCallDirection((script.call_direction as "outbound" | "inbound") || "outbound");
     setSystemPrompt(script.system_prompt);
     setFirstMessage(script.first_message);
     setSecondMessage(script.second_message || "");
