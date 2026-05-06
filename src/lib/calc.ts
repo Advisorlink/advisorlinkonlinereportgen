@@ -4,6 +4,13 @@
 export type IncomeFrequency = "Weekly" | "Monthly" | "Annually";
 export type RiskProfile = "High Growth" | "Growth" | "Balanced" | "Moderate" | "Conservative";
 
+export interface InvestmentOption {
+  name: string;
+  allocationPct: number; // 0-1, portion of the fund balance in this option
+  growthAssetsPct: number;
+  fiveYearReturn: number; // decimal e.g. 0.066
+}
+
 export interface FundEntry {
   fundName: string;
   modelLabel: string;
@@ -13,6 +20,28 @@ export interface FundEntry {
   adminFeeFlat: number;
   adminFeePct: number;
   investmentRiskProfile?: string;
+  investmentOptions?: InvestmentOption[];
+}
+
+// Compute weighted averages from investment options if present
+export function resolvedFundReturn(f: FundEntry): number {
+  if (f.investmentOptions && f.investmentOptions.length > 0) {
+    const totalAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0);
+    if (totalAlloc > 0) {
+      return f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.fiveYearReturn, 0) / totalAlloc;
+    }
+  }
+  return f.grossReturn;
+}
+
+export function resolvedFundGrowth(f: FundEntry): number {
+  if (f.investmentOptions && f.investmentOptions.length > 0) {
+    const totalAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0);
+    if (totalAlloc > 0) {
+      return f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.growthAssetsPct, 0) / totalAlloc;
+    }
+  }
+  return f.growthAssetsPct;
 }
 
 export interface ClientInputs {
@@ -51,6 +80,9 @@ export interface ClientInputs {
 
   // Multiple funds support
   additionalFunds?: FundEntry[];
+
+  // Investment options for primary fund
+  investmentOptions?: InvestmentOption[];
 }
 
 // Risk profile lookup (mirrors XLSX J27/J28 array formulas via growth-assets %)
@@ -141,6 +173,7 @@ export function getAllFunds(i: ClientInputs): FundEntry[] {
     adminFeeFlat: i.adminFeeFlat,
     adminFeePct: i.adminFeePct,
     investmentRiskProfile: i.investmentRiskProfile,
+    investmentOptions: i.investmentOptions,
   };
   const funds = [primary];
   if (i.additionalFunds) {
@@ -159,7 +192,7 @@ export function weightedGrowthPct(i: ClientInputs): number {
   const funds = getAllFunds(i);
   const total = funds.reduce((s, f) => s + f.superBalance, 0) + (i.secondBalance ?? 0);
   if (total === 0) return 0;
-  let weighted = funds.reduce((s, f) => s + f.superBalance * f.growthAssetsPct, 0);
+  let weighted = funds.reduce((s, f) => s + f.superBalance * resolvedFundGrowth(f), 0);
   weighted += (i.secondBalance ?? 0) * (i.secondGrowthPct ?? 0);
   return weighted / total;
 }
@@ -169,7 +202,7 @@ export function existingReturnPct(i: ClientInputs): number {
   const funds = getAllFunds(i);
   const total = funds.reduce((s, f) => s + f.superBalance, 0) + (i.secondBalance ?? 0);
   if (total === 0) return 0;
-  let weighted = funds.reduce((s, f) => s + f.superBalance * f.grossReturn, 0);
+  let weighted = funds.reduce((s, f) => s + f.superBalance * resolvedFundReturn(f), 0);
   weighted += (i.secondBalance ?? 0) * (i.secondReturn ?? 0);
   return weighted / total;
 }
