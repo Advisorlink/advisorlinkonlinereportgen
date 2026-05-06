@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Phone, Loader2, RefreshCw, Trash2 } from "lucide-react";
+import { Plus, Phone, Loader2, RefreshCw, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 interface PhoneNumber {
@@ -13,15 +13,16 @@ interface PhoneNumber {
   number: string;
   provider: string;
   name?: string;
-  createdAt?: string;
 }
 
 export function AICallerPhoneNumbers() {
   const [numbers, setNumbers] = useState<PhoneNumber[]>([]);
   const [loading, setLoading] = useState(true);
-  const [buying, setBuying] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [areaCode, setAreaCode] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [twilioSid, setTwilioSid] = useState("");
+  const [twilioAuth, setTwilioAuth] = useState("");
 
   useEffect(() => { loadNumbers(); }, []);
 
@@ -35,40 +36,50 @@ export function AICallerPhoneNumbers() {
       if (data?.error) throw new Error(data.error);
       const nums = (data?.phoneNumbers || []).map((p: any) => ({
         id: p.id,
-        number: p.number || p.twilioPhoneNumber || p.vonagePhoneNumber || "Unknown",
+        number: p.number || p.twilioPhoneNumber || "Unknown",
         provider: p.provider || "twilio",
         name: p.name,
-        createdAt: p.createdAt,
       }));
       setNumbers(nums);
     } catch (e: any) {
       console.error("Failed to load phone numbers:", e);
-      toast.error(e.message || "Failed to load phone numbers");
     } finally {
       setLoading(false);
     }
   }
 
-  async function buyNumber() {
-    setBuying(true);
+  async function importNumber() {
+    if (!phoneNumber.trim() || !twilioSid.trim() || !twilioAuth.trim()) {
+      toast.error("All fields are required");
+      return;
+    }
+    if (!phoneNumber.startsWith("+")) {
+      toast.error("Phone number must be in E.164 format (e.g. +61412345678)");
+      return;
+    }
+
+    setImporting(true);
     try {
       const { data, error } = await supabase.functions.invoke("vapi-manage", {
         body: {
-          action: "buy-phone-number",
-          areaCode: areaCode.trim() || undefined,
-          countryCode: "AU",
+          action: "import-phone-number",
+          number: phoneNumber.trim(),
+          twilioAccountSid: twilioSid.trim(),
+          twilioAuthToken: twilioAuth.trim(),
         },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success("Australian phone number purchased!");
+      toast.success("Phone number imported successfully!");
       setDialogOpen(false);
-      setAreaCode("");
+      setPhoneNumber("");
+      setTwilioSid("");
+      setTwilioAuth("");
       loadNumbers();
     } catch (e: any) {
-      toast.error(e.message || "Failed to buy number. Make sure you have Twilio credits in your Vapi account.");
+      toast.error(e.message || "Failed to import number");
     } finally {
-      setBuying(false);
+      setImporting(false);
     }
   }
 
@@ -77,7 +88,7 @@ export function AICallerPhoneNumbers() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Phone Numbers</h2>
-          <p className="text-sm text-muted-foreground">Manage your Australian calling numbers via Vapi</p>
+          <p className="text-sm text-muted-foreground">Manage your calling numbers</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={loadNumbers} className="gap-1">
@@ -85,28 +96,55 @@ export function AICallerPhoneNumbers() {
           </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2"><Plus className="w-4 h-4" /> Buy Number</Button>
+              <Button className="gap-2"><Plus className="w-4 h-4" /> Import Number</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-sm">
+            <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>Buy Australian Phone Number</DialogTitle>
+                <DialogTitle>Import Twilio Phone Number</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-2">
                 <p className="text-sm text-muted-foreground">
-                  Purchase an Australian phone number through your Vapi account. This will be charged to your Vapi/Twilio billing.
+                  Import an Australian phone number from your Twilio account. You'll need the number, your Twilio Account SID, and Auth Token.
                 </p>
+
                 <div className="space-y-2">
-                  <Label>Area Code (optional)</Label>
+                  <Label>Phone Number (E.164 format)</Label>
                   <Input
-                    value={areaCode}
-                    onChange={e => setAreaCode(e.target.value)}
-                    placeholder="e.g. 02 for Sydney, 03 for Melbourne"
+                    value={phoneNumber}
+                    onChange={e => setPhoneNumber(e.target.value)}
+                    placeholder="+61412345678"
                   />
-                  <p className="text-xs text-muted-foreground">Leave blank for any available AU number</p>
                 </div>
-                <Button onClick={buyNumber} disabled={buying} className="w-full">
-                  {buying ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Purchasing...</> : "Buy Number"}
+
+                <div className="space-y-2">
+                  <Label>Twilio Account SID</Label>
+                  <Input
+                    value={twilioSid}
+                    onChange={e => setTwilioSid(e.target.value)}
+                    placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Twilio Auth Token</Label>
+                  <Input
+                    type="password"
+                    value={twilioAuth}
+                    onChange={e => setTwilioAuth(e.target.value)}
+                    placeholder="Your Twilio auth token"
+                  />
+                </div>
+
+                <Button onClick={importNumber} disabled={importing} className="w-full">
+                  {importing ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Importing...</> : "Import Number"}
                 </Button>
+
+                <p className="text-xs text-muted-foreground text-center">
+                  Don't have a Twilio number?{" "}
+                  <a href="https://console.twilio.com/us1/develop/phone-numbers/manage/search" target="_blank" rel="noopener noreferrer" className="text-cyan underline">
+                    Buy one on Twilio
+                  </a>
+                </p>
               </div>
             </DialogContent>
           </Dialog>
@@ -116,14 +154,14 @@ export function AICallerPhoneNumbers() {
       {loading ? (
         <div className="text-center py-12 text-muted-foreground text-sm">
           <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
-          Loading phone numbers from Vapi...
+          Loading phone numbers...
         </div>
       ) : numbers.length === 0 ? (
         <Card className="bg-card border-border">
           <CardContent className="py-12 text-center">
             <Phone className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
             <p className="text-sm text-muted-foreground mb-1">No phone numbers yet</p>
-            <p className="text-xs text-muted-foreground">Buy an Australian number to start making AI calls</p>
+            <p className="text-xs text-muted-foreground">Import a Twilio number or buy one from the Vapi dashboard</p>
           </CardContent>
         </Card>
       ) : (
@@ -140,10 +178,6 @@ export function AICallerPhoneNumbers() {
                     <p className="text-[10px] text-muted-foreground capitalize">{n.provider}</p>
                   </div>
                 </div>
-                {n.name && (
-                  <p className="text-xs text-muted-foreground mt-2 truncate">{n.name}</p>
-                )}
-                <p className="text-[10px] text-muted-foreground mt-1 font-mono">{n.id}</p>
               </CardContent>
             </Card>
           ))}
@@ -153,10 +187,10 @@ export function AICallerPhoneNumbers() {
       <Card className="bg-muted/30 border-border">
         <CardContent className="py-3 px-4">
           <p className="text-xs text-muted-foreground">
-            <strong>Tip:</strong> You can also buy and manage phone numbers directly in your{" "}
-            <a href="https://dashboard.vapi.ai" target="_blank" rel="noopener noreferrer" className="text-cyan underline">
-              Vapi dashboard
-            </a>. Numbers purchased there will appear here automatically.
+            <strong>How it works:</strong> 1) Buy a phone number on{" "}
+            <a href="https://console.twilio.com" target="_blank" rel="noopener noreferrer" className="text-cyan underline">Twilio</a>
+            {" "}→ 2) Import it here with your Twilio credentials → 3) Use it in your campaigns. You can also manage numbers in your{" "}
+            <a href="https://dashboard.vapi.ai" target="_blank" rel="noopener noreferrer" className="text-cyan underline">Vapi dashboard</a>.
           </p>
         </CardContent>
       </Card>
