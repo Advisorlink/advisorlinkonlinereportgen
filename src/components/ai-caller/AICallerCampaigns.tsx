@@ -348,6 +348,26 @@ export function AICallerCampaigns() {
                         </Button>
                       </>
                     )}
+                    {c.status === "active" && (
+                      <>
+                        <Button variant="outline" size="sm" className="gap-1" onClick={() => pauseCampaign(c.id)}>
+                          <Pause className="w-3 h-3" /> Pause
+                        </Button>
+                        <Button variant="destructive" size="sm" className="gap-1" onClick={() => stopCampaign(c.id)}>
+                          <Square className="w-3 h-3" /> Stop
+                        </Button>
+                      </>
+                    )}
+                    {c.status === "paused" && (
+                      <>
+                        <Button variant="outline" size="sm" className="gap-1" onClick={() => resumeCampaign(c.id)}>
+                          <RotateCcw className="w-3 h-3" /> Resume
+                        </Button>
+                        <Button variant="destructive" size="sm" className="gap-1" onClick={() => stopCampaign(c.id)}>
+                          <Square className="w-3 h-3" /> Stop
+                        </Button>
+                      </>
+                    )}
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteCampaign(c.id)}>
                       <Trash2 className="w-4 h-4 text-destructive" />
                     </Button>
