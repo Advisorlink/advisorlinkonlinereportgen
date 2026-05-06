@@ -213,6 +213,38 @@ export type Database = {
           },
         ]
       }
+      ai_caller_lead_notes: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          lead_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lead_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lead_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_caller_lead_notes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "ai_caller_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_caller_leads: {
         Row: {
           call_duration_seconds: number | null
