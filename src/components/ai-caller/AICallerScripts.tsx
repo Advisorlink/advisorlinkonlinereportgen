@@ -61,6 +61,7 @@ type ScriptSetupDraft = {
   firstMessage: string;
   followUpStatements: string[];
   questions: Question[];
+  closingStatements: string[];
   voiceId: string;
   bgSound: string;
   bgEnabled: boolean;
