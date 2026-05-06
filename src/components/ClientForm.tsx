@@ -338,3 +338,100 @@ function PctInput({ v, on }: { v: number; on: (n: number) => void }) {
     </div>
   );
 }
+
+function InvestmentOptionsSection({
+  options,
+  onChange,
+  fundLabel,
+  primaryReturn,
+  primaryGrowth,
+}: {
+  options: InvestmentOption[];
+  onChange: (opts: InvestmentOption[]) => void;
+  fundLabel: string;
+  primaryReturn: number;
+  primaryGrowth: number;
+}) {
+  const addOption = () => {
+    onChange([...options, { name: "", allocationPct: 1, growthAssetsPct: 0.7, fiveYearReturn: 0 }]);
+  };
+  const update = (idx: number, key: keyof InvestmentOption, val: string | number) => {
+    const next = [...options];
+    next[idx] = { ...next[idx], [key]: val };
+    onChange(next);
+  };
+  const remove = (idx: number) => {
+    const next = [...options];
+    next.splice(idx, 1);
+    onChange(next);
+  };
+
+  // Calculate weighted averages
+  const totalAlloc = options.reduce((s, o) => s + o.allocationPct, 0);
+  const avgReturn = totalAlloc > 0
+    ? options.reduce((s, o) => s + o.allocationPct * o.fiveYearReturn, 0) / totalAlloc
+    : primaryReturn;
+  const avgGrowth = totalAlloc > 0
+    ? options.reduce((s, o) => s + o.allocationPct * o.growthAssetsPct, 0) / totalAlloc
+    : primaryGrowth;
+
+  return (
+    <div className="ml-2 border-l-2 border-cyan/30 pl-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <BarChart3 className="w-3.5 h-3.5 text-cyan" />
+          <span className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
+            {fundLabel} — Investment Options
+          </span>
+        </div>
+        <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={addOption}>
+          <Plus className="w-3 h-3 mr-1" /> Add Option
+        </Button>
+      </div>
+      {options.length === 0 && (
+        <p className="text-[10px] text-muted-foreground italic mb-2">
+          No investment options added. The fund's single return & growth values are used. Add options to split across multiple investment choices.
+        </p>
+      )}
+      {options.map((opt, idx) => (
+        <div key={idx} className="rounded-lg border border-border bg-secondary/20 p-3 mb-2">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-semibold text-foreground">Option {idx + 1}</span>
+            <Button variant="ghost" size="sm" className="h-6 text-[10px] text-destructive" onClick={() => remove(idx)}>
+              <Trash2 className="w-3 h-3 mr-1" /> Remove
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="Option name">
+              <Input value={opt.name} placeholder="e.g. Balanced, Growth, Cash" onChange={e => update(idx, "name", e.target.value)} />
+            </Field>
+            <Field label="Allocation %">
+              <PctInput v={opt.allocationPct} on={n => update(idx, "allocationPct", n)} />
+            </Field>
+            <Field label="Growth assets %">
+              <PctInput v={opt.growthAssetsPct} on={n => update(idx, "growthAssetsPct", n)} />
+            </Field>
+            <Field label="5-year net return %">
+              <PctInput v={opt.fiveYearReturn} on={n => update(idx, "fiveYearReturn", n)} />
+            </Field>
+          </div>
+        </div>
+      ))}
+      {options.length > 0 && (
+        <div className="rounded-lg border border-cyan/30 bg-cyan/5 p-3 mt-1">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-cyan mb-1">Weighted Average (used in calculations)</div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span className="text-muted-foreground">Avg Return: </span>
+              <span className="font-semibold text-foreground">{(avgReturn * 100).toFixed(2)}%</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Avg Growth Assets: </span>
+              <span className="font-semibold text-foreground">{(avgGrowth * 100).toFixed(1)}%</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
