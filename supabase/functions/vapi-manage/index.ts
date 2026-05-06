@@ -131,6 +131,47 @@ After all questions are asked, thank them for their time and let them know someo
       });
     }
 
+    if (action === "preview-voice") {
+      const { voiceId, text } = body;
+      if (!voiceId || !text) throw new Error("voiceId and text are required");
+      
+      const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
+      if (!ELEVENLABS_API_KEY) {
+        return new Response(JSON.stringify({ error: "ELEVENLABS_API_KEY not configured", fallback: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const ttsRes = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_22050_32`,
+        {
+          method: "POST",
+          headers: {
+            "xi-api-key": ELEVENLABS_API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text,
+            model_id: "eleven_turbo_v2_5",
+            voice_settings: { stability: 0.5, similarity_boost: 0.75 },
+          }),
+        }
+      );
+
+      if (!ttsRes.ok) {
+        const errText = await ttsRes.text();
+        throw new Error(`ElevenLabs TTS failed [${ttsRes.status}]: ${errText}`);
+      }
+
+      const audioBuffer = await ttsRes.arrayBuffer();
+      const { encode: base64Encode } = await import("https://deno.land/std@0.168.0/encoding/base64.ts");
+      const audioBase64 = base64Encode(audioBuffer);
+
+      return new Response(JSON.stringify({ audioBase64 }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "make-call") {
       const { assistantId, phoneNumber, contactId, campaignId } = body;
 
