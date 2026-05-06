@@ -321,6 +321,7 @@ export type Database = {
         Row: {
           background_sound: string | null
           background_sound_enabled: boolean
+          call_direction: string
           created_at: string
           description: string | null
           first_message: string
@@ -339,6 +340,7 @@ export type Database = {
         Insert: {
           background_sound?: string | null
           background_sound_enabled?: boolean
+          call_direction?: string
           created_at?: string
           description?: string | null
           first_message?: string
@@ -357,6 +359,7 @@ export type Database = {
         Update: {
           background_sound?: string | null
           background_sound_enabled?: boolean
+          call_direction?: string
           created_at?: string
           description?: string | null
           first_message?: string

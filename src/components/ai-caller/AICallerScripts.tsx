@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Phone } from "lucide-react";
+import { Phone, PhoneIncoming, PhoneOutgoing } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -33,6 +33,7 @@ interface Script {
   background_sound_enabled: boolean;
   model: string;
   max_duration_seconds: number;
+  call_direction: string;
   created_at: string;
 }
 
@@ -52,9 +53,11 @@ export function AICallerScripts() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingScript, setEditingScript] = useState<Script | null>(null);
+  const [directionFilter, setDirectionFilter] = useState<"outbound" | "inbound">("outbound");
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [callDirection, setCallDirection] = useState<"outbound" | "inbound">("outbound");
   const [systemPrompt, setSystemPrompt] = useState("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
   const [firstMessage, setFirstMessage] = useState("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
   const [secondMessage, setSecondMessage] = useState("Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
@@ -83,6 +86,7 @@ export function AICallerScripts() {
   function resetForm() {
     setName("");
     setDescription("");
+    setCallDirection(directionFilter);
     setSystemPrompt("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
     setFirstMessage("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
     setSecondMessage("Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
@@ -102,6 +106,7 @@ export function AICallerScripts() {
     setEditingScript(script);
     setName(script.name);
     setDescription(script.description || "");
+    setCallDirection((script.call_direction as "outbound" | "inbound") || "outbound");
     setSystemPrompt(script.system_prompt);
     setFirstMessage(script.first_message);
     setSecondMessage(script.second_message || "");
@@ -133,6 +138,7 @@ export function AICallerScripts() {
       user_id: user.id,
       name: name.trim(),
       description: description.trim() || null,
+      call_direction: callDirection,
       system_prompt: systemPrompt,
       first_message: firstMessage,
       second_message: secondMessage,
@@ -166,6 +172,8 @@ export function AICallerScripts() {
     loadScripts();
   }
 
+  const filteredScripts = scripts.filter(s => (s.call_direction || "outbound") === directionFilter);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -182,6 +190,36 @@ export function AICallerScripts() {
               <DialogTitle>{editingScript ? "Edit Script" : "Create Script"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-5 py-2">
+              {/* Direction selector */}
+              <div className="space-y-2">
+                <Label>Call Direction</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={callDirection === "outbound" ? "default" : "outline"}
+                    size="sm"
+                    className="gap-2 flex-1"
+                    onClick={() => setCallDirection("outbound")}
+                  >
+                    <PhoneOutgoing className="w-3.5 h-3.5" /> Outbound
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={callDirection === "inbound" ? "default" : "outline"}
+                    size="sm"
+                    className="gap-2 flex-1"
+                    onClick={() => setCallDirection("inbound")}
+                  >
+                    <PhoneIncoming className="w-3.5 h-3.5" /> Inbound
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  {callDirection === "inbound"
+                    ? "This script runs when someone calls your number. Assign it to a phone number in the Numbers tab."
+                    : "This script is used for outbound campaigns calling leads."}
+                </p>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Script Name</Label>
@@ -208,8 +246,15 @@ export function AICallerScripts() {
               </div>
 
               <div className="space-y-2">
-                <Label>Opening Message</Label>
-                <Textarea value={firstMessage} onChange={e => setFirstMessage(e.target.value)} rows={2} placeholder="What does the AI say first?" />
+                <Label>{callDirection === "inbound" ? "Greeting Message" : "Opening Message"}</Label>
+                <Textarea
+                  value={firstMessage}
+                  onChange={e => setFirstMessage(e.target.value)}
+                  rows={2}
+                  placeholder={callDirection === "inbound"
+                    ? "e.g. G'day! Thanks for calling Advisor Link. How can I help you today?"
+                    : "What does the AI say first?"}
+                />
               </div>
 
               <div className="space-y-2">
@@ -283,24 +328,61 @@ export function AICallerScripts() {
         </Dialog>
       </div>
 
+      {/* Direction filter tabs */}
+      <div className="flex gap-2">
+        <Button
+          variant={directionFilter === "outbound" ? "default" : "outline"}
+          size="sm"
+          className="gap-2"
+          onClick={() => setDirectionFilter("outbound")}
+        >
+          <PhoneOutgoing className="w-3.5 h-3.5" /> Outbound Scripts
+        </Button>
+        <Button
+          variant={directionFilter === "inbound" ? "default" : "outline"}
+          size="sm"
+          className="gap-2"
+          onClick={() => setDirectionFilter("inbound")}
+        >
+          <PhoneIncoming className="w-3.5 h-3.5" /> Inbound Scripts
+        </Button>
+      </div>
+
       {loading ? (
         <div className="text-center py-12 text-muted-foreground text-sm">Loading scripts...</div>
-      ) : scripts.length === 0 ? (
+      ) : filteredScripts.length === 0 ? (
         <Card className="bg-card border-border">
           <CardContent className="py-12 text-center">
-            <Phone className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-            <p className="text-sm text-muted-foreground">No scripts yet. Create one to get started.</p>
+            {directionFilter === "inbound" ? (
+              <>
+                <PhoneIncoming className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+                <p className="text-sm text-muted-foreground mb-1">No inbound scripts yet</p>
+                <p className="text-xs text-muted-foreground">Create an inbound script so your AI answers when clients call your number</p>
+              </>
+            ) : (
+              <>
+                <Phone className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+                <p className="text-sm text-muted-foreground">No outbound scripts yet. Create one to get started.</p>
+              </>
+            )}
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {scripts.map(s => (
+          {filteredScripts.map(s => (
             <Card key={s.id} className="bg-card border-border hover:border-cyan/30 transition-colors">
               <CardContent className="pt-5 pb-4 px-5">
                 <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="font-semibold text-foreground">{s.name}</h3>
-                    {s.description && <p className="text-xs text-muted-foreground mt-0.5">{s.description}</p>}
+                  <div className="flex items-center gap-2">
+                    {(s.call_direction || "outbound") === "inbound" ? (
+                      <PhoneIncoming className="w-4 h-4 text-emerald-400 shrink-0" />
+                    ) : (
+                      <PhoneOutgoing className="w-4 h-4 text-cyan shrink-0" />
+                    )}
+                    <div>
+                      <h3 className="font-semibold text-foreground">{s.name}</h3>
+                      {s.description && <p className="text-xs text-muted-foreground mt-0.5">{s.description}</p>}
+                    </div>
                   </div>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(s)}>
