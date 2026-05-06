@@ -98,6 +98,19 @@ function stripEmptyFields(fields: Record<string, unknown>) {
   );
 }
 
+function formatFollowUps(secondMessage: string | null | undefined): string {
+  if (!secondMessage) return "";
+  try {
+    const parsed = JSON.parse(secondMessage);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return `\nFOLLOW-UP STATEMENTS (say these after the client responds to your opening message, before asking questions):\n${parsed.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")}\n`;
+    }
+  } catch {
+    /* not JSON, treat as single statement */
+  }
+  return `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${secondMessage}"\n`;
+}
+
 async function extractLeadAnswers(
   transcript: string,
   summary: string,
