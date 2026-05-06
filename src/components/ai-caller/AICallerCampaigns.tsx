@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Upload, Play, Trash2, Users, Loader2, Pencil } from "lucide-react";
+import { Plus, Upload, Play, Trash2, Users, Loader2, Pencil, Square, Pause, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -160,6 +160,48 @@ export function AICallerCampaigns() {
     }
   }
 
+  async function stopCampaign(id: string) {
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "stop-campaign", campaignId: id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Campaign stopped. ${data.callsEnded || 0} active calls ended.`);
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to stop campaign");
+    }
+  }
+
+  async function pauseCampaign(id: string) {
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "pause-campaign", campaignId: id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Campaign paused");
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to pause campaign");
+    }
+  }
+
+  async function resumeCampaign(id: string) {
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "resume-campaign", campaignId: id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Campaign resumed");
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to resume campaign");
+    }
+  }
+
   const statusColor: Record<string, string> = {
     draft: "bg-muted text-muted-foreground",
     active: "bg-emerald-500/20 text-emerald-400",
@@ -303,6 +345,26 @@ export function AICallerCampaigns() {
                         <Button size="sm" className="gap-1" onClick={() => startCampaign(c.id)} disabled={starting !== null}>
                           {starting === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
                           {starting === c.id ? "Starting..." : "Start"}
+                        </Button>
+                      </>
+                    )}
+                    {c.status === "active" && (
+                      <>
+                        <Button variant="outline" size="sm" className="gap-1" onClick={() => pauseCampaign(c.id)}>
+                          <Pause className="w-3 h-3" /> Pause
+                        </Button>
+                        <Button variant="destructive" size="sm" className="gap-1" onClick={() => stopCampaign(c.id)}>
+                          <Square className="w-3 h-3" /> Stop
+                        </Button>
+                      </>
+                    )}
+                    {c.status === "paused" && (
+                      <>
+                        <Button variant="outline" size="sm" className="gap-1" onClick={() => resumeCampaign(c.id)}>
+                          <RotateCcw className="w-3 h-3" /> Resume
+                        </Button>
+                        <Button variant="destructive" size="sm" className="gap-1" onClick={() => stopCampaign(c.id)}>
+                          <Square className="w-3 h-3" /> Stop
                         </Button>
                       </>
                     )}

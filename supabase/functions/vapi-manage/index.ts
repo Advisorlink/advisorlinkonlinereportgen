@@ -109,6 +109,7 @@ After all questions are asked, thank them for their time and let them know someo
           model: "nova-2",
           language: "en-AU",
         },
+        serverUrl: `${supabaseUrl}/functions/v1/vapi-webhook`,
       };
 
       const vapiRes = await fetch(`${VAPI_BASE}/assistant`, {
@@ -210,16 +211,11 @@ After all questions are asked, thank them for their time and let them know someo
     if (action === "make-call") {
       const { assistantId, phoneNumber, contactId, campaignId } = body;
 
-      const webhookUrl = `${supabaseUrl}/functions/v1/vapi-webhook`;
-
       const callPayload: any = {
         assistantId,
         customer: { number: phoneNumber },
         phoneNumberId: body.phoneNumberId,
         metadata: { contactId, campaignId },
-        server: {
-          url: webhookUrl,
-        },
       };
 
       const vapiRes = await fetch(`${VAPI_BASE}/call/phone`, {
@@ -500,6 +496,7 @@ After all questions are asked, thank them for their time and let them know someo
         responseDelaySeconds: 0.5,
         backgroundSound: script.background_sound_enabled ? (script.background_sound || "office") : undefined,
         transcriber: { provider: "deepgram", model: "nova-2", language: "en-AU" },
+        serverUrl: `${supabaseUrl}/functions/v1/vapi-webhook`,
       };
 
       const assistantRes = await fetch(`${VAPI_BASE}/assistant`, {
@@ -520,7 +517,6 @@ After all questions are asked, thank them for their time and let them know someo
       } as any).eq("id", campaignId);
 
       // Start calling contacts (fire calls with small delays)
-      const webhookUrl = `${supabaseUrl}/functions/v1/vapi-webhook`;
       const results: any[] = [];
 
       for (const contact of contacts) {
@@ -530,7 +526,6 @@ After all questions are asked, thank them for their time and let them know someo
             customer: { number: contact.phone },
             phoneNumberId,
             metadata: { contactId: contact.id, campaignId },
-            server: { url: webhookUrl },
           };
 
           const callRes = await fetch(`${VAPI_BASE}/call/phone`, {
@@ -581,6 +576,68 @@ After all questions are asked, thank them for their time and let them know someo
         callsFailed: results.filter(r => r.error).length,
         results 
       }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "stop-campaign") {
+      const { campaignId } = body;
+      if (!campaignId) throw new Error("campaignId is required");
+
+      // Update campaign status
+      await supabase.from("ai_caller_campaigns").update({
+        status: "completed",
+        completed_at: new Date().toISOString(),
+      } as any).eq("id", campaignId);
+
+      // Get active calls for this campaign
+      const { data: activeCalls } = await supabase
+        .from("ai_caller_call_logs")
+        .select("vapi_call_id")
+        .eq("campaign_id", campaignId)
+        .eq("status", "initiated");
+
+      // End active calls via Vapi
+      let ended = 0;
+      for (const call of (activeCalls || [])) {
+        if (!call.vapi_call_id) continue;
+        try {
+          const endRes = await fetch(`${VAPI_BASE}/call/${call.vapi_call_id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
+          });
+          if (endRes.ok) ended++;
+          await endRes.text();
+        } catch { /* best effort */ }
+      }
+
+      return new Response(JSON.stringify({ stopped: true, callsEnded: ended }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "pause-campaign") {
+      const { campaignId } = body;
+      if (!campaignId) throw new Error("campaignId is required");
+
+      await supabase.from("ai_caller_campaigns").update({
+        status: "paused",
+      } as any).eq("id", campaignId);
+
+      return new Response(JSON.stringify({ paused: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "resume-campaign") {
+      const { campaignId } = body;
+      if (!campaignId) throw new Error("campaignId is required");
+
+      await supabase.from("ai_caller_campaigns").update({
+        status: "active",
+      } as any).eq("id", campaignId);
+
+      return new Response(JSON.stringify({ resumed: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
