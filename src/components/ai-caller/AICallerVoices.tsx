@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Square, Mic, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Voice {
   id: string;
@@ -28,21 +29,19 @@ export function AICallerVoices() {
   const [voices, setVoices] = useState<Voice[]>(VOICES);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Fetch public preview URLs from ElevenLabs (no API key needed)
+  // Fetch preview URLs from edge function (uses ElevenLabs API key for community voices)
   useEffect(() => {
     async function fetchPreviews() {
       try {
-        const res = await fetch("https://api.elevenlabs.io/v1/voices");
-        if (!res.ok) return;
-        const data = await res.json();
-        const voiceMap = new Map<string, string>();
-        for (const v of data.voices || []) {
-          if (v.preview_url) voiceMap.set(v.voice_id, v.preview_url);
-        }
+        const { data, error } = await supabase.functions.invoke("vapi-manage", {
+          body: { action: "voice-previews" },
+        });
+        if (error || !data?.previews) return;
+        const previews = data.previews as Record<string, string>;
         setVoices(prev =>
           prev.map(v => ({
             ...v,
-            previewUrl: voiceMap.get(v.elevenLabsId) || v.previewUrl,
+            previewUrl: previews[v.id] || v.previewUrl,
           }))
         );
       } catch {
