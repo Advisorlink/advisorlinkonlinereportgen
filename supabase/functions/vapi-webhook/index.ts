@@ -111,7 +111,7 @@ serve(async (req) => {
 
     if (type === "end-of-call-report") {
       const transcript = message?.transcript || body.transcript || "";
-      const summary = message?.summary || body.summary || "";
+      let summary = message?.summary || body.summary || "";
       const duration = call?.duration || message?.durationSeconds || 0;
       const cost = message?.cost || call?.cost || 0;
       const endedReason = message?.endedReason || call?.endedReason || "unknown";
@@ -155,7 +155,7 @@ serve(async (req) => {
 
       extractedFields = stripEmptyFields(extractedFields);
 
-      const finalSummary = message?.summary || summary;
+      const finalSummary = summary;
 
       // Update call log
       if (vapiCallId) {
