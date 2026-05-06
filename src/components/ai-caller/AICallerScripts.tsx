@@ -1,0 +1,322 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, Trash2, GripVertical, Play, Volume2, Pencil } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+
+interface Question {
+  id: string;
+  question: string;
+  fieldName: string;
+}
+
+interface Script {
+  id: string;
+  name: string;
+  description: string | null;
+  system_prompt: string;
+  first_message: string;
+  questions: Question[];
+  voice_id: string;
+  voice_provider: string;
+  background_sound: string | null;
+  background_sound_enabled: boolean;
+  model: string;
+  max_duration_seconds: number;
+  created_at: string;
+}
+
+const VOICES = [
+  { id: "sarah", name: "Sarah", accent: "Australian", gender: "Female" },
+  { id: "laura", name: "Laura", accent: "Australian", gender: "Female" },
+  { id: "charlie", name: "Charlie", accent: "Australian", gender: "Male" },
+  { id: "george", name: "George", accent: "Australian/British", gender: "Male" },
+  { id: "callum", name: "Callum", accent: "Australian", gender: "Male" },
+  { id: "matilda", name: "Matilda", accent: "Australian", gender: "Female" },
+  { id: "jessica", name: "Jessica", accent: "Australian", gender: "Female" },
+];
+
+export function AICallerScripts() {
+  const { user } = useAuth();
+  const [scripts, setScripts] = useState<Script[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingScript, setEditingScript] = useState<Script | null>(null);
+
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [systemPrompt, setSystemPrompt] = useState("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
+  const [firstMessage, setFirstMessage] = useState("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
+  const [questions, setQuestions] = useState<Question[]>([
+    { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
+    { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
+    { id: crypto.randomUUID(), question: "Have you ever had your super reviewed before?", fieldName: "had_review" },
+  ]);
+  const [voiceId, setVoiceId] = useState("sarah");
+  const [bgSound, setBgSound] = useState("office");
+  const [bgEnabled, setBgEnabled] = useState(true);
+  const [maxDuration, setMaxDuration] = useState(300);
+
+  useEffect(() => { loadScripts(); }, []);
+
+  async function loadScripts() {
+    setLoading(true);
+    const { data } = await supabase
+      .from("ai_caller_scripts")
+      .select("*")
+      .order("created_at", { ascending: false });
+    setScripts((data || []).map((s: any) => ({ ...s, questions: s.questions || [] })));
+    setLoading(false);
+  }
+
+  function resetForm() {
+    setName("");
+    setDescription("");
+    setSystemPrompt("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
+    setFirstMessage("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
+    setQuestions([
+      { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
+      { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
+      { id: crypto.randomUUID(), question: "Have you ever had your super reviewed before?", fieldName: "had_review" },
+    ]);
+    setVoiceId("sarah");
+    setBgSound("office");
+    setBgEnabled(true);
+    setMaxDuration(300);
+    setEditingScript(null);
+  }
+
+  function openEdit(script: Script) {
+    setEditingScript(script);
+    setName(script.name);
+    setDescription(script.description || "");
+    setSystemPrompt(script.system_prompt);
+    setFirstMessage(script.first_message);
+    setQuestions(script.questions.length > 0 ? script.questions : []);
+    setVoiceId(script.voice_id);
+    setBgSound(script.background_sound || "office");
+    setBgEnabled(script.background_sound_enabled);
+    setMaxDuration(script.max_duration_seconds);
+    setDialogOpen(true);
+  }
+
+  function addQuestion() {
+    setQuestions([...questions, { id: crypto.randomUUID(), question: "", fieldName: "" }]);
+  }
+
+  function removeQuestion(id: string) {
+    setQuestions(questions.filter(q => q.id !== id));
+  }
+
+  function updateQuestion(id: string, field: "question" | "fieldName", value: string) {
+    setQuestions(questions.map(q => q.id === id ? { ...q, [field]: value } : q));
+  }
+
+  async function saveScript() {
+    if (!name.trim()) { toast.error("Script name is required"); return; }
+    if (!user) return;
+
+    const payload = {
+      user_id: user.id,
+      name: name.trim(),
+      description: description.trim() || null,
+      system_prompt: systemPrompt,
+      first_message: firstMessage,
+      questions: questions.filter(q => q.question && q.fieldName),
+      voice_id: voiceId,
+      voice_provider: "elevenlabs",
+      background_sound: bgSound,
+      background_sound_enabled: bgEnabled,
+      model: "gpt-4o",
+      max_duration_seconds: maxDuration,
+    };
+
+    if (editingScript) {
+      const { error } = await supabase.from("ai_caller_scripts").update(payload).eq("id", editingScript.id);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Script updated");
+    } else {
+      const { error } = await supabase.from("ai_caller_scripts").insert(payload);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Script created");
+    }
+
+    setDialogOpen(false);
+    resetForm();
+    loadScripts();
+  }
+
+  async function deleteScript(id: string) {
+    await supabase.from("ai_caller_scripts").delete().eq("id", id);
+    toast.success("Script deleted");
+    loadScripts();
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Call Scripts</h2>
+          <p className="text-sm text-muted-foreground">Define what your AI caller says and asks</p>
+        </div>
+        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
+          <DialogTrigger asChild>
+            <Button className="gap-2"><Plus className="w-4 h-4" /> New Script</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingScript ? "Edit Script" : "Create Script"}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-5 py-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Script Name</Label>
+                  <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Super Review Intro" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Voice</Label>
+                  <Select value={voiceId} onValueChange={setVoiceId}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {VOICES.map(v => (
+                        <SelectItem key={v.id} value={v.id}>
+                          {v.name} — {v.accent} ({v.gender})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Description (optional)</Label>
+                <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Brief description..." />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Opening Message</Label>
+                <Textarea value={firstMessage} onChange={e => setFirstMessage(e.target.value)} rows={2} placeholder="What does the AI say first?" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>System Prompt / Personality</Label>
+                <Textarea value={systemPrompt} onChange={e => setSystemPrompt(e.target.value)} rows={4} placeholder="Define how the AI should behave..." />
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Questions to Ask</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={addQuestion} className="gap-1">
+                    <Plus className="w-3 h-3" /> Add Question
+                  </Button>
+                </div>
+                {questions.map((q, i) => (
+                  <div key={q.id} className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 border border-border">
+                    <span className="text-xs text-muted-foreground mt-2.5 font-mono w-5 shrink-0">{i + 1}.</span>
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        value={q.question}
+                        onChange={e => updateQuestion(q.id, "question", e.target.value)}
+                        placeholder="e.g. What is your current super fund?"
+                      />
+                      <Input
+                        value={q.fieldName}
+                        onChange={e => updateQuestion(q.id, "fieldName", e.target.value.replace(/\s/g, "_").toLowerCase())}
+                        placeholder="field_name (e.g. super_fund)"
+                        className="font-mono text-xs"
+                      />
+                    </div>
+                    <Button variant="ghost" size="icon" className="shrink-0 mt-1" onClick={() => removeQuestion(q.id)}>
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Office Background Sound</Label>
+                    <Switch checked={bgEnabled} onCheckedChange={setBgEnabled} />
+                  </div>
+                  {bgEnabled && (
+                    <Select value={bgSound} onValueChange={setBgSound}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="office">Office</SelectItem>
+                        <SelectItem value="off">Silent</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Max Call Duration (seconds)</Label>
+                  <Input type="number" value={maxDuration} onChange={e => setMaxDuration(Number(e.target.value))} min={60} max={1800} />
+                </div>
+              </div>
+
+              <Button onClick={saveScript} className="w-full">
+                {editingScript ? "Update Script" : "Create Script"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12 text-muted-foreground text-sm">Loading scripts...</div>
+      ) : scripts.length === 0 ? (
+        <Card className="bg-card border-border">
+          <CardContent className="py-12 text-center">
+            <Phone className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+            <p className="text-sm text-muted-foreground">No scripts yet. Create one to get started.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {scripts.map(s => (
+            <Card key={s.id} className="bg-card border-border hover:border-cyan/30 transition-colors">
+              <CardContent className="pt-5 pb-4 px-5">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="font-semibold text-foreground">{s.name}</h3>
+                    {s.description && <p className="text-xs text-muted-foreground mt-0.5">{s.description}</p>}
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(s)}>
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteScript(s.id)}>
+                      <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan/20 text-cyan font-medium">
+                    {VOICES.find(v => v.id === s.voice_id)?.name || s.voice_id}
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                    {(s.questions as Question[]).length} questions
+                  </span>
+                  {s.background_sound_enabled && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium flex items-center gap-1">
+                      <Volume2 className="w-2.5 h-2.5" /> Office BG
+                    </span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
