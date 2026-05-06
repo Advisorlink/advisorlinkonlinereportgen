@@ -68,9 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
-        setProfile(null);
+        // Only reload profile if user changed — don't clear on token refreshes
         setAuthError(null);
-        // Defer profile lookup off the auth callback to avoid deadlocks
         setTimeout(() => {
           if (mounted) loadProfile(sess.user.id);
         }, 0);
