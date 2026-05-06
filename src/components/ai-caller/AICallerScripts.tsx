@@ -58,13 +58,28 @@ type ScriptSetupDraft = {
   callDirection: "outbound" | "inbound";
   systemPrompt: string;
   firstMessage: string;
-  secondMessage: string;
+  followUpStatements: string[];
   questions: Question[];
   voiceId: string;
   bgSound: string;
   bgEnabled: boolean;
   maxDuration: number;
 };
+
+function parseFollowUps(secondMessage: string | null | undefined): string[] {
+  if (!secondMessage) return [""];
+  try {
+    const parsed = JSON.parse(secondMessage);
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+  } catch { /* not JSON, treat as single statement */ }
+  return [secondMessage];
+}
+
+function serializeFollowUps(statements: string[]): string {
+  const filtered = statements.filter(s => s.trim());
+  if (filtered.length === 0) return "";
+  return JSON.stringify(filtered);
+}
 
 export function AICallerScripts() {
   const { user } = useAuth();
