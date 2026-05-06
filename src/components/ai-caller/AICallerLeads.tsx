@@ -111,14 +111,32 @@ export function AICallerLeads() {
     return `${m}:${sec.toString().padStart(2, "0")}`;
   }
 
-  function selectLead(lead: any) {
+  async function selectLead(lead: any) {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
     setTranscriptOpen(false);
-    setSelectedLead(lead);
     setNewNote("");
+
+    // If lead has no recording_url, try fetching from call_logs via contact_id
+    let enrichedLead = { ...lead };
+    if (!lead.recording_url && lead.contact_id) {
+      const { data: log } = await supabase
+        .from("ai_caller_call_logs")
+        .select("recording_url")
+        .eq("contact_id", lead.contact_id)
+        .not("recording_url", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+      if (log?.recording_url) {
+        enrichedLead.recording_url = log.recording_url;
+        // Also save it to the lead for future access
+        await supabase.from("ai_caller_leads").update({ recording_url: log.recording_url } as any).eq("id", lead.id);
+      }
+    }
+    setSelectedLead(enrichedLead);
   }
 
   // Extract field helpers
