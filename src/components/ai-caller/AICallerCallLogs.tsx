@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, Phone, Clock, DollarSign, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Search, Phone, Clock, DollarSign, CheckCircle, XCircle, Loader2, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function AICallerCallLogs() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -84,6 +85,16 @@ export function AICallerCallLogs() {
                       </div>
                     </div>
                   </div>
+                  {log.recording_url && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 text-xs"
+                      onClick={() => window.open(log.recording_url, "_blank")}
+                    >
+                      <Download className="w-3.5 h-3.5" /> Recording
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
