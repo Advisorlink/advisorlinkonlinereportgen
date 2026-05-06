@@ -53,9 +53,11 @@ export function AICallerScripts() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingScript, setEditingScript] = useState<Script | null>(null);
+  const [directionFilter, setDirectionFilter] = useState<"outbound" | "inbound">("outbound");
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [callDirection, setCallDirection] = useState<"outbound" | "inbound">("outbound");
   const [systemPrompt, setSystemPrompt] = useState("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
   const [firstMessage, setFirstMessage] = useState("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
   const [secondMessage, setSecondMessage] = useState("Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
