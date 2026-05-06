@@ -320,6 +320,7 @@ export function AICallerScripts() {
                     setFirstMessage(s.first_message);
                     setFollowUpStatements(parseFollowUps(s.second_message));
                     setQuestions(s.questions.map(q => ({ ...q, id: crypto.randomUUID() })));
+                    setClosingStatements(parseFollowUps(s.closing_statements));
                     setVoiceId(s.voice_id);
                     setBgSound(s.background_sound || "office");
                     setBgEnabled(s.background_sound_enabled);
