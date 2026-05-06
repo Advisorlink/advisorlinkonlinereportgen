@@ -27,6 +27,7 @@ interface Script {
   first_message: string;
   second_message: string;
   questions: Question[];
+  closing_statements: string;
   voice_id: string;
   voice_provider: string;
   background_sound: string | null;
