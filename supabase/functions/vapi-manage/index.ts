@@ -263,7 +263,7 @@ After all questions are asked, thank them for their time and let them know someo
 
       const callPayload: any = {
         assistantId,
-        customer: { number: phoneNumber },
+        customer: { number: normalizeAUPhone(phoneNumber) },
         phoneNumberId: body.phoneNumberId,
         metadata: { contactId, campaignId },
       };
@@ -574,7 +574,7 @@ After all questions are asked, thank them for their time and let them know someo
         try {
           const callPayload = {
             assistantId: assistant.id,
-            customer: { number: contact.phone },
+            customer: { number: normalizeAUPhone(contact.phone) },
             phoneNumberId,
             metadata: { contactId: contact.id, campaignId },
           };
