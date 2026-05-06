@@ -109,6 +109,7 @@ After all questions are asked, thank them for their time and let them know someo
           model: "nova-2",
           language: "en-AU",
         },
+        serverUrl: `${supabaseUrl}/functions/v1/vapi-webhook`,
       };
 
       const vapiRes = await fetch(`${VAPI_BASE}/assistant`, {
@@ -210,16 +211,11 @@ After all questions are asked, thank them for their time and let them know someo
     if (action === "make-call") {
       const { assistantId, phoneNumber, contactId, campaignId } = body;
 
-      const webhookUrl = `${supabaseUrl}/functions/v1/vapi-webhook`;
-
       const callPayload: any = {
         assistantId,
         customer: { number: phoneNumber },
         phoneNumberId: body.phoneNumberId,
         metadata: { contactId, campaignId },
-        server: {
-          url: webhookUrl,
-        },
       };
 
       const vapiRes = await fetch(`${VAPI_BASE}/call/phone`, {
@@ -500,6 +496,7 @@ After all questions are asked, thank them for their time and let them know someo
         responseDelaySeconds: 0.5,
         backgroundSound: script.background_sound_enabled ? (script.background_sound || "office") : undefined,
         transcriber: { provider: "deepgram", model: "nova-2", language: "en-AU" },
+        serverUrl: `${supabaseUrl}/functions/v1/vapi-webhook`,
       };
 
       const assistantRes = await fetch(`${VAPI_BASE}/assistant`, {
@@ -520,7 +517,6 @@ After all questions are asked, thank them for their time and let them know someo
       } as any).eq("id", campaignId);
 
       // Start calling contacts (fire calls with small delays)
-      const webhookUrl = `${supabaseUrl}/functions/v1/vapi-webhook`;
       const results: any[] = [];
 
       for (const contact of contacts) {
@@ -530,7 +526,6 @@ After all questions are asked, thank them for their time and let them know someo
             customer: { number: contact.phone },
             phoneNumberId,
             metadata: { contactId: contact.id, campaignId },
-            server: { url: webhookUrl },
           };
 
           const callRes = await fetch(`${VAPI_BASE}/call/phone`, {
