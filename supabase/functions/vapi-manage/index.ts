@@ -98,6 +98,19 @@ function stripEmptyFields(fields: Record<string, unknown>) {
   );
 }
 
+function formatFollowUps(secondMessage: string | null | undefined): string {
+  if (!secondMessage) return "";
+  try {
+    const parsed = JSON.parse(secondMessage);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return `\nFOLLOW-UP STATEMENTS (say these after the client responds to your opening message, before asking questions):\n${parsed.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")}\n`;
+    }
+  } catch {
+    /* not JSON, treat as single statement */
+  }
+  return `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${secondMessage}"\n`;
+}
+
 async function extractLeadAnswers(
   transcript: string,
   summary: string,
@@ -245,16 +258,14 @@ serve(async (req) => {
         };
       }
 
-      const secondMessage = script.second_message
-        ? `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${script.second_message}"\n`
-        : "";
+      const secondMessage = formatFollowUps(script.second_message);
 
       const systemPrompt = `${script.system_prompt}
 
 IMPORTANT RULES:
 - You MUST follow this script exactly. Do not deviate or make up information.
-- After your opening message, wait for the client to respond. Then deliver the follow-up statement below (if provided).
-- After the follow-up, ask each question one at a time and wait for the response before moving on.
+- After your opening message, wait for the client to respond. Then deliver the follow-up statement(s) below (if provided).
+- After the follow-up(s), ask each question one at a time and wait for the response before moving on.
 - Be conversational and natural, like a real Australian person calling.
 - If the person says they're not interested, politely thank them and end the call.
 - If they ask who you are, say you're calling from Advisor Link.
@@ -732,16 +743,14 @@ After all questions are asked, thank them for their time and let them know someo
         };
       }
 
-      const secondMessage = script.second_message
-        ? `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${script.second_message}"\n`
-        : "";
+      const secondMessage = formatFollowUps(script.second_message);
 
       const systemPrompt = `${script.system_prompt}
 
 IMPORTANT RULES:
 - You MUST follow this script exactly. Do not deviate or make up information.
-- After your opening message, wait for the client to respond. Then deliver the follow-up statement below (if provided).
-- After the follow-up, ask each question one at a time and wait for the response before moving on.
+- After your opening message, wait for the client to respond. Then deliver the follow-up statement(s) below (if provided).
+- After the follow-up(s), ask each question one at a time and wait for the response before moving on.
 - Be conversational and natural, like a real Australian person calling.
 - If the person says they're not interested, politely thank them and end the call.
 - If they ask who you are, say you're calling from Advisor Link.
@@ -1180,17 +1189,15 @@ After all questions are asked, thank them for their time and let them know someo
         extractionProperties[q.fieldName] = { type: "string", description: q.question };
       }
 
-      const secondMessage = (script as any).second_message
-        ? `\nFOLLOW-UP STATEMENT (say this after the caller responds to your greeting, before asking questions):\n"${(script as any).second_message}"\n`
-        : "";
+      const secondMessage = formatFollowUps((script as any).second_message);
 
       const systemPrompt = `${(script as any).system_prompt}
 
 IMPORTANT RULES:
 - This is an INBOUND call — the person called YOU. Be welcoming and helpful.
 - You MUST follow this script exactly. Do not deviate or make up information.
-- After your greeting, wait for the caller to respond. Then deliver the follow-up statement below (if provided).
-- After the follow-up, ask each question one at a time and wait for the response before moving on.
+- After your greeting, wait for the caller to respond. Then deliver the follow-up statement(s) below (if provided).
+- After the follow-up(s), ask each question one at a time and wait for the response before moving on.
 - Be conversational and natural, like a real Australian person.
 - If they ask who you are, say you're from Advisor Link.
 - NEVER hallucinate or make up facts. Only relay information from your script.
