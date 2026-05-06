@@ -100,6 +100,41 @@ export function AICallerScripts() {
 
   useEffect(() => { loadScripts(); }, []);
 
+  useEffect(() => {
+    const editingScriptId = savedDraft.current?.editingScriptId;
+    if (!editingScriptId || editingScript || scripts.length === 0) return;
+    const script = scripts.find(s => s.id === editingScriptId);
+    if (script) setEditingScript(script);
+  }, [editingScript, scripts]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!dialogOpen) {
+      sessionStorage.removeItem(SCRIPT_SETUP_DRAFT_KEY);
+      return;
+    }
+
+    const draft: ScriptSetupDraft = {
+      dialogOpen,
+      editingScriptId: editingScript?.id ?? savedDraft.current?.editingScriptId ?? null,
+      directionFilter,
+      name,
+      description,
+      callDirection,
+      systemPrompt,
+      firstMessage,
+      secondMessage,
+      questions,
+      voiceId,
+      bgSound,
+      bgEnabled,
+      maxDuration,
+    };
+
+    sessionStorage.setItem(SCRIPT_SETUP_DRAFT_KEY, JSON.stringify(draft));
+    savedDraft.current = draft;
+  }, [bgEnabled, bgSound, callDirection, description, dialogOpen, directionFilter, editingScript, firstMessage, maxDuration, name, questions, secondMessage, systemPrompt, voiceId]);
+
   async function loadScripts() {
     setLoading(true);
     const { data } = await supabase
@@ -127,6 +162,11 @@ export function AICallerScripts() {
     setBgEnabled(true);
     setMaxDuration(300);
     setEditingScript(null);
+  }
+
+  function clearSavedDraft() {
+    savedDraft.current = null;
+    if (typeof window !== "undefined") sessionStorage.removeItem(SCRIPT_SETUP_DRAFT_KEY);
   }
 
   function openEdit(script: Script) {
