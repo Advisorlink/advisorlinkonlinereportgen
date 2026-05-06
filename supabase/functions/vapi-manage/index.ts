@@ -300,10 +300,10 @@ After all questions are asked, thank them for their time and let them know someo
     }
 
     if (action === "search-twilio-numbers") {
-      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-      if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-      const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
-      if (!TWILIO_API_KEY) throw new Error("TWILIO_API_KEY is not configured – connect Twilio first");
+      const TWILIO_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
+      if (!TWILIO_SID) throw new Error("TWILIO_ACCOUNT_SID is not configured");
+      const TWILIO_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
+      if (!TWILIO_TOKEN) throw new Error("TWILIO_AUTH_TOKEN is not configured");
 
       const { country, areaCode, contains } = body;
       const cc = country || "AU";
@@ -313,17 +313,17 @@ After all questions are asked, thank them for their time and let them know someo
       params.set("VoiceEnabled", "true");
       params.set("PageSize", "20");
 
-      // Try Mobile first (AU region gateway doesn't support Local endpoint)
-      const numberTypes = cc === "AU" ? ["Mobile", "Local", "TollFree"] : ["Local", "Mobile", "TollFree"];
+      const basicAuth = btoa(`${TWILIO_SID}:${TWILIO_TOKEN}`);
+      // Use main Twilio API (api.twilio.com) to avoid AU1 realm limitation
+      const numberTypes = ["Local", "Mobile", "TollFree"];
       let twilioRes: Response | null = null;
       let lastErr = "";
       for (const numType of numberTypes) {
         const res = await fetch(
-          `${TWILIO_GATEWAY}/AvailablePhoneNumbers/${cc}/${numType}.json?${params.toString()}`,
+          `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/AvailablePhoneNumbers/${cc}/${numType}.json?${params.toString()}`,
           {
             headers: {
-              "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-              "X-Connection-Api-Key": TWILIO_API_KEY,
+              "Authorization": `Basic ${basicAuth}`,
             },
           }
         );
@@ -332,9 +332,7 @@ After all questions are asked, thank them for their time and let them know someo
           break;
         }
         lastErr = await res.text();
-        // If 404/not supported in realm, try next type
         if (res.status === 404) continue;
-        // Other errors are real failures
         throw new Error(`Twilio search failed [${res.status}]: ${lastErr}`);
       }
       if (!twilioRes) {
@@ -354,20 +352,21 @@ After all questions are asked, thank them for their time and let them know someo
     }
 
     if (action === "buy-twilio-number") {
-      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-      if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-      const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
-      if (!TWILIO_API_KEY) throw new Error("TWILIO_API_KEY is not configured – connect Twilio first");
+      const TWILIO_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
+      if (!TWILIO_SID) throw new Error("TWILIO_ACCOUNT_SID is not configured");
+      const TWILIO_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
+      if (!TWILIO_TOKEN) throw new Error("TWILIO_AUTH_TOKEN is not configured");
 
       const { phoneNumber } = body;
       if (!phoneNumber) throw new Error("phoneNumber is required");
 
-      // 1. Buy on Twilio via gateway
-      const buyRes = await fetch(`${TWILIO_GATEWAY}/IncomingPhoneNumbers.json`, {
+      const basicAuth = btoa(`${TWILIO_SID}:${TWILIO_TOKEN}`);
+
+      // 1. Buy on Twilio directly (avoid AU1 realm issues)
+      const buyRes = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/IncomingPhoneNumbers.json`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-          "X-Connection-Api-Key": TWILIO_API_KEY,
+          "Authorization": `Basic ${basicAuth}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({ PhoneNumber: phoneNumber }),
@@ -378,20 +377,9 @@ After all questions are asked, thank them for their time and let them know someo
       }
       const purchased = await buyRes.json();
 
-      // 2. Get Twilio account info for Vapi import
-      const acctRes = await fetch(`${TWILIO_GATEWAY}/.json`, {
-        headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-          "X-Connection-Api-Key": TWILIO_API_KEY,
-        },
-      });
-      let twilioSid = "";
-      let twilioAuth = "";
-      if (acctRes.ok) {
-        const acct = await acctRes.json();
-        twilioSid = acct.sid || "";
-        twilioAuth = acct.auth_token || "";
-      }
+      // 2. Use stored credentials for Vapi import
+      const twilioSid = TWILIO_SID;
+      const twilioAuth = TWILIO_TOKEN;
 
       // 3. Import to Vapi
       const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
