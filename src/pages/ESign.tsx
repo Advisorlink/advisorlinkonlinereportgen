@@ -1,13 +1,62 @@
 import { useState } from "react";
 import { CRMLayout } from "@/components/CRMLayout";
-import { FileSignature, Eye, FilePlus, PenTool, LayoutTemplate } from "lucide-react";
+import {
+  FileSignature,
+  Eye,
+  PenTool,
+  LayoutTemplate,
+  Clock,
+  Shield,
+  Send,
+  FolderOpen,
+  ArrowRight,
+} from "lucide-react";
 import { ESignNewRequest } from "@/components/esign/ESignNewRequest";
 import { ESignDocumentList } from "@/components/esign/ESignDocumentList";
 
 const menuItems = [
-  { id: "esign", label: "E-Sign", icon: PenTool, description: "Send a document for electronic signature" },
-  { id: "review", label: "Review Docs", icon: Eye, description: "Review sent & signed documents" },
-  { id: "templates", label: "Create Template", icon: LayoutTemplate, description: "Create reusable document templates" },
+  {
+    id: "esign",
+    label: "New E-Sign",
+    icon: Send,
+    description: "Upload & prepare a document for electronic signature",
+    gradient: "from-cyan/20 to-cyan/5",
+    iconColor: "text-cyan",
+    available: true,
+  },
+  {
+    id: "review",
+    label: "Review Docs",
+    icon: Eye,
+    description: "Track and review all sent & signed documents",
+    gradient: "from-primary/20 to-primary/5",
+    iconColor: "text-primary",
+    available: true,
+  },
+  {
+    id: "templates",
+    label: "Templates",
+    icon: LayoutTemplate,
+    description: "Create reusable templates to speed up your workflow",
+    gradient: "from-muted-foreground/10 to-muted/10",
+    iconColor: "text-muted-foreground",
+    available: false,
+  },
+  {
+    id: "archive",
+    label: "Archive",
+    icon: FolderOpen,
+    description: "Access completed and archived document history",
+    gradient: "from-muted-foreground/10 to-muted/10",
+    iconColor: "text-muted-foreground",
+    available: false,
+  },
+];
+
+const stats = [
+  { label: "Avg. Signing Time", value: "< 2 min", icon: Clock },
+  { label: "Secure & Encrypted", value: "256-bit SSL", icon: Shield },
+  { label: "Documents Ready", value: "Instant", icon: FileSignature },
 ];
 
 export default function ESign() {
@@ -31,37 +80,84 @@ export default function ESign() {
 
   return (
     <CRMLayout>
-      <div className="max-w-4xl mx-auto py-8 px-4">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="p-3 rounded-xl bg-cyan/10">
-            <FileSignature className="w-7 h-7 text-cyan" />
+      <div className="max-w-5xl mx-auto py-10 px-4 space-y-10">
+        {/* Header */}
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-cyan/5 p-8">
+          <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-cyan/5 blur-3xl" />
+          <div className="relative flex items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-cyan/10 ring-1 ring-cyan/20">
+              <FileSignature className="h-7 w-7 text-cyan" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                E-Sign Centre
+              </h1>
+              <p className="mt-1 text-muted-foreground max-w-lg">
+                Send, sign, and manage documents electronically — fast, secure, and paperless.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">E-Sign Docs</h1>
-            <p className="text-sm text-muted-foreground">Send, sign, and manage documents electronically</p>
+
+          {/* Quick stats */}
+          <div className="relative mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/60 backdrop-blur-sm px-4 py-3"
+              >
+                <stat.icon className="h-5 w-5 text-cyan/70" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Action Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {menuItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              disabled={item.id === "templates"}
-              className="group relative flex flex-col items-center gap-3 p-8 rounded-2xl border border-border bg-card hover:border-cyan/40 hover:shadow-lg hover:shadow-cyan/5 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+              onClick={() => item.available && setActiveSection(item.id)}
+              disabled={!item.available}
+              className={`group relative flex flex-col items-start gap-4 p-6 rounded-2xl border transition-all duration-300 text-left ${
+                item.available
+                  ? "border-border bg-card hover:border-cyan/50 hover:shadow-xl hover:shadow-cyan/5 hover:-translate-y-0.5"
+                  : "border-border/50 bg-card/60 opacity-50 cursor-not-allowed"
+              }`}
             >
-              <div className="p-4 rounded-xl bg-cyan/10 group-hover:bg-cyan/20 transition-colors">
-                <item.icon className="w-8 h-8 text-cyan" />
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${item.gradient} transition-transform group-hover:scale-110`}>
+                <item.icon className={`h-6 w-6 ${item.iconColor}`} />
               </div>
-              <span className="text-lg font-semibold text-foreground">{item.label}</span>
-              <span className="text-xs text-muted-foreground text-center">{item.description}</span>
-              {item.id === "templates" && (
-                <span className="absolute top-3 right-3 text-[10px] font-semibold bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+
+              <div>
+                <span className="text-base font-semibold text-foreground block">
+                  {item.label}
+                </span>
+                <span className="mt-1 text-xs text-muted-foreground leading-relaxed block">
+                  {item.description}
+                </span>
+              </div>
+
+              {item.available ? (
+                <div className="flex items-center gap-1 text-xs font-medium text-cyan opacity-0 group-hover:opacity-100 transition-opacity">
+                  Open <ArrowRight className="h-3 w-3" />
+                </div>
+              ) : (
+                <span className="text-[10px] font-semibold bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                   Coming Soon
                 </span>
               )}
             </button>
           ))}
+        </div>
+
+        {/* Bottom tip */}
+        <div className="text-center text-xs text-muted-foreground/60">
+          <PenTool className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
+          All signatures are legally binding and stored securely.
         </div>
       </div>
     </CRMLayout>
