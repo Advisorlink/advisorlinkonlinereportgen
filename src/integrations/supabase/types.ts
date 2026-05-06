@@ -294,6 +294,7 @@ export type Database = {
           model: string
           name: string
           questions: Json
+          second_message: string | null
           system_prompt: string
           updated_at: string
           user_id: string
@@ -311,6 +312,7 @@ export type Database = {
           model?: string
           name: string
           questions?: Json
+          second_message?: string | null
           system_prompt?: string
           updated_at?: string
           user_id: string
@@ -328,6 +330,7 @@ export type Database = {
           model?: string
           name?: string
           questions?: Json
+          second_message?: string | null
           system_prompt?: string
           updated_at?: string
           user_id?: string
