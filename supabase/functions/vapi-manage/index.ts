@@ -785,6 +785,66 @@ After all questions are asked, thank them for their time and let them know someo
       });
     }
 
+    if (action === "reprocess-lead") {
+      const { leadId } = body;
+      if (!leadId) throw new Error("leadId is required");
+
+      const { data: lead, error: leadErr } = await supabase
+        .from("ai_caller_leads")
+        .select("*")
+        .eq("id", leadId)
+        .single();
+      if (leadErr || !lead) throw new Error("Lead not found");
+
+      let transcript = (lead as any).full_transcript || "";
+      let recordingUrl = (lead as any).recording_url || null;
+      if ((lead as any).contact_id && (!transcript || !recordingUrl)) {
+        const { data: log } = await supabase
+          .from("ai_caller_call_logs")
+          .select("transcript, recording_url")
+          .eq("contact_id", (lead as any).contact_id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+        transcript = transcript || log?.transcript || "";
+        recordingUrl = recordingUrl || log?.recording_url || null;
+      }
+
+      let questions: any[] = [];
+      if ((lead as any).campaign_id) {
+        const { data: campaign } = await supabase
+          .from("ai_caller_campaigns")
+          .select("ai_caller_scripts(questions)")
+          .eq("id", (lead as any).campaign_id)
+          .single();
+        questions = (campaign as any)?.ai_caller_scripts?.questions || [];
+      }
+
+      const existingFields = ((lead as any).extracted_fields || {}) as Record<string, unknown>;
+      const extracted = hasMeaningfulFields(existingFields)
+        ? { fields: existingFields, summary: (lead as any).transcript_summary || "" }
+        : await extractLeadAnswers(transcript, (lead as any).transcript_summary || "", questions);
+
+      const updates = {
+        extracted_fields: stripEmptyFields({ ...existingFields, ...extracted.fields }),
+        transcript_summary: extracted.summary || (lead as any).transcript_summary,
+        full_transcript: transcript || (lead as any).full_transcript,
+        recording_url: recordingUrl,
+      } as any;
+
+      const { data: updated, error: updateErr } = await supabase
+        .from("ai_caller_leads")
+        .update(updates)
+        .eq("id", leadId)
+        .select()
+        .single();
+      if (updateErr) throw updateErr;
+
+      return new Response(JSON.stringify({ lead: updated }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "stop-call") {
       const { callId } = body;
       if (!callId) throw new Error("callId (vapi_call_id) is required");
