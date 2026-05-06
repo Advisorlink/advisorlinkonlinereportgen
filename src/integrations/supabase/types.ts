@@ -322,6 +322,7 @@ export type Database = {
           background_sound: string | null
           background_sound_enabled: boolean
           call_direction: string
+          closing_statements: string | null
           created_at: string
           description: string | null
           first_message: string
@@ -341,6 +342,7 @@ export type Database = {
           background_sound?: string | null
           background_sound_enabled?: boolean
           call_direction?: string
+          closing_statements?: string | null
           created_at?: string
           description?: string | null
           first_message?: string
@@ -360,6 +362,7 @@ export type Database = {
           background_sound?: string | null
           background_sound_enabled?: boolean
           call_direction?: string
+          closing_statements?: string | null
           created_at?: string
           description?: string | null
           first_message?: string
