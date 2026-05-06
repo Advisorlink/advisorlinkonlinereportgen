@@ -1,0 +1,1 @@
+ALTER TABLE public.ai_caller_scripts ADD COLUMN second_message TEXT DEFAULT '';

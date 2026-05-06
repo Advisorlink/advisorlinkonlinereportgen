@@ -25,6 +25,7 @@ interface Script {
   description: string | null;
   system_prompt: string;
   first_message: string;
+  second_message: string;
   questions: Question[];
   voice_id: string;
   voice_provider: string;
@@ -52,6 +53,7 @@ export function AICallerScripts() {
   const [description, setDescription] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
   const [firstMessage, setFirstMessage] = useState("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
+  const [secondMessage, setSecondMessage] = useState("Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
   const [questions, setQuestions] = useState<Question[]>([
     { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
     { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
@@ -79,6 +81,7 @@ export function AICallerScripts() {
     setDescription("");
     setSystemPrompt("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
     setFirstMessage("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
+    setSecondMessage("Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
     setQuestions([
       { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
       { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
@@ -97,6 +100,7 @@ export function AICallerScripts() {
     setDescription(script.description || "");
     setSystemPrompt(script.system_prompt);
     setFirstMessage(script.first_message);
+    setSecondMessage(script.second_message || "");
     setQuestions(script.questions.length > 0 ? script.questions : []);
     setVoiceId(script.voice_id);
     setBgSound(script.background_sound || "office");
@@ -127,6 +131,7 @@ export function AICallerScripts() {
       description: description.trim() || null,
       system_prompt: systemPrompt,
       first_message: firstMessage,
+      second_message: secondMessage,
       questions: questions.filter(q => q.question && q.fieldName).map(q => ({ id: q.id, question: q.question, fieldName: q.fieldName })) as any,
       voice_id: voiceId,
       voice_provider: "elevenlabs",
@@ -201,6 +206,12 @@ export function AICallerScripts() {
               <div className="space-y-2">
                 <Label>Opening Message</Label>
                 <Textarea value={firstMessage} onChange={e => setFirstMessage(e.target.value)} rows={2} placeholder="What does the AI say first?" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Follow-Up Statement</Label>
+                <p className="text-xs text-muted-foreground">Said after the client responds to the opening message, before questions begin</p>
+                <Textarea value={secondMessage} onChange={e => setSecondMessage(e.target.value)} rows={3} placeholder="e.g. Great to hear! The reason for my call today is..." />
               </div>
 
               <div className="space-y-2">

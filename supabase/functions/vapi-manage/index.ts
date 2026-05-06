@@ -59,16 +59,19 @@ serve(async (req) => {
         };
       }
 
+      const secondMessage = script.second_message ? `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${script.second_message}"\n` : "";
+
       const systemPrompt = `${script.system_prompt}
 
 IMPORTANT RULES:
 - You MUST follow this script exactly. Do not deviate or make up information.
-- Ask each question one at a time and wait for the response before moving on.
+- After your opening message, wait for the client to respond. Then deliver the follow-up statement below (if provided).
+- After the follow-up, ask each question one at a time and wait for the response before moving on.
 - Be conversational and natural, like a real Australian person calling.
 - If the person says they're not interested, politely thank them and end the call.
 - If they ask who you are, say you're calling from Advisor Link.
 - NEVER hallucinate or make up facts. Only relay information from your script.
-
+${secondMessage}
 QUESTIONS TO ASK (in order):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 
@@ -457,16 +460,19 @@ After all questions are asked, thank them for their time and let them know someo
         extractionProperties[q.fieldName] = { type: "string", description: q.question };
       }
 
+      const secondMessage = script.second_message ? `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${script.second_message}"\n` : "";
+
       const systemPrompt = `${script.system_prompt}
 
 IMPORTANT RULES:
 - You MUST follow this script exactly. Do not deviate or make up information.
-- Ask each question one at a time and wait for the response before moving on.
+- After your opening message, wait for the client to respond. Then deliver the follow-up statement below (if provided).
+- After the follow-up, ask each question one at a time and wait for the response before moving on.
 - Be conversational and natural, like a real Australian person calling.
 - If the person says they're not interested, politely thank them and end the call.
 - If they ask who you are, say you're calling from Advisor Link.
 - NEVER hallucinate or make up facts. Only relay information from your script.
-
+${secondMessage}
 QUESTIONS TO ASK (in order):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 
