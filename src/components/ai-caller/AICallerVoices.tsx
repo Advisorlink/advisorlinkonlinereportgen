@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Square, Volume2, Mic, Loader2 } from "lucide-react";
+import { Play, Square, Mic, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Voice {
@@ -12,28 +11,53 @@ interface Voice {
   accent: string;
   gender: string;
   description: string;
-  sampleText: string;
+  previewUrl?: string;
 }
 
 const VOICES: Voice[] = [
-  { id: "sarah", elevenLabsId: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", accent: "Australian", gender: "Female", description: "Warm, professional", sampleText: "G'day! I'm Sarah, calling from Advisor Link. How are you going today?" },
-  { id: "laura", elevenLabsId: "FGY2WhTYpPnrIDTdsKH5", name: "Laura", accent: "Australian", gender: "Female", description: "Friendly, clear", sampleText: "Hi there, this is Laura from Advisor Link. I hope I'm not catching you at a bad time." },
-  { id: "charlie", elevenLabsId: "IKne3meq5aSn9XLyUdCD", name: "Charlie", accent: "Australian", gender: "Male", description: "Confident, natural", sampleText: "G'day mate, Charlie here from Advisor Link. Got a quick moment to chat?" },
-  { id: "george", elevenLabsId: "JBFqnCBsd6RMkjVDRZzb", name: "George", accent: "Australian/British", gender: "Male", description: "Authoritative, calm", sampleText: "Good afternoon, this is George from Advisor Link. I'd love to have a quick chat about your superannuation." },
-  { id: "callum", elevenLabsId: "N2lVS1w4EtoT3dr4eOWO", name: "Callum", accent: "Australian", gender: "Male", description: "Conversational, relaxed", sampleText: "Hey there, Callum here from Advisor Link. How's your day been so far?" },
-  { id: "river", elevenLabsId: "SAz9YHcvj6GT2YYXdXww", name: "River", accent: "Neutral", gender: "Non-binary", description: "Smooth, versatile", sampleText: "Hello, this is River from Advisor Link. I'm reaching out about your financial planning options." },
-  { id: "matilda", elevenLabsId: "XrExE9yKIg1WjnnlVkGX", name: "Matilda", accent: "Australian", gender: "Female", description: "Energetic, bright", sampleText: "Hi! Matilda here from Advisor Link. I've got some great news about your super options!" },
-  { id: "jessica", elevenLabsId: "cgSgspJ2msm6clMCkdW9", name: "Jessica", accent: "Australian", gender: "Female", description: "Soft, empathetic", sampleText: "Hello, this is Jessica calling from Advisor Link. I just wanted to check in with you about your financial goals." },
-  { id: "alice", elevenLabsId: "Xb7hH8MSUJpSbSDYk0k2", name: "Alice", accent: "British", gender: "Female", description: "Refined, articulate", sampleText: "Good day, Alice here from Advisor Link. I'd like to discuss some excellent opportunities for your portfolio." },
-  { id: "brian", elevenLabsId: "nPczCjzI2devNBz1zQrb", name: "Brian", accent: "American", gender: "Male", description: "Deep, trustworthy", sampleText: "Hi there, Brian calling from Advisor Link. I wanted to talk to you about securing your financial future." },
-  { id: "lily", elevenLabsId: "pFZP5JQG7iQjIQuC4Bku", name: "Lily", accent: "British", gender: "Female", description: "Gentle, warm", sampleText: "Hello, this is Lily from Advisor Link. I hope you're having a lovely day. May I have a moment of your time?" },
-  { id: "daniel", elevenLabsId: "onwK4e9ZLuTAKqWW03F9", name: "Daniel", accent: "British", gender: "Male", description: "Authoritative, clear", sampleText: "Good day, Daniel here from Advisor Link. I'd like to share some important information about your superannuation." },
+  { id: "sarah", elevenLabsId: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", accent: "Australian", gender: "Female", description: "Warm, professional" },
+  { id: "laura", elevenLabsId: "FGY2WhTYpPnrIDTdsKH5", name: "Laura", accent: "Australian", gender: "Female", description: "Friendly, clear" },
+  { id: "charlie", elevenLabsId: "IKne3meq5aSn9XLyUdCD", name: "Charlie", accent: "Australian", gender: "Male", description: "Confident, natural" },
+  { id: "george", elevenLabsId: "JBFqnCBsd6RMkjVDRZzb", name: "George", accent: "Australian/British", gender: "Male", description: "Authoritative, calm" },
+  { id: "callum", elevenLabsId: "N2lVS1w4EtoT3dr4eOWO", name: "Callum", accent: "Australian", gender: "Male", description: "Conversational, relaxed" },
+  { id: "river", elevenLabsId: "SAz9YHcvj6GT2YYXdXww", name: "River", accent: "Neutral", gender: "Non-binary", description: "Smooth, versatile" },
+  { id: "matilda", elevenLabsId: "XrExE9yKIg1WjnnlVkGX", name: "Matilda", accent: "Australian", gender: "Female", description: "Energetic, bright" },
+  { id: "jessica", elevenLabsId: "cgSgspJ2msm6clMCkdW9", name: "Jessica", accent: "Australian", gender: "Female", description: "Soft, empathetic" },
+  { id: "alice", elevenLabsId: "Xb7hH8MSUJpSbSDYk0k2", name: "Alice", accent: "British", gender: "Female", description: "Refined, articulate" },
+  { id: "brian", elevenLabsId: "nPczCjzI2devNBz1zQrb", name: "Brian", accent: "American", gender: "Male", description: "Deep, trustworthy" },
+  { id: "lily", elevenLabsId: "pFZP5JQG7iQjIQuC4Bku", name: "Lily", accent: "British", gender: "Female", description: "Gentle, warm" },
+  { id: "daniel", elevenLabsId: "onwK4e9ZLuTAKqWW03F9", name: "Daniel", accent: "British", gender: "Male", description: "Authoritative, clear" },
 ];
 
 export function AICallerVoices() {
   const [playing, setPlaying] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
+  const [voices, setVoices] = useState<Voice[]>(VOICES);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Fetch public preview URLs from ElevenLabs (no API key needed)
+  useEffect(() => {
+    async function fetchPreviews() {
+      try {
+        const res = await fetch("https://api.elevenlabs.io/v1/voices");
+        if (!res.ok) return;
+        const data = await res.json();
+        const voiceMap = new Map<string, string>();
+        for (const v of data.voices || []) {
+          if (v.preview_url) voiceMap.set(v.voice_id, v.preview_url);
+        }
+        setVoices(prev =>
+          prev.map(v => ({
+            ...v,
+            previewUrl: voiceMap.get(v.elevenLabsId) || v.previewUrl,
+          }))
+        );
+      } catch {
+        // Preview URLs are optional — browser fallback still works
+      }
+    }
+    fetchPreviews();
+  }, []);
 
   function stopAudio() {
     if (audioRef.current) {
@@ -48,21 +72,15 @@ export function AICallerVoices() {
     stopAudio();
     setLoading(voice.id);
     try {
-      // Try server-side TTS preview via edge function
-      const { data, error } = await supabase.functions.invoke("vapi-manage", {
-        body: {
-          action: "preview-voice",
-          voiceId: voice.elevenLabsId,
-          text: voice.sampleText,
-        },
-      });
-
-      if (!error && data?.audioBase64) {
-        const audioUrl = `data:audio/mpeg;base64,${data.audioBase64}`;
-        const audio = new Audio(audioUrl);
+      if (voice.previewUrl) {
+        const audio = new Audio(voice.previewUrl);
         audioRef.current = audio;
         audio.onended = () => { setPlaying(null); audioRef.current = null; };
-        audio.onerror = () => { setPlaying(null); audioRef.current = null; };
+        audio.onerror = () => {
+          setPlaying(null);
+          audioRef.current = null;
+          toast.error("Could not load voice preview");
+        };
         setPlaying(voice.id);
         setLoading(null);
         await audio.play();
@@ -70,7 +88,8 @@ export function AICallerVoices() {
       }
 
       // Fallback: browser speech synthesis
-      const utterance = new SpeechSynthesisUtterance(voice.sampleText);
+      const sampleText = `Hi there, this is ${voice.name} from Advisor Link. How are you going today?`;
+      const utterance = new SpeechSynthesisUtterance(sampleText);
       utterance.lang = "en-AU";
       utterance.rate = 0.95;
       utterance.onend = () => setPlaying(null);
@@ -93,7 +112,7 @@ export function AICallerVoices() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {VOICES.map(v => (
+        {voices.map(v => (
           <Card key={v.id} className="bg-card border-border hover:border-cyan/30 transition-colors">
             <CardContent className="pt-4 pb-3 px-4">
               <div className="flex items-start justify-between">
@@ -136,7 +155,7 @@ export function AICallerVoices() {
       <Card className="bg-muted/30 border-border">
         <CardContent className="py-3 px-4">
           <p className="text-xs text-muted-foreground">
-            <strong>Tip:</strong> Click play to hear a preview. The actual call voices use ElevenLabs AI and will sound more natural than the browser preview. Select any voice in the Script editor's Voice dropdown.
+            <strong>Tip:</strong> Click play to hear the actual ElevenLabs AI voice. Select any voice ID in the Script editor's Voice dropdown.
           </p>
         </CardContent>
       </Card>
