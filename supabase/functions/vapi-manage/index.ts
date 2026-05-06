@@ -313,18 +313,32 @@ After all questions are asked, thank them for their time and let them know someo
       params.set("VoiceEnabled", "true");
       params.set("PageSize", "20");
 
-      const twilioRes = await fetch(
-        `${TWILIO_GATEWAY}/AvailablePhoneNumbers/${cc}/Local.json?${params.toString()}`,
-        {
-          headers: {
-            "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-            "X-Connection-Api-Key": TWILIO_API_KEY,
-          },
+      // Try Mobile first (AU region gateway doesn't support Local endpoint)
+      const numberTypes = cc === "AU" ? ["Mobile", "Local", "TollFree"] : ["Local", "Mobile", "TollFree"];
+      let twilioRes: Response | null = null;
+      let lastErr = "";
+      for (const numType of numberTypes) {
+        const res = await fetch(
+          `${TWILIO_GATEWAY}/AvailablePhoneNumbers/${cc}/${numType}.json?${params.toString()}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+              "X-Connection-Api-Key": TWILIO_API_KEY,
+            },
+          }
+        );
+        if (res.ok) {
+          twilioRes = res;
+          break;
         }
-      );
-      if (!twilioRes.ok) {
-        const errText = await twilioRes.text();
-        throw new Error(`Twilio search failed [${twilioRes.status}]: ${errText}`);
+        lastErr = await res.text();
+        // If 404/not supported in realm, try next type
+        if (res.status === 404) continue;
+        // Other errors are real failures
+        throw new Error(`Twilio search failed [${res.status}]: ${lastErr}`);
+      }
+      if (!twilioRes) {
+        throw new Error(`No available number types found for ${cc}. Last error: ${lastErr}`);
       }
       const result = await twilioRes.json();
       const numbers = (result.available_phone_numbers || []).map((n: any) => ({
