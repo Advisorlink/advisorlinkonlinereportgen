@@ -433,23 +433,13 @@ export function ESignPdfEditor({
         }
 
         if (field.kind === "date") {
-          // Date boxes render like signature boxes — placeholder for signer to fill
-          page.drawRectangle({
-            x,
-            y,
-            width,
-            height,
-            borderWidth: 1.4,
-            borderColor: rgb(0.55, 0.35, 0.05),
-            color: rgb(1, 0.98, 0.93),
-            opacity: 0.65,
-          });
-          page.drawText("Date", {
+          // Date fields stay auto-filled, but export as clean text with no visible box.
+          page.drawText(field.value || todayFormatted, {
             x: x + 5,
-            y: y + height / 2 - 5,
-            size: clamp(height * 0.35, 7, 11),
-            font: boldFont,
-            color: rgb(0.55, 0.35, 0.05),
+            y: y + Math.max(4, height / 2 - 5),
+            size: clamp(height * 0.42, 7, 12),
+            font,
+            color: rgb(0.05, 0.09, 0.16),
             maxWidth: width - 10,
           });
         }
