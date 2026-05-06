@@ -1,12 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Upload, Play, Pause, Trash2, Users } from "lucide-react";
+import { Plus, Upload, Play, Trash2, Users, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -14,24 +14,32 @@ export function AICallerCampaigns() {
   const { user } = useAuth();
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [scripts, setScripts] = useState<any[]>([]);
+  const [phoneNumbers, setPhoneNumbers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [scriptId, setScriptId] = useState("");
+  const [phoneNumberId, setPhoneNumberId] = useState("");
   const [contacts, setContacts] = useState<{ name: string; phone: string; email: string }[]>([]);
-  const [csvText, setCsvText] = useState("");
+  const [starting, setStarting] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { load(); }, []);
 
   async function load() {
     setLoading(true);
-    const [c, s] = await Promise.all([
+    const [c, s, p] = await Promise.all([
       supabase.from("ai_caller_campaigns").select("*, ai_caller_scripts(name)").order("created_at", { ascending: false }),
       supabase.from("ai_caller_scripts").select("id, name"),
+      supabase.functions.invoke("vapi-manage", { body: { action: "list-phone-numbers" } }),
     ]);
     setCampaigns(c.data || []);
     setScripts(s.data || []);
+    const nums = (p.data?.phoneNumbers || []).map((n: any) => ({
+      id: n.id,
+      number: n.number || n.twilioPhoneNumber || "Unknown",
+    }));
+    setPhoneNumbers(nums);
     setLoading(false);
   }
 
@@ -41,7 +49,6 @@ export function AICallerCampaigns() {
       const text = e.target?.result as string;
       const lines = text.split("\n").filter(l => l.trim());
       const parsed: { name: string; phone: string; email: string }[] = [];
-      // Skip header
       for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(",").map(c => c.trim().replace(/^"|"$/g, ""));
         if (cols.length >= 2) {
@@ -60,6 +67,7 @@ export function AICallerCampaigns() {
 
   async function createCampaign() {
     if (!name.trim() || !scriptId) { toast.error("Name and script are required"); return; }
+    if (!phoneNumberId) { toast.error("Select a phone number to call from"); return; }
     if (contacts.length === 0) { toast.error("Add at least one contact"); return; }
     if (!user) return;
 
@@ -70,12 +78,12 @@ export function AICallerCampaigns() {
       user_id: user.id,
       name: name.trim(),
       script_id: scriptId,
+      phone_number_id: phoneNumberId,
       total_contacts: validContacts.length,
     } as any).select().single();
 
     if (error) { toast.error(error.message); return; }
 
-    // Insert contacts
     const contactRows = validContacts.map(c => ({
       campaign_id: campaign.id,
       name: c.name || "Unknown",
@@ -90,6 +98,7 @@ export function AICallerCampaigns() {
     setDialogOpen(false);
     setName("");
     setScriptId("");
+    setPhoneNumberId("");
     setContacts([]);
     load();
   }
@@ -101,11 +110,20 @@ export function AICallerCampaigns() {
   }
 
   async function startCampaign(id: string) {
-    // Update status
-    await supabase.from("ai_caller_campaigns").update({ status: "active", started_at: new Date().toISOString() } as any).eq("id", id);
-    toast.success("Campaign started! Calls will begin processing.");
-    load();
-    // Note: actual calling orchestration would be handled by a scheduled edge function
+    setStarting(id);
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "start-campaign", campaignId: id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Campaign started! ${data.callsInitiated} calls initiated, ${data.callsFailed} failed.`);
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to start campaign");
+    } finally {
+      setStarting(null);
+    }
   }
 
   const statusColor: Record<string, string> = {
@@ -145,6 +163,20 @@ export function AICallerCampaigns() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Phone Number (call from)</Label>
+                <Select value={phoneNumberId} onValueChange={setPhoneNumberId}>
+                  <SelectTrigger><SelectValue placeholder="Select a phone number..." /></SelectTrigger>
+                  <SelectContent>
+                    {phoneNumbers.map(n => (
+                      <SelectItem key={n.id} value={n.id}>{n.number}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {phoneNumbers.length === 0 && (
+                  <p className="text-xs text-destructive">No phone numbers available. Buy one in the Phone Numbers tab first.</p>
+                )}
               </div>
 
               <div className="space-y-3">
@@ -226,8 +258,9 @@ export function AICallerCampaigns() {
                   </div>
                   <div className="flex gap-2">
                     {c.status === "draft" && (
-                      <Button size="sm" className="gap-1" onClick={() => startCampaign(c.id)}>
-                        <Play className="w-3 h-3" /> Start
+                      <Button size="sm" className="gap-1" onClick={() => startCampaign(c.id)} disabled={starting !== null}>
+                        {starting === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
+                        {starting === c.id ? "Starting..." : "Start"}
                       </Button>
                     )}
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteCampaign(c.id)}>

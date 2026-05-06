@@ -1,0 +1,1 @@
+ALTER TABLE public.ai_caller_campaigns ADD COLUMN phone_number_id text;
