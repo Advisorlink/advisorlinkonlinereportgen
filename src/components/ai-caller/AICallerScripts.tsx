@@ -41,8 +41,13 @@ const VOICES = [
   { id: "charlie", name: "Charlie", accent: "Australian", gender: "Male" },
   { id: "george", name: "George", accent: "Australian/British", gender: "Male" },
   { id: "callum", name: "Callum", accent: "Australian", gender: "Male" },
+  { id: "river", name: "River", accent: "Neutral", gender: "Non-binary" },
   { id: "matilda", name: "Matilda", accent: "Australian", gender: "Female" },
   { id: "jessica", name: "Jessica", accent: "Australian", gender: "Female" },
+  { id: "alice", name: "Alice", accent: "British", gender: "Female" },
+  { id: "brian", name: "Brian", accent: "American", gender: "Male" },
+  { id: "lily", name: "Lily", accent: "British", gender: "Female" },
+  { id: "daniel", name: "Daniel", accent: "British", gender: "Male" },
 ];
 
 export function AICallerScripts() {

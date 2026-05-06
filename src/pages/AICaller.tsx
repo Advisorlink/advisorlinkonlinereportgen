@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { CRMLayout } from "@/components/CRMLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, FileText, Users, BarChart3, ScrollText, PhoneCall } from "lucide-react";
+import { Phone, FileText, Users, BarChart3, ScrollText, PhoneCall, Mic } from "lucide-react";
 import { AICallerDashboard } from "@/components/ai-caller/AICallerDashboard";
 import { AICallerScripts } from "@/components/ai-caller/AICallerScripts";
 import { AICallerCampaigns } from "@/components/ai-caller/AICallerCampaigns";
 import { AICallerLeads } from "@/components/ai-caller/AICallerLeads";
 import { AICallerCallLogs } from "@/components/ai-caller/AICallerCallLogs";
 import { AICallerPhoneNumbers } from "@/components/ai-caller/AICallerPhoneNumbers";
+import { AICallerVoices } from "@/components/ai-caller/AICallerVoices";
 
 export default function AICaller() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -42,6 +43,9 @@ export default function AICaller() {
             <TabsTrigger value="numbers" className="gap-2 data-[state=active]:bg-background">
               <PhoneCall className="w-4 h-4" /> Phone Numbers
             </TabsTrigger>
+            <TabsTrigger value="voices" className="gap-2 data-[state=active]:bg-background">
+              <Mic className="w-4 h-4" /> Voices
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard"><AICallerDashboard onNavigate={setActiveTab} /></TabsContent>
@@ -50,6 +54,7 @@ export default function AICaller() {
           <TabsContent value="leads"><AICallerLeads /></TabsContent>
           <TabsContent value="logs"><AICallerCallLogs /></TabsContent>
           <TabsContent value="numbers"><AICallerPhoneNumbers /></TabsContent>
+          <TabsContent value="voices"><AICallerVoices /></TabsContent>
         </Tabs>
       </div>
     </CRMLayout>
