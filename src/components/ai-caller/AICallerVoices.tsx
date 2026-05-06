@@ -21,6 +21,7 @@ const VOICES: Voice[] = [
   { id: "voice3", elevenLabsId: "tyepWYJJwJM9TTFIg5U7", name: "Mia", accent: "Australian", gender: "Female", description: "Friendly, clear" },
   { id: "voice4", elevenLabsId: "w9rPM8AIZle60Nbpw7nl", name: "Liam", accent: "Australian", gender: "Male", description: "Conversational, relaxed" },
   { id: "voice5", elevenLabsId: "DTLT09E2cxHF0DqjKVbc", name: "Sophie", accent: "Australian", gender: "Female", description: "Energetic, bright" },
+  { id: "voice6", elevenLabsId: "4yye0QE5YPsKbMOCGGlj", name: "Emma", accent: "Australian", gender: "Female", description: "Natural, friendly" },
 ];
 
 export function AICallerVoices() {
