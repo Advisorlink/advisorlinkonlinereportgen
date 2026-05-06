@@ -287,6 +287,13 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                 fundLabel={`Fund ${idx + 2}`}
                 primaryReturn={fund.grossReturn}
                 primaryGrowth={fund.growthAssetsPct}
+                primaryAllocationPct={fund.primaryAllocationPct ?? 0}
+                onPrimaryAllocationChange={(v) => {
+                  const funds = [...(value.additionalFunds ?? [])];
+                  funds[idx] = { ...funds[idx], primaryAllocationPct: v };
+                  onChange({ ...value, additionalFunds: funds });
+                }}
+                primaryOptionLabel={fund.modelLabel}
               />
             </div>
           ))}
