@@ -33,6 +33,7 @@ interface Script {
   background_sound_enabled: boolean;
   model: string;
   max_duration_seconds: number;
+  call_direction: string;
   created_at: string;
 }
 
