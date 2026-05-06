@@ -19,6 +19,13 @@ const VOICE_ID_MAP: Record<string, string> = {
   voice7: "sclx1MZrNqboRcmLWoDb",
 };
 
+const VAPI_VOICE_FALLBACKS: Record<string, string> = {
+  voice4: "Elliot",
+  voice5: "Rohan",
+  voice6: "Zac",
+  voice7: "Dan",
+};
+
 function resolveVoiceId(shortId: string | undefined): string {
   if (!shortId) return VOICE_ID_MAP.voice1;
   return VOICE_ID_MAP[shortId] || shortId;
@@ -31,15 +38,13 @@ function resolveVoiceProvider(provider: string | undefined): string {
 
 function buildVoiceConfig(script: any, supabaseUrl: string) {
   const provider = resolveVoiceProvider(script.voice_provider);
-  const voiceId = resolveVoiceId(script.voice_id);
+  const shortVoiceId = script.voice_id;
+  const voiceId = resolveVoiceId(shortVoiceId);
 
-  if (provider === "11labs") {
+  if (provider === "11labs" && VAPI_VOICE_FALLBACKS[shortVoiceId]) {
     return {
-      provider: "custom-voice",
-      server: {
-        url: `${supabaseUrl}/functions/v1/vapi-tts?voiceId=${encodeURIComponent(voiceId)}`,
-        timeoutSeconds: 20,
-      },
+      provider: "vapi",
+      voiceId: VAPI_VOICE_FALLBACKS[shortVoiceId],
     };
   }
 
