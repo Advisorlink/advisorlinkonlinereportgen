@@ -111,6 +111,19 @@ function formatFollowUps(secondMessage: string | null | undefined): string {
   return `\nFOLLOW-UP STATEMENT (say this after the client responds to your opening message, before asking questions):\n"${secondMessage}"\n`;
 }
 
+function formatClosingStatements(closingStatements: string | null | undefined): string {
+  if (!closingStatements) return "";
+  try {
+    const parsed = JSON.parse(closingStatements);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return `\nCLOSING STATEMENTS (use these to wrap up the call after all questions have been asked):\n${parsed.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")}\n`;
+    }
+  } catch {
+    /* not JSON, treat as single statement */
+  }
+  return `\nCLOSING STATEMENT (use this to wrap up the call after all questions have been asked):\n"${closingStatements}"\n`;
+}
+
 async function extractLeadAnswers(
   transcript: string,
   summary: string,
@@ -259,6 +272,7 @@ serve(async (req) => {
       }
 
       const secondMessage = formatFollowUps(script.second_message);
+      const closingMsg = formatClosingStatements(script.closing_statements);
 
       const systemPrompt = `${script.system_prompt}
 
@@ -273,8 +287,8 @@ IMPORTANT RULES:
 ${secondMessage}
 QUESTIONS TO ASK (in order):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
-
-After all questions are asked, thank them for their time and let them know someone will be in touch.`;
+${closingMsg}
+After all questions are asked, follow the closing statements above to wrap up the call.`;
 
       const assistantPayload: any = {
         name: script.name,
@@ -744,6 +758,7 @@ After all questions are asked, thank them for their time and let them know someo
       }
 
       const secondMessage = formatFollowUps(script.second_message);
+      const closingMsg = formatClosingStatements(script.closing_statements);
 
       const systemPrompt = `${script.system_prompt}
 
@@ -758,8 +773,8 @@ IMPORTANT RULES:
 ${secondMessage}
 QUESTIONS TO ASK (in order):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
-
-After all questions are asked, thank them for their time and let them know someone will be in touch.`;
+${closingMsg}
+After all questions are asked, follow the closing statements above to wrap up the call.`;
 
       const assistantPayload: any = {
         name: `${script.name} - Campaign`,
@@ -1190,6 +1205,7 @@ After all questions are asked, thank them for their time and let them know someo
       }
 
       const secondMessage = formatFollowUps((script as any).second_message);
+      const closingMsg = formatClosingStatements((script as any).closing_statements);
 
       const systemPrompt = `${(script as any).system_prompt}
 
@@ -1204,8 +1220,8 @@ IMPORTANT RULES:
 ${secondMessage}
 QUESTIONS TO ASK (in order):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
-
-After all questions are asked, thank them for their time and let them know someone will be in touch.`;
+${closingMsg}
+After all questions are asked, follow the closing statements above to wrap up the call.`;
 
       const assistantPayload: any = {
         name: `${(script as any).name} - Inbound`,

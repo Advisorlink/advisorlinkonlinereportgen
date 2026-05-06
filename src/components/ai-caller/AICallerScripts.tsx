@@ -27,6 +27,7 @@ interface Script {
   first_message: string;
   second_message: string;
   questions: Question[];
+  closing_statements: string;
   voice_id: string;
   voice_provider: string;
   background_sound: string | null;
@@ -60,6 +61,7 @@ type ScriptSetupDraft = {
   firstMessage: string;
   followUpStatements: string[];
   questions: Question[];
+  closingStatements: string[];
   voiceId: string;
   bgSound: string;
   bgEnabled: boolean;
@@ -110,6 +112,9 @@ export function AICallerScripts() {
     { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
     { id: crypto.randomUUID(), question: "Have you ever had your super review before?", fieldName: "had_review" },
   ]);
+  const [closingStatements, setClosingStatements] = useState<string[]>(savedDraft.current?.closingStatements ?? [
+    "Thank you so much for your time today! We'll have one of our advisors reach out to you shortly to arrange your free review."
+  ]);
   const [voiceId, setVoiceId] = useState(savedDraft.current?.voiceId ?? "sarah");
   const [bgSound, setBgSound] = useState(savedDraft.current?.bgSound ?? "office");
   const [bgEnabled, setBgEnabled] = useState(savedDraft.current?.bgEnabled ?? true);
@@ -142,6 +147,7 @@ export function AICallerScripts() {
       firstMessage,
       followUpStatements,
       questions,
+      closingStatements,
       voiceId,
       bgSound,
       bgEnabled,
@@ -150,7 +156,7 @@ export function AICallerScripts() {
 
     sessionStorage.setItem(SCRIPT_SETUP_DRAFT_KEY, JSON.stringify(draft));
     savedDraft.current = draft;
-  }, [bgEnabled, bgSound, callDirection, description, dialogOpen, directionFilter, editingScript, firstMessage, maxDuration, name, questions, followUpStatements, systemPrompt, voiceId]);
+  }, [bgEnabled, bgSound, callDirection, closingStatements, description, dialogOpen, directionFilter, editingScript, firstMessage, maxDuration, name, questions, followUpStatements, systemPrompt, voiceId]);
 
   async function loadScripts() {
     setLoading(true);
@@ -174,6 +180,7 @@ export function AICallerScripts() {
       { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
       { id: crypto.randomUUID(), question: "Have you ever had your super reviewed before?", fieldName: "had_review" },
     ]);
+    setClosingStatements(["Thank you so much for your time today! We'll have one of our advisors reach out to you shortly to arrange your free review."]);
     setVoiceId("sarah");
     setBgSound("office");
     setBgEnabled(true);
@@ -196,6 +203,7 @@ export function AICallerScripts() {
     setFirstMessage(script.first_message);
     setFollowUpStatements(parseFollowUps(script.second_message));
     setQuestions(script.questions.length > 0 ? script.questions : []);
+    setClosingStatements(parseFollowUps(script.closing_statements));
     setVoiceId(script.voice_id);
     setBgSound(script.background_sound || "office");
     setBgEnabled(script.background_sound_enabled);
@@ -228,6 +236,7 @@ export function AICallerScripts() {
       first_message: firstMessage,
       second_message: serializeFollowUps(followUpStatements),
       questions: questions.filter(q => q.question && q.fieldName).map(q => ({ id: q.id, question: q.question, fieldName: q.fieldName })) as any,
+      closing_statements: serializeFollowUps(closingStatements),
       voice_id: voiceId,
       voice_provider: "elevenlabs",
       background_sound: bgSound,
@@ -267,6 +276,7 @@ export function AICallerScripts() {
     setFirstMessage(script.first_message);
     setFollowUpStatements(parseFollowUps(script.second_message));
     setQuestions(script.questions.map(q => ({ ...q, id: crypto.randomUUID() })));
+    setClosingStatements(parseFollowUps(script.closing_statements));
     setVoiceId(script.voice_id);
     setBgSound(script.background_sound || "office");
     setBgEnabled(script.background_sound_enabled);
@@ -310,6 +320,7 @@ export function AICallerScripts() {
                     setFirstMessage(s.first_message);
                     setFollowUpStatements(parseFollowUps(s.second_message));
                     setQuestions(s.questions.map(q => ({ ...q, id: crypto.randomUUID() })));
+                    setClosingStatements(parseFollowUps(s.closing_statements));
                     setVoiceId(s.voice_id);
                     setBgSound(s.background_sound || "office");
                     setBgEnabled(s.background_sound_enabled);
@@ -466,6 +477,45 @@ export function AICallerScripts() {
                     <Button variant="ghost" size="icon" className="shrink-0 mt-1" onClick={() => removeQuestion(q.id)}>
                       <Trash2 className="w-4 h-4 text-destructive" />
                     </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Closing Statements */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Closing Statements</Label>
+                    <p className="text-xs text-muted-foreground">Script for the AI to follow when closing the call. Add as many as needed.</p>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setClosingStatements([...closingStatements, ""])} className="gap-1 shrink-0">
+                    <Plus className="w-3 h-3" /> Add Statement
+                  </Button>
+                </div>
+                {closingStatements.map((stmt, i) => (
+                  <div key={i} className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 border border-border">
+                    <span className="text-xs text-muted-foreground mt-2.5 font-mono w-5 shrink-0">{i + 1}.</span>
+                    <Textarea
+                      value={stmt}
+                      onChange={e => {
+                        const updated = [...closingStatements];
+                        updated[i] = e.target.value;
+                        setClosingStatements(updated);
+                      }}
+                      rows={2}
+                      placeholder={`Closing statement ${i + 1}...`}
+                      className="flex-1"
+                    />
+                    {closingStatements.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 mt-1"
+                        onClick={() => setClosingStatements(closingStatements.filter((_, idx) => idx !== i))}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
