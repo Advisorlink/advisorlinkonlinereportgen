@@ -524,7 +524,9 @@ export function ESignPdfEditor({
                           ? "border-cyan bg-cyan/15 text-foreground"
                           : field.kind === "signature"
                             ? "border-cyan/80 bg-cyan/10 text-cyan"
-                            : "border-primary/70 bg-background/80 text-foreground"
+                            : field.kind === "date"
+                              ? "border-amber-500/70 bg-amber-50/80 text-amber-800"
+                              : "border-primary/70 bg-background/80 text-foreground"
                       }`}
                       style={{
                         left: `${field.x * 100}%`,
@@ -535,7 +537,7 @@ export function ESignPdfEditor({
                       onPointerDown={(event) => startMove(event, field)}
                     >
                       <span className="min-w-0 truncate">
-                        {field.kind === "signature" ? "Sign here" : field.value || field.label}
+                        {field.kind === "signature" ? "Sign here" : field.kind === "date" ? `📅 ${field.value}` : field.value || field.label}
                       </span>
                       <button
                         type="button"
@@ -564,7 +566,7 @@ export function ESignPdfEditor({
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Fields</h3>
             <p className="mt-1 text-xs text-muted-foreground">
-              {textFields.length} text • {signatureFields.length} signature
+              {textFields.length} text • {dateFields.length} date • {signatureFields.length} signature
             </p>
           </div>
 
