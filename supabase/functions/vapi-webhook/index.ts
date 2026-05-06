@@ -6,6 +6,91 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function hasMeaningfulFields(fields: Record<string, unknown> | null | undefined) {
+  return !!fields && Object.values(fields).some((value) => value != null && String(value).trim() !== "");
+}
+
+function stripEmptyFields(fields: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(fields).filter(([, value]) => value != null && String(value).trim() !== "")
+  );
+}
+
+async function extractLeadAnswers(transcript: string, summary: string, questions: any[] = []) {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY || !transcript.trim()) return { fields: {}, summary };
+
+  const questionText = questions.length
+    ? questions.map((q, i) => `${i + 1}. ${q.question || q.label || q.fieldName} -> ${q.fieldName}`).join("\n")
+    : "No custom campaign questions were found.";
+
+  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-3-flash-preview",
+      temperature: 0,
+      messages: [
+        {
+          role: "system",
+          content: "You extract Australian superannuation lead data from call transcripts. Only use answers spoken by the client/User. Never use guesses, never use the AI caller's suggested wording as an answer, and leave fields blank when the client did not clearly answer.",
+        },
+        {
+          role: "user",
+          content: `Campaign questions:\n${questionText}\n\nExisting Vapi summary:\n${summary || ""}\n\nTranscript:\n${transcript}\n\nReturn structured fields for the lead page. Required standard fields: super_fund_name, balance, age, had_review_before. Also include answers to any campaign questions using their fieldName. Balance must be a raw number string if possible, no commas or currency symbols. had_review_before must be Yes, No, or blank.`,
+        },
+      ],
+      tools: [{
+        type: "function",
+        function: {
+          name: "save_extracted_lead",
+          description: "Save fields explicitly stated by the client during the call",
+          parameters: {
+            type: "object",
+            properties: {
+              fields: {
+                type: "object",
+                properties: {
+                  super_fund_name: { type: "string" },
+                  balance: { type: "string" },
+                  age: { type: "string" },
+                  had_review_before: { type: "string" },
+                },
+                additionalProperties: { type: "string" },
+              },
+              summary: { type: "string", description: "Concise call summary based only on the transcript" },
+            },
+            required: ["fields", "summary"],
+          },
+        },
+      }],
+      tool_choice: { type: "function", function: { name: "save_extracted_lead" } },
+    }),
+  });
+
+  if (!resp.ok) {
+    console.error("lead extraction failed", resp.status, await resp.text());
+    return { fields: {}, summary };
+  }
+
+  const result = await resp.json();
+  const rawArgs = result.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+  if (!rawArgs) return { fields: {}, summary };
+
+  try {
+    const parsed = JSON.parse(rawArgs);
+    return {
+      fields: stripEmptyFields(parsed.fields || {}),
+      summary: parsed.summary || summary,
+    };
+  } catch {
+    return { fields: {}, summary };
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
