@@ -85,6 +85,16 @@ export function AICallerCallLogs() {
                       </div>
                     </div>
                   </div>
+                  {log.recording_url && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 text-xs"
+                      onClick={() => window.open(log.recording_url, "_blank")}
+                    >
+                      <Download className="w-3.5 h-3.5" /> Recording
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
