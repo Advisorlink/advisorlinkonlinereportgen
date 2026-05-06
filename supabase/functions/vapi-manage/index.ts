@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const VAPI_BASE = "https://api.vapi.ai";
+const TWILIO_GATEWAY = "https://connector-gateway.lovable.dev/twilio";
 
 const VOICE_ID_MAP: Record<string, string> = {
   voice1: "DTLT09E2cxHF0DqjKVbc",
