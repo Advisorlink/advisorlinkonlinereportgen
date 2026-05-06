@@ -361,15 +361,19 @@ After all questions are asked, thank them for their time and let them know someo
       if (!phoneNumber) throw new Error("phoneNumber is required");
 
       const basicAuth = btoa(`${TWILIO_SID}:${TWILIO_TOKEN}`);
+      const ADDRESS_SID = Deno.env.get("TWILIO_ADDRESS_SID");
 
       // 1. Buy on Twilio directly (avoid AU1 realm issues)
+      const buyParams: Record<string, string> = { PhoneNumber: phoneNumber };
+      if (ADDRESS_SID) buyParams.AddressSid = ADDRESS_SID;
+
       const buyRes = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/IncomingPhoneNumbers.json`, {
         method: "POST",
         headers: {
           "Authorization": `Basic ${basicAuth}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: new URLSearchParams({ PhoneNumber: phoneNumber }),
+        body: new URLSearchParams(buyParams),
       });
       if (!buyRes.ok) {
         const errText = await buyRes.text();
