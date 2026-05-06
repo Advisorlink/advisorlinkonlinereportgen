@@ -29,10 +29,6 @@ export function AICallerPhoneNumbers() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogTab, setDialogTab] = useState("buy");
 
-  // Twilio credentials (shared between tabs)
-  const [twilioSid, setTwilioSid] = useState("");
-  const [twilioAuth, setTwilioAuth] = useState("");
-
   // Search/Buy state
   const [areaCode, setAreaCode] = useState("");
   const [contains, setContains] = useState("");
@@ -40,8 +36,10 @@ export function AICallerPhoneNumbers() {
   const [availableNumbers, setAvailableNumbers] = useState<AvailableNumber[]>([]);
   const [buying, setBuying] = useState<string | null>(null);
 
-  // Import state
+  // Import state (Vapi needs raw Twilio creds for import)
   const [importNumber, setImportNumber] = useState("");
+  const [twilioSid, setTwilioSid] = useState("");
+  const [twilioAuth, setTwilioAuth] = useState("");
   const [importing, setImporting] = useState(false);
 
   useEffect(() => { loadNumbers(); }, []);
@@ -69,18 +67,12 @@ export function AICallerPhoneNumbers() {
   }
 
   async function searchNumbers() {
-    if (!twilioSid.trim() || !twilioAuth.trim()) {
-      toast.error("Enter your Twilio credentials first");
-      return;
-    }
     setSearching(true);
     setAvailableNumbers([]);
     try {
       const { data, error } = await supabase.functions.invoke("vapi-manage", {
         body: {
           action: "search-twilio-numbers",
-          twilioAccountSid: twilioSid.trim(),
-          twilioAuthToken: twilioAuth.trim(),
           country: "AU",
           areaCode: areaCode.trim() || undefined,
           contains: contains.trim() || undefined,
@@ -100,14 +92,11 @@ export function AICallerPhoneNumbers() {
   }
 
   async function buyNumber(phoneNumber: string) {
-    if (!twilioSid.trim() || !twilioAuth.trim()) return;
     setBuying(phoneNumber);
     try {
       const { data, error } = await supabase.functions.invoke("vapi-manage", {
         body: {
           action: "buy-twilio-number",
-          twilioAccountSid: twilioSid.trim(),
-          twilioAuthToken: twilioAuth.trim(),
           phoneNumber,
         },
       });
@@ -180,22 +169,7 @@ export function AICallerPhoneNumbers() {
                 <DialogTitle>Get a Phone Number</DialogTitle>
               </DialogHeader>
 
-              {/* Twilio credentials (always visible) */}
-              <div className="space-y-3 pb-2 border-b border-border">
-                <p className="text-xs text-muted-foreground">Enter your Twilio credentials to search & buy numbers directly.</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Twilio Account SID</Label>
-                    <Input value={twilioSid} onChange={e => setTwilioSid(e.target.value)} placeholder="ACxxx..." className="text-xs" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Twilio Auth Token</Label>
-                    <Input type="password" value={twilioAuth} onChange={e => setTwilioAuth(e.target.value)} placeholder="Auth token" className="text-xs" />
-                  </div>
-                </div>
-              </div>
-
-              <Tabs value={dialogTab} onValueChange={setDialogTab} className="mt-2">
+              <Tabs value={dialogTab} onValueChange={setDialogTab}>
                 <TabsList className="w-full">
                   <TabsTrigger value="buy" className="flex-1 gap-1.5">
                     <ShoppingCart className="w-3.5 h-3.5" /> Search & Buy
@@ -206,6 +180,7 @@ export function AICallerPhoneNumbers() {
                 </TabsList>
 
                 <TabsContent value="buy" className="space-y-3 mt-3">
+                  <p className="text-xs text-muted-foreground">Search for available Australian numbers via your connected Twilio account.</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-xs">Area Code (optional)</Label>
@@ -216,7 +191,7 @@ export function AICallerPhoneNumbers() {
                       <Input value={contains} onChange={e => setContains(e.target.value)} placeholder="e.g. 555" className="text-xs" />
                     </div>
                   </div>
-                  <Button onClick={searchNumbers} disabled={searching || !twilioSid || !twilioAuth} className="w-full gap-2">
+                  <Button onClick={searchNumbers} disabled={searching} className="w-full gap-2">
                     {searching ? <><Loader2 className="w-4 h-4 animate-spin" /> Searching...</> : <><Search className="w-4 h-4" /> Search Australian Numbers</>}
                   </Button>
 
@@ -245,9 +220,20 @@ export function AICallerPhoneNumbers() {
                 </TabsContent>
 
                 <TabsContent value="import" className="space-y-3 mt-3">
+                  <p className="text-xs text-muted-foreground">Import an existing Twilio number. Vapi requires your Twilio SID & Auth Token to manage the number.</p>
                   <div className="space-y-1">
                     <Label className="text-xs">Phone Number (E.164 format)</Label>
                     <Input value={importNumber} onChange={e => setImportNumber(e.target.value)} placeholder="+61412345678" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Twilio Account SID</Label>
+                      <Input value={twilioSid} onChange={e => setTwilioSid(e.target.value)} placeholder="ACxxx..." className="text-xs" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Twilio Auth Token</Label>
+                      <Input type="password" value={twilioAuth} onChange={e => setTwilioAuth(e.target.value)} placeholder="Auth token" className="text-xs" />
+                    </div>
                   </div>
                   <Button onClick={handleImport} disabled={importing} className="w-full">
                     {importing ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Importing...</> : "Import Number"}
