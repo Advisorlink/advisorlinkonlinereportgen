@@ -272,6 +272,7 @@ serve(async (req) => {
       }
 
       const secondMessage = formatFollowUps(script.second_message);
+      const closingMsg = formatClosingStatements(script.closing_statements);
 
       const systemPrompt = `${script.system_prompt}
 
@@ -286,8 +287,8 @@ IMPORTANT RULES:
 ${secondMessage}
 QUESTIONS TO ASK (in order):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
-
-After all questions are asked, thank them for their time and let them know someone will be in touch.`;
+${closingMsg}
+After all questions are asked, follow the closing statements above to wrap up the call.`;
 
       const assistantPayload: any = {
         name: script.name,
