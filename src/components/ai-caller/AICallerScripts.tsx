@@ -112,6 +112,9 @@ export function AICallerScripts() {
     { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
     { id: crypto.randomUUID(), question: "Have you ever had your super review before?", fieldName: "had_review" },
   ]);
+  const [closingStatements, setClosingStatements] = useState<string[]>(savedDraft.current?.closingStatements ?? [
+    "Thank you so much for your time today! We'll have one of our advisors reach out to you shortly to arrange your free review."
+  ]);
   const [voiceId, setVoiceId] = useState(savedDraft.current?.voiceId ?? "sarah");
   const [bgSound, setBgSound] = useState(savedDraft.current?.bgSound ?? "office");
   const [bgEnabled, setBgEnabled] = useState(savedDraft.current?.bgEnabled ?? true);
