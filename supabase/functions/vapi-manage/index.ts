@@ -273,9 +273,9 @@ After all questions are asked, thank them for their time and let them know someo
       if (!number) {
         throw new Error("number (E.164) is required");
       }
-      // Use provided creds or fall back to connector creds for Vapi import
-      const sid = twilioAccountSid || await getTwilioAccountSid();
-      const auth = twilioAuthToken || await getTwilioAuthToken();
+      if (!twilioAccountSid || !twilioAuthToken) {
+        throw new Error("twilioAccountSid and twilioAuthToken are required for Vapi import");
+      }
       const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
         method: "POST",
         headers: {
@@ -285,8 +285,8 @@ After all questions are asked, thank them for their time and let them know someo
         body: JSON.stringify({
           provider: "twilio",
           number,
-          twilioAccountSid: sid,
-          twilioAuthToken: auth,
+          twilioAccountSid,
+          twilioAuthToken,
         }),
       });
       if (!vapiRes.ok) {
