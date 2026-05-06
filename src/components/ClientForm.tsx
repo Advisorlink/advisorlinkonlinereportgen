@@ -247,6 +247,9 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
             fundLabel="Fund 1"
             primaryReturn={value.grossReturn}
             primaryGrowth={value.growthAssetsPct}
+            primaryAllocationPct={value.primaryAllocationPct ?? 0}
+            onPrimaryAllocationChange={(v) => onChange({ ...value, primaryAllocationPct: v })}
+            primaryOptionLabel={value.modelLabel}
           />
           {/* Additional funds */}
           {(value.additionalFunds ?? []).map((fund, idx) => (
@@ -284,6 +287,13 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                 fundLabel={`Fund ${idx + 2}`}
                 primaryReturn={fund.grossReturn}
                 primaryGrowth={fund.growthAssetsPct}
+                primaryAllocationPct={fund.primaryAllocationPct ?? 0}
+                onPrimaryAllocationChange={(v) => {
+                  const funds = [...(value.additionalFunds ?? [])];
+                  funds[idx] = { ...funds[idx], primaryAllocationPct: v };
+                  onChange({ ...value, additionalFunds: funds });
+                }}
+                primaryOptionLabel={fund.modelLabel}
               />
             </div>
           ))}
@@ -345,12 +355,18 @@ function InvestmentOptionsSection({
   fundLabel,
   primaryReturn,
   primaryGrowth,
+  primaryAllocationPct,
+  onPrimaryAllocationChange,
+  primaryOptionLabel,
 }: {
   options: InvestmentOption[];
   onChange: (opts: InvestmentOption[]) => void;
   fundLabel: string;
   primaryReturn: number;
   primaryGrowth: number;
+  primaryAllocationPct: number;
+  onPrimaryAllocationChange: (v: number) => void;
+  primaryOptionLabel: string;
 }) {
   const addOption = () => {
     onChange([...options, { name: "", allocationPct: 1, growthAssetsPct: 0.7, fiveYearReturn: 0 }]);
@@ -366,13 +382,13 @@ function InvestmentOptionsSection({
     onChange(next);
   };
 
-  // Calculate weighted averages
-  const totalAlloc = options.reduce((s, o) => s + o.allocationPct, 0);
+  // Calculate weighted averages including primary allocation
+  const totalAlloc = options.reduce((s, o) => s + o.allocationPct, 0) + primaryAllocationPct;
   const avgReturn = totalAlloc > 0
-    ? options.reduce((s, o) => s + o.allocationPct * o.fiveYearReturn, 0) / totalAlloc
+    ? (options.reduce((s, o) => s + o.allocationPct * o.fiveYearReturn, 0) + primaryAllocationPct * primaryReturn) / totalAlloc
     : primaryReturn;
   const avgGrowth = totalAlloc > 0
-    ? options.reduce((s, o) => s + o.allocationPct * o.growthAssetsPct, 0) / totalAlloc
+    ? (options.reduce((s, o) => s + o.allocationPct * o.growthAssetsPct, 0) + primaryAllocationPct * primaryGrowth) / totalAlloc
     : primaryGrowth;
 
   return (
@@ -392,6 +408,25 @@ function InvestmentOptionsSection({
         <p className="text-[10px] text-muted-foreground italic mb-2">
           No investment options added. The fund's single return & growth values are used. Add options to split across multiple investment choices.
         </p>
+      )}
+      {/* Primary option allocation - only show when there are additional options */}
+      {options.length > 0 && (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mb-2">
+          <div className="flex items-center gap-1.5 mb-2">
+            <span className="text-[11px] font-semibold text-foreground">
+              Primary — {primaryOptionLabel || "Original Option"}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="Allocation %">
+              <PctInput v={primaryAllocationPct} on={onPrimaryAllocationChange} />
+            </Field>
+            <div className="text-[10px] text-muted-foreground flex flex-col justify-center gap-0.5">
+              <div>Return: {(primaryReturn * 100).toFixed(2)}%</div>
+              <div>Growth: {(primaryGrowth * 100).toFixed(1)}%</div>
+            </div>
+          </div>
+        </div>
       )}
       {options.map((opt, idx) => (
         <div key={idx} className="rounded-lg border border-border bg-secondary/20 p-3 mb-2">
@@ -429,6 +464,9 @@ function InvestmentOptionsSection({
               <span className="text-muted-foreground">Avg Growth Assets: </span>
               <span className="font-semibold text-foreground">{(avgGrowth * 100).toFixed(1)}%</span>
             </div>
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-1">
+            Total allocation: {(totalAlloc * 100).toFixed(0)}% (Primary {(primaryAllocationPct * 100).toFixed(0)}% + {options.length} option{options.length !== 1 ? "s" : ""})
           </div>
         </div>
       )}

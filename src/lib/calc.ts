@@ -21,14 +21,18 @@ export interface FundEntry {
   adminFeePct: number;
   investmentRiskProfile?: string;
   investmentOptions?: InvestmentOption[];
+  primaryAllocationPct?: number; // 0-1, portion remaining in the primary/original option
 }
 
 // Compute weighted averages from investment options if present
 export function resolvedFundReturn(f: FundEntry): number {
   if (f.investmentOptions && f.investmentOptions.length > 0) {
-    const totalAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0);
+    const primaryAlloc = f.primaryAllocationPct ?? 0;
+    const totalAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0) + primaryAlloc;
     if (totalAlloc > 0) {
-      return f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.fiveYearReturn, 0) / totalAlloc;
+      const optionsWeighted = f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.fiveYearReturn, 0);
+      const primaryWeighted = primaryAlloc * f.grossReturn;
+      return (optionsWeighted + primaryWeighted) / totalAlloc;
     }
   }
   return f.grossReturn;
@@ -36,9 +40,12 @@ export function resolvedFundReturn(f: FundEntry): number {
 
 export function resolvedFundGrowth(f: FundEntry): number {
   if (f.investmentOptions && f.investmentOptions.length > 0) {
-    const totalAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0);
+    const primaryAlloc = f.primaryAllocationPct ?? 0;
+    const totalAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0) + primaryAlloc;
     if (totalAlloc > 0) {
-      return f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.growthAssetsPct, 0) / totalAlloc;
+      const optionsWeighted = f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.growthAssetsPct, 0);
+      const primaryWeighted = primaryAlloc * f.growthAssetsPct;
+      return (optionsWeighted + primaryWeighted) / totalAlloc;
     }
   }
   return f.growthAssetsPct;
@@ -83,6 +90,7 @@ export interface ClientInputs {
 
   // Investment options for primary fund
   investmentOptions?: InvestmentOption[];
+  primaryAllocationPct?: number; // 0-1, portion remaining in the primary/original option
 }
 
 // Risk profile lookup (mirrors XLSX J27/J28 array formulas via growth-assets %)
@@ -174,6 +182,7 @@ export function getAllFunds(i: ClientInputs): FundEntry[] {
     adminFeePct: i.adminFeePct,
     investmentRiskProfile: i.investmentRiskProfile,
     investmentOptions: i.investmentOptions,
+    primaryAllocationPct: i.primaryAllocationPct,
   };
   const funds = [primary];
   if (i.additionalFunds) {
