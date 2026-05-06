@@ -138,6 +138,7 @@ export function AICallerScripts() {
       user_id: user.id,
       name: name.trim(),
       description: description.trim() || null,
+      call_direction: callDirection,
       system_prompt: systemPrompt,
       first_message: firstMessage,
       second_message: secondMessage,
