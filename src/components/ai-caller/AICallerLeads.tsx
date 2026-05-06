@@ -120,24 +120,30 @@ export function AICallerLeads() {
     setTranscriptOpen(false);
     setNewNote("");
 
-    // If lead has no recording_url, try fetching from call_logs via contact_id
     let enrichedLead = { ...lead };
-    if (!lead.recording_url && lead.contact_id) {
-      const { data: log } = await supabase
-        .from("ai_caller_call_logs")
-        .select("recording_url")
-        .eq("contact_id", lead.contact_id)
-        .not("recording_url", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-      if (log?.recording_url) {
-        enrichedLead.recording_url = log.recording_url;
-        // Also save it to the lead for future access
-        await supabase.from("ai_caller_leads").update({ recording_url: log.recording_url } as any).eq("id", lead.id);
+    setSelectedLead(enrichedLead);
+
+    const hasExtractedFields = enrichedLead.extracted_fields && Object.values(enrichedLead.extracted_fields).some(Boolean);
+    const needsReprocess = !hasExtractedFields || !enrichedLead.recording_url;
+    if (needsReprocess) {
+      setExtractingLeadId(lead.id);
+      try {
+        const { data, error } = await supabase.functions.invoke("vapi-manage", {
+          body: { action: "reprocess-lead", leadId: lead.id },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        if (data?.lead) {
+          enrichedLead = data.lead;
+          setSelectedLead(enrichedLead);
+          setLeads(prev => prev.map(l => l.id === lead.id ? enrichedLead : l));
+        }
+      } catch (e: any) {
+        toast.error(e.message || "Could not extract lead answers from this call");
+      } finally {
+        setExtractingLeadId(null);
       }
     }
-    setSelectedLead(enrichedLead);
   }
 
   // Extract field helpers
