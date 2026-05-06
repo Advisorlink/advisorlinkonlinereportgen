@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, Phone, Clock, DollarSign, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Search, Phone, Clock, DollarSign, CheckCircle, XCircle, Loader2, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function AICallerCallLogs() {
   const [logs, setLogs] = useState<any[]>([]);
