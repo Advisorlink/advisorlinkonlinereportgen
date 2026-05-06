@@ -699,6 +699,11 @@ function suggestedValue(name: string, clientData: Record<string, string>) {
   const raw = name.toLowerCase().trim();
   const normalized = raw.replace(/[\s_-]+/g, "_");
 
+  // Skip fields that are clearly NOT client personal data
+  if (/(company|account|abn|acn|bsb|tfn|fund|product|policy|employer|business|organisation|organization)/i.test(raw)) {
+    return "";
+  }
+
   // Check for date-of-birth first (must come before generic date check)
   if (/(birth|dob)/i.test(raw)) {
     return clientData.dob || "";
@@ -709,17 +714,13 @@ function suggestedValue(name: string, clientData: Record<string, string>) {
     return clientData.date || "";
   }
 
-  // Exact key match
+  // Exact key match only (no partial)
   for (const [key, value] of Object.entries(clientData)) {
     if (normalized === key && value) return value;
   }
-  // Partial match
-  for (const [key, value] of Object.entries(clientData)) {
-    if (normalized.includes(key) && value) return value;
-  }
 
-  // Keyword fallback for common labels
-  if (/\b(name|full.?name|client.?name)\b/i.test(raw)) return clientData.name || "";
+  // Keyword fallback for common personal labels
+  if (/\b(full.?name|client.?name|applicant.?name|member.?name)\b/i.test(raw)) return clientData.name || "";
   if (/\b(email|e.?mail)\b/i.test(raw)) return clientData.email || "";
   if (/\b(phone|mobile|tel)\b/i.test(raw)) return clientData.phone || "";
   if (/\b(address|street|residential)\b/i.test(raw)) return clientData.address || "";
