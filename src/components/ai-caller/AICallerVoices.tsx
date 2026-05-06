@@ -18,15 +18,9 @@ const VOICES: Voice[] = [
   { id: "sarah", elevenLabsId: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", accent: "Australian", gender: "Female", description: "Warm, professional" },
   { id: "laura", elevenLabsId: "FGY2WhTYpPnrIDTdsKH5", name: "Laura", accent: "Australian", gender: "Female", description: "Friendly, clear" },
   { id: "charlie", elevenLabsId: "IKne3meq5aSn9XLyUdCD", name: "Charlie", accent: "Australian", gender: "Male", description: "Confident, natural" },
-  { id: "george", elevenLabsId: "JBFqnCBsd6RMkjVDRZzb", name: "George", accent: "Australian/British", gender: "Male", description: "Authoritative, calm" },
   { id: "callum", elevenLabsId: "N2lVS1w4EtoT3dr4eOWO", name: "Callum", accent: "Australian", gender: "Male", description: "Conversational, relaxed" },
-  { id: "river", elevenLabsId: "SAz9YHcvj6GT2YYXdXww", name: "River", accent: "Neutral", gender: "Non-binary", description: "Smooth, versatile" },
   { id: "matilda", elevenLabsId: "XrExE9yKIg1WjnnlVkGX", name: "Matilda", accent: "Australian", gender: "Female", description: "Energetic, bright" },
   { id: "jessica", elevenLabsId: "cgSgspJ2msm6clMCkdW9", name: "Jessica", accent: "Australian", gender: "Female", description: "Soft, empathetic" },
-  { id: "alice", elevenLabsId: "Xb7hH8MSUJpSbSDYk0k2", name: "Alice", accent: "British", gender: "Female", description: "Refined, articulate" },
-  { id: "brian", elevenLabsId: "nPczCjzI2devNBz1zQrb", name: "Brian", accent: "American", gender: "Male", description: "Deep, trustworthy" },
-  { id: "lily", elevenLabsId: "pFZP5JQG7iQjIQuC4Bku", name: "Lily", accent: "British", gender: "Female", description: "Gentle, warm" },
-  { id: "daniel", elevenLabsId: "onwK4e9ZLuTAKqWW03F9", name: "Daniel", accent: "British", gender: "Male", description: "Authoritative, clear" },
 ];
 
 export function AICallerVoices() {
