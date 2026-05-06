@@ -17,7 +17,6 @@ const VOICE_ID_MAP: Record<string, string> = {
   voice5: "2nzji8yPQooBwG4eQO4s",
   voice6: "NMbn4FNN0acONjKLsueJ",
   voice7: "sclx1MZrNqboRcmLWoDb",
-  voice8: "NMbn4FNN0acONjKLsueJ",
 };
 
 function resolveVoiceId(shortId: string | undefined): string {

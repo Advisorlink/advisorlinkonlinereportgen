@@ -44,7 +44,6 @@ const VOICES = [
   { id: "voice5", name: "Lachlan", accent: "Australian", gender: "Male" },
   { id: "voice6", name: "Declan", accent: "Australian", gender: "Male" },
   { id: "voice7", name: "Ryan", accent: "Australian", gender: "Male" },
-  { id: "voice8", name: "Cooper", accent: "Australian", gender: "Male" },
 ];
 
 export function AICallerScripts() {
