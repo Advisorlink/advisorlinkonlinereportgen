@@ -140,6 +140,27 @@ After all questions are asked, thank them for their time and let them know someo
       });
     }
 
+    if (action === "voice-previews") {
+      const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
+      if (!ELEVENLABS_API_KEY) throw new Error("ELEVENLABS_API_KEY is not configured");
+
+      const previews: Record<string, string> = {};
+      for (const [shortId, elId] of Object.entries(VOICE_ID_MAP)) {
+        try {
+          const res = await fetch(`https://api.elevenlabs.io/v1/voices/${elId}`, {
+            headers: { "xi-api-key": ELEVENLABS_API_KEY },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.preview_url) previews[shortId] = data.preview_url;
+          }
+        } catch { /* skip */ }
+      }
+      return new Response(JSON.stringify({ previews }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "preview-voice") {
       const { voiceId, text } = body;
       if (!voiceId || !text) throw new Error("voiceId and text are required");
