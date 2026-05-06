@@ -222,19 +222,39 @@ serve(async (req) => {
 
       const finalSummary = summary;
 
-      // Update call log
+      // Update or create call log
       if (vapiCallId) {
-        await supabase
+        const { data: existingLog } = await supabase
           .from("ai_caller_call_logs")
-          .update({
-            status: endedReason === "assistant-error" ? "failed" : "completed",
-            duration_seconds: Math.round(duration),
-            cost: cost,
-            transcript: transcript,
-            recording_url: recordingUrl,
-            ended_at: new Date().toISOString(),
-          })
-          .eq("vapi_call_id", vapiCallId);
+          .select("id")
+          .eq("vapi_call_id", vapiCallId)
+          .maybeSingle();
+
+        const logPayload = {
+          status: endedReason === "assistant-error" ? "failed" : "completed",
+          duration_seconds: Math.round(duration),
+          cost: cost,
+          transcript: transcript,
+          recording_url: recordingUrl,
+          ended_at: new Date().toISOString(),
+        };
+
+        if (existingLog) {
+          await supabase
+            .from("ai_caller_call_logs")
+            .update(logPayload)
+            .eq("vapi_call_id", vapiCallId);
+        } else {
+          // Inbound call — no prior log exists
+          const callerPhone = call?.customer?.number || call?.customerNumber || "";
+          await supabase.from("ai_caller_call_logs").insert({
+            ...logPayload,
+            vapi_call_id: vapiCallId,
+            campaign_id: campaignId || null,
+            contact_id: contactId || null,
+            started_at: new Date().toISOString(),
+          });
+        }
       }
 
       // Update contact status
@@ -252,21 +272,49 @@ serve(async (req) => {
       const hasExtractedData = Object.keys(extractedFields).length > 0;
       const wasQualified = duration > 30 || hasExtractedData;
 
-      if (wasQualified && contactId) {
-        // Get contact info
-        const { data: contact } = await supabase
-          .from("ai_caller_contacts")
-          .select("*")
-          .eq("id", contactId)
-          .single();
+      if (wasQualified) {
+        if (contactId) {
+          // Outbound call with known contact
+          const { data: contact } = await supabase
+            .from("ai_caller_contacts")
+            .select("*")
+            .eq("id", contactId)
+            .single();
 
-        if (contact) {
+          if (contact) {
+            await supabase.from("ai_caller_leads").insert({
+              campaign_id: campaignId || null,
+              contact_id: contactId,
+              name: contact.name,
+              phone: contact.phone,
+              email: contact.email,
+              extracted_fields: extractedFields,
+              transcript_summary: finalSummary,
+              full_transcript: transcript,
+              recording_url: recordingUrl || null,
+              call_duration_seconds: Math.round(duration),
+              qualification_score: hasExtractedData
+                ? Math.min(100, Object.keys(extractedFields).length * 20)
+                : 30,
+              status: "new",
+            });
+
+            // Update campaign stats
+            if (campaignId) {
+              await supabase.rpc("increment_campaign_leads", {
+                _campaign_id: campaignId,
+              });
+            }
+          }
+        } else {
+          // Inbound call — create lead directly
+          const callerPhone = call?.customer?.number || call?.customerNumber || "";
           await supabase.from("ai_caller_leads").insert({
-            campaign_id: campaignId || null,
-            contact_id: contactId,
-            name: contact.name,
-            phone: contact.phone,
-            email: contact.email,
+            campaign_id: null,
+            contact_id: null,
+            name: "Inbound Caller",
+            phone: callerPhone,
+            email: null,
             extracted_fields: extractedFields,
             transcript_summary: finalSummary,
             full_transcript: transcript,
@@ -277,13 +325,6 @@ serve(async (req) => {
               : 30,
             status: "new",
           });
-
-          // Update campaign stats
-          if (campaignId) {
-            await supabase.rpc("increment_campaign_leads", {
-              _campaign_id: campaignId,
-            });
-          }
         }
       }
 
