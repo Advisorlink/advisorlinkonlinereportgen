@@ -10,8 +10,18 @@ import { AICallerCallLogs } from "@/components/ai-caller/AICallerCallLogs";
 import { AICallerPhoneNumbers } from "@/components/ai-caller/AICallerPhoneNumbers";
 import { AICallerVoices } from "@/components/ai-caller/AICallerVoices";
 
+const AI_CALLER_ACTIVE_TAB_KEY = "ai-caller-active-tab";
+
 export default function AICaller() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window === "undefined") return "dashboard";
+    return sessionStorage.getItem(AI_CALLER_ACTIVE_TAB_KEY) || "dashboard";
+  });
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    sessionStorage.setItem(AI_CALLER_ACTIVE_TAB_KEY, tab);
+  };
 
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
@@ -48,7 +58,7 @@ export default function AICaller() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
           <TabsList className="bg-card border border-border p-1.5 h-auto flex flex-wrap gap-1 rounded-xl shadow-sm">
             {tabs.map(tab => (
               <TabsTrigger
@@ -62,8 +72,8 @@ export default function AICaller() {
             ))}
           </TabsList>
 
-          <TabsContent value="dashboard"><AICallerDashboard onNavigate={setActiveTab} /></TabsContent>
-          <TabsContent value="scripts"><AICallerScripts /></TabsContent>
+          <TabsContent value="dashboard"><AICallerDashboard onNavigate={handleTabChange} /></TabsContent>
+          <TabsContent value="scripts" forceMount><AICallerScripts /></TabsContent>
           <TabsContent value="campaigns"><AICallerCampaigns /></TabsContent>
           <TabsContent value="leads"><AICallerLeads /></TabsContent>
           <TabsContent value="logs"><AICallerCallLogs /></TabsContent>

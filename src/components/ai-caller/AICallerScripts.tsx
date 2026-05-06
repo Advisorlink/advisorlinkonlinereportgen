@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,31 +47,93 @@ const VOICES = [
   { id: "voice7", name: "Ryan", accent: "Australian", gender: "Male" },
 ];
 
+const SCRIPT_SETUP_DRAFT_KEY = "ai-caller-script-setup-draft";
+
+type ScriptSetupDraft = {
+  dialogOpen: boolean;
+  editingScriptId: string | null;
+  directionFilter: "outbound" | "inbound";
+  name: string;
+  description: string;
+  callDirection: "outbound" | "inbound";
+  systemPrompt: string;
+  firstMessage: string;
+  secondMessage: string;
+  questions: Question[];
+  voiceId: string;
+  bgSound: string;
+  bgEnabled: boolean;
+  maxDuration: number;
+};
+
 export function AICallerScripts() {
   const { user } = useAuth();
+  const savedDraft = useRef<ScriptSetupDraft | null>(null);
+  if (savedDraft.current === null && typeof window !== "undefined") {
+    try {
+      savedDraft.current = JSON.parse(sessionStorage.getItem(SCRIPT_SETUP_DRAFT_KEY) || "null");
+    } catch {
+      savedDraft.current = null;
+    }
+  }
   const [scripts, setScripts] = useState<Script[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(savedDraft.current?.dialogOpen ?? false);
   const [editingScript, setEditingScript] = useState<Script | null>(null);
-  const [directionFilter, setDirectionFilter] = useState<"outbound" | "inbound">("outbound");
+  const [directionFilter, setDirectionFilter] = useState<"outbound" | "inbound">(savedDraft.current?.directionFilter ?? "outbound");
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [callDirection, setCallDirection] = useState<"outbound" | "inbound">("outbound");
-  const [systemPrompt, setSystemPrompt] = useState("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
-  const [firstMessage, setFirstMessage] = useState("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
-  const [secondMessage, setSecondMessage] = useState("Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
-  const [questions, setQuestions] = useState<Question[]>([
+  const [name, setName] = useState(savedDraft.current?.name ?? "");
+  const [description, setDescription] = useState(savedDraft.current?.description ?? "");
+  const [callDirection, setCallDirection] = useState<"outbound" | "inbound">(savedDraft.current?.callDirection ?? "outbound");
+  const [systemPrompt, setSystemPrompt] = useState(savedDraft.current?.systemPrompt ?? "You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
+  const [firstMessage, setFirstMessage] = useState(savedDraft.current?.firstMessage ?? "G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
+  const [secondMessage, setSecondMessage] = useState(savedDraft.current?.secondMessage ?? "Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?");
+  const [questions, setQuestions] = useState<Question[]>(savedDraft.current?.questions ?? [
     { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
     { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
     { id: crypto.randomUUID(), question: "Have you ever had your super reviewed before?", fieldName: "had_review" },
   ]);
-  const [voiceId, setVoiceId] = useState("sarah");
-  const [bgSound, setBgSound] = useState("office");
-  const [bgEnabled, setBgEnabled] = useState(true);
-  const [maxDuration, setMaxDuration] = useState(300);
+  const [voiceId, setVoiceId] = useState(savedDraft.current?.voiceId ?? "sarah");
+  const [bgSound, setBgSound] = useState(savedDraft.current?.bgSound ?? "office");
+  const [bgEnabled, setBgEnabled] = useState(savedDraft.current?.bgEnabled ?? true);
+  const [maxDuration, setMaxDuration] = useState(savedDraft.current?.maxDuration ?? 300);
 
   useEffect(() => { loadScripts(); }, []);
+
+  useEffect(() => {
+    const editingScriptId = savedDraft.current?.editingScriptId;
+    if (!editingScriptId || editingScript || scripts.length === 0) return;
+    const script = scripts.find(s => s.id === editingScriptId);
+    if (script) setEditingScript(script);
+  }, [editingScript, scripts]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!dialogOpen) {
+      sessionStorage.removeItem(SCRIPT_SETUP_DRAFT_KEY);
+      return;
+    }
+
+    const draft: ScriptSetupDraft = {
+      dialogOpen,
+      editingScriptId: editingScript?.id ?? savedDraft.current?.editingScriptId ?? null,
+      directionFilter,
+      name,
+      description,
+      callDirection,
+      systemPrompt,
+      firstMessage,
+      secondMessage,
+      questions,
+      voiceId,
+      bgSound,
+      bgEnabled,
+      maxDuration,
+    };
+
+    sessionStorage.setItem(SCRIPT_SETUP_DRAFT_KEY, JSON.stringify(draft));
+    savedDraft.current = draft;
+  }, [bgEnabled, bgSound, callDirection, description, dialogOpen, directionFilter, editingScript, firstMessage, maxDuration, name, questions, secondMessage, systemPrompt, voiceId]);
 
   async function loadScripts() {
     setLoading(true);
@@ -102,7 +164,13 @@ export function AICallerScripts() {
     setEditingScript(null);
   }
 
+  function clearSavedDraft() {
+    savedDraft.current = null;
+    if (typeof window !== "undefined") sessionStorage.removeItem(SCRIPT_SETUP_DRAFT_KEY);
+  }
+
   function openEdit(script: Script) {
+    clearSavedDraft();
     setEditingScript(script);
     setName(script.name);
     setDescription(script.description || "");
@@ -173,6 +241,7 @@ export function AICallerScripts() {
   }
 
   function cloneScript(script: Script) {
+    clearSavedDraft();
     setEditingScript(null);
     setName(`${script.name} (Copy)`);
     setDescription(script.description || "");
@@ -197,11 +266,15 @@ export function AICallerScripts() {
           <h2 className="text-lg font-semibold text-foreground">Call Scripts</h2>
           <p className="text-sm text-muted-foreground">Define what your AI caller says and asks</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
+        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) { clearSavedDraft(); resetForm(); } }}>
           <DialogTrigger asChild>
             <Button className="gap-2"><Plus className="w-4 h-4" /> New Script</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogContent
+            className="max-w-2xl max-h-[85vh] overflow-y-auto"
+            onInteractOutside={(event) => event.preventDefault()}
+            onEscapeKeyDown={(event) => event.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle>{editingScript ? "Edit Script" : "Create Script"}</DialogTitle>
             </DialogHeader>
