@@ -150,8 +150,10 @@ serve(async (req) => {
       if (!hasMeaningfulFields(extractedFields) && transcript) {
         const aiExtracted = await extractLeadAnswers(transcript, summary, scriptQuestions);
         extractedFields = { ...extractedFields, ...aiExtracted.fields };
-        if (aiExtracted.summary) message.summary = aiExtracted.summary;
+        if (aiExtracted.summary) summary = aiExtracted.summary;
       }
+
+      extractedFields = stripEmptyFields(extractedFields);
 
       const finalSummary = message?.summary || summary;
 
