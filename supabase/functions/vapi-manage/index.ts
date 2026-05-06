@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const VAPI_BASE = "https://api.vapi.ai";
+const TWILIO_GATEWAY = "https://connector-gateway.lovable.dev/twilio";
 
 const VOICE_ID_MAP: Record<string, string> = {
   voice1: "DTLT09E2cxHF0DqjKVbc",
@@ -269,8 +270,11 @@ After all questions are asked, thank them for their time and let them know someo
 
     if (action === "import-phone-number") {
       const { number, twilioAccountSid, twilioAuthToken } = body;
-      if (!number || !twilioAccountSid || !twilioAuthToken) {
-        throw new Error("number (E.164), twilioAccountSid, and twilioAuthToken are required");
+      if (!number) {
+        throw new Error("number (E.164) is required");
+      }
+      if (!twilioAccountSid || !twilioAuthToken) {
+        throw new Error("twilioAccountSid and twilioAuthToken are required for Vapi import");
       }
       const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
         method: "POST",
@@ -296,10 +300,12 @@ After all questions are asked, thank them for their time and let them know someo
     }
 
     if (action === "search-twilio-numbers") {
-      const { twilioAccountSid, twilioAuthToken, country, areaCode, contains } = body;
-      if (!twilioAccountSid || !twilioAuthToken) {
-        throw new Error("twilioAccountSid and twilioAuthToken are required");
-      }
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+      const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
+      if (!TWILIO_API_KEY) throw new Error("TWILIO_API_KEY is not configured – connect Twilio first");
+
+      const { country, areaCode, contains } = body;
       const cc = country || "AU";
       const params = new URLSearchParams();
       if (areaCode) params.set("AreaCode", areaCode);
@@ -307,12 +313,15 @@ After all questions are asked, thank them for their time and let them know someo
       params.set("VoiceEnabled", "true");
       params.set("PageSize", "20");
 
-      const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/AvailablePhoneNumbers/${cc}/Local.json?${params.toString()}`;
-      const twilioRes = await fetch(twilioUrl, {
-        headers: {
-          Authorization: "Basic " + btoa(`${twilioAccountSid}:${twilioAuthToken}`),
-        },
-      });
+      const twilioRes = await fetch(
+        `${TWILIO_GATEWAY}/AvailablePhoneNumbers/${cc}/Local.json?${params.toString()}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+            "X-Connection-Api-Key": TWILIO_API_KEY,
+          },
+        }
+      );
       if (!twilioRes.ok) {
         const errText = await twilioRes.text();
         throw new Error(`Twilio search failed [${twilioRes.status}]: ${errText}`);
@@ -331,17 +340,20 @@ After all questions are asked, thank them for their time and let them know someo
     }
 
     if (action === "buy-twilio-number") {
-      const { twilioAccountSid, twilioAuthToken, phoneNumber } = body;
-      if (!twilioAccountSid || !twilioAuthToken || !phoneNumber) {
-        throw new Error("twilioAccountSid, twilioAuthToken, and phoneNumber are required");
-      }
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+      const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
+      if (!TWILIO_API_KEY) throw new Error("TWILIO_API_KEY is not configured – connect Twilio first");
 
-      // 1. Buy on Twilio
-      const buyUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/IncomingPhoneNumbers.json`;
-      const buyRes = await fetch(buyUrl, {
+      const { phoneNumber } = body;
+      if (!phoneNumber) throw new Error("phoneNumber is required");
+
+      // 1. Buy on Twilio via gateway
+      const buyRes = await fetch(`${TWILIO_GATEWAY}/IncomingPhoneNumbers.json`, {
         method: "POST",
         headers: {
-          Authorization: "Basic " + btoa(`${twilioAccountSid}:${twilioAuthToken}`),
+          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+          "X-Connection-Api-Key": TWILIO_API_KEY,
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({ PhoneNumber: phoneNumber }),
@@ -352,7 +364,22 @@ After all questions are asked, thank them for their time and let them know someo
       }
       const purchased = await buyRes.json();
 
-      // 2. Import to Vapi
+      // 2. Get Twilio account info for Vapi import
+      const acctRes = await fetch(`${TWILIO_GATEWAY}/.json`, {
+        headers: {
+          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+          "X-Connection-Api-Key": TWILIO_API_KEY,
+        },
+      });
+      let twilioSid = "";
+      let twilioAuth = "";
+      if (acctRes.ok) {
+        const acct = await acctRes.json();
+        twilioSid = acct.sid || "";
+        twilioAuth = acct.auth_token || "";
+      }
+
+      // 3. Import to Vapi
       const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
         method: "POST",
         headers: {
@@ -362,13 +389,12 @@ After all questions are asked, thank them for their time and let them know someo
         body: JSON.stringify({
           provider: "twilio",
           number: purchased.phone_number,
-          twilioAccountSid,
-          twilioAuthToken,
+          twilioAccountSid: twilioSid,
+          twilioAuthToken: twilioAuth,
         }),
       });
       if (!vapiRes.ok) {
         const errText = await vapiRes.text();
-        // Number was bought but import failed - still return success with warning
         return new Response(JSON.stringify({
           purchased: { sid: purchased.sid, phoneNumber: purchased.phone_number },
           vapiImportError: errText,
