@@ -198,8 +198,11 @@ After all questions are asked, thank them for their time and let them know someo
       });
     }
 
-    if (action === "buy-phone-number") {
-      const { areaCode, countryCode } = body;
+    if (action === "import-phone-number") {
+      const { number, twilioAccountSid, twilioAuthToken } = body;
+      if (!number || !twilioAccountSid || !twilioAuthToken) {
+        throw new Error("number (E.164), twilioAccountSid, and twilioAuthToken are required");
+      }
       const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
         method: "POST",
         headers: {
@@ -208,16 +211,14 @@ After all questions are asked, thank them for their time and let them know someo
         },
         body: JSON.stringify({
           provider: "twilio",
-          number: undefined,
-          twilioPhoneNumber: undefined,
-          fallbackDestination: undefined,
-          areaCode: areaCode || undefined,
-          countryCode: countryCode || "AU",
+          number,
+          twilioAccountSid,
+          twilioAuthToken,
         }),
       });
       if (!vapiRes.ok) {
         const errText = await vapiRes.text();
-        throw new Error(`Vapi buy number failed [${vapiRes.status}]: ${errText}`);
+        throw new Error(`Vapi import number failed [${vapiRes.status}]: ${errText}`);
       }
       const phoneNumber = await vapiRes.json();
       return new Response(JSON.stringify({ phoneNumber }), {
