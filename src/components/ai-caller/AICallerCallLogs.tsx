@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, Phone, Clock, DollarSign, CheckCircle, XCircle, Loader2, Download } from "lucide-react";
+import { Search, Phone, Clock, DollarSign, CheckCircle, XCircle, Loader2, Download, Trash2, Square, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function AICallerCallLogs() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [stopping, setStopping] = useState<string | null>(null);
 
   useEffect(() => { loadLogs(); }, []);
 
@@ -21,6 +23,52 @@ export function AICallerCallLogs() {
       .limit(100);
     setLogs(data || []);
     setLoading(false);
+  }
+
+  async function stopCall(vapiCallId: string) {
+    setStopping(vapiCallId);
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "stop-call", callId: vapiCallId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Call stopped");
+      loadLogs();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to stop call");
+    } finally {
+      setStopping(null);
+    }
+  }
+
+  async function deleteLog(logId: string) {
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "delete-call-log", logId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Call log deleted");
+      setLogs(logs.filter(l => l.id !== logId));
+    } catch (e: any) {
+      toast.error(e.message || "Failed to delete log");
+    }
+  }
+
+  async function clearAllLogs() {
+    if (!confirm("Delete ALL call logs? This cannot be undone.")) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("vapi-manage", {
+        body: { action: "clear-call-logs" },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("All call logs cleared");
+      setLogs([]);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to clear logs");
+    }
   }
 
   const statusIcon: Record<string, any> = {
@@ -37,9 +85,16 @@ export function AICallerCallLogs() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold text-foreground">Call Logs</h2>
-        <p className="text-sm text-muted-foreground">Detailed log of every call attempt</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Call Logs</h2>
+          <p className="text-sm text-muted-foreground">Detailed log of every call attempt</p>
+        </div>
+        {logs.length > 0 && (
+          <Button variant="destructive" size="sm" className="gap-1.5" onClick={clearAllLogs}>
+            <Trash2 className="w-3.5 h-3.5" /> Clear All
+          </Button>
+        )}
       </div>
 
       <div className="relative">
@@ -82,19 +137,48 @@ export function AICallerCallLogs() {
                           </span>
                         )}
                         <span>{new Date(log.created_at).toLocaleString()}</span>
+                        {log.error_message && (
+                          <span className="flex items-center gap-1 text-destructive">
+                            <AlertTriangle className="w-3 h-3" /> {log.error_message}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
-                  {log.recording_url && (
+                  <div className="flex gap-1.5 items-center">
+                    {log.status === "initiated" && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="gap-1 text-xs"
+                        disabled={stopping === log.vapi_call_id}
+                        onClick={() => stopCall(log.vapi_call_id)}
+                      >
+                        {stopping === log.vapi_call_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Square className="w-3 h-3" />}
+                        Stop
+                      </Button>
+                    )}
+                    {log.recording_url && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 text-xs"
+                        onClick={() => window.open(log.recording_url, "_blank")}
+                      >
+                        <Download className="w-3.5 h-3.5" /> Recording
+                      </Button>
+                    )}
                     <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-1.5 text-xs"
-                      onClick={() => window.open(log.recording_url, "_blank")}
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => {
+                        if (confirm("Delete this call log?")) deleteLog(log.id);
+                      }}
                     >
-                      <Download className="w-3.5 h-3.5" /> Recording
+                      <Trash2 className="w-3.5 h-3.5 text-destructive" />
                     </Button>
-                  )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
