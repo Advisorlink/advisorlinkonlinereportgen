@@ -21,6 +21,7 @@ export interface FundEntry {
   adminFeePct: number;
   investmentRiskProfile?: string;
   investmentOptions?: InvestmentOption[];
+  primaryAllocationPct?: number; // 0-1, portion remaining in the primary/original option
 }
 
 // Compute weighted averages from investment options if present
