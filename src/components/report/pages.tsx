@@ -6,6 +6,7 @@ import {
   comparisonAnnualFee, comparisonAdviceFee,
   getAllFunds, totalBalance, weightedGrowthPct,
   existingReturnPct, inferRiskProfile, annualPersonalContrib,
+  resolvedFundReturn, resolvedFundGrowth,
 } from "@/lib/calc";
 import {
   PageShell, PageHeader, PageFooter, KpiCard, SectionCard,
