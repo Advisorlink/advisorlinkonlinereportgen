@@ -147,6 +147,7 @@ export function AICallerScripts() {
       firstMessage,
       followUpStatements,
       questions,
+      closingStatements,
       voiceId,
       bgSound,
       bgEnabled,
@@ -155,7 +156,7 @@ export function AICallerScripts() {
 
     sessionStorage.setItem(SCRIPT_SETUP_DRAFT_KEY, JSON.stringify(draft));
     savedDraft.current = draft;
-  }, [bgEnabled, bgSound, callDirection, description, dialogOpen, directionFilter, editingScript, firstMessage, maxDuration, name, questions, followUpStatements, systemPrompt, voiceId]);
+  }, [bgEnabled, bgSound, callDirection, closingStatements, description, dialogOpen, directionFilter, editingScript, firstMessage, maxDuration, name, questions, followUpStatements, systemPrompt, voiceId]);
 
   async function loadScripts() {
     setLoading(true);
