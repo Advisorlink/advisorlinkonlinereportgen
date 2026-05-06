@@ -182,6 +182,7 @@ export function getAllFunds(i: ClientInputs): FundEntry[] {
     adminFeePct: i.adminFeePct,
     investmentRiskProfile: i.investmentRiskProfile,
     investmentOptions: i.investmentOptions,
+    primaryAllocationPct: i.primaryAllocationPct,
   };
   const funds = [primary];
   if (i.additionalFunds) {
