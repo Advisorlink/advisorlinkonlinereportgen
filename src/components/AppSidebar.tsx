@@ -1,4 +1,4 @@
-import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall, ClipboardList, MessageSquare, Send } from "lucide-react";
+import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall, ClipboardList, MessageSquare, Send, Sparkles } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -19,7 +19,7 @@ import logoSvg from "@/assets/logo.svg";
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: BarChart3 },
   { title: "Presentations", url: "/presentations", icon: Monitor },
-  { title: "Messages", url: "/messages", icon: MessageSquare, badge: "NEW", badgeColor: "bg-cyan" },
+  { title: "Messages", url: "/messages", icon: MessageSquare, badge: "NEW", badgeColor: "gradient-accent" },
   { title: "SMS Hub", url: "/sms-hub", icon: Send },
   { title: "Report Generator", url: "/", icon: FileText },
   { title: "Fact Find", url: "/fact-find", icon: ClipboardList },
@@ -38,47 +38,51 @@ export function AppSidebar() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border bg-navy">
-      <SidebarContent className="bg-navy text-navy-foreground">
-        <div className={`px-4 py-5 ${collapsed ? "px-2" : ""}`}>
+    <Sidebar collapsible="icon" className="border-r-0">
+      <SidebarContent className="bg-gradient-to-b from-[hsl(215,58%,11%)] to-[hsl(215,58%,8%)] text-white sidebar-scrollbar">
+        {/* Logo */}
+        <div className={`px-4 pt-6 pb-4 ${collapsed ? "px-2" : ""}`}>
           {collapsed ? (
-            <div className="w-8 h-8 rounded-lg bg-cyan flex items-center justify-center mx-auto">
-              <span className="text-xs font-black text-cyan-foreground">AL</span>
+            <div className="w-9 h-9 rounded-xl gradient-accent flex items-center justify-center mx-auto shadow-lg shadow-cyan/20">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
           ) : (
             <div className="flex items-center justify-center py-1">
               <img
                 src={logoSvg}
                 alt="Advisor Link Online"
-                className="h-10 w-auto"
+                className="h-10 w-auto drop-shadow-lg"
               />
             </div>
           )}
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/40 text-[10px] font-semibold tracking-widest uppercase">
+          <SidebarGroupLabel className="text-white/30 text-[10px] font-semibold tracking-[0.2em] uppercase px-4">
             {!collapsed && "Menu"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="px-2 space-y-0.5">
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
                     className={`
-                      text-white/70 hover:text-white hover:bg-white/10
-                      ${isActive(item.url) ? "!bg-cyan/20 !text-cyan" : ""}
+                      text-white/60 hover:text-white hover:bg-white/[0.08] rounded-lg transition-all duration-200
+                      ${isActive(item.url) 
+                        ? "!bg-white/[0.12] !text-white shadow-sm" 
+                        : ""
+                      }
                     `}
                   >
-                    <NavLink to={item.url} className="flex items-center gap-2.5">
-                      <item.icon className="h-4 w-4" />
+                    <NavLink to={item.url} className="flex items-center gap-3 py-2">
+                      <item.icon className={`h-[18px] w-[18px] transition-colors ${isActive(item.url) ? "text-cyan" : ""}`} />
                       {!collapsed && (
-                        <span className="text-sm font-medium flex-1">{item.title}</span>
+                        <span className="text-[13px] font-medium flex-1">{item.title}</span>
                       )}
                       {!collapsed && item.badge && (
-                        <span className={`ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white leading-none ${(item as any).badgeColor || "bg-cyan"}`}>
+                        <span className={`ml-auto px-2 py-0.5 rounded-full text-[9px] font-bold text-white leading-none ${(item as any).badgeColor || "gradient-accent"}`}>
                           {item.badge}
                         </span>
                       )}
@@ -91,15 +95,15 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="bg-navy border-t border-white/10 p-3">
+      <SidebarFooter className="bg-[hsl(215,58%,8%)] border-t border-white/[0.06] p-3">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full text-white/50 hover:text-white hover:bg-white/10 justify-start gap-2"
+          className="w-full text-white/40 hover:text-white hover:bg-white/[0.08] justify-start gap-2.5 rounded-lg transition-all"
           onClick={signOut}
         >
           <LogOut className="w-4 h-4" />
-          {!collapsed && <span className="text-sm">Sign Out</span>}
+          {!collapsed && <span className="text-[13px]">Sign Out</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>
