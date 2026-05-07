@@ -772,6 +772,530 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_campaign_recipients: {
+        Row: {
+          campaign_id: string
+          contact_id: string
+          created_at: string
+          delivered_at: string | null
+          error_message: string | null
+          id: string
+          sent_at: string | null
+          status: string
+          twilio_sid: string | null
+        }
+        Insert: {
+          campaign_id: string
+          contact_id: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          twilio_sid?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          contact_id?: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          twilio_sid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "sms_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sms_campaign_recipients_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "sms_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_campaigns: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          delivered_count: number | null
+          estimated_cost: number | null
+          failed_count: number | null
+          id: string
+          media_urls: string[] | null
+          message_body: string
+          name: string
+          opt_out_count: number | null
+          recipient_filter: Json | null
+          reply_count: number | null
+          scheduled_at: string | null
+          sent_count: number | null
+          started_at: string | null
+          status: string
+          total_recipients: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          delivered_count?: number | null
+          estimated_cost?: number | null
+          failed_count?: number | null
+          id?: string
+          media_urls?: string[] | null
+          message_body: string
+          name: string
+          opt_out_count?: number | null
+          recipient_filter?: Json | null
+          reply_count?: number | null
+          scheduled_at?: string | null
+          sent_count?: number | null
+          started_at?: string | null
+          status?: string
+          total_recipients?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          delivered_count?: number | null
+          estimated_cost?: number | null
+          failed_count?: number | null
+          id?: string
+          media_urls?: string[] | null
+          message_body?: string
+          name?: string
+          opt_out_count?: number | null
+          recipient_filter?: Json | null
+          reply_count?: number | null
+          scheduled_at?: string | null
+          sent_count?: number | null
+          started_at?: string | null
+          status?: string
+          total_recipients?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sms_contacts: {
+        Row: {
+          assigned_user_id: string | null
+          created_at: string
+          custom_fields: Json | null
+          email: string | null
+          first_name: string | null
+          full_name: string
+          id: string
+          last_message_at: string | null
+          last_name: string | null
+          lead_source: string | null
+          lead_status: string | null
+          notes: string | null
+          opt_in_date: string | null
+          opt_in_source: string | null
+          opt_in_status: boolean | null
+          opt_out_date: string | null
+          opt_out_status: boolean | null
+          phone: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          created_at?: string
+          custom_fields?: Json | null
+          email?: string | null
+          first_name?: string | null
+          full_name: string
+          id?: string
+          last_message_at?: string | null
+          last_name?: string | null
+          lead_source?: string | null
+          lead_status?: string | null
+          notes?: string | null
+          opt_in_date?: string | null
+          opt_in_source?: string | null
+          opt_in_status?: boolean | null
+          opt_out_date?: string | null
+          opt_out_status?: boolean | null
+          phone: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_user_id?: string | null
+          created_at?: string
+          custom_fields?: Json | null
+          email?: string | null
+          first_name?: string | null
+          full_name?: string
+          id?: string
+          last_message_at?: string | null
+          last_name?: string | null
+          lead_source?: string | null
+          lead_status?: string | null
+          notes?: string | null
+          opt_in_date?: string | null
+          opt_in_source?: string | null
+          opt_in_status?: boolean | null
+          opt_out_date?: string | null
+          opt_out_status?: boolean | null
+          phone?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sms_conversations: {
+        Row: {
+          assigned_user_id: string | null
+          contact_id: string
+          created_at: string
+          id: string
+          is_unread: boolean | null
+          last_message_at: string | null
+          last_message_body: string | null
+          last_message_direction: string | null
+          status: string
+          tags: string[] | null
+          unread_count: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          contact_id: string
+          created_at?: string
+          id?: string
+          is_unread?: boolean | null
+          last_message_at?: string | null
+          last_message_body?: string | null
+          last_message_direction?: string | null
+          status?: string
+          tags?: string[] | null
+          unread_count?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_user_id?: string | null
+          contact_id?: string
+          created_at?: string
+          id?: string
+          is_unread?: boolean | null
+          last_message_at?: string | null
+          last_message_body?: string | null
+          last_message_direction?: string | null
+          status?: string
+          tags?: string[] | null
+          unread_count?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_conversations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "sms_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_internal_notes: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_internal_notes_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "sms_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_message_media: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          file_size: number | null
+          id: string
+          media_url: string
+          message_id: string
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          file_size?: number | null
+          id?: string
+          media_url: string
+          message_id: string
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          file_size?: number | null
+          id?: string
+          media_url?: string
+          message_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_message_media_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "sms_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_messages: {
+        Row: {
+          automation_id: string | null
+          body: string | null
+          campaign_id: string | null
+          channel: string
+          contact_id: string
+          conversation_id: string
+          cost: number | null
+          created_at: string
+          delivered_at: string | null
+          direction: string
+          error_code: string | null
+          error_message: string | null
+          failed_at: string | null
+          from_number: string
+          id: string
+          media_urls: string[] | null
+          read_at: string | null
+          segment_count: number | null
+          sent_by_user_id: string | null
+          status: string
+          to_number: string
+          twilio_sid: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          automation_id?: string | null
+          body?: string | null
+          campaign_id?: string | null
+          channel?: string
+          contact_id: string
+          conversation_id: string
+          cost?: number | null
+          created_at?: string
+          delivered_at?: string | null
+          direction: string
+          error_code?: string | null
+          error_message?: string | null
+          failed_at?: string | null
+          from_number: string
+          id?: string
+          media_urls?: string[] | null
+          read_at?: string | null
+          segment_count?: number | null
+          sent_by_user_id?: string | null
+          status?: string
+          to_number: string
+          twilio_sid?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          automation_id?: string | null
+          body?: string | null
+          campaign_id?: string | null
+          channel?: string
+          contact_id?: string
+          conversation_id?: string
+          cost?: number | null
+          created_at?: string
+          delivered_at?: string | null
+          direction?: string
+          error_code?: string | null
+          error_message?: string | null
+          failed_at?: string | null
+          from_number?: string
+          id?: string
+          media_urls?: string[] | null
+          read_at?: string | null
+          segment_count?: number | null
+          sent_by_user_id?: string | null
+          status?: string
+          to_number?: string
+          twilio_sid?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "sms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sms_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "sms_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_opt_records: {
+        Row: {
+          action: string
+          contact_id: string
+          created_at: string
+          id: string
+          keyword: string | null
+          method: string
+          phone: string | null
+          source: string | null
+        }
+        Insert: {
+          action: string
+          contact_id: string
+          created_at?: string
+          id?: string
+          keyword?: string | null
+          method?: string
+          phone?: string | null
+          source?: string | null
+        }
+        Update: {
+          action?: string
+          contact_id?: string
+          created_at?: string
+          id?: string
+          keyword?: string | null
+          method?: string
+          phone?: string | null
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_opt_records_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "sms_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_templates: {
+        Row: {
+          body: string
+          category: string | null
+          compliance_footer: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          merge_fields: string[] | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          category?: string | null
+          compliance_footer?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          merge_fields?: string[] | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          category?: string | null
+          compliance_footer?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          merge_fields?: string[] | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sms_twilio_numbers: {
+        Row: {
+          created_at: string
+          friendly_name: string | null
+          id: string
+          is_default: boolean | null
+          mms_enabled: boolean | null
+          phone_number: string
+          sms_enabled: boolean | null
+          twilio_sid: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friendly_name?: string | null
+          id?: string
+          is_default?: boolean | null
+          mms_enabled?: boolean | null
+          phone_number: string
+          sms_enabled?: boolean | null
+          twilio_sid?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friendly_name?: string | null
+          id?: string
+          is_default?: boolean | null
+          mms_enabled?: boolean | null
+          phone_number?: string
+          sms_enabled?: boolean | null
+          twilio_sid?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
