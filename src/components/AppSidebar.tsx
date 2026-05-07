@@ -1,4 +1,4 @@
-import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall, ClipboardList } from "lucide-react";
+import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall, ClipboardList, MessageSquare } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -19,6 +19,7 @@ import logoSvg from "@/assets/logo.svg";
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: BarChart3 },
   { title: "Presentations", url: "/presentations", icon: Monitor },
+  { title: "Messages", url: "/messages", icon: MessageSquare, badge: "NEW", badgeColor: "bg-cyan" },
   { title: "Report Generator", url: "/", icon: FileText },
   { title: "Fact Find", url: "/fact-find", icon: ClipboardList },
   { title: "E-Sign Docs", url: "/esign", icon: FileSignature },
