@@ -716,6 +716,147 @@ After all questions are asked, follow the closing statements above to wrap up th
       );
     }
 
+    if (action === "search-telnyx-numbers") {
+      const TELNYX_KEY = Deno.env.get("TELNYX_API_KEY");
+      if (!TELNYX_KEY) throw new Error("TELNYX_API_KEY is not configured");
+
+      const { country, contains, locality } = body;
+      const cc = country || "AU";
+      const params = new URLSearchParams();
+      params.set("filter[country_code]", cc);
+      params.set("filter[features][]", "sms");
+      params.set("filter[features][]", "voice");
+      if (contains) params.set("filter[phone_number][contains]", contains);
+      if (locality) params.set("filter[locality]", locality);
+      params.set("page[size]", "20");
+
+      const res = await fetch(`https://api.telnyx.com/v2/available_phone_numbers?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${TELNYX_KEY}` },
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Telnyx search failed [${res.status}]: ${errText}`);
+      }
+      const result = await res.json();
+      const numbers = (result.data || []).map((n: any) => ({
+        phoneNumber: n.phone_number,
+        friendlyName: n.phone_number,
+        locality: n.region_information?.[0]?.region_name || "",
+        region: n.region_information?.[0]?.region_type || "",
+        capabilities: { voice: true, sms: true },
+        costMonthly: n.cost_information?.monthly_cost || "N/A",
+        costUpfront: n.cost_information?.upfront_cost || "N/A",
+      }));
+      return new Response(JSON.stringify({ numbers }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "buy-telnyx-number") {
+      const TELNYX_KEY = Deno.env.get("TELNYX_API_KEY");
+      if (!TELNYX_KEY) throw new Error("TELNYX_API_KEY is not configured");
+
+      const { phoneNumber } = body;
+      if (!phoneNumber) throw new Error("phoneNumber is required");
+
+      // Create a number order on Telnyx
+      const orderRes = await fetch("https://api.telnyx.com/v2/number_orders", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${TELNYX_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone_numbers: [{ phone_number: phoneNumber }],
+        }),
+      });
+      if (!orderRes.ok) {
+        const errText = await orderRes.text();
+        throw new Error(`Telnyx order failed [${orderRes.status}]: ${errText}`);
+      }
+      const orderData = await orderRes.json();
+
+      // Set up messaging profile for the number (enable SMS)
+      // The number should be ready after ordering
+
+      return new Response(JSON.stringify({
+        purchased: {
+          phoneNumber,
+          orderId: orderData.data?.id,
+          status: orderData.data?.status || "pending",
+        },
+        provider: "telnyx",
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "import-telnyx-number") {
+      const { number, sipUsername, sipPassword } = body;
+      if (!number) throw new Error("number (E.164) is required");
+
+      // For Telnyx, we import as a BYO SIP trunk + BYO phone number into Vapi
+      // First, create SIP trunk credential if sip credentials provided
+      let credentialId = body.credentialId;
+
+      if (!credentialId && sipUsername && sipPassword) {
+        const credRes = await fetch(`${VAPI_BASE}/credential`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${VAPI_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            provider: "byo-sip-trunk",
+            name: "Telnyx Trunk",
+            gateways: [
+              { ip: "192.76.120.10", inboundEnabled: true },
+              { ip: "64.16.250.10", inboundEnabled: true },
+            ],
+            outboundAuthenticationPlan: {
+              authUsername: sipUsername,
+              authPassword: sipPassword,
+              sipRegisterPlan: { realm: "sip.telnyx.com" },
+            },
+          }),
+        });
+        if (!credRes.ok) {
+          const errText = await credRes.text();
+          throw new Error(`Vapi create SIP credential failed [${credRes.status}]: ${errText}`);
+        }
+        const credData = await credRes.json();
+        credentialId = credData.id;
+      }
+
+      if (!credentialId) {
+        throw new Error("Either provide sipUsername+sipPassword or an existing credentialId");
+      }
+
+      // Now register the phone number with Vapi as BYO
+      const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${VAPI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          provider: "byo-phone-number",
+          name: `Telnyx ${number}`,
+          number,
+          numberE164CheckEnabled: false,
+          credentialId,
+        }),
+      });
+      if (!vapiRes.ok) {
+        const errText = await vapiRes.text();
+        throw new Error(`Vapi import Telnyx number failed [${vapiRes.status}]: ${errText}`);
+      }
+      const phoneNumber = await vapiRes.json();
+      return new Response(JSON.stringify({ phoneNumber }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "start-campaign") {
       const { campaignId } = body;
       if (!campaignId) throw new Error("campaignId is required");

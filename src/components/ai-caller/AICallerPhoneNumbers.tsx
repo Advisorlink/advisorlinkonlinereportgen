@@ -37,6 +37,9 @@ export function AICallerPhoneNumbers() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogTab, setDialogTab] = useState("buy");
 
+  // Provider selection for search & buy
+  const [buyProvider, setBuyProvider] = useState<"twilio" | "telnyx">("telnyx");
+
   // Inbound scripts
   const [inboundScripts, setInboundScripts] = useState<InboundScript[]>([]);
   const [assigningNumberId, setAssigningNumberId] = useState<string | null>(null);
@@ -51,10 +54,16 @@ export function AICallerPhoneNumbers() {
   const [buying, setBuying] = useState<string | null>(null);
 
   // Import state
+  const [importProvider, setImportProvider] = useState<"twilio" | "telnyx">("telnyx");
   const [importNumber, setImportNumber] = useState("");
   const [twilioSid, setTwilioSid] = useState("");
   const [twilioAuth, setTwilioAuth] = useState("");
+  const [sipUsername, setSipUsername] = useState("");
+  const [sipPassword, setSipPassword] = useState("");
   const [importing, setImporting] = useState(false);
+
+  // SMS number management
+  const [savingSmsNumber, setSavingSmsNumber] = useState<string | null>(null);
 
   useEffect(() => { loadNumbers(); loadInboundScripts(); }, []);
 
@@ -94,12 +103,14 @@ export function AICallerPhoneNumbers() {
     setSearching(true);
     setAvailableNumbers([]);
     try {
+      const action = buyProvider === "telnyx" ? "search-telnyx-numbers" : "search-twilio-numbers";
       const { data, error } = await supabase.functions.invoke("vapi-manage", {
         body: {
-          action: "search-twilio-numbers",
+          action,
           country: "AU",
-          areaCode: areaCode.trim() || undefined,
+          areaCode: buyProvider === "twilio" ? (areaCode.trim() || undefined) : undefined,
           contains: contains.trim() || undefined,
+          locality: buyProvider === "telnyx" ? (areaCode.trim() || undefined) : undefined,
         },
       });
       if (error) throw error;
@@ -118,16 +129,21 @@ export function AICallerPhoneNumbers() {
   async function buyNumber(phoneNumber: string) {
     setBuying(phoneNumber);
     try {
+      const action = buyProvider === "telnyx" ? "buy-telnyx-number" : "buy-twilio-number";
       const { data, error } = await supabase.functions.invoke("vapi-manage", {
-        body: { action: "buy-twilio-number", phoneNumber },
+        body: { action, phoneNumber },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       if (data?.warning) {
         toast.warning(data.warning);
       } else {
-        toast.success(`Purchased ${phoneNumber} and imported to Vapi!`);
+        toast.success(`Purchased ${phoneNumber} via ${buyProvider === "telnyx" ? "Telnyx" : "Twilio"}!`);
       }
+
+      // Also save to sms_twilio_numbers for SMS sending
+      await saveSmsNumber(phoneNumber, buyProvider);
+
       setDialogOpen(false);
       setAvailableNumbers([]);
       loadNumbers();
@@ -138,30 +154,76 @@ export function AICallerPhoneNumbers() {
     }
   }
 
+  async function saveSmsNumber(phone: string, provider: string) {
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) return;
+      
+      // Check if already exists
+      const { data: existing } = await supabase
+        .from("sms_twilio_numbers")
+        .select("id")
+        .eq("phone_number", phone)
+        .limit(1)
+        .single();
+      
+      if (!existing) {
+        await supabase.from("sms_twilio_numbers").insert({
+          phone_number: phone,
+          provider,
+          user_id: session.session.user.id,
+          sms_enabled: true,
+          friendly_name: `${provider === "telnyx" ? "Telnyx" : "Twilio"} - ${phone}`,
+        } as any);
+      }
+    } catch (e) {
+      console.error("Failed to save SMS number:", e);
+    }
+  }
+
   async function handleImport() {
-    if (!importNumber.trim() || !twilioSid.trim() || !twilioAuth.trim()) {
-      toast.error("All fields are required");
+    if (!importNumber.trim()) {
+      toast.error("Phone number is required");
       return;
     }
     if (!importNumber.startsWith("+")) {
       toast.error("Phone number must be in E.164 format (e.g. +61412345678)");
       return;
     }
+
+    if (importProvider === "twilio") {
+      if (!twilioSid.trim() || !twilioAuth.trim()) {
+        toast.error("Twilio Account SID and Auth Token are required");
+        return;
+      }
+    } else {
+      if (!sipUsername.trim() || !sipPassword.trim()) {
+        toast.error("Telnyx SIP Username and Password are required");
+        return;
+      }
+    }
+
     setImporting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("vapi-manage", {
-        body: {
-          action: "import-phone-number",
-          number: importNumber.trim(),
-          twilioAccountSid: twilioSid.trim(),
-          twilioAuthToken: twilioAuth.trim(),
-        },
-      });
+      const action = importProvider === "telnyx" ? "import-telnyx-number" : "import-phone-number";
+      const body = importProvider === "telnyx"
+        ? { action, number: importNumber.trim(), sipUsername: sipUsername.trim(), sipPassword: sipPassword.trim() }
+        : { action, number: importNumber.trim(), twilioAccountSid: twilioSid.trim(), twilioAuthToken: twilioAuth.trim() };
+
+      const { data, error } = await supabase.functions.invoke("vapi-manage", { body });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+
+      // Save to SMS numbers table
+      await saveSmsNumber(importNumber.trim(), importProvider);
+
       toast.success("Phone number imported successfully!");
       setDialogOpen(false);
       setImportNumber("");
+      setSipUsername("");
+      setSipPassword("");
+      setTwilioSid("");
+      setTwilioAuth("");
       loadNumbers();
     } catch (e: any) {
       toast.error(e.message || "Failed to import number");
@@ -191,6 +253,16 @@ export function AICallerPhoneNumbers() {
       setSavingInbound(false);
     }
   }
+
+  const providerBadge = (provider: string) => (
+    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium uppercase tracking-wider ${
+      provider === "telnyx" || provider === "byo-phone-number"
+        ? "bg-emerald-500/20 text-emerald-400"
+        : "bg-red-500/20 text-red-400"
+    }`}>
+      {provider === "byo-phone-number" ? "telnyx" : provider}
+    </span>
+  );
 
   return (
     <div className="space-y-4">
@@ -223,11 +295,31 @@ export function AICallerPhoneNumbers() {
                 </TabsList>
 
                 <TabsContent value="buy" className="space-y-3 mt-3">
-                  <p className="text-xs text-muted-foreground">Search for available Australian numbers via your connected Twilio account.</p>
+                  {/* Provider selector */}
+                  <div className="space-y-1">
+                    <Label className="text-xs">Provider</Label>
+                    <Select value={buyProvider} onValueChange={(v) => { setBuyProvider(v as any); setAvailableNumbers([]); }}>
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="telnyx">
+                          <span className="flex items-center gap-2">🟢 Telnyx <span className="text-muted-foreground">(recommended)</span></span>
+                        </SelectItem>
+                        <SelectItem value="twilio">
+                          <span className="flex items-center gap-2">🔴 Twilio</span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground">
+                    Search for available Australian numbers via your {buyProvider === "telnyx" ? "Telnyx" : "Twilio"} account.
+                  </p>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <Label className="text-xs">Area Code (optional)</Label>
-                      <Input value={areaCode} onChange={e => setAreaCode(e.target.value)} placeholder="e.g. 02, 03" className="text-xs" />
+                      <Label className="text-xs">{buyProvider === "telnyx" ? "Locality (optional)" : "Area Code (optional)"}</Label>
+                      <Input value={areaCode} onChange={e => setAreaCode(e.target.value)} placeholder={buyProvider === "telnyx" ? "e.g. Sydney" : "e.g. 02, 03"} className="text-xs" />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs">Contains (optional)</Label>
@@ -263,21 +355,54 @@ export function AICallerPhoneNumbers() {
                 </TabsContent>
 
                 <TabsContent value="import" className="space-y-3 mt-3">
-                  <p className="text-xs text-muted-foreground">Import an existing Twilio number. Vapi requires your Twilio SID & Auth Token to manage the number.</p>
+                  {/* Provider selector for import */}
+                  <div className="space-y-1">
+                    <Label className="text-xs">Provider</Label>
+                    <Select value={importProvider} onValueChange={(v) => setImportProvider(v as any)}>
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="telnyx">🟢 Telnyx</SelectItem>
+                        <SelectItem value="twilio">🔴 Twilio</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground">
+                    {importProvider === "telnyx"
+                      ? "Import an existing Telnyx number. You'll need your SIP credentials from the Telnyx portal."
+                      : "Import an existing Twilio number. Vapi requires your Twilio SID & Auth Token to manage the number."}
+                  </p>
                   <div className="space-y-1">
                     <Label className="text-xs">Phone Number (E.164 format)</Label>
                     <Input value={importNumber} onChange={e => setImportNumber(e.target.value)} placeholder="+61412345678" />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Twilio Account SID</Label>
-                      <Input value={twilioSid} onChange={e => setTwilioSid(e.target.value)} placeholder="ACxxx..." className="text-xs" />
+
+                  {importProvider === "twilio" ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Twilio Account SID</Label>
+                        <Input value={twilioSid} onChange={e => setTwilioSid(e.target.value)} placeholder="ACxxx..." className="text-xs" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Twilio Auth Token</Label>
+                        <Input type="password" value={twilioAuth} onChange={e => setTwilioAuth(e.target.value)} placeholder="Auth token" className="text-xs" />
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Twilio Auth Token</Label>
-                      <Input type="password" value={twilioAuth} onChange={e => setTwilioAuth(e.target.value)} placeholder="Auth token" className="text-xs" />
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">SIP Username</Label>
+                        <Input value={sipUsername} onChange={e => setSipUsername(e.target.value)} placeholder="From Telnyx portal" className="text-xs" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">SIP Password</Label>
+                        <Input type="password" value={sipPassword} onChange={e => setSipPassword(e.target.value)} placeholder="SIP password" className="text-xs" />
+                      </div>
                     </div>
-                  </div>
+                  )}
+
                   <Button onClick={handleImport} disabled={importing} className="w-full">
                     {importing ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Importing...</> : "Import Number"}
                   </Button>
@@ -312,7 +437,9 @@ export function AICallerPhoneNumbers() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground truncate">{n.number}</p>
-                    <p className="text-[10px] text-muted-foreground capitalize">{n.provider}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      {providerBadge(n.provider)}
+                    </div>
                   </div>
                 </div>
 

@@ -1268,6 +1268,7 @@ export type Database = {
           is_default: boolean | null
           mms_enabled: boolean | null
           phone_number: string
+          provider: string
           sms_enabled: boolean | null
           twilio_sid: string | null
           user_id: string
@@ -1279,6 +1280,7 @@ export type Database = {
           is_default?: boolean | null
           mms_enabled?: boolean | null
           phone_number: string
+          provider?: string
           sms_enabled?: boolean | null
           twilio_sid?: string | null
           user_id: string
@@ -1290,6 +1292,7 @@ export type Database = {
           is_default?: boolean | null
           mms_enabled?: boolean | null
           phone_number?: string
+          provider?: string
           sms_enabled?: boolean | null
           twilio_sid?: string | null
           user_id?: string

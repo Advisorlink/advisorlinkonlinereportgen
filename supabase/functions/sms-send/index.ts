@@ -3,14 +3,53 @@ import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.95.0/cors";
 
 const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID")!;
 const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN")!;
+const TELNYX_API_KEY = Deno.env.get("TELNYX_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+async function sendViaTwilio(to: string, from: string, body: string, mediaUrls: string[], statusCallbackUrl: string) {
+  const params = new URLSearchParams({ To: to, From: from, Body: body, StatusCallback: statusCallbackUrl });
+  if (mediaUrls?.length > 0) {
+    for (const url of mediaUrls) params.append("MediaUrl", url);
+  }
+  const res = await fetch(
+    `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
+    {
+      method: "POST",
+      headers: {
+        "Authorization": "Basic " + btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`),
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params.toString(),
+    }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(`Twilio error: ${JSON.stringify(data)}`);
+  return { sid: data.sid, status: data.status || "queued", segments: data.num_segments ? parseInt(data.num_segments) : 1 };
+}
+
+async function sendViaTelnyx(to: string, from: string, body: string, mediaUrls: string[], webhookUrl: string) {
+  if (!TELNYX_API_KEY) throw new Error("TELNYX_API_KEY is not configured");
+  const payload: any = { from, to, text: body, webhook_url: webhookUrl };
+  if (mediaUrls?.length > 0) payload.media_urls = mediaUrls;
+  const res = await fetch("https://api.telnyx.com/v2/messages", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${TELNYX_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(`Telnyx error: ${JSON.stringify(data)}`);
+  const msg = data.data || data;
+  return { sid: msg.id, status: msg.to?.[0]?.status || "queued", segments: msg.parts || 1 };
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    // Verify auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -30,24 +69,36 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Missing 'to' or 'body'" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Get default from number if not provided
+    // Get default from number and its provider
     let from = fromNumber;
+    let provider = "twilio";
     if (!from) {
       const { data: numData } = await supabase
         .from("sms_twilio_numbers")
-        .select("phone_number")
+        .select("phone_number, provider")
         .eq("is_default", true)
         .limit(1)
         .single();
       from = numData?.phone_number;
+      provider = numData?.provider || "twilio";
       if (!from) {
         const { data: anyNum } = await supabase
           .from("sms_twilio_numbers")
-          .select("phone_number")
+          .select("phone_number, provider")
           .limit(1)
           .single();
         from = anyNum?.phone_number;
+        provider = anyNum?.provider || "twilio";
       }
+    } else {
+      // Look up provider for the specified number
+      const { data: numLookup } = await supabase
+        .from("sms_twilio_numbers")
+        .select("provider")
+        .eq("phone_number", from)
+        .limit(1)
+        .single();
+      provider = numLookup?.provider || "twilio";
     }
 
     if (!from) {
@@ -62,36 +113,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Build Twilio request
+    // Send via the appropriate provider
     const statusCallbackUrl = `${SUPABASE_URL}/functions/v1/sms-status-callback`;
-    const params = new URLSearchParams({
-      To: to,
-      From: from,
-      Body: body,
-      StatusCallback: statusCallbackUrl,
-    });
+    const telnyxWebhookUrl = `${SUPABASE_URL}/functions/v1/sms-inbound-telnyx`;
+    let result: { sid: string; status: string; segments: number };
 
-    if (mediaUrls && mediaUrls.length > 0) {
-      for (const url of mediaUrls) {
-        params.append("MediaUrl", url);
-      }
-    }
-
-    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
-    const twilioRes = await fetch(twilioUrl, {
-      method: "POST",
-      headers: {
-        "Authorization": "Basic " + btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`),
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params.toString(),
-    });
-
-    const twilioData = await twilioRes.json();
-
-    if (!twilioRes.ok) {
-      console.error("Twilio error:", twilioData);
-      return new Response(JSON.stringify({ error: "Failed to send SMS", details: twilioData }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (provider === "telnyx") {
+      result = await sendViaTelnyx(to, from, body, mediaUrls, telnyxWebhookUrl);
+    } else {
+      result = await sendViaTwilio(to, from, body, mediaUrls, statusCallbackUrl);
     }
 
     // Find or create conversation
@@ -99,7 +129,6 @@ Deno.serve(async (req) => {
     let contId = contactId;
 
     if (!contId) {
-      // Try to find contact by phone
       const { data: existingContact } = await supabase
         .from("sms_contacts")
         .select("id")
@@ -142,26 +171,24 @@ Deno.serve(async (req) => {
 
     const channel = (mediaUrls && mediaUrls.length > 0) ? "mms" : "sms";
 
-    // Save message
     const { data: msg, error: msgErr } = await supabase.from("sms_messages").insert({
       conversation_id: convId,
       contact_id: contId,
       user_id: userId,
-      twilio_sid: twilioData.sid,
+      twilio_sid: result.sid,
       direction: "outbound",
       channel,
       from_number: from,
       to_number: to,
       body,
       media_urls: mediaUrls || [],
-      status: twilioData.status || "queued",
+      status: result.status,
       sent_by_user_id: userId,
-      segment_count: twilioData.num_segments ? parseInt(twilioData.num_segments) : 1,
+      segment_count: result.segments,
     }).select("id").single();
 
     if (msgErr) console.error("DB error saving message:", msgErr);
 
-    // Update conversation
     await supabase.from("sms_conversations").update({
       last_message_body: body.substring(0, 200),
       last_message_at: new Date().toISOString(),
@@ -169,10 +196,9 @@ Deno.serve(async (req) => {
       status: "open",
     }).eq("id", convId);
 
-    // Update contact last_message_at
     await supabase.from("sms_contacts").update({ last_message_at: new Date().toISOString() }).eq("id", contId);
 
-    return new Response(JSON.stringify({ success: true, messageSid: twilioData.sid, messageId: msg?.id }), {
+    return new Response(JSON.stringify({ success: true, messageSid: result.sid, messageId: msg?.id, provider }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
