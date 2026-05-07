@@ -11,6 +11,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 import { CRMLayout } from "@/components/CRMLayout";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 export default function Index() {
   const { user } = useAuth();
@@ -20,6 +29,18 @@ export default function Index() {
   const fileRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+  const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
+
+  // We store generated PDF artifacts here so the dialog callbacks can use them
+  const pendingExport = useRef<{
+    pdf: any;
+    pdfBlob: Blob;
+    ghlBlob: Blob;
+    canvases: HTMLCanvasElement[];
+    fileName: string;
+    safeClient: string;
+    pdfPath: string | null;
+  } | null>(null);
 
   const handleUpload = async (file: File) => {
     try {
@@ -48,12 +69,6 @@ export default function Index() {
         compress: true,
       });
 
-      // Render all pages to canvases in parallel — massive speed win vs sequential.
-      // scale: 3 → ~450 DPI on A4 (210mm wide → ~2480px), giving razor-sharp,
-      // near-vector text clarity. PNG (lossless) preserves crisp edges on text and
-      // thin lines that JPEG would smear with compression artifacts. Combined with
-      // parallel rendering + jsPDF's internal flate compression, the result is a
-      // pixel-perfect PDF that still downloads quickly.
       const canvases = await Promise.all(
         pages.map((page) =>
           html2canvas(page, {
@@ -72,31 +87,20 @@ export default function Index() {
       for (let i = 0; i < canvases.length; i++) {
         const img = canvases[i].toDataURL("image/png");
         if (i > 0) pdf.addPage();
-        // "SLOW" enables jsPDF's better PNG compression — smaller file, same quality.
         pdf.addImage(img, "PNG", 0, 0, 210, 297, undefined, "SLOW");
       }
-      // Set the default open view to "Actual Size" (100% zoom) when the PDF is opened.
-      // /XYZ null null null preserves position; the magnification "null" combined with
-      // PageMode keeps viewers from auto-fitting. We also set OpenAction to use a
-      // zoom of 1 (100%) explicitly via the viewer preferences.
-      const anyPdf = pdf as unknown as {
-        internal: { write: (s: string) => void };
-        _jsPDF?: unknown;
-      };
-      // jsPDF exposes setDisplayMode for this purpose
+
       (pdf as unknown as { setDisplayMode: (zoom: string | number, layout?: string, pmode?: string) => void })
         .setDisplayMode(1, "continuous", "UseNone");
       const safeClient = (inputs.clientName.trim() || "Unnamed client").replace(/[/\\?%*:|"<>]/g, "-");
       const fileName = `${safeClient} Performance Report.pdf`;
+      // Always download the PDF immediately
       pdf.save(fileName);
 
       if (user) {
-        const clientEmail = (inputs.clientEmail ?? "").trim() || null;
         const pdfBlob: Blob = pdf.output("blob");
         let ghlBlob: Blob = pdfBlob;
 
-        // GHL rejects uploads over ~5MB. Keep the user's downloaded/stored PDF
-        // lossless, but send GHL a compressed copy if the original is too large.
         if (pdfBlob.size > 4.8 * 1024 * 1024) {
           for (const quality of [0.72, 0.58, 0.45, 0.34]) {
             const crmPdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
@@ -110,7 +114,7 @@ export default function Index() {
           }
         }
 
-        // 1) Upload PDF to client's storage folder
+        // Upload to storage
         let pdfPath: string | null = null;
         const ts = new Date().toISOString().replace(/[:.]/g, "-");
         const path = `${user.id}/${safeClient}/${ts} - ${fileName}`;
@@ -124,64 +128,105 @@ export default function Index() {
           pdfPath = path;
         }
 
-        // 2) Log + insert report row
-        await Promise.all([
-          supabase.from("activity_log").insert({
-            user_id: user.id, email: user.email, event_type: "report_generated",
-            details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath },
-          }),
-          supabase.from("reports").insert({
-            user_id: user.id,
-            email: clientEmail,
-            client_name: inputs.clientName.trim() || "Unnamed client",
-            inputs: JSON.parse(JSON.stringify(inputs)),
-            summary: JSON.parse(JSON.stringify(summary)),
-            pdf_path: pdfPath,
-          } as never),
-        ]);
-
-        // 3) Push to Go High Level if we have an email
-        if (clientEmail) {
-          try {
-            const buf = await ghlBlob.arrayBuffer();
-            // base64 encode in chunks to avoid stack overflow
-            const bytes = new Uint8Array(buf);
-            let binary = "";
-            const chunk = 0x8000;
-            for (let i = 0; i < bytes.length; i += chunk) {
-              binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
-            }
-            const pdfBase64 = btoa(binary);
-            const { data: ghl, error: ghlErr } = await supabase.functions.invoke("ghl-upload-report", {
-              body: { email: clientEmail, fileName, pdfBase64 },
-            });
-            if (ghlErr) throw ghlErr;
-            if (ghl?.skipped) {
-              toast.warning("Go High Level upload skipped", {
-                description: ghl.message || (ghl.reason === "file_too_large"
-                  ? "The CRM copy is still over Go High Level's file limit."
-                  : ghl.reason === "no_contact"
-                    ? `No Go High Level contact found for ${clientEmail}.`
-                    : "Go High Level could not attach the PDF to this contact."),
-              });
-            } else if (ghl?.success) {
-              toast.success("Uploaded to Go High Level contact");
-            }
-          } catch (e) {
-            console.error("GHL upload failed:", e);
-            toast.error("Go High Level upload failed", {
-              description: e instanceof Error ? e.message : "Unknown error",
-            });
-          }
-        }
+        // Store pending data and show the dialog
+        pendingExport.current = { pdf, pdfBlob, ghlBlob, canvases, fileName, safeClient, pdfPath };
+        setShowWorkflowDialog(true);
+      } else {
+        toast.success("PDF exported");
       }
-      toast.success("PDF exported");
     } catch (e) {
       console.error(e);
       toast.error("PDF export failed");
     } finally {
       setExporting(false);
     }
+  };
+
+  /** Just save to client reports list — no GHL automation */
+  const handleAddToClientList = async () => {
+    setShowWorkflowDialog(false);
+    if (!user || !pendingExport.current) return;
+    const { pdfPath } = pendingExport.current;
+    const clientEmail = (inputs.clientEmail ?? "").trim() || null;
+
+    await Promise.all([
+      supabase.from("activity_log").insert({
+        user_id: user.id, email: user.email, event_type: "report_generated",
+        details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath, workflow: false },
+      }),
+      supabase.from("reports").insert({
+        user_id: user.id,
+        email: clientEmail,
+        client_name: inputs.clientName.trim() || "Unnamed client",
+        inputs: JSON.parse(JSON.stringify(inputs)),
+        summary: JSON.parse(JSON.stringify(summary)),
+        pdf_path: pdfPath,
+      } as never),
+    ]);
+
+    pendingExport.current = null;
+    toast.success("Client added to reports list");
+  };
+
+  /** Full workflow: save to client list + push to GHL */
+  const handleStartWorkflow = async () => {
+    setShowWorkflowDialog(false);
+    if (!user || !pendingExport.current) return;
+    const { ghlBlob, fileName, pdfPath } = pendingExport.current;
+    const clientEmail = (inputs.clientEmail ?? "").trim() || null;
+
+    // Log + insert report row
+    await Promise.all([
+      supabase.from("activity_log").insert({
+        user_id: user.id, email: user.email, event_type: "report_generated",
+        details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath, workflow: true },
+      }),
+      supabase.from("reports").insert({
+        user_id: user.id,
+        email: clientEmail,
+        client_name: inputs.clientName.trim() || "Unnamed client",
+        inputs: JSON.parse(JSON.stringify(inputs)),
+        summary: JSON.parse(JSON.stringify(summary)),
+        pdf_path: pdfPath,
+      } as never),
+    ]);
+
+    // Push to Go High Level
+    if (clientEmail) {
+      try {
+        const buf = await ghlBlob.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let binary = "";
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+        }
+        const pdfBase64 = btoa(binary);
+        const { data: ghl, error: ghlErr } = await supabase.functions.invoke("ghl-upload-report", {
+          body: { email: clientEmail, fileName, pdfBase64 },
+        });
+        if (ghlErr) throw ghlErr;
+        if (ghl?.skipped) {
+          toast.warning("Go High Level upload skipped", {
+            description: ghl.message || (ghl.reason === "file_too_large"
+              ? "The CRM copy is still over Go High Level's file limit."
+              : ghl.reason === "no_contact"
+                ? `No Go High Level contact found for ${clientEmail}.`
+                : "Go High Level could not attach the PDF to this contact."),
+          });
+        } else if (ghl?.success) {
+          toast.success("Uploaded to Go High Level contact");
+        }
+      } catch (e) {
+        console.error("GHL upload failed:", e);
+        toast.error("Go High Level upload failed", {
+          description: e instanceof Error ? e.message : "Unknown error",
+        });
+      }
+    }
+
+    pendingExport.current = null;
+    toast.success("Workflow started & PDF exported");
   };
 
   const openFullScreen = () => {
@@ -193,6 +238,8 @@ export default function Index() {
       el.requestFullscreen?.().catch(() => toast.error("Full screen not available"));
     }
   };
+
+  const clientDisplayName = inputs.clientName.trim() || "this client";
 
   return (
     <CRMLayout>
@@ -238,6 +285,29 @@ export default function Index() {
           </section>
         </div>
       </div>
+
+      {/* Workflow choice dialog */}
+      <AlertDialog open={showWorkflowDialog} onOpenChange={setShowWorkflowDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start workflow for {clientDisplayName}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Would you like to start the full workflow (upload to Go High Level) or just add this client to your reports list?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={() => { setShowWorkflowDialog(false); pendingExport.current = null; }}>
+              Cancel
+            </AlertDialogCancel>
+            <Button variant="outline" onClick={handleAddToClientList}>
+              Add to Client List
+            </Button>
+            <Button onClick={handleStartWorkflow} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
+              Yes, Start Workflow
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </CRMLayout>
   );
 }
