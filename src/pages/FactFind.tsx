@@ -1001,21 +1001,26 @@ export default function FactFind() {
   );
 
   /* ─── Section Renderers ─── */
-  const renderSection = () => {
-    switch (activeSection) {
-      case 0: // Cover Page
-        return (
-          <div className="space-y-4">
-            <Field label="Date Completed" value={data.dateCompleted} onChange={v => updateData({ dateCompleted: v })} />
-            <Field label="Client 1 Name" value={data.client1Name} onChange={v => updateData({ client1Name: v })} />
-            <Field label="Client 2 Name" value={data.client2Name} onChange={v => updateData({ client2Name: v })} />
-            <Field label="Representative Name" value={data.representativeName} onChange={v => updateData({ representativeName: v })} />
-            <div className="p-4 rounded-lg bg-muted/50 text-xs text-muted-foreground">
-              <p className="font-semibold mb-1">Important Notice</p>
-              <p>The factual information provided in this section is collected prior to any advice discussion and is reviewed by a licensed financial adviser before any advice is provided. This information alone does not constitute personal financial advice. Any recommendations will be based on a full assessment of your circumstances and formalised in a Statement of Advice (SoA).</p>
-            </div>
-          </div>
-        );
+
+  const SectionDivider = ({ title }: { title: string }) => (
+    <div className="relative -mx-6 px-6 py-4 mt-8 mb-4" style={{ background: "linear-gradient(160deg, hsl(215 65% 14%) 0%, hsl(215 60% 18%) 45%, hsl(210 55% 24%) 100%)" }}>
+      <h3 className="text-white font-bold text-sm tracking-wide uppercase">{title}</h3>
+    </div>
+  );
+
+  const renderAllSections = () => (
+    <div className="space-y-2">
+      {/* Cover fields */}
+      <div className="space-y-4">
+        <Field label="Date Completed" value={data.dateCompleted} onChange={v => updateData({ dateCompleted: v })} />
+        <Field label="Client 1 Name" value={data.client1Name} onChange={v => updateData({ client1Name: v })} />
+        <Field label="Client 2 Name" value={data.client2Name} onChange={v => updateData({ client2Name: v })} />
+        <Field label="Representative Name" value={data.representativeName} onChange={v => updateData({ representativeName: v })} />
+        <div className="p-4 rounded-lg bg-muted/50 text-xs text-muted-foreground">
+          <p className="font-semibold mb-1">Important Notice</p>
+          <p>The factual information provided in this section is collected prior to any advice discussion and is reviewed by a licensed financial adviser before any advice is provided. This information alone does not constitute personal financial advice. Any recommendations will be based on a full assessment of your circumstances and formalised in a Statement of Advice (SoA).</p>
+        </div>
+      </div>
 
       case 1: // Personal Details
         return (
