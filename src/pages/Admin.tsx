@@ -30,10 +30,12 @@ interface ReportRow {
 
 export default function Admin() {
   const nav = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const clientFilter = searchParams.get("client") || "";
   const { profile, loading } = useAuth();
   const { setInputs } = useClientInputs();
   const [reports, setReports] = useState<ReportRow[]>([]);
-  const [reportSearch, setReportSearch] = useState("");
+  const [reportSearch, setReportSearch] = useState(clientFilter);
   const [busy, setBusy] = useState(false);
   const [pdfBusyId, setPdfBusyId] = useState<string | null>(null);
   const pdfStageRef = useRef<HTMLDivElement>(null);
