@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { CRMLayout } from "@/components/CRMLayout";
-import { FileText, Gift, Monitor, Users, TrendingUp, ArrowRight } from "lucide-react";
+import { FileText, Gift, Monitor, Users, TrendingUp, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
@@ -30,33 +30,45 @@ export default function Dashboard() {
   if (loading) return <CRMLayout><div className="grid place-items-center h-full text-muted-foreground text-sm">Loading…</div></CRMLayout>;
 
   const cards = [
-    { label: "Total Reports", value: stats.reports, icon: FileText, color: "bg-cyan/15 text-cyan", link: "/admin" },
-    { label: "Referral Responses", value: stats.referrals, icon: Gift, color: "bg-emerald-100 text-emerald-600", link: "/referrals" },
-    { label: "Meetings Held", value: stats.meetings, icon: Monitor, color: "bg-violet-100 text-violet-600", link: "/presentations" },
-    { label: "Referral Leads", value: stats.leads, icon: Users, color: "bg-amber-100 text-amber-600", link: "/referrals" },
+    { label: "Total Reports", value: stats.reports, icon: FileText, gradient: "from-cyan/10 to-cyan/5", iconBg: "bg-cyan/15 text-cyan", link: "/admin" },
+    { label: "Referral Responses", value: stats.referrals, icon: Gift, gradient: "from-emerald-500/10 to-emerald-500/5", iconBg: "bg-emerald-500/15 text-emerald-600", link: "/referrals" },
+    { label: "Meetings Held", value: stats.meetings, icon: Monitor, gradient: "from-violet-500/10 to-violet-500/5", iconBg: "bg-violet-500/15 text-violet-600", link: "/presentations" },
+    { label: "Referral Leads", value: stats.leads, icon: Users, gradient: "from-amber-500/10 to-amber-500/5", iconBg: "bg-amber-500/15 text-amber-600", link: "/referrals" },
   ];
 
   return (
     <CRMLayout>
-      <div className="p-6 max-w-6xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold font-heading text-navy">Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1">Welcome back to Advisor Link Online</p>
+      <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8">
+        {/* Welcome header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold font-heading text-foreground tracking-tight">Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">Welcome back to Advisor Link Online</p>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan/10 text-cyan text-xs font-medium">
+            <Sparkles className="w-3.5 h-3.5" />
+            All systems online
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {cards.map((c) => (
             <button
               key={c.label}
               onClick={() => nav(c.link)}
-              className="bg-white rounded-xl shadow-elevated p-5 flex items-center gap-4 hover:shadow-lg transition-shadow text-left"
+              className={`group relative bg-white rounded-2xl shadow-card hover:shadow-elevated p-5 flex flex-col gap-4 transition-all duration-300 text-left overflow-hidden border border-border/50 hover:border-border`}
             >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${c.color}`}>
-                <c.icon className="w-6 h-6" />
+              <div className={`absolute inset-0 bg-gradient-to-br ${c.gradient} opacity-0 group-hover:opacity-100 transition-opacity`} />
+              <div className="relative flex items-center justify-between">
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${c.iconBg}`}>
+                  <c.icon className="w-5 h-5" />
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground/0 group-hover:text-muted-foreground transition-all -translate-x-2 group-hover:translate-x-0" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-navy">{c.value}</p>
-                <p className="text-xs text-muted-foreground font-medium">{c.label}</p>
+              <div className="relative">
+                <p className="text-3xl font-bold text-foreground tracking-tight">{c.value}</p>
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">{c.label}</p>
               </div>
             </button>
           ))}
@@ -64,36 +76,47 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Quick actions */}
-          <div className="bg-white rounded-xl shadow-elevated p-6">
-            <h2 className="text-lg font-bold font-heading text-navy mb-4">Quick Actions</h2>
-            <div className="space-y-3">
-              <Button className="w-full justify-between bg-navy text-navy-foreground hover:bg-navy/90" onClick={() => nav("/presentations")}>
-                <span className="flex items-center gap-2"><Monitor className="w-4 h-4" /> Start Presentation</span>
+          <div className="bg-white rounded-2xl shadow-card border border-border/50 p-6">
+            <h2 className="text-lg font-bold font-heading text-foreground mb-4">Quick Actions</h2>
+            <div className="space-y-2.5">
+              <Button
+                className="w-full justify-between h-12 gradient-accent text-white border-0 shadow-lg shadow-cyan/20 hover:shadow-cyan/30 transition-all"
+                onClick={() => nav("/presentations")}
+              >
+                <span className="flex items-center gap-2.5"><Monitor className="w-4 h-4" /> Start Presentation</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
-              <Button variant="outline" className="w-full justify-between" onClick={() => nav("/")}>
-                <span className="flex items-center gap-2"><FileText className="w-4 h-4" /> Generate Report</span>
+              <Button variant="outline" className="w-full justify-between h-11 hover:bg-muted/50" onClick={() => nav("/")}>
+                <span className="flex items-center gap-2.5"><FileText className="w-4 h-4" /> Generate Report</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
-              <Button variant="outline" className="w-full justify-between" onClick={() => nav("/referrals")}>
-                <span className="flex items-center gap-2"><Gift className="w-4 h-4" /> View Referrals</span>
+              <Button variant="outline" className="w-full justify-between h-11 hover:bg-muted/50" onClick={() => nav("/referrals")}>
+                <span className="flex items-center gap-2.5"><Gift className="w-4 h-4" /> View Referrals</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
 
           {/* Recent reports */}
-          <div className="bg-white rounded-xl shadow-elevated p-6">
-            <h2 className="text-lg font-bold font-heading text-navy mb-4">Recent Reports</h2>
+          <div className="bg-white rounded-2xl shadow-card border border-border/50 p-6">
+            <h2 className="text-lg font-bold font-heading text-foreground mb-4">Recent Reports</h2>
             {recentReports.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No reports yet</p>
+              <div className="py-8 text-center">
+                <FileText className="w-10 h-10 text-muted-foreground/20 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No reports yet</p>
+              </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {recentReports.map((r) => (
-                  <div key={r.id} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                    <div>
-                      <p className="text-sm font-medium text-navy">{r.client_name}</p>
-                      <p className="text-[11px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</p>
+                  <div key={r.id} className="flex items-center justify-between py-3 px-3 -mx-3 rounded-xl hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center shrink-0">
+                        <FileText className="w-4 h-4 text-cyan" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{r.client_name}</p>
+                        <p className="text-[11px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</p>
+                      </div>
                     </div>
                     <TrendingUp className="w-4 h-4 text-cyan" />
                   </div>
