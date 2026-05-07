@@ -1,18 +1,21 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MeetingHostDock } from "@/components/MeetingHostDock";
+import { Menu } from "lucide-react";
 
 export function CRMLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 flex items-center border-b border-border bg-white px-4 shrink-0">
-            <SidebarTrigger className="text-navy" />
+          <header className="h-14 flex items-center border-b border-border/60 bg-white/80 backdrop-blur-xl px-4 shrink-0 sticky top-0 z-30">
+            <SidebarTrigger className="text-foreground/60 hover:text-foreground transition-colors">
+              <Menu className="w-5 h-5" />
+            </SidebarTrigger>
           </header>
           <MeetingHostDock />
-          <main className="flex-1 overflow-auto bg-secondary/40">
+          <main className="flex-1 overflow-auto bg-background page-enter">
             {children}
           </main>
         </div>
