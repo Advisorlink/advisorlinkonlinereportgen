@@ -147,7 +147,8 @@ export default function Presentations() {
     setPausedSlide(currentSlide);
     setGlobalPausedSlide(currentSlide);
     setShowSlideshow(false);
-    navigate("/admin");
+    const clientName = selectedReport?.client_name || activeMeeting?.client_name || "";
+    navigate(`/admin?client=${encodeURIComponent(clientName)}`);
   };
 
   const deleteMeeting = async (id: string) => {

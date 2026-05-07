@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CRMLayout } from "@/components/CRMLayout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientInputs } from "@/hooks/useClientInputs";
@@ -30,10 +30,12 @@ interface ReportRow {
 
 export default function Admin() {
   const nav = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const clientFilter = searchParams.get("client") || "";
   const { profile, loading } = useAuth();
   const { setInputs } = useClientInputs();
   const [reports, setReports] = useState<ReportRow[]>([]);
-  const [reportSearch, setReportSearch] = useState("");
+  const [reportSearch, setReportSearch] = useState(clientFilter);
   const [busy, setBusy] = useState(false);
   const [pdfBusyId, setPdfBusyId] = useState<string | null>(null);
   const pdfStageRef = useRef<HTMLDivElement>(null);
@@ -323,7 +325,7 @@ export default function Admin() {
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={reportSearch}
-                onChange={e => setReportSearch(e.target.value)}
+                onChange={e => { setReportSearch(e.target.value); if (clientFilter) setSearchParams({}); }}
                 placeholder="Search clients…"
                 className="pl-9 bg-white border-border/60 shadow-sm"
               />
