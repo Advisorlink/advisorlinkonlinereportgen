@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Search, FileText, ArrowLeft, Download, User } from "lucide-react";
+import { Search, FileText, ArrowLeft, Download, User, Plus, X, ChevronDown, ChevronRight, Shield } from "lucide-react";
 import jsPDF from "jspdf";
 import logoSvg from "@/assets/logo.svg";
 
@@ -166,6 +166,145 @@ const HEALTH_SCENARIOS = [
   "Dangerous hobbies or sports",
 ];
 
+/* ─── Medical detail questions per condition ─── */
+const CONDITION_QUESTIONS: Record<string, string[]> = {
+  "Asthma/Respiratory": [
+    "Date of diagnosis?",
+    "Current medication and dosage?",
+    "How often do you use a puffer/inhaler?",
+    "Hospital admissions in the last 5 years?",
+    "Date of last attack/episode?",
+    "Do you smoke or have you ever smoked?",
+  ],
+  "Back / Neck / Spine": [
+    "Date of first symptoms?",
+    "What is the diagnosis (e.g. disc bulge, sciatica)?",
+    "Cause of the condition (e.g. injury, degenerative)?",
+    "Current treatment (e.g. physio, chiro, medication)?",
+    "Any time off work? If so, how long?",
+    "Any surgical procedures? Details and dates?",
+    "Any ongoing symptoms or limitations?",
+  ],
+  "Cancers- Internal": [
+    "Date of diagnosis?",
+    "Type and location of cancer?",
+    "Stage at diagnosis?",
+    "Treatment received (surgery, chemo, radiation)?",
+    "Date treatment was completed?",
+    "Current status (remission, monitoring)?",
+    "Date of last check-up and results?",
+  ],
+  "Cancer/s- External": [
+    "Date of diagnosis?",
+    "Type of skin cancer (BCC, SCC, Melanoma)?",
+    "Location on body?",
+    "Treatment received?",
+    "Number of removals/procedures?",
+    "Date of last skin check and results?",
+    "Any further treatment required?",
+  ],
+  "Diabetes": [
+    "Date of diagnosis?",
+    "Type 1 or Type 2?",
+    "Current medication (insulin, tablets)?",
+    "Latest HbA1c reading and date?",
+    "Any complications (retinopathy, neuropathy, kidney)?",
+    "How well managed is the condition?",
+    "Date of last specialist review?",
+  ],
+  "Epilepsy": [
+    "Date of diagnosis?",
+    "Type of epilepsy/seizures?",
+    "Current medication and dosage?",
+    "Date of last seizure?",
+    "Frequency of seizures?",
+    "Any triggers identified?",
+    "Do you hold a driver's licence?",
+  ],
+  "Eyesight / Hearing / Speech conditions": [
+    "Date condition was first identified?",
+    "Nature of the condition?",
+    "Cause (e.g. congenital, injury, degenerative)?",
+    "Current treatment or aids (glasses, hearing aid)?",
+    "Has the condition worsened over time?",
+    "Any impact on daily activities or work?",
+  ],
+  "Gastric Sleeve / Weight Loss": [
+    "Date of procedure?",
+    "Type of procedure (sleeve, bypass, band)?",
+    "Weight before and current weight?",
+    "Any complications post-surgery?",
+    "Current diet and exercise regime?",
+    "Any ongoing medication?",
+  ],
+  "Gout / IBS / Crohn's Disease / Diverticulitis / Colitis": [
+    "Date of diagnosis?",
+    "Which condition applies?",
+    "Current medication?",
+    "Frequency of flare-ups?",
+    "Any hospital admissions?",
+    "Impact on daily activities or work?",
+    "Date of last specialist review?",
+  ],
+  "High Blood Pressure / High Cholesterol": [
+    "Date of diagnosis?",
+    "Which condition (or both)?",
+    "Current medication and dosage?",
+    "Latest reading and date?",
+    "Family history of heart disease?",
+    "Any complications (heart, kidney)?",
+    "How well controlled with medication?",
+  ],
+  "Mental Health": [
+    "Date of diagnosis?",
+    "Nature of condition (anxiety, depression, PTSD, other)?",
+    "Current medication and dosage?",
+    "Are you seeing a psychologist/psychiatrist? How often?",
+    "Any hospital admissions or crisis events?",
+    "Any time off work due to mental health? How long?",
+    "Current status and how well managed?",
+  ],
+  "Muscle / Joint / Bone Injuries": [
+    "Date of injury/onset?",
+    "Which body part is affected?",
+    "Cause (sport, work, accident)?",
+    "Diagnosis (e.g. tear, fracture, arthritis)?",
+    "Treatment received (physio, surgery)?",
+    "Any ongoing symptoms or limitations?",
+    "Any time off work? How long?",
+  ],
+  "Sleep Apnea": [
+    "Date of diagnosis?",
+    "How was it diagnosed (sleep study)?",
+    "Severity (mild, moderate, severe)?",
+    "Do you use a CPAP machine? How often?",
+    "Any other treatment?",
+    "Has it impacted your work or driving?",
+    "Current BMI/weight?",
+  ],
+  "Thyroid Disorder": [
+    "Date of diagnosis?",
+    "Hypo or Hyperthyroidism?",
+    "Current medication and dosage?",
+    "Latest TSH reading and date?",
+    "Any complications or related conditions?",
+    "How well managed with medication?",
+  ],
+  "Family history - Immediate family only": [
+    "Which family member (parent, sibling)?",
+    "What condition do/did they have?",
+    "Age of diagnosis?",
+    "Are they still living? If not, age and cause of death?",
+  ],
+  "Dangerous hobbies or sports": [
+    "What hobby or sport?",
+    "How often do you participate?",
+    "Any competitions or professional level?",
+    "Any injuries sustained?",
+    "Do you intend to continue?",
+  ],
+};
+
 const emptyFactFind = (): FactFindData => ({
   dateCompleted: new Date().toISOString().slice(0, 10),
   client1Name: "", client2Name: "", representativeName: "",
@@ -245,6 +384,12 @@ export default function FactFind() {
   const [data, setData] = useState<FactFindData>(emptyFactFind());
   const [exporting, setExporting] = useState(false);
 
+  /* Toggle states */
+  const [showClient2, setShowClient2] = useState(false);
+  const [showSecondaryEmployment, setShowSecondaryEmployment] = useState(false);
+  const [showSelfEmployment, setShowSelfEmployment] = useState(false);
+  const [expandedConditions, setExpandedConditions] = useState<Record<string, boolean>>({});
+
   useEffect(() => {
     if (!profile) return;
     (async () => {
@@ -275,6 +420,10 @@ export default function FactFind() {
   };
 
   const updateData = (patch: Partial<FactFindData>) => setData(prev => ({ ...prev, ...patch }));
+
+  const toggleConditionExpand = (condition: string) => {
+    setExpandedConditions(prev => ({ ...prev, [condition]: !prev[condition] }));
+  };
 
   /* ─── PDF Export ─── */
   const exportPDF = async () => {
@@ -330,22 +479,18 @@ export default function FactFind() {
         y += 7 * Math.max(1, lines.length);
       };
 
-      // ── COVER PAGE — Client-report style ──
-      // Full-bleed navy gradient
+      // ── COVER PAGE ──
       pdf.setFillColor(navy[0], navy[1], navy[2]);
       pdf.rect(0, 0, W, H, "F");
-      // Gradient accent — draw lighter overlay rectangles
       pdf.setFillColor(20, 35, 60);
       pdf.rect(0, 0, W, 120, "F");
 
-      // Decorative circles
       pdf.setFillColor(0, 188, 212);
       pdf.setGState(new (pdf as any).GState({ opacity: 0.12 }));
       pdf.circle(W + 10, -10, 80, "F");
       pdf.circle(-20, H - 20, 70, "F");
       pdf.setGState(new (pdf as any).GState({ opacity: 1 }));
 
-      // Logo
       try {
         const logoImg = new Image();
         logoImg.src = logoSvg;
@@ -358,7 +503,6 @@ export default function FactFind() {
         pdf.addImage(logoDataUrl, "PNG", margin, 20, 60, 15);
       } catch { /* skip logo */ }
 
-      // Company info top right
       pdf.setTextColor(white[0], white[1], white[2]);
       pdf.setFontSize(11); pdf.setFont("helvetica", "bold");
       pdf.text("Advisor Link Pty Ltd", W - margin, 25, { align: "right" });
@@ -367,11 +511,9 @@ export default function FactFind() {
       pdf.text("21 Upton Street, Bundall QLD 4217", W - margin, 38, { align: "right" });
       pdf.text("admin@advisorlinkonline.com.au", W - margin, 44, { align: "right" });
 
-      // Cyan accent line
       pdf.setFillColor(cyan[0], cyan[1], cyan[2]);
       pdf.rect(margin, 65, 16, 3, "F");
 
-      // Title
       pdf.setTextColor(white[0], white[1], white[2]);
       pdf.setFontSize(42); pdf.setFont("helvetica", "bold");
       pdf.text("FACT FIND", margin, 90);
@@ -381,7 +523,6 @@ export default function FactFind() {
       pdf.text("A comprehensive collection of your personal, financial and", margin, 102);
       pdf.text("lifestyle information to support tailored advice.", margin, 110);
 
-      // Prepared for box
       pdf.setFontSize(10);
       pdf.setTextColor(cyan[0], cyan[1], cyan[2]);
       pdf.text("PREPARED FOR", margin, 140);
@@ -389,7 +530,6 @@ export default function FactFind() {
       pdf.setFontSize(24); pdf.setFont("helvetica", "bold");
       pdf.text(data.client1Name || "Client", margin, 152);
 
-      // Info box
       pdf.setDrawColor(cyan[0], cyan[1], cyan[2]);
       pdf.setLineWidth(0.5);
       pdf.roundedRect(margin, 170, contentW, 50, 4, 4, "S");
@@ -403,7 +543,6 @@ export default function FactFind() {
       pdf.text(data.client1Name, margin + 55, 194);
       pdf.text(data.client2Name || "—", margin + 55, 206);
 
-      // Important notice
       pdf.setFontSize(7); pdf.setTextColor(180, 180, 180);
       const notice = "The factual information provided in this section is collected prior to any advice discussion and is reviewed by a licensed financial adviser before any advice is provided. This information alone does not constitute personal financial advice.";
       const noticeLines = pdf.splitTextToSize(notice, contentW - 10);
@@ -455,9 +594,11 @@ export default function FactFind() {
         if (e.additionalNotes) { y += 2; singleRow("Additional notes", e.additionalNotes); }
       };
       printEmployment("Primary Employment Details - Client 1", data.primaryEmployment1);
-      printEmployment("Primary Employment Details - Client 2", data.primaryEmployment2);
-      printEmployment("Secondary Employment Details - Client 1", data.secondaryEmployment1);
-      printEmployment("Secondary Employment Details - Client 2", data.secondaryEmployment2);
+      if (showClient2) printEmployment("Primary Employment Details - Client 2", data.primaryEmployment2);
+      if (showSecondaryEmployment) {
+        printEmployment("Secondary Employment Details - Client 1", data.secondaryEmployment1);
+        if (showClient2) printEmployment("Secondary Employment Details - Client 2", data.secondaryEmployment2);
+      }
 
       const printSelf = (title: string, s: SelfEmploymentBlock) => {
         addPage(); sectionHeader(title);
@@ -468,8 +609,10 @@ export default function FactFind() {
           ["Annual income", s.annualIncome], ["Annual dividends", s.annualDividends]];
         fields.forEach(([l, v], i) => singleRow(l, v, i % 2 === 0));
       };
-      printSelf("Self-Employment Details - Client 1", data.selfEmployment1);
-      printSelf("Self-Employment Details - Client 2", data.selfEmployment2);
+      if (showSelfEmployment) {
+        printSelf("Self-Employment Details - Client 1", data.selfEmployment1);
+        if (showClient2) printSelf("Self-Employment Details - Client 2", data.selfEmployment2);
+      }
 
       // Assets
       addPage(); sectionHeader("Assets & Liabilities");
@@ -497,12 +640,16 @@ export default function FactFind() {
       // Super & Insurance
       addPage(); sectionHeader("Existing Superannuation Funds - Client 1");
       data.client1SuperFunds.forEach((sf, i) => singleRow(`Fund ${i + 1}`, `${sf.fund} | Acc: ${sf.accountNumber} | Balance: ${sf.balance}`, i % 2 === 0));
-      y += 4; sectionHeader("Existing Superannuation Funds - Client 2");
-      data.client2SuperFunds.forEach((sf, i) => singleRow(`Fund ${i + 1}`, `${sf.fund} | Acc: ${sf.accountNumber} | Balance: ${sf.balance}`, i % 2 === 0));
+      if (showClient2) {
+        y += 4; sectionHeader("Existing Superannuation Funds - Client 2");
+        data.client2SuperFunds.forEach((sf, i) => singleRow(`Fund ${i + 1}`, `${sf.fund} | Acc: ${sf.accountNumber} | Balance: ${sf.balance}`, i % 2 === 0));
+      }
       y += 4; sectionHeader("Existing Personal Insurances - Client 1");
       data.client1Insurance.forEach((ins, i) => singleRow(`Policy ${i + 1}`, `${ins.insurer} | #${ins.policyNumber} | ${ins.coverType} | $${ins.sumInsured} | $${ins.premiumPA}/yr`, i % 2 === 0));
-      y += 4; sectionHeader("Existing Personal Insurances - Client 2");
-      data.client2Insurance.forEach((ins, i) => singleRow(`Policy ${i + 1}`, `${ins.insurer} | #${ins.policyNumber} | ${ins.coverType} | $${ins.sumInsured} | $${ins.premiumPA}/yr`, i % 2 === 0));
+      if (showClient2) {
+        y += 4; sectionHeader("Existing Personal Insurances - Client 2");
+        data.client2Insurance.forEach((ins, i) => singleRow(`Policy ${i + 1}`, `${ins.insurer} | #${ins.policyNumber} | ${ins.coverType} | $${ins.sumInsured} | $${ins.premiumPA}/yr`, i % 2 === 0));
+      }
 
       // Estate Planning
       y += 4; sectionHeader("Estate Planning");
@@ -522,11 +669,22 @@ export default function FactFind() {
       y += 4; sectionHeader("Conditions");
       HEALTH_CONDITIONS.forEach((c, i) => { if (data.healthConditions[c]) singleRow("✓ " + c, "", i % 2 === 0); });
       HEALTH_SCENARIOS.forEach((s, i) => { if (data.healthScenarios[s]) singleRow("✓ " + s, "", i % 2 === 0); });
-      Object.entries(data.healthDetails).forEach(([key, val]) => {
-        if (val && val.trim()) { checkSpace(20); sectionHeader(key); const lines = pdf.splitTextToSize(val, contentW - 10); pdf.setFontSize(8); pdf.text(lines, margin + 2, y + 4); y += lines.length * 4 + 4; }
+
+      // Print condition detail answers
+      const allActive = [...HEALTH_CONDITIONS.filter(c => data.healthConditions[c]), ...HEALTH_SCENARIOS.filter(s => data.healthScenarios[s])];
+      allActive.forEach(condition => {
+        const questions = CONDITION_QUESTIONS[condition] || [];
+        const hasAnswers = questions.some(q => data.healthDetails[`${condition}__${q}`]?.trim());
+        if (hasAnswers) {
+          checkSpace(20); sectionHeader(condition);
+          questions.forEach((q, i) => {
+            const answer = data.healthDetails[`${condition}__${q}`] || "";
+            if (answer.trim()) singleRow(q, answer, i % 2 === 0);
+          });
+        }
       });
 
-      // Part B
+      // Part B in PDF only
       addPage();
       pdf.setFillColor(navy[0], navy[1], navy[2]); pdf.rect(0, 0, W, 50, "F");
       pdf.setTextColor(white[0], white[1], white[2]); pdf.setFontSize(22); pdf.setFont("helvetica", "bold");
@@ -555,8 +713,10 @@ export default function FactFind() {
       y += 4; sectionHeader("Nomination of Beneficiaries");
       singleRow("Client 1 nomination type", data.client1NominationType);
       data.client1Beneficiaries.forEach((b, i) => { if (b.fullName) singleRow(`Beneficiary ${i + 1}`, `${b.fullName} | ${b.relationship} | ${b.benefitPct}%`, i % 2 === 0); });
-      y += 4; singleRow("Client 2 nomination type", data.client2NominationType);
-      data.client2Beneficiaries.forEach((b, i) => { if (b.fullName) singleRow(`Beneficiary ${i + 1}`, `${b.fullName} | ${b.relationship} | ${b.benefitPct}%`, i % 2 === 0); });
+      if (showClient2) {
+        y += 4; singleRow("Client 2 nomination type", data.client2NominationType);
+        data.client2Beneficiaries.forEach((b, i) => { if (b.fullName) singleRow(`Beneficiary ${i + 1}`, `${b.fullName} | ${b.relationship} | ${b.benefitPct}%`, i % 2 === 0); });
+      }
 
       addPage(); sectionHeader("Acknowledgements");
       dualRow("FSG provided date", data.client1FSGDate, data.client2FSGDate);
@@ -614,17 +774,25 @@ export default function FactFind() {
     </div>
   );
 
-  const DualField = ({ label, v1, v2, onChange1, onChange2 }: { label: string; v1: string; v2: string; onChange1: (v: string) => void; onChange2: (v: string) => void }) => (
-    <div className="grid grid-cols-[1fr_1fr_1fr] gap-2 items-end">
+  const SingleField = ({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) => (
+    <div className="grid grid-cols-[1fr_1fr] gap-2 items-end">
       <Label className="text-xs text-muted-foreground self-center">{label}</Label>
-      <Input value={v1} onChange={e => onChange1(e.target.value)} className="h-8 text-sm" placeholder="Client 1" />
-      <Input value={v2} onChange={e => onChange2(e.target.value)} className="h-8 text-sm" placeholder="Client 2" />
+      <Input value={value} onChange={e => onChange(e.target.value)} className="h-8 text-sm" placeholder="Client 1" />
     </div>
   );
 
-  const SectionDivider = ({ title }: { title: string }) => (
-    <div className="relative -mx-6 px-6 py-3 mt-10 mb-4 rounded-lg" style={{ background: "linear-gradient(160deg, hsl(215 65% 14%) 0%, hsl(215 60% 18%) 45%, hsl(210 55% 24%) 100%)" }}>
+  const DualField = ({ label, v1, v2, onChange1, onChange2 }: { label: string; v1: string; v2: string; onChange1: (v: string) => void; onChange2: (v: string) => void }) => (
+    <div className={`grid ${showClient2 ? "grid-cols-[1fr_1fr_1fr]" : "grid-cols-[1fr_1fr]"} gap-2 items-end`}>
+      <Label className="text-xs text-muted-foreground self-center">{label}</Label>
+      <Input value={v1} onChange={e => onChange1(e.target.value)} className="h-8 text-sm" placeholder="Client 1" />
+      {showClient2 && <Input value={v2} onChange={e => onChange2(e.target.value)} className="h-8 text-sm" placeholder="Client 2" />}
+    </div>
+  );
+
+  const SectionDivider = ({ title, extra }: { title: string; extra?: React.ReactNode }) => (
+    <div className="relative -mx-6 px-6 py-3 mt-10 mb-4 rounded-lg flex items-center justify-between" style={{ background: "linear-gradient(160deg, hsl(215 65% 14%) 0%, hsl(215 60% 18%) 45%, hsl(210 55% 24%) 100%)" }}>
       <h3 className="text-white font-bold text-sm tracking-wide uppercase">{title}</h3>
+      {extra}
     </div>
   );
 
@@ -810,51 +978,76 @@ export default function FactFind() {
     );
   };
 
-  /* ─── Main Form View — Single continuous scrollable form ─── */
+  /* ─── Main Form View ─── */
   return (
     <CRMLayout>
       <div className="h-full overflow-y-auto">
-        {/* Cover Header — matches client report style */}
-        <header
-          className="relative px-8 pt-6 pb-8 text-white overflow-hidden"
-          style={{
-            background: "linear-gradient(160deg, hsl(215 65% 14%) 0%, hsl(215 60% 18%) 40%, hsl(205 60% 26%) 80%, hsl(195 75% 34%) 100%)",
-          }}
-        >
-          <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/20 blur-3xl pointer-events-none" />
-          <div className="absolute -right-10 top-10 w-44 h-44 rounded-full bg-cyan/25 pointer-events-none" />
-          <div className="absolute -left-20 -bottom-24 w-72 h-72 rounded-full bg-[hsl(225_85%_60%)]/15 blur-3xl pointer-events-none" />
+        {/* ═══ PREMIUM HEADER ═══ */}
+        <header className="relative overflow-hidden">
+          {/* Background layers */}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, hsl(220 70% 8%) 0%, hsl(215 65% 14%) 30%, hsl(210 55% 20%) 60%, hsl(195 70% 28%) 100%)" }} />
+          <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(ellipse 80% 60% at 70% 20%, hsl(185 80% 40% / 0.4), transparent), radial-gradient(ellipse 60% 80% at 10% 80%, hsl(230 60% 50% / 0.3), transparent)" }} />
+          
+          {/* Decorative elements */}
+          <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full border border-white/5" />
+          <div className="absolute -right-8 top-8 w-48 h-48 rounded-full border border-cyan/10" />
+          <div className="absolute right-20 top-4 w-24 h-24 rounded-full bg-cyan/8 blur-2xl" />
+          <div className="absolute -left-12 -bottom-12 w-48 h-48 rounded-full bg-blue-500/10 blur-3xl" />
+          <div className="absolute left-1/2 bottom-0 w-full h-px bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
 
-          <div className="relative flex items-start justify-between gap-4">
-            <img src={logoSvg} alt="Advisor Link Online" className="h-10 w-auto" />
-            <div className="text-right text-sm opacity-90">
-              <div className="font-bold text-base">Advisor Link Pty Ltd</div>
-              <div>(07) 5241 1244</div>
-              <div>21 Upton Street, Bundall QLD 4217</div>
-              <div>admin@advisorlinkonline.com.au</div>
+          <div className="relative px-8 pt-8 pb-10">
+            {/* Top bar: Logo + company info */}
+            <div className="flex items-start justify-between gap-4 mb-8">
+              <div className="flex items-center gap-3">
+                <img src={logoSvg} alt="Advisor Link Online" className="h-10 w-auto drop-shadow-lg" />
+              </div>
+              <div className="text-right text-white/80 text-xs space-y-0.5">
+                <div className="font-bold text-sm text-white">Advisor Link Pty Ltd</div>
+                <div>(07) 5241 1244</div>
+                <div>21 Upton Street, Bundall QLD 4217</div>
+                <div>admin@advisorlinkonline.com.au</div>
+              </div>
             </div>
-          </div>
 
-          <div className="relative mt-6">
-            <div className="h-[3px] w-12 rounded-full bg-cyan mb-3" />
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight">FACT FIND</h1>
-            <p className="mt-2 text-sm max-w-lg opacity-80 leading-relaxed">
-              A comprehensive collection of your personal, financial and lifestyle information to support tailored advice.
-            </p>
-            <div className="mt-4">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan">Prepared For</div>
-              <div className="mt-1 text-xl font-bold tracking-tight">{data.client1Name || "Client"}</div>
+            {/* Title block */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-cyan/20 border border-cyan/30 flex items-center justify-center backdrop-blur-sm">
+                  <Shield className="w-5 h-5 text-cyan" />
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-cyan/80">Part A</div>
+                  <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white leading-none">FACT FIND</h1>
+                </div>
+              </div>
+              <p className="text-sm text-white/60 max-w-lg leading-relaxed pl-[52px]">
+                A comprehensive collection of your personal, financial and lifestyle information to support tailored advice.
+              </p>
+              <div className="pl-[52px] pt-2">
+                <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-5 py-3 backdrop-blur-sm">
+                  <div>
+                    <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-cyan/70">Prepared For</div>
+                    <div className="text-lg font-bold text-white tracking-tight">{data.client1Name || "Client"}</div>
+                  </div>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div>
+                    <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-cyan/70">Date</div>
+                    <div className="text-sm font-medium text-white/90">{data.dateCompleted}</div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="relative mt-4 flex gap-2">
-            <Button variant="outline" size="sm" className="text-white border-white/30 hover:bg-white/10" onClick={() => setSelectedClient(null)}>
-              <ArrowLeft className="w-3 h-3 mr-1" /> Back
-            </Button>
-            <Button size="sm" onClick={exportPDF} disabled={exporting} className="gap-1 bg-cyan hover:bg-cyan/80 text-navy font-semibold">
-              <Download className="w-3.5 h-3.5" />
-              {exporting ? "Exporting..." : "Download PDF"}
-            </Button>
+            {/* Action buttons */}
+            <div className="mt-6 pl-[52px] flex gap-2">
+              <Button variant="outline" size="sm" className="text-white border-white/20 hover:bg-white/10 backdrop-blur-sm" onClick={() => setSelectedClient(null)}>
+                <ArrowLeft className="w-3 h-3 mr-1" /> Back
+              </Button>
+              <Button size="sm" onClick={exportPDF} disabled={exporting} className="gap-1 bg-cyan hover:bg-cyan/80 text-[hsl(215_65%_14%)] font-semibold shadow-lg shadow-cyan/20">
+                <Download className="w-3.5 h-3.5" />
+                {exporting ? "Exporting..." : "Download PDF"}
+              </Button>
+            </div>
           </div>
         </header>
 
@@ -865,7 +1058,16 @@ export default function FactFind() {
           <div className="space-y-4">
             <Field label="Date Completed" value={data.dateCompleted} onChange={v => updateData({ dateCompleted: v })} />
             <Field label="Client 1 Name" value={data.client1Name} onChange={v => updateData({ client1Name: v })} />
-            <Field label="Client 2 Name" value={data.client2Name} onChange={v => updateData({ client2Name: v })} />
+            {showClient2 ? (
+              <div className="flex items-end gap-2">
+                <div className="flex-1"><Field label="Client 2 Name" value={data.client2Name} onChange={v => updateData({ client2Name: v })} /></div>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setShowClient2(false)}><X className="w-4 h-4" /></Button>
+              </div>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => setShowClient2(true)} className="gap-1 text-xs">
+                <Plus className="w-3 h-3" /> Add Client 2
+              </Button>
+            )}
             <Field label="Representative Name" value={data.representativeName} onChange={v => updateData({ representativeName: v })} />
             <div className="p-4 rounded-lg bg-muted/50 text-xs text-muted-foreground">
               <p className="font-semibold mb-1">Important Notice</p>
@@ -876,7 +1078,11 @@ export default function FactFind() {
           {/* Personal Details */}
           <SectionDivider title="Personal Details" />
           <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-2 pb-2 border-b"><div /><p className="text-xs font-semibold text-center">Client 1</p><p className="text-xs font-semibold text-center">Client 2</p></div>
+            <div className={`grid ${showClient2 ? "grid-cols-3" : "grid-cols-2"} gap-2 pb-2 border-b`}>
+              <div />
+              <p className="text-xs font-semibold text-center">Client 1</p>
+              {showClient2 && <p className="text-xs font-semibold text-center">Client 2</p>}
+            </div>
             <DualField label="Title" v1={data.client1Title} v2={data.client2Title} onChange1={v => updateData({ client1Title: v })} onChange2={v => updateData({ client2Title: v })} />
             <DualField label="Client name" v1={data.client1Name} v2={data.client2Name} onChange1={v => updateData({ client1Name: v })} onChange2={v => updateData({ client2Name: v })} />
             <DualField label="Middle name" v1={data.client1MiddleName} v2={data.client2MiddleName} onChange1={v => updateData({ client1MiddleName: v })} onChange2={v => updateData({ client2MiddleName: v })} />
@@ -927,26 +1133,54 @@ export default function FactFind() {
             <div><Label className="text-xs text-muted-foreground">Additional notes</Label><Textarea value={data.dependentsNotes} onChange={e => updateData({ dependentsNotes: e.target.value })} className="text-sm" rows={3} /></div>
           </div>
 
-          {/* Primary Employment */}
+          {/* Primary Employment — only Client 1, add Client 2 button */}
           <SectionDivider title="Primary Employment" />
           <div className="space-y-4">
             {renderEmploymentFields(data.primaryEmployment1, "primaryEmployment1", 1)}
-            {renderEmploymentFields(data.primaryEmployment2, "primaryEmployment2", 2)}
+            {showClient2 && renderEmploymentFields(data.primaryEmployment2, "primaryEmployment2", 2)}
           </div>
 
-          {/* Secondary Employment */}
-          <SectionDivider title="Secondary Employment" />
-          <div className="space-y-4">
-            {renderEmploymentFields(data.secondaryEmployment1, "secondaryEmployment1", 1)}
-            {renderEmploymentFields(data.secondaryEmployment2, "secondaryEmployment2", 2)}
-          </div>
+          {/* Secondary Employment — hidden until toggled */}
+          {showSecondaryEmployment ? (
+            <>
+              <SectionDivider title="Secondary Employment" extra={
+                <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10 h-7 text-xs" onClick={() => setShowSecondaryEmployment(false)}>
+                  <X className="w-3 h-3 mr-1" /> Remove
+                </Button>
+              } />
+              <div className="space-y-4">
+                {renderEmploymentFields(data.secondaryEmployment1, "secondaryEmployment1", 1)}
+                {showClient2 && renderEmploymentFields(data.secondaryEmployment2, "secondaryEmployment2", 2)}
+              </div>
+            </>
+          ) : (
+            <div className="mt-6">
+              <Button variant="outline" size="sm" onClick={() => setShowSecondaryEmployment(true)} className="gap-1 text-xs">
+                <Plus className="w-3 h-3" /> Add Secondary Employment
+              </Button>
+            </div>
+          )}
 
-          {/* Self-Employment */}
-          <SectionDivider title="Self-Employment" />
-          <div className="space-y-4">
-            {renderSelfEmployment(data.selfEmployment1, "selfEmployment1", 1)}
-            {renderSelfEmployment(data.selfEmployment2, "selfEmployment2", 2)}
-          </div>
+          {/* Self-Employment — hidden until toggled */}
+          {showSelfEmployment ? (
+            <>
+              <SectionDivider title="Self-Employment" extra={
+                <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10 h-7 text-xs" onClick={() => setShowSelfEmployment(false)}>
+                  <X className="w-3 h-3 mr-1" /> Remove
+                </Button>
+              } />
+              <div className="space-y-4">
+                {renderSelfEmployment(data.selfEmployment1, "selfEmployment1", 1)}
+                {showClient2 && renderSelfEmployment(data.selfEmployment2, "selfEmployment2", 2)}
+              </div>
+            </>
+          ) : (
+            <div className="mt-2">
+              <Button variant="outline" size="sm" onClick={() => setShowSelfEmployment(true)} className="gap-1 text-xs">
+                <Plus className="w-3 h-3" /> Add Self-Employment
+              </Button>
+            </div>
+          )}
 
           {/* Assets & Liabilities */}
           <SectionDivider title="Assets & Liabilities" />
@@ -981,7 +1215,7 @@ export default function FactFind() {
               <h4 className="font-semibold text-sm">Savings Capacity</h4>
               <div className="grid grid-cols-2 gap-2">
                 <Field label="Client 1 living expense split %" value={data.client1ExpenseSplitPct} onChange={v => updateData({ client1ExpenseSplitPct: v })} />
-                <Field label="Client 2 living expense split %" value={data.client2ExpenseSplitPct} onChange={v => updateData({ client2ExpenseSplitPct: v })} />
+                {showClient2 && <Field label="Client 2 living expense split %" value={data.client2ExpenseSplitPct} onChange={v => updateData({ client2ExpenseSplitPct: v })} />}
               </div>
               <Field label="Total annual core expenses" value={data.totalAnnualCoreExpenses} onChange={v => updateData({ totalAnnualCoreExpenses: v })} />
               <h5 className="text-xs font-semibold text-muted-foreground">Dependent Educational Expenses</h5>
@@ -995,10 +1229,10 @@ export default function FactFind() {
           <SectionDivider title="Super Funds & Insurance" />
           <div className="space-y-6">
             {renderSuperFunds(data.client1SuperFunds, 1)}
-            {renderSuperFunds(data.client2SuperFunds, 2)}
+            {showClient2 && renderSuperFunds(data.client2SuperFunds, 2)}
             <div className="border-t pt-4" />
             {renderInsurance(data.client1Insurance, 1)}
-            {renderInsurance(data.client2Insurance, 2)}
+            {showClient2 && renderInsurance(data.client2Insurance, 2)}
             <div className="pt-4 border-t space-y-2">
               <h4 className="font-semibold text-sm">Private Health Cover</h4>
               <div className="flex gap-4">
@@ -1028,12 +1262,36 @@ export default function FactFind() {
             <DualField label="Standard drinks per week?" v1={data.client1DrinksPerWeek} v2={data.client2DrinksPerWeek} onChange1={v => updateData({ client1DrinksPerWeek: v })} onChange2={v => updateData({ client2DrinksPerWeek: v })} />
             <DualField label="Recreational drug use?" v1={data.client1RecreationalDrugs} v2={data.client2RecreationalDrugs} onChange1={v => updateData({ client1RecreationalDrugs: v })} onChange2={v => updateData({ client2RecreationalDrugs: v })} />
             <DualField label="General health condition" v1={data.client1GeneralHealth} v2={data.client2GeneralHealth} onChange1={v => updateData({ client1GeneralHealth: v })} onChange2={v => updateData({ client2GeneralHealth: v })} />
+            
+            {/* Health conditions — checkboxes with expandable questions */}
             <div className="pt-4 border-t">
               <h4 className="font-semibold text-sm mb-3">Do any of the following conditions apply?</h4>
               <div className="flex items-center gap-2 mb-3"><Checkbox checked={data.healthConditionsNoneApply} onCheckedChange={v => updateData({ healthConditionsNoneApply: !!v })} /><Label className="text-sm">None apply</Label></div>
               {!data.healthConditionsNoneApply && (
-                <div className="grid grid-cols-2 gap-2">
-                  {HEALTH_CONDITIONS.map(c => (<label key={c} className="flex items-center gap-2 text-sm"><Checkbox checked={data.healthConditions[c]} onCheckedChange={v => updateData({ healthConditions: { ...data.healthConditions, [c]: !!v } })} />{c}</label>))}
+                <div className="space-y-1">
+                  {HEALTH_CONDITIONS.map(c => (
+                    <div key={c}>
+                      <label className="flex items-center gap-2 text-sm py-1">
+                        <Checkbox checked={data.healthConditions[c]} onCheckedChange={v => {
+                          updateData({ healthConditions: { ...data.healthConditions, [c]: !!v } });
+                          if (v) setExpandedConditions(prev => ({ ...prev, [c]: true }));
+                        }} />
+                        {c}
+                        {data.healthConditions[c] && (
+                          <button type="button" onClick={() => toggleConditionExpand(c)} className="ml-auto text-muted-foreground hover:text-foreground">
+                            {expandedConditions[c] ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </label>
+                      {data.healthConditions[c] && expandedConditions[c] && (
+                        <div className="ml-8 mb-3 p-3 rounded-lg border bg-muted/30 space-y-2">
+                          {(CONDITION_QUESTIONS[c] || []).map(q => (
+                            <Field key={q} label={q} value={data.healthDetails[`${c}__${q}`] || ""} onChange={v => updateData({ healthDetails: { ...data.healthDetails, [`${c}__${q}`]: v } })} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -1041,154 +1299,36 @@ export default function FactFind() {
               <h4 className="font-semibold text-sm mb-3">Do any of the following scenarios apply?</h4>
               <div className="flex items-center gap-2 mb-3"><Checkbox checked={data.healthScenariosNoneApply} onCheckedChange={v => updateData({ healthScenariosNoneApply: !!v })} /><Label className="text-sm">None apply</Label></div>
               {!data.healthScenariosNoneApply && (
-                <div className="space-y-2">
-                  {HEALTH_SCENARIOS.map(s => (<label key={s} className="flex items-center gap-2 text-sm"><Checkbox checked={data.healthScenarios[s]} onCheckedChange={v => updateData({ healthScenarios: { ...data.healthScenarios, [s]: !!v } })} />{s}</label>))}
+                <div className="space-y-1">
+                  {HEALTH_SCENARIOS.map(s => (
+                    <div key={s}>
+                      <label className="flex items-center gap-2 text-sm py-1">
+                        <Checkbox checked={data.healthScenarios[s]} onCheckedChange={v => {
+                          updateData({ healthScenarios: { ...data.healthScenarios, [s]: !!v } });
+                          if (v) setExpandedConditions(prev => ({ ...prev, [s]: true }));
+                        }} />
+                        {s}
+                        {data.healthScenarios[s] && (
+                          <button type="button" onClick={() => toggleConditionExpand(s)} className="ml-auto text-muted-foreground hover:text-foreground">
+                            {expandedConditions[s] ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </label>
+                      {data.healthScenarios[s] && expandedConditions[s] && (
+                        <div className="ml-8 mb-3 p-3 rounded-lg border bg-muted/30 space-y-2">
+                          {(CONDITION_QUESTIONS[s] || []).map(q => (
+                            <Field key={q} label={q} value={data.healthDetails[`${s}__${q}`] || ""} onChange={v => updateData({ healthDetails: { ...data.healthDetails, [`${s}__${q}`]: v } })} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Health Conditions Detail */}
-          {allActiveHealth.length > 0 && (
-            <>
-              <SectionDivider title="Health Condition Details" />
-              <div className="space-y-6">
-                <p className="text-xs text-muted-foreground">Provide detailed information for each selected condition.</p>
-                {allActiveHealth.map(condition => (
-                  <div key={condition} className="space-y-2 p-4 rounded-lg border">
-                    <h4 className="font-semibold text-sm">{condition}</h4>
-                    <Textarea value={data.healthDetails[condition] || ""} onChange={e => updateData({ healthDetails: { ...data.healthDetails, [condition]: e.target.value } })} className="text-sm" rows={6} placeholder={`Enter details for ${condition}...`} />
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Part B — Adviser Section */}
-          <SectionDivider title="Part B — Financial Adviser Section" />
-          <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
-              <p className="text-xs text-muted-foreground">This section is to be completed by a licensed financial adviser.</p>
-            </div>
-            <Field label="Date Completed" value={data.partBDateCompleted} onChange={v => updateData({ partBDateCompleted: v })} />
-            <Field label="Adviser Name" value={data.partBAdviserName} onChange={v => updateData({ partBAdviserName: v })} />
-            <div><Label className="text-xs text-muted-foreground">Initial Reasons For Seeking Advice</Label><Textarea value={data.initialReasonsForAdvice} onChange={e => updateData({ initialReasonsForAdvice: e.target.value })} className="text-sm" rows={4} /></div>
-          </div>
-
-          {/* Objectives */}
-          <SectionDivider title="Objectives" />
-          <div className="space-y-4">
-            {data.objectives.map((o, i) => (
-              <div key={i} className="p-4 rounded-lg border space-y-3">
-                <h4 className="text-sm font-semibold">Objective {i + 1}</h4>
-                <Field label="Objective" value={o.objective} onChange={v => { const objs = [...data.objectives]; objs[i] = { ...o, objective: v }; updateData({ objectives: objs }); }} />
-                <div className="grid grid-cols-3 gap-2">
-                  <Field label="Term" value={o.term} onChange={v => { const objs = [...data.objectives]; objs[i] = { ...o, term: v }; updateData({ objectives: objs }); }} />
-                  <Field label="Priority (1-9)" value={o.priority} onChange={v => { const objs = [...data.objectives]; objs[i] = { ...o, priority: v }; updateData({ objectives: objs }); }} />
-                  <Field label="Amount Required" value={o.amountRequired} onChange={v => { const objs = [...data.objectives]; objs[i] = { ...o, amountRequired: v }; updateData({ objectives: objs }); }} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Advice Goals & Scope */}
-          <SectionDivider title="Advice Goals & Scope" />
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-semibold mb-3">Advice Goals (Fundable Through Superannuation)</h3>
-              {Object.keys(data.adviceGoalsSuper).map(k => (<label key={k} className="flex items-center gap-2 text-sm mb-2"><Checkbox checked={data.adviceGoalsSuper[k]} onCheckedChange={v => updateData({ adviceGoalsSuper: { ...data.adviceGoalsSuper, [k]: !!v } })} />{k}</label>))}
-            </div>
-            <div>
-              <h3 className="font-semibold mb-3">Advice Goals (Fundable Outside of Superannuation)</h3>
-              {Object.keys(data.adviceGoalsOutside).map(k => (<label key={k} className="flex items-center gap-2 text-sm mb-2"><Checkbox checked={data.adviceGoalsOutside[k]} onCheckedChange={v => updateData({ adviceGoalsOutside: { ...data.adviceGoalsOutside, [k]: !!v } })} />{k}</label>))}
-            </div>
-            <div className="pt-4 border-t">
-              <h4 className="font-semibold text-sm mb-3">Retirement Objectives</h4>
-              <DualField label="Planned retirement date/age" v1={data.client1RetirementAge} v2={data.client2RetirementAge} onChange1={v => updateData({ client1RetirementAge: v })} onChange2={v => updateData({ client2RetirementAge: v })} />
-              <DualField label="Expected retirement income (p.a)" v1={data.client1RetirementIncome} v2={data.client2RetirementIncome} onChange1={v => updateData({ client1RetirementIncome: v })} onChange2={v => updateData({ client2RetirementIncome: v })} />
-              <div className="grid grid-cols-2 gap-2 mt-3">
-                <Field label="Emergency cash requirements (Now)" value={data.emergencyFundsNow} onChange={v => updateData({ emergencyFundsNow: v })} />
-                <Field label="Emergency cash requirements (Retirement)" value={data.emergencyFundsRetirement} onChange={v => updateData({ emergencyFundsRetirement: v })} />
-              </div>
-            </div>
-            <div className="pt-4 border-t">
-              <h4 className="font-semibold text-sm mb-3">Scope of Advice Agreement</h4>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm"><input type="radio" name="scope" checked={data.scopeOfAdvice === "full"} onChange={() => updateData({ scopeOfAdvice: "full" })} /> Full Comprehensive Advice</label>
-                <label className="flex items-center gap-2 text-sm"><input type="radio" name="scope" checked={data.scopeOfAdvice === "limited"} onChange={() => updateData({ scopeOfAdvice: "limited" })} /> Limited / Scaled Advice</label>
-              </div>
-              {data.scopeOfAdvice === "limited" && (
-                <div className="mt-3 space-y-2">
-                  {Object.keys(data.scopeLimitedAreas).map(k => (<label key={k} className="flex items-center gap-2 text-sm"><Checkbox checked={data.scopeLimitedAreas[k]} onCheckedChange={v => updateData({ scopeLimitedAreas: { ...data.scopeLimitedAreas, [k]: !!v } })} />{k}</label>))}
-                  <Field label="Other" value={data.scopeOther} onChange={v => updateData({ scopeOther: v })} />
-                  <div><Label className="text-xs text-muted-foreground">Why are you choosing not to receive advice on other areas?</Label><Textarea value={data.scopeLimitingExplanation} onChange={e => updateData({ scopeLimitingExplanation: e.target.value })} className="text-sm" rows={3} /></div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Investment Goals */}
-          <SectionDivider title="Investment Goals" />
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <h4 className="font-semibold text-sm">Administration Vehicle</h4>
-              {["The Basic platform has features suitable to me", "The Wrap platform has features suitable to me", "I want to invest via a Self-Managed Superannuation Fund"].map(item => (
-                <DualField key={item} label={item} v1={data.investmentGoals[`c1_${item}`] || ""} v2={data.investmentGoals[`c2_${item}`] || ""} onChange1={v => updateData({ investmentGoals: { ...data.investmentGoals, [`c1_${item}`]: v } })} onChange2={v => updateData({ investmentGoals: { ...data.investmentGoals, [`c2_${item}`]: v } })} />
-              ))}
-              <h4 className="font-semibold text-sm">Investment Vehicle</h4>
-              {["Direct shares", "Managed funds", "SMA"].map(item => (
-                <DualField key={item} label={`I would like assets in ${item}`} v1={data.investmentGoals[`c1_vehicle_${item}`] || ""} v2={data.investmentGoals[`c2_vehicle_${item}`] || ""} onChange1={v => updateData({ investmentGoals: { ...data.investmentGoals, [`c1_vehicle_${item}`]: v } })} onChange2={v => updateData({ investmentGoals: { ...data.investmentGoals, [`c2_vehicle_${item}`]: v } })} />
-              ))}
-              <h4 className="font-semibold text-sm">Investment Knowledge & Experience</h4>
-              <DualField label="Level of knowledge" v1={data.investmentKnowledge.c1_level || ""} v2={data.investmentKnowledge.c2_level || ""} onChange1={v => updateData({ investmentKnowledge: { ...data.investmentKnowledge, c1_level: v } })} onChange2={v => updateData({ investmentKnowledge: { ...data.investmentKnowledge, c2_level: v } })} />
-              <h5 className="text-xs font-semibold text-muted-foreground">Previously invested in:</h5>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.keys(data.investmentExperience).map(k => (<label key={k} className="flex items-center gap-2 text-sm"><Checkbox checked={data.investmentExperience[k]} onCheckedChange={v => updateData({ investmentExperience: { ...data.investmentExperience, [k]: !!v } })} />{k}</label>))}
-              </div>
-              <div><Label className="text-xs text-muted-foreground">Notes</Label><Textarea value={data.investmentNotes} onChange={e => updateData({ investmentNotes: e.target.value })} className="text-sm" rows={3} /></div>
-            </div>
-          </div>
-
-          {/* Risk Profile */}
-          <SectionDivider title="Risk Profile Questionnaire" />
-          <div className="space-y-6">
-            {riskQuestions.map((q, qi) => (
-              <div key={qi} className="p-4 rounded-lg border space-y-3">
-                <p className="text-sm font-medium">{q.q}</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Client 1</Label>
-                    <Select value={data.riskAnswers[`c1_q${qi}`] || ""} onValueChange={v => updateData({ riskAnswers: { ...data.riskAnswers, [`c1_q${qi}`]: v } })}>
-                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select..." /></SelectTrigger>
-                      <SelectContent>{q.options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Client 2</Label>
-                    <Select value={data.riskAnswers[`c2_q${qi}`] || ""} onValueChange={v => updateData({ riskAnswers: { ...data.riskAnswers, [`c2_q${qi}`]: v } })}>
-                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select..." /></SelectTrigger>
-                      <SelectContent>{q.options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            ))}
-            <div className="pt-4 border-t space-y-3">
-              <h4 className="font-semibold text-sm">Results</h4>
-              <DualField label="Total points" v1={data.client1TotalPoints} v2={data.client2TotalPoints} onChange1={v => updateData({ client1TotalPoints: v })} onChange2={v => updateData({ client2TotalPoints: v })} />
-              <DualField label="Risk profile" v1={data.client1RiskProfile} v2={data.client2RiskProfile} onChange1={v => updateData({ client1RiskProfile: v })} onChange2={v => updateData({ client2RiskProfile: v })} />
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm"><input type="radio" name="riskAgree" checked={data.riskAgree === "agree"} onChange={() => updateData({ riskAgree: "agree" })} /> I/We agree with the category assigned</label>
-                <label className="flex items-center gap-2 text-sm"><input type="radio" name="riskAgree" checked={data.riskAgree === "disagree"} onChange={() => updateData({ riskAgree: "disagree" })} /> I/We do not agree with the category assigned</label>
-              </div>
-              {data.riskAgree === "disagree" && (
-                <>
-                  <Field label="Altered risk profile" value={data.alteredRiskProfile} onChange={v => updateData({ alteredRiskProfile: v })} />
-                  <div><Label className="text-xs text-muted-foreground">Reason for altered risk profile</Label><Textarea value={data.alteredRiskReason} onChange={e => updateData({ alteredRiskReason: e.target.value })} className="text-sm" rows={3} /></div>
-                </>
-              )}
-            </div>
-          </div>
+          {/* NOTE: Part B is NOT shown in the form — it's only included in the PDF export */}
 
           {/* Insurer Information */}
           <SectionDivider title="Information for Insurer" />
@@ -1227,8 +1367,12 @@ export default function FactFind() {
           <SectionDivider title="Nomination of Beneficiaries" />
           <div className="space-y-6">
             {renderBeneficiaries(data.client1Beneficiaries, 1)}
-            <div className="border-t pt-4" />
-            {renderBeneficiaries(data.client2Beneficiaries, 2)}
+            {showClient2 && (
+              <>
+                <div className="border-t pt-4" />
+                {renderBeneficiaries(data.client2Beneficiaries, 2)}
+              </>
+            )}
             <div><Label className="text-xs text-muted-foreground">Additional notes</Label><Textarea value={data.beneficiaryNotes} onChange={e => updateData({ beneficiaryNotes: e.target.value })} className="text-sm" rows={3} /></div>
           </div>
 
@@ -1248,13 +1392,13 @@ export default function FactFind() {
             </div>
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm"><Checkbox checked={data.client1NoContact} onCheckedChange={v => updateData({ client1NoContact: !!v })} /> Client 1 - No call/no contact</label>
-              <label className="flex items-center gap-2 text-sm"><Checkbox checked={data.client2NoContact} onCheckedChange={v => updateData({ client2NoContact: !!v })} /> Client 2 - No call/no contact</label>
+              {showClient2 && <label className="flex items-center gap-2 text-sm"><Checkbox checked={data.client2NoContact} onCheckedChange={v => updateData({ client2NoContact: !!v })} /> Client 2 - No call/no contact</label>}
             </div>
           </div>
 
           {/* Bottom download button */}
           <div className="pt-8 pb-12 flex justify-center">
-            <Button size="lg" onClick={exportPDF} disabled={exporting} className="gap-2 bg-cyan hover:bg-cyan/80 text-navy font-semibold px-8">
+            <Button size="lg" onClick={exportPDF} disabled={exporting} className="gap-2 bg-cyan hover:bg-cyan/80 text-[hsl(215_65%_14%)] font-semibold px-8 shadow-lg shadow-cyan/20">
               <Download className="w-4 h-4" />
               {exporting ? "Exporting..." : "Download Fact Find PDF"}
             </Button>
