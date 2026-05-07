@@ -325,7 +325,7 @@ export default function Admin() {
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={reportSearch}
-                onChange={e => setReportSearch(e.target.value)}
+                onChange={e => { setReportSearch(e.target.value); if (clientFilter) setSearchParams({}); }}
                 placeholder="Search clients…"
                 className="pl-9 bg-white border-border/60 shadow-sm"
               />
