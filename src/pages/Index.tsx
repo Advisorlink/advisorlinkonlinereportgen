@@ -244,22 +244,25 @@ export default function Index() {
   return (
     <CRMLayout>
       <div className="h-[calc(100vh-48px)] overflow-hidden">
-        <div className="no-print px-4 py-2 flex items-center justify-between bg-white border-b border-border">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-navy">Report Generator</span>
+        <div className="no-print px-4 py-2.5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b border-border/60">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-cyan/10 flex items-center justify-center">
+              <FileText className="w-4 h-4 text-cyan" />
+            </div>
+            <span className="text-sm font-semibold text-foreground font-heading">Report Generator</span>
           </div>
           <div className="flex items-center gap-2">
             <input
               ref={fileRef} type="file" accept=".xlsx,.xls" className="hidden"
               onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.currentTarget.value = ""; }}
             />
-            <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
+            <Button variant="outline" size="sm" className="h-9 hover:bg-muted/50" onClick={() => fileRef.current?.click()}>
               Upload XLSX
             </Button>
-            <Button size="sm" onClick={exportPDF} disabled={exporting} className="bg-cyan text-cyan-foreground hover:bg-cyan/90">
+            <Button size="sm" onClick={exportPDF} disabled={exporting} className="h-9 gradient-accent text-white border-0 shadow-md shadow-cyan/20 hover:shadow-cyan/30 transition-all">
               {exporting ? "Exporting…" : "Download PDF"}
             </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={openFullScreen} title="Full screen">
+            <Button variant="outline" size="icon" className="h-9 w-9 hover:bg-muted/50" onClick={openFullScreen} title="Full screen">
               <Maximize2 className="w-4 h-4" />
             </Button>
           </div>
