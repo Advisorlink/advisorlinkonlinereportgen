@@ -8,6 +8,7 @@ import { ClientInputsProvider } from "@/hooks/useClientInputs";
 import { MeetingHostProvider } from "@/hooks/useMeetingHost";
 import { ProtectedApp } from "@/components/ProtectedApp";
 import AICaller from "./pages/AICaller.tsx";
+import FactFind from "./pages/FactFind.tsx";
 import Auth from "./pages/Auth.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Presentations from "./pages/Presentations.tsx";
@@ -41,6 +42,7 @@ const App = () => (
                 <Route path="/referrals" element={<ProtectedApp><Referrals /></ProtectedApp>} />
                 <Route path="/esign" element={<ProtectedApp><ESign /></ProtectedApp>} />
                 <Route path="/ai-caller" element={<ProtectedApp><AICaller /></ProtectedApp>} />
+                <Route path="/fact-find" element={<ProtectedApp><FactFind /></ProtectedApp>} />
                 <Route path="/refer" element={<ReferralForm />} />
                 <Route path="/refer/claim" element={<ReferralLanding />} />
                 <Route path="/meeting/join" element={<MeetingJoin />} />
