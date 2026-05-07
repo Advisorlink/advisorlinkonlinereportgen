@@ -8,18 +8,19 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
-  Search, Send, Paperclip, Smile, Phone, Mail, User, MessageSquare,
-  ChevronDown, Archive, X, MoreVertical, Clock, CheckCheck, Check,
-  AlertCircle, Ban, Plus, Filter, RefreshCw, Image, FileText,
-  Tag, Star, Bell, ArrowLeft,
+  Search, Send, Paperclip, Phone, Mail, User, MessageSquare,
+  Archive, X, MoreVertical, Clock, CheckCheck, Check,
+  AlertCircle, Ban, Plus, Tag, ArrowLeft, FileText, ChevronDown,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Conversation = {
   id: string; contact_id: string; status: string; is_unread: boolean;
@@ -39,6 +40,14 @@ type Message = {
   media_urls: string[]; status: string; error_code: string | null;
   error_message: string | null; created_at: string; from_number: string;
   to_number: string; twilio_sid: string | null; segment_count: number;
+};
+
+type SmsNumber = {
+  id: string; phone_number: string; provider: string; friendly_name: string | null; is_default: boolean;
+};
+
+type Template = {
+  id: string; name: string; category: string; body: string;
 };
 
 const statusIcon = (s: string) => {
@@ -78,6 +87,14 @@ export default function Messages() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
 
+  // From number selector
+  const [smsNumbers, setSmsNumbers] = useState<SmsNumber[]>([]);
+  const [selectedFromNumber, setSelectedFromNumber] = useState<string>("");
+
+  // Template quick-insert
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [showTemplates, setShowTemplates] = useState(false);
+
   const fetchConversations = useCallback(async () => {
     const { data, error } = await supabase
       .from("sms_conversations")
@@ -96,7 +113,29 @@ export default function Messages() {
     if (data) setMessages(data as unknown as Message[]);
   }, []);
 
-  useEffect(() => { fetchConversations(); }, [fetchConversations]);
+  const fetchSmsNumbers = useCallback(async () => {
+    const { data } = await supabase
+      .from("sms_twilio_numbers")
+      .select("id, phone_number, provider, friendly_name, is_default")
+      .order("is_default", { ascending: false });
+    if (data) {
+      setSmsNumbers(data as unknown as SmsNumber[]);
+      const def = data.find((n: any) => n.is_default);
+      if (def) setSelectedFromNumber((def as any).phone_number);
+      else if (data.length > 0) setSelectedFromNumber((data[0] as any).phone_number);
+    }
+  }, []);
+
+  const fetchTemplates = useCallback(async () => {
+    const { data } = await supabase
+      .from("sms_templates")
+      .select("id, name, category, body")
+      .eq("is_active", true)
+      .order("category");
+    if (data) setTemplates(data as unknown as Template[]);
+  }, []);
+
+  useEffect(() => { fetchConversations(); fetchSmsNumbers(); fetchTemplates(); }, [fetchConversations, fetchSmsNumbers, fetchTemplates]);
 
   // Realtime subscriptions
   useEffect(() => {
@@ -116,7 +155,6 @@ export default function Messages() {
   useEffect(() => {
     if (activeConv) {
       fetchMessages(activeConv.id);
-      // Mark as read
       if (activeConv.is_unread) {
         supabase.from("sms_conversations").update({ is_unread: false, unread_count: 0 }).eq("id", activeConv.id).then();
       }
@@ -135,6 +173,7 @@ export default function Messages() {
           body: messageText,
           contactId: activeConv.contact_id,
           conversationId: activeConv.id,
+          fromNumber: selectedFromNumber || undefined,
         },
       });
       if (error) throw error;
@@ -148,9 +187,24 @@ export default function Messages() {
     setSending(false);
   };
 
+  const handleInsertTemplate = (template: Template) => {
+    // Replace merge fields with contact data if available
+    let body = template.body;
+    if (activeConv) {
+      const c = activeConv.sms_contacts;
+      body = body
+        .replace(/\{\{first_name\}\}/g, c.first_name || c.full_name.split(" ")[0] || "")
+        .replace(/\{\{last_name\}\}/g, c.last_name || "")
+        .replace(/\{\{full_name\}\}/g, c.full_name || "")
+        .replace(/\{\{phone\}\}/g, c.phone || "")
+        .replace(/\{\{email\}\}/g, c.email || "");
+    }
+    setMessageText(body);
+    setShowTemplates(false);
+  };
+
   const handleNewChat = async () => {
     if (!newChatPhone.trim() || !user) return;
-    // Create contact then open conversation
     const { data: contact } = await supabase
       .from("sms_contacts")
       .insert({ user_id: user.id, full_name: newChatName || newChatPhone, phone: newChatPhone })
@@ -199,12 +253,13 @@ export default function Messages() {
   const charCount = messageText.length;
   const segmentCount = Math.ceil(charCount / 160) || 1;
 
+  const providerLabel = (p: string) => p === "telnyx" ? "Telnyx" : "Twilio";
+
   return (
     <CRMLayout>
       <div className="flex h-[calc(100vh-2rem)] overflow-hidden rounded-xl border border-border bg-card shadow-card">
         {/* LEFT — Conversation List */}
         <div className={`flex flex-col border-r border-border ${activeConv ? "hidden md:flex" : "flex"} w-full md:w-80 lg:w-96 shrink-0`}>
-          {/* Header */}
           <div className="p-4 border-b border-border space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-foreground font-heading flex items-center gap-2">
@@ -228,13 +283,12 @@ export default function Messages() {
             </Tabs>
           </div>
 
-          {/* List */}
           <ScrollArea className="flex-1">
             {loading ? (
               <div className="p-8 text-center text-muted-foreground text-sm">Loading...</div>
             ) : filtered.length === 0 ? (
               <div className="p-8 text-center">
-                <MessageSquare className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <MessageSquare className="w-12 h-12 text-muted-foreground/20 mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground">No conversations yet</p>
                 <Button size="sm" variant="outline" className="mt-3" onClick={() => setShowNewChat(true)}>
                   <Plus className="w-3 h-3 mr-1" /> Start a conversation
@@ -358,6 +412,66 @@ export default function Messages() {
                 </div>
               ) : (
                 <>
+                  {/* From number & template selector row */}
+                  <div className="flex items-center gap-2 mb-2">
+                    {smsNumbers.length > 0 && (
+                      <Select value={selectedFromNumber} onValueChange={setSelectedFromNumber}>
+                        <SelectTrigger className="h-7 text-[11px] w-auto min-w-[140px] max-w-[200px] bg-muted/50 border-0">
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="w-3 h-3 text-muted-foreground shrink-0" />
+                            <SelectValue placeholder="From number" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {smsNumbers.map((n) => (
+                            <SelectItem key={n.id} value={n.phone_number}>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-xs">{n.phone_number}</span>
+                                <span className={`text-[9px] px-1 py-0 rounded ${n.provider === "telnyx" ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"}`}>
+                                  {providerLabel(n.provider)}
+                                </span>
+                                {n.is_default && <span className="text-[9px] text-muted-foreground">default</span>}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+
+                    <Popover open={showTemplates} onOpenChange={setShowTemplates}>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-7 text-[11px] text-muted-foreground hover:text-foreground gap-1.5 px-2">
+                          <FileText className="w-3 h-3" /> Templates
+                          <ChevronDown className="w-3 h-3" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-72 p-0" align="start">
+                        <div className="p-2 border-b border-border">
+                          <p className="text-xs font-semibold text-foreground">Quick Insert Template</p>
+                        </div>
+                        <ScrollArea className="max-h-[250px]">
+                          {templates.length === 0 ? (
+                            <div className="p-4 text-center text-xs text-muted-foreground">No templates yet</div>
+                          ) : (
+                            templates.map((t) => (
+                              <button
+                                key={t.id}
+                                onClick={() => handleInsertTemplate(t)}
+                                className="w-full text-left px-3 py-2 hover:bg-muted/50 border-b border-border/50 last:border-0"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-medium text-foreground">{t.name}</span>
+                                  <Badge variant="secondary" className="text-[9px] px-1">{t.category}</Badge>
+                                </div>
+                                <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{t.body}</p>
+                              </button>
+                            ))
+                          )}
+                        </ScrollArea>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
                   <div className="flex items-end gap-2">
                     <div className="flex-1 relative">
                       <Textarea
@@ -423,14 +537,12 @@ export default function Messages() {
             </div>
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
-                {/* Contact info */}
                 <div className="space-y-2">
                   <DetailRow icon={<Phone className="w-3.5 h-3.5" />} label="Phone" value={activeConv.sms_contacts.phone} />
                   {activeConv.sms_contacts.email && <DetailRow icon={<Mail className="w-3.5 h-3.5" />} label="Email" value={activeConv.sms_contacts.email} />}
                   {activeConv.sms_contacts.lead_source && <DetailRow icon={<Tag className="w-3.5 h-3.5" />} label="Source" value={activeConv.sms_contacts.lead_source} />}
                 </div>
 
-                {/* Status */}
                 <div className="border-t border-border pt-3">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Status</p>
                   <div className="flex flex-wrap gap-1.5">
@@ -446,7 +558,6 @@ export default function Messages() {
                   </div>
                 </div>
 
-                {/* Tags */}
                 {activeConv.sms_contacts.tags && activeConv.sms_contacts.tags.length > 0 && (
                   <div className="border-t border-border pt-3">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tags</p>
@@ -458,7 +569,6 @@ export default function Messages() {
                   </div>
                 )}
 
-                {/* Notes */}
                 {activeConv.sms_contacts.notes && (
                   <div className="border-t border-border pt-3">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Notes</p>
@@ -466,7 +576,6 @@ export default function Messages() {
                   </div>
                 )}
 
-                {/* Timeline info */}
                 <div className="border-t border-border pt-3">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Activity</p>
                   <div className="space-y-1.5">

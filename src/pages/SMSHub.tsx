@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   FileText, Plus, Edit, Trash2, Copy, Send, Users, BarChart3,
   Clock, CheckCheck, AlertCircle, Play, Pause, Calendar, Search,
-  MessageSquare, Target, TrendingUp, Mail,
+  MessageSquare, Target, TrendingUp, Mail, Phone, Star, Settings,
 } from "lucide-react";
 
 const TEMPLATE_CATEGORIES = [
@@ -51,11 +51,17 @@ type Campaign = {
   created_at: string;
 };
 
+type SmsNumber = {
+  id: string; phone_number: string; provider: string; friendly_name: string | null;
+  is_default: boolean; sms_enabled: boolean; mms_enabled: boolean; created_at: string;
+};
+
 export default function SMSHub() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("templates");
   const [templates, setTemplates] = useState<Template[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [smsNumbers, setSmsNumbers] = useState<SmsNumber[]>([]);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [showCampaignDialog, setShowCampaignDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
@@ -77,7 +83,12 @@ export default function SMSHub() {
     if (data) setCampaigns(data as unknown as Campaign[]);
   };
 
-  useEffect(() => { fetchTemplates(); fetchCampaigns(); }, []);
+  const fetchNumbers = async () => {
+    const { data } = await supabase.from("sms_twilio_numbers").select("*").order("is_default", { ascending: false });
+    if (data) setSmsNumbers(data as unknown as SmsNumber[]);
+  };
+
+  useEffect(() => { fetchTemplates(); fetchCampaigns(); fetchNumbers(); }, []);
 
   const handleSaveTemplate = async () => {
     if (!tplName.trim() || !tplBody.trim() || !user) return;
@@ -133,6 +144,20 @@ export default function SMSHub() {
     toast({ title: "Campaign created as draft" });
   };
 
+  const handleSetDefault = async (numberId: string) => {
+    // Clear all defaults first, then set the selected one
+    await supabase.from("sms_twilio_numbers").update({ is_default: false } as any).neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabase.from("sms_twilio_numbers").update({ is_default: true } as any).eq("id", numberId);
+    fetchNumbers();
+    toast({ title: "Default number updated" });
+  };
+
+  const handleDeleteNumber = async (numberId: string) => {
+    await supabase.from("sms_twilio_numbers").delete().eq("id", numberId);
+    fetchNumbers();
+    toast({ title: "Number removed" });
+  };
+
   const filteredTemplates = templates.filter((t) =>
     !searchQ || t.name.toLowerCase().includes(searchQ.toLowerCase()) || t.category.toLowerCase().includes(searchQ.toLowerCase())
   );
@@ -146,7 +171,7 @@ export default function SMSHub() {
             <h1 className="text-2xl font-bold text-foreground font-heading flex items-center gap-2">
               <MessageSquare className="w-6 h-6 text-cyan" /> SMS Hub
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">Templates, campaigns, and analytics</p>
+            <p className="text-sm text-muted-foreground mt-1">Templates, campaigns, phone numbers & analytics</p>
           </div>
         </div>
 
@@ -154,6 +179,7 @@ export default function SMSHub() {
           <TabsList className="bg-muted/50">
             <TabsTrigger value="templates" className="gap-1.5"><FileText className="w-3.5 h-3.5" /> Templates</TabsTrigger>
             <TabsTrigger value="campaigns" className="gap-1.5"><Target className="w-3.5 h-3.5" /> Campaigns</TabsTrigger>
+            <TabsTrigger value="numbers" className="gap-1.5"><Phone className="w-3.5 h-3.5" /> Numbers</TabsTrigger>
             <TabsTrigger value="analytics" className="gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> Analytics</TabsTrigger>
           </TabsList>
 
@@ -239,7 +265,6 @@ export default function SMSHub() {
                           </div>
                         </div>
                       </div>
-                      {/* Stats bar */}
                       {c.total_recipients > 0 && (
                         <div className="mt-3 grid grid-cols-5 gap-2 text-center text-[10px]">
                           <div><p className="font-bold text-foreground">{c.total_recipients}</p><p className="text-muted-foreground">Recipients</p></div>
@@ -249,6 +274,103 @@ export default function SMSHub() {
                           <div><p className="font-bold text-amber-500">{c.opt_out_count}</p><p className="text-muted-foreground">Opt Outs</p></div>
                         </div>
                       )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* PHONE NUMBERS TAB */}
+          <TabsContent value="numbers" className="mt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {smsNumbers.length} number{smsNumbers.length !== 1 ? "s" : ""} configured for SMS
+                </p>
+              </div>
+              <Button variant="outline" size="sm" onClick={fetchNumbers} className="gap-1.5">
+                <Settings className="w-3.5 h-3.5" /> Refresh
+              </Button>
+            </div>
+
+            {smsNumbers.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Phone className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground mb-1">No SMS numbers configured</p>
+                  <p className="text-xs text-muted-foreground">
+                    Go to AI Caller → Phone Numbers to buy or import a number.
+                    <br />
+                    Numbers purchased there will automatically appear here for SMS.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {smsNumbers.map((n) => (
+                  <Card key={n.id} className={`relative ${n.is_default ? "ring-1 ring-cyan/50" : ""}`}>
+                    <CardContent className="pt-4 pb-3 px-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                            n.provider === "telnyx" ? "bg-emerald-500/20" : "bg-red-500/20"
+                          }`}>
+                            <Phone className={`w-4.5 h-4.5 ${n.provider === "telnyx" ? "text-emerald-400" : "text-red-400"}`} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-mono font-semibold text-foreground">{n.phone_number}</p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium uppercase tracking-wider ${
+                                n.provider === "telnyx"
+                                  ? "bg-emerald-500/20 text-emerald-400"
+                                  : "bg-red-500/20 text-red-400"
+                              }`}>
+                                {n.provider}
+                              </span>
+                              {n.is_default && (
+                                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan/20 text-cyan font-medium">DEFAULT</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {n.friendly_name && (
+                        <p className="text-xs text-muted-foreground mb-3">{n.friendly_name}</p>
+                      )}
+
+                      <div className="flex items-center gap-2 text-[10px] text-muted-foreground mb-3">
+                        <span className={`flex items-center gap-1 ${n.sms_enabled ? "text-online" : "text-muted-foreground"}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${n.sms_enabled ? "bg-online" : "bg-muted-foreground"}`} />
+                          SMS
+                        </span>
+                        <span className={`flex items-center gap-1 ${n.mms_enabled ? "text-online" : "text-muted-foreground"}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${n.mms_enabled ? "bg-online" : "bg-muted-foreground"}`} />
+                          MMS
+                        </span>
+                      </div>
+
+                      <div className="flex gap-1.5">
+                        {!n.is_default && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 h-7 text-xs gap-1"
+                            onClick={() => handleSetDefault(n.id)}
+                          >
+                            <Star className="w-3 h-3" /> Set Default
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs text-destructive hover:text-destructive"
+                          onClick={() => handleDeleteNumber(n.id)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -358,23 +480,23 @@ function AnalyticsDashboard() {
     fetch();
   }, []);
 
-  const cards = [
-    { label: "SMS Sent", value: stats.totalSent, icon: Send, color: "text-cyan" },
+  const statCards = [
+    { label: "Messages Sent", value: stats.totalSent, icon: Send, color: "text-cyan" },
     { label: "Delivered", value: stats.totalDelivered, icon: CheckCheck, color: "text-online" },
     { label: "Failed", value: stats.totalFailed, icon: AlertCircle, color: "text-destructive" },
-    { label: "Inbound Replies", value: stats.totalInbound, icon: Mail, color: "text-cyan" },
+    { label: "Inbound", value: stats.totalInbound, icon: Mail, color: "text-foreground" },
     { label: "Opt Outs", value: stats.totalOptOuts, icon: Users, color: "text-amber-500" },
     { label: "Conversations", value: stats.totalConversations, icon: MessageSquare, color: "text-foreground" },
   ];
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      {cards.map((c) => (
-        <Card key={c.label}>
-          <CardContent className="py-4 text-center">
-            <c.icon className={`w-6 h-6 mx-auto mb-2 ${c.color}`} />
-            <p className="text-2xl font-bold text-foreground">{c.value}</p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">{c.label}</p>
+      {statCards.map((s) => (
+        <Card key={s.label}>
+          <CardContent className="pt-4 pb-3 px-4 text-center">
+            <s.icon className={`w-6 h-6 mx-auto mb-2 ${s.color}`} />
+            <p className="text-2xl font-bold text-foreground">{s.value}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">{s.label}</p>
           </CardContent>
         </Card>
       ))}
