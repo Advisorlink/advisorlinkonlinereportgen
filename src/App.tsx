@@ -16,6 +16,7 @@ import Index from "./pages/Index.tsx";
 import Admin from "./pages/Admin.tsx";
 import Referrals from "./pages/Referrals.tsx";
 import Messages from "./pages/Messages.tsx";
+import SMSHub from "./pages/SMSHub.tsx";
 import ESign from "./pages/ESign.tsx";
 import ESignPublic from "./pages/ESignPublic.tsx";
 import ReferralForm from "./pages/ReferralForm.tsx";
@@ -42,6 +43,7 @@ const App = () => (
                 <Route path="/admin" element={<ProtectedApp><Admin /></ProtectedApp>} />
                 <Route path="/referrals" element={<ProtectedApp><Referrals /></ProtectedApp>} />
                 <Route path="/messages" element={<ProtectedApp><Messages /></ProtectedApp>} />
+                <Route path="/sms-hub" element={<ProtectedApp><SMSHub /></ProtectedApp>} />
                 <Route path="/esign" element={<ProtectedApp><ESign /></ProtectedApp>} />
                 <Route path="/ai-caller" element={<ProtectedApp><AICaller /></ProtectedApp>} />
                 <Route path="/fact-find" element={<ProtectedApp><FactFind /></ProtectedApp>} />
