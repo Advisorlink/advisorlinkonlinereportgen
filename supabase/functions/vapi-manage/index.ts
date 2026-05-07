@@ -716,6 +716,70 @@ After all questions are asked, follow the closing statements above to wrap up th
       );
     }
 
+    if (action === "auto-buy-telnyx-number") {
+      const TELNYX_KEY = Deno.env.get("TELNYX_API_KEY");
+      if (!TELNYX_KEY) throw new Error("TELNYX_API_KEY is not configured");
+
+      const { country, preferPrefix } = body;
+      const cc = country || "AU";
+      const params = new URLSearchParams();
+      params.set("filter[country_code]", cc);
+      params.set("filter[features][]", "sms");
+      params.set("filter[features][]", "voice");
+      params.set("page[size]", "20");
+
+      const searchRes = await fetch(`https://api.telnyx.com/v2/available_phone_numbers?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${TELNYX_KEY}` },
+      });
+      if (!searchRes.ok) {
+        const errText = await searchRes.text();
+        throw new Error(`Telnyx search failed [${searchRes.status}]: ${errText}`);
+      }
+      const searchResult = await searchRes.json();
+      const allNumbers = searchResult.data || [];
+      
+      // Filter by prefix if requested, otherwise pick first cheap one
+      let picked = allNumbers.find((n: any) => {
+        const pn = n.phone_number || "";
+        if (preferPrefix) return pn.startsWith(preferPrefix);
+        // Prefer $2 numbers over $15/$50 ones
+        const cost = parseFloat(n.cost_information?.upfront_cost || "999");
+        return cost <= 5;
+      });
+      if (!picked && allNumbers.length > 0) picked = allNumbers[0];
+      if (!picked) throw new Error("No available numbers found");
+
+      const phoneNumber = picked.phone_number;
+      console.log("Auto-buying Telnyx number:", phoneNumber);
+
+      // Order it
+      const orderRes = await fetch("https://api.telnyx.com/v2/number_orders", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${TELNYX_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phone_numbers: [{ phone_number: phoneNumber }] }),
+      });
+      if (!orderRes.ok) {
+        const errText = await orderRes.text();
+        throw new Error(`Telnyx order failed [${orderRes.status}]: ${errText}`);
+      }
+      const orderData = await orderRes.json();
+
+      return new Response(JSON.stringify({
+        purchased: {
+          phoneNumber,
+          orderId: orderData.data?.id,
+          status: orderData.data?.status || "pending",
+          cost: picked.cost_information,
+        },
+        provider: "telnyx",
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "search-telnyx-numbers") {
       const TELNYX_KEY = Deno.env.get("TELNYX_API_KEY");
       if (!TELNYX_KEY) throw new Error("TELNYX_API_KEY is not configured");
