@@ -628,6 +628,8 @@ export type Database = {
           client_phone: string | null
           created_at: string
           id: string
+          lost_reason_id: string | null
+          lost_reason_note: string | null
           notes: string | null
           position: number
           source: string | null
@@ -643,6 +645,8 @@ export type Database = {
           client_phone?: string | null
           created_at?: string
           id?: string
+          lost_reason_id?: string | null
+          lost_reason_note?: string | null
           notes?: string | null
           position?: number
           source?: string | null
@@ -658,6 +662,8 @@ export type Database = {
           client_phone?: string | null
           created_at?: string
           id?: string
+          lost_reason_id?: string | null
+          lost_reason_note?: string | null
           notes?: string | null
           position?: number
           source?: string | null
@@ -668,6 +674,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "pipeline_deals_lost_reason_id_fkey"
+            columns: ["lost_reason_id"]
+            isOneToOne: false
+            referencedRelation: "pipeline_lost_reasons"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pipeline_deals_stage_id_fkey"
             columns: ["stage_id"]
             isOneToOne: false
@@ -675,6 +688,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pipeline_lost_reasons: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          position: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+        }
+        Relationships: []
       }
       pipeline_stages: {
         Row: {

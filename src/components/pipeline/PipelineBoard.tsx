@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   DndContext,
@@ -12,12 +12,12 @@ import {
   type DragEndEvent,
   type DragOverEvent,
 } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { PipelineColumn } from "./PipelineColumn";
 import { PipelineDealCard } from "./PipelineDealCard";
 import { AddDealDialog } from "./AddDealDialog";
 import { DealProfileDrawer } from "./DealProfileDrawer";
-import { Kanban, Plus, DollarSign } from "lucide-react";
+import { LostReasonDialog } from "./LostReasonDialog";
+import { Kanban, Plus, DollarSign, Trophy, XCircle, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -33,7 +33,14 @@ type Deal = {
   position: number;
   created_at: string;
   updated_at: string;
+  lost_reason_id?: string | null;
+  lost_reason_note?: string | null;
 };
+
+type ViewFilter = "active" | "won" | "lost" | "all";
+
+const isLostStage = (s?: Stage) => !!s && s.name.toLowerCase() === "lost";
+const isWonStage = (s?: Stage) => !!s && s.name.toLowerCase() === "won";
 
 export function PipelineBoard() {
   const [stages, setStages] = useState<Stage[]>([]);
@@ -42,6 +49,13 @@ export function PipelineBoard() {
   const [addToStage, setAddToStage] = useState<string | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<ViewFilter>("active");
+  const [pendingLost, setPendingLost] = useState<{
+    dealId: string;
+    targetStageId: string;
+    previousStageId: string;
+    clientName: string;
+  } | null>(null);
   const { toast } = useToast();
 
   const sensors = useSensors(
@@ -55,16 +69,26 @@ export function PipelineBoard() {
       supabase.from("pipeline_deals").select("*").order("position"),
     ]);
     setStages(s || []);
-    setDeals(d || []);
+    setDeals((d as any) || []);
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  const visibleStages = useMemo(() => {
+    if (view === "all") return stages;
+    if (view === "won") return stages.filter(isWonStage);
+    if (view === "lost") return stages.filter(isLostStage);
+    return stages.filter((s) => !isWonStage(s) && !isLostStage(s));
+  }, [stages, view]);
+
   const dealsInStage = (stageId: string) =>
     deals.filter((d) => d.stage_id === stageId).sort((a, b) => a.position - b.position);
 
   const totalValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
+  const wonCount = deals.filter((d) => isWonStage(stages.find((s) => s.id === d.stage_id))).length;
+  const lostCount = deals.filter((d) => isLostStage(stages.find((s) => s.id === d.stage_id))).length;
+  const activeCount = deals.length - wonCount - lostCount;
 
   const handleDragStart = (event: DragStartEvent) => {
     const deal = deals.find((d) => d.id === event.active.id);
@@ -93,50 +117,86 @@ export function PipelineBoard() {
     );
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveDeal(null);
-    if (!over) {
-      // Dropped outside — revert by refetching
-      fetchData();
-      return;
-    }
-
-    const activeId = active.id as string;
-    const deal = deals.find((d) => d.id === activeId);
-    if (!deal) return;
-
-    const overStage = stages.find((s) => s.id === (over.id as string));
-    const overDeal = deals.find((d) => d.id === (over.id as string));
-    const targetStageId = overStage?.id || overDeal?.stage_id || deal.stage_id;
-
+  const persistMove = async (dealId: string, targetStageId: string, extra: Record<string, any> = {}) => {
     const stageDeals = deals
-      .filter((d) => d.stage_id === targetStageId && d.id !== activeId)
+      .filter((d) => d.stage_id === targetStageId && d.id !== dealId)
       .sort((a, b) => a.position - b.position);
+    const newPosition = stageDeals.length;
 
-    let newPosition = 0;
-    if (overDeal) {
-      const overIndex = stageDeals.findIndex((d) => d.id === overDeal.id);
-      newPosition = overIndex >= 0 ? overIndex : stageDeals.length;
-    } else {
-      newPosition = stageDeals.length;
-    }
-
-    const updated = deals.map((d) => {
-      if (d.id === activeId) return { ...d, stage_id: targetStageId, position: newPosition };
-      return d;
-    });
-    setDeals(updated);
+    setDeals((prev) =>
+      prev.map((d) =>
+        d.id === dealId ? { ...d, stage_id: targetStageId, position: newPosition, ...extra } : d
+      )
+    );
 
     const { error } = await supabase
       .from("pipeline_deals")
-      .update({ stage_id: targetStageId, position: newPosition })
-      .eq("id", activeId);
+      .update({ stage_id: targetStageId, position: newPosition, ...extra })
+      .eq("id", dealId);
 
     if (error) {
       toast({ title: "Failed to move deal", variant: "destructive" });
       fetchData();
     }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    const dragged = activeDeal;
+    setActiveDeal(null);
+    if (!over) { fetchData(); return; }
+
+    const activeId = active.id as string;
+    const deal = deals.find((d) => d.id === activeId) || dragged;
+    if (!deal) return;
+
+    const overStage = stages.find((s) => s.id === (over.id as string));
+    const overDeal = deals.find((d) => d.id === (over.id as string));
+    const targetStageId = overStage?.id || overDeal?.stage_id || deal.stage_id;
+    const targetStage = stages.find((s) => s.id === targetStageId);
+
+    // If moving INTO a Lost stage from a non-Lost stage → ask for reason first
+    const previousStage = stages.find((s) => s.id === dragged?.stage_id);
+    if (
+      isLostStage(targetStage) &&
+      !isLostStage(previousStage) &&
+      dragged
+    ) {
+      setPendingLost({
+        dealId: deal.id,
+        targetStageId,
+        previousStageId: dragged.stage_id,
+        clientName: deal.client_name,
+      });
+      return;
+    }
+
+    // If moving OUT of Lost → clear the reason
+    const extra: Record<string, any> = {};
+    if (isLostStage(previousStage) && !isLostStage(targetStage)) {
+      extra.lost_reason_id = null;
+      extra.lost_reason_note = null;
+    }
+
+    await persistMove(activeId, targetStageId, extra);
+  };
+
+  const handleConfirmLost = async (reasonId: string, note: string) => {
+    if (!pendingLost) return;
+    await persistMove(pendingLost.dealId, pendingLost.targetStageId, {
+      lost_reason_id: reasonId,
+      lost_reason_note: note || null,
+    });
+    setPendingLost(null);
+    toast({ title: "Marked as lost" });
+  };
+
+  const handleCancelLost = () => {
+    if (!pendingLost) return;
+    // revert UI
+    const { dealId, previousStageId } = pendingLost;
+    setDeals((prev) => prev.map((d) => d.id === dealId ? { ...d, stage_id: previousStageId } : d));
+    setPendingLost(null);
   };
 
   const handleDealAdded = () => {
@@ -149,9 +209,7 @@ export function PipelineBoard() {
     await supabase.from("pipeline_deals").delete().eq("id", dealId);
   };
 
-  const handleDealClick = (deal: Deal) => {
-    setSelectedDeal(deal);
-  };
+  const handleDealClick = (deal: Deal) => setSelectedDeal(deal);
 
   if (loading) {
     return (
@@ -165,6 +223,13 @@ export function PipelineBoard() {
       </div>
     );
   }
+
+  const filterTabs: { id: ViewFilter; label: string; count: number; icon: any; tone: string }[] = [
+    { id: "active", label: "Active", count: activeCount, icon: Kanban, tone: "text-primary" },
+    { id: "won", label: "Won", count: wonCount, icon: Trophy, tone: "text-emerald-600" },
+    { id: "lost", label: "Lost", count: lostCount, icon: XCircle, tone: "text-destructive" },
+    { id: "all", label: "All", count: deals.length, icon: Layers, tone: "text-muted-foreground" },
+  ];
 
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
@@ -190,13 +255,40 @@ export function PipelineBoard() {
               </span>
             </div>
             <Button
-              onClick={() => setAddToStage(stages[0]?.id || null)}
+              onClick={() => setAddToStage(stages.find((s) => !isWonStage(s) && !isLostStage(s))?.id || stages[0]?.id || null)}
               className="gradient-accent text-white border-0 shadow-lg shadow-cyan/20 hover:shadow-cyan/30 gap-2"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Add Deal</span>
             </Button>
           </div>
+        </div>
+
+        {/* Filter tabs */}
+        <div className="mt-4 flex items-center gap-1.5 bg-muted/40 p-1 rounded-xl w-fit">
+          {filterTabs.map((t) => {
+            const Icon = t.icon;
+            const isActive = view === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setView(t.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  isActive
+                    ? "bg-white shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? t.tone : ""}`} />
+                {t.label}
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                  isActive ? "bg-muted text-foreground" : "bg-background/60 text-muted-foreground"
+                }`}>
+                  {t.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -210,7 +302,7 @@ export function PipelineBoard() {
           onDragEnd={handleDragEnd}
         >
           <div className="flex gap-4 h-full min-w-max">
-            {stages.map((stage) => {
+            {visibleStages.map((stage) => {
               const stageDeals = dealsInStage(stage.id);
               return (
                 <PipelineColumn
@@ -223,10 +315,15 @@ export function PipelineBoard() {
                 />
               );
             })}
+            {visibleStages.length === 0 && (
+              <div className="flex items-center justify-center w-full text-sm text-muted-foreground">
+                Nothing here yet.
+              </div>
+            )}
           </div>
 
           <DragOverlay dropAnimation={{ duration: 200, easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)" }}>
-            {activeDeal ? <PipelineDealCard deal={activeDeal} isOverlay /> : null}
+            {activeDeal ? <PipelineDealCard deal={activeDeal as any} isOverlay /> : null}
           </DragOverlay>
         </DndContext>
       </div>
@@ -240,12 +337,19 @@ export function PipelineBoard() {
       />
 
       <DealProfileDrawer
-        deal={selectedDeal}
+        deal={selectedDeal as any}
         stages={stages}
         open={!!selectedDeal}
         onOpenChange={(open) => { if (!open) setSelectedDeal(null); }}
         onDealUpdated={() => { fetchData(); }}
         onDeleteDeal={handleDeleteDeal}
+      />
+
+      <LostReasonDialog
+        open={!!pendingLost}
+        clientName={pendingLost?.clientName}
+        onConfirm={handleConfirmLost}
+        onCancel={handleCancelLost}
       />
     </div>
   );
