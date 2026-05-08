@@ -356,7 +356,85 @@ serve(async (req) => {
         contactId,
         duration,
         extractedFields,
+        hasRecording: !!recordingUrl,
       });
+
+      // If no recording URL yet, schedule a background fetch from Vapi API
+      if (!recordingUrl && vapiCallId && duration > 5) {
+        const vapiKey = Deno.env.get("VAPI_API_KEY");
+        if (vapiKey) {
+          EdgeRuntime.waitUntil((async () => {
+            // Wait 30 seconds for Vapi to finish processing the recording
+            await new Promise(r => setTimeout(r, 30000));
+            try {
+              const resp = await fetch(`https://api.vapi.ai/call/${vapiCallId}`, {
+                headers: { Authorization: `Bearer ${vapiKey}` },
+              });
+              if (resp.ok) {
+                const callData = await resp.json();
+                const recUrl = callData.recordingUrl || callData.artifact?.recordingUrl;
+                if (recUrl) {
+                  console.log("Background fetch: found recording for", vapiCallId);
+                  await supabase
+                    .from("ai_caller_call_logs")
+                    .update({ recording_url: recUrl })
+                    .eq("vapi_call_id", vapiCallId);
+                  
+                  if (contactId) {
+                    await supabase
+                      .from("ai_caller_leads")
+                      .update({ recording_url: recUrl })
+                      .eq("contact_id", contactId)
+                      .is("recording_url", null);
+                  }
+                }
+              }
+            } catch (e) {
+              console.error("Background recording fetch failed:", e);
+            }
+          })());
+        }
+      }
+    }
+
+    // Handle status-update events — Vapi often sends recordingUrl here after processing
+    if (type === "status-update") {
+      const vapiCallId = call?.id || message?.callId || null;
+      const recordingUrl = message?.recordingUrl || call?.recordingUrl || call?.artifact?.recordingUrl || null;
+      const status = message?.status || call?.status || "";
+
+      if (vapiCallId && recordingUrl) {
+        console.log("status-update: saving recording URL for", vapiCallId);
+
+        // Update call log
+        await supabase
+          .from("ai_caller_call_logs")
+          .update({ recording_url: recordingUrl })
+          .eq("vapi_call_id", vapiCallId)
+          .is("recording_url", null);
+
+        // Update lead
+        await supabase
+          .from("ai_caller_leads")
+          .update({ recording_url: recordingUrl })
+          .eq("full_transcript", "") // only match if we can identify by call id via contact
+          .is("recording_url", null);
+
+        // Try to find the contact_id from the call log to update the right lead
+        const { data: log } = await supabase
+          .from("ai_caller_call_logs")
+          .select("contact_id")
+          .eq("vapi_call_id", vapiCallId)
+          .maybeSingle();
+
+        if (log?.contact_id) {
+          await supabase
+            .from("ai_caller_leads")
+            .update({ recording_url: recordingUrl })
+            .eq("contact_id", log.contact_id)
+            .is("recording_url", null);
+        }
+      }
     }
 
     if (type === "function-call") {
