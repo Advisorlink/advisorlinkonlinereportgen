@@ -313,7 +313,8 @@ ACCURACY WITH NAMES, EMAILS & NUMBERS:
 - If you're unsure about ANY detail other than email, just ask them to repeat it. Better to double-check than get it wrong.
 
 PACING:
-- After the client says hello or introduces themselves, pause for a brief moment before you start speaking. Don't jump in immediately — let them finish. Take a breath, then respond naturally.
+- After the client says hello or introduces themselves for the FIRST time, pause for a brief moment before you start speaking. Don't jump in immediately — let them finish. Take a breath, then respond naturally.
+- After that first exchange, respond QUICKLY. Once they answer your greeting (e.g. "Good thanks", "Yeah not bad"), jump straight in with your next line — no awkward pauses. Keep the conversation flowing at a natural, brisk pace.
 
 ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the client is willing — but paraphrase them naturally, don't read them word-for-word):
@@ -1058,7 +1059,8 @@ ACCURACY WITH NAMES, EMAILS & NUMBERS:
 - If you're unsure about ANY detail other than email, just ask them to repeat it. Better to double-check than get it wrong.
 
 PACING:
-- After the client says hello or introduces themselves, pause for a brief moment before you start speaking. Don't jump in immediately — let them finish. Take a breath, then respond naturally.
+- After the client says hello or introduces themselves for the FIRST time, pause for a brief moment before you start speaking. Don't jump in immediately — let them finish. Take a breath, then respond naturally.
+- After that first exchange, respond QUICKLY. Once they answer your greeting (e.g. "Good thanks", "Yeah not bad"), jump straight in with your next line — no awkward pauses. Keep the conversation flowing at a natural, brisk pace.
 
 ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the client is willing — but paraphrase them naturally, don't read them word-for-word):
@@ -1557,7 +1559,8 @@ ACCURACY WITH NAMES, EMAILS & NUMBERS:
 - If you're unsure about ANY detail other than email, just ask them to repeat it. Better to double-check than get it wrong.
 
 PACING:
-- After the caller says hello or introduces themselves, pause for a brief moment before you start speaking. Don't jump in immediately — let them finish. Take a breath, then respond naturally.
+- After the caller says hello or introduces themselves for the FIRST time, pause for a brief moment before you start speaking. Don't jump in immediately — let them finish. Take a breath, then respond naturally.
+- After that first exchange, respond QUICKLY. Once they answer your greeting (e.g. "Good thanks", "Yeah not bad"), jump straight in with your next line — no awkward pauses. Keep the conversation flowing at a natural, brisk pace.
 
 ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the caller is willing — but paraphrase them naturally, don't read them word-for-word):
