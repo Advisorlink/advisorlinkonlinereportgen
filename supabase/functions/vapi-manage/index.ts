@@ -545,13 +545,16 @@ After all questions are asked, follow the closing statements above to wrap up th
     }
 
     if (action === "import-phone-number") {
-      const { number, twilioAccountSid, twilioAuthToken } = body;
+      const { number } = body;
       if (!number) {
         throw new Error("number (E.164) is required");
       }
+      // Use stored Twilio credentials, with optional overrides from body
+      const twilioAccountSid = body.twilioAccountSid || Deno.env.get("TWILIO_ACCOUNT_SID");
+      const twilioAuthToken = body.twilioAuthToken || Deno.env.get("TWILIO_AUTH_TOKEN");
       if (!twilioAccountSid || !twilioAuthToken) {
         throw new Error(
-          "twilioAccountSid and twilioAuthToken are required for Vapi import",
+          "Twilio credentials not found. Set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN secrets.",
         );
       }
       const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
@@ -1244,6 +1247,24 @@ After all questions are asked, follow the closing statements above to wrap up th
         .eq("campaign_id", campaignId);
 
       return new Response(JSON.stringify({ reset: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "delete-phone-number") {
+      const { phoneNumberId } = body;
+      if (!phoneNumberId) throw new Error("phoneNumberId is required");
+
+      const vapiRes = await fetch(`${VAPI_BASE}/phone-number/${phoneNumberId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
+      });
+      if (!vapiRes.ok) {
+        const errText = await vapiRes.text();
+        throw new Error(`Vapi delete phone number failed [${vapiRes.status}]: ${errText}`);
+      }
+      const result = await vapiRes.json();
+      return new Response(JSON.stringify({ deleted: true, result }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
