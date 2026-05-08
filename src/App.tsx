@@ -11,6 +11,7 @@ import AICaller from "./pages/AICaller.tsx";
 import FactFind from "./pages/FactFind.tsx";
 import Auth from "./pages/Auth.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
+import Pipeline from "./pages/Pipeline.tsx";
 import Presentations from "./pages/Presentations.tsx";
 import Index from "./pages/Index.tsx";
 import Admin from "./pages/Admin.tsx";
