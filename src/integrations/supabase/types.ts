@@ -588,8 +588,41 @@ export type Database = {
           },
         ]
       }
+      pipeline_deal_notes: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          deal_id: string
+          id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          deal_id: string
+          id?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          deal_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_deal_notes_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "pipeline_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pipeline_deals: {
         Row: {
+          client_address: string | null
           client_email: string | null
           client_name: string
           client_phone: string | null
@@ -597,11 +630,14 @@ export type Database = {
           id: string
           notes: string | null
           position: number
+          source: string | null
           stage_id: string
+          tags: string[] | null
           updated_at: string
           value: number | null
         }
         Insert: {
+          client_address?: string | null
           client_email?: string | null
           client_name: string
           client_phone?: string | null
@@ -609,11 +645,14 @@ export type Database = {
           id?: string
           notes?: string | null
           position?: number
+          source?: string | null
           stage_id: string
+          tags?: string[] | null
           updated_at?: string
           value?: number | null
         }
         Update: {
+          client_address?: string | null
           client_email?: string | null
           client_name?: string
           client_phone?: string | null
@@ -621,7 +660,9 @@ export type Database = {
           id?: string
           notes?: string | null
           position?: number
+          source?: string | null
           stage_id?: string
+          tags?: string[] | null
           updated_at?: string
           value?: number | null
         }
