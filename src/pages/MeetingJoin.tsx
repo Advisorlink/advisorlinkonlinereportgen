@@ -292,6 +292,14 @@ export default function MeetingJoin() {
   useEffect(() => {
     if (videoRef.current && remoteStream) {
       videoRef.current.srcObject = remoteStream;
+      // Ensure playback starts on all devices (mobile browsers block unmuted autoplay)
+      videoRef.current.play().catch(() => {
+        // If autoplay is still blocked, mute and retry
+        if (videoRef.current) {
+          videoRef.current.muted = true;
+          videoRef.current.play().catch(() => {});
+        }
+      });
     }
   }, [remoteStream, status]);
 
@@ -318,6 +326,7 @@ export default function MeetingJoin() {
             ref={videoRef}
             autoPlay
             playsInline
+            muted
             className="w-full h-full object-contain bg-black"
             style={{ maxHeight: "100dvh" }}
           />
