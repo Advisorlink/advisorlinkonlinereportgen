@@ -545,13 +545,16 @@ After all questions are asked, follow the closing statements above to wrap up th
     }
 
     if (action === "import-phone-number") {
-      const { number, twilioAccountSid, twilioAuthToken } = body;
+      const { number } = body;
       if (!number) {
         throw new Error("number (E.164) is required");
       }
+      // Use stored Twilio credentials, with optional overrides from body
+      const twilioAccountSid = body.twilioAccountSid || Deno.env.get("TWILIO_ACCOUNT_SID");
+      const twilioAuthToken = body.twilioAuthToken || Deno.env.get("TWILIO_AUTH_TOKEN");
       if (!twilioAccountSid || !twilioAuthToken) {
         throw new Error(
-          "twilioAccountSid and twilioAuthToken are required for Vapi import",
+          "Twilio credentials not found. Set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN secrets.",
         );
       }
       const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
