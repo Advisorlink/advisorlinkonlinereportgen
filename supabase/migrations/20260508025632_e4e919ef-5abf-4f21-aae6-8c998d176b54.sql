@@ -1,0 +1,1 @@
+UPDATE public.ai_caller_campaigns SET phone_number_id = 'b0d6a1f7-27b2-4666-b2d8-ce41b53ccc0b' WHERE id = '11372d90-3a0b-4494-b205-55f65adf0865';
