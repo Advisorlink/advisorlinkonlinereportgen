@@ -351,6 +351,7 @@ After all questions have been asked (or if the client wants to end early), wrap 
         recordingEnabled: true,
         maxDurationSeconds: script.max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
+        numFastTurns: 3,
         responseDelaySeconds: 0.3,
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1092,6 +1093,7 @@ After all questions have been asked (or if the client wants to end early), wrap 
         recordingEnabled: true,
         maxDurationSeconds: script.max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
+        numFastTurns: 3,
         responseDelaySeconds: 0.3,
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1581,6 +1583,7 @@ After all questions have been asked (or if the caller wants to end early), wrap 
         recordingEnabled: true,
         maxDurationSeconds: (script as any).max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
+        numFastTurns: 3,
         responseDelaySeconds: 0.3,
         backgroundSound: (script as any).background_sound_enabled
           ? (script as any).background_sound || "office"
