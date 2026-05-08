@@ -983,11 +983,13 @@ GUIDELINES:
 - If the person says they're not interested, politely thank them and wish them well.
 - NEVER make up facts or information not in your script.
 - Listen carefully to what the client says and respond appropriately — don't talk over them or ignore their answers.
+- CRITICAL: You MUST ask EVERY question listed below. Do NOT skip any questions. Do NOT end the call until all questions have been asked and answered.
+- Keep your responses short and concise — one or two sentences max before asking the next question.
 ${secondMessage}
-QUESTIONS TO ASK (in order):
+QUESTIONS TO ASK (you MUST ask ALL of these, in order — do not skip any):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 ${closingMsg}
-After all questions are asked, follow the closing statements above to wrap up the call.`;
+IMPORTANT: Only after ALL ${questions.length} questions above have been asked and answered, follow the closing statements to wrap up the call.`;
 
       const assistantPayload: any = {
         name: `${script.name} - Campaign`.substring(0, 40),
@@ -1450,11 +1452,13 @@ GUIDELINES:
 - Be conversational, warm, and natural — like a real Australian person.
 - NEVER make up facts or information not in your script.
 - Listen carefully to what the caller says and respond appropriately — don't talk over them or ignore their answers.
+- CRITICAL: You MUST ask EVERY question listed below. Do NOT skip any questions. Do NOT end the call until all questions have been asked and answered.
+- Keep your responses short and concise — one or two sentences max before asking the next question.
 ${secondMessage}
-QUESTIONS TO ASK (in order):
+QUESTIONS TO ASK (you MUST ask ALL of these, in order — do not skip any):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 ${closingMsg}
-After all questions are asked, follow the closing statements above to wrap up the call.`;
+IMPORTANT: Only after ALL ${questions.length} questions above have been asked and answered, follow the closing statements to wrap up the call.`;
 
       const assistantPayload: any = {
         name: `${(script as any).name} - Inbound`.substring(0, 40),
