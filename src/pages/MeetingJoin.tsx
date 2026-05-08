@@ -11,6 +11,21 @@ const iceServers = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
   { urls: "stun:stun2.l.google.com:19302" },
+  {
+    urls: "turn:openrelay.metered.ca:80",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+  {
+    urls: "turn:openrelay.metered.ca:443",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+  {
+    urls: "turn:openrelay.metered.ca:443?transport=tcp",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
 ];
 
 const SESSION_KEY = "alo_meeting_session";
@@ -292,6 +307,14 @@ export default function MeetingJoin() {
   useEffect(() => {
     if (videoRef.current && remoteStream) {
       videoRef.current.srcObject = remoteStream;
+      // Ensure playback starts on all devices (mobile browsers block unmuted autoplay)
+      videoRef.current.play().catch(() => {
+        // If autoplay is still blocked, mute and retry
+        if (videoRef.current) {
+          videoRef.current.muted = true;
+          videoRef.current.play().catch(() => {});
+        }
+      });
     }
   }, [remoteStream, status]);
 
@@ -318,6 +341,7 @@ export default function MeetingJoin() {
             ref={videoRef}
             autoPlay
             playsInline
+            muted
             className="w-full h-full object-contain bg-black"
             style={{ maxHeight: "100dvh" }}
           />
