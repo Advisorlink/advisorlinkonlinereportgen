@@ -18,6 +18,7 @@ import logoSvg from "@/assets/logo.svg";
 
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: BarChart3 },
+  { title: "Pipeline", url: "/pipeline", icon: Kanban, badge: "NEW", badgeColor: "gradient-accent" },
   { title: "Presentations", url: "/presentations", icon: Monitor },
   { title: "Messages", url: "/messages", icon: MessageSquare, badge: "NEW", badgeColor: "gradient-accent" },
   { title: "SMS Hub", url: "/sms-hub", icon: Send },
