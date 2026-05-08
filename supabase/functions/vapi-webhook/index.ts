@@ -359,6 +359,46 @@ serve(async (req) => {
       });
     }
 
+    // Handle status-update events — Vapi often sends recordingUrl here after processing
+    if (type === "status-update") {
+      const vapiCallId = call?.id || message?.callId || null;
+      const recordingUrl = message?.recordingUrl || call?.recordingUrl || call?.artifact?.recordingUrl || null;
+      const status = message?.status || call?.status || "";
+
+      if (vapiCallId && recordingUrl) {
+        console.log("status-update: saving recording URL for", vapiCallId);
+
+        // Update call log
+        await supabase
+          .from("ai_caller_call_logs")
+          .update({ recording_url: recordingUrl })
+          .eq("vapi_call_id", vapiCallId)
+          .is("recording_url", null);
+
+        // Update lead
+        await supabase
+          .from("ai_caller_leads")
+          .update({ recording_url: recordingUrl })
+          .eq("full_transcript", "") // only match if we can identify by call id via contact
+          .is("recording_url", null);
+
+        // Try to find the contact_id from the call log to update the right lead
+        const { data: log } = await supabase
+          .from("ai_caller_call_logs")
+          .select("contact_id")
+          .eq("vapi_call_id", vapiCallId)
+          .maybeSingle();
+
+        if (log?.contact_id) {
+          await supabase
+            .from("ai_caller_leads")
+            .update({ recording_url: recordingUrl })
+            .eq("contact_id", log.contact_id)
+            .is("recording_url", null);
+        }
+      }
+    }
+
     if (type === "function-call") {
       const functionCall = message?.functionCall || body.functionCall;
       if (functionCall?.name === "extract_lead_data") {
