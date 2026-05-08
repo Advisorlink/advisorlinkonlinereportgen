@@ -276,14 +276,15 @@ serve(async (req) => {
 
       const systemPrompt = `${script.system_prompt}
 
-IMPORTANT RULES:
-- You MUST follow this script exactly. Do not deviate or make up information.
-- After your opening message, wait for the client to respond. Then deliver the follow-up statement(s) below (if provided).
-- After the follow-up(s), ask each question one at a time and wait for the response before moving on.
-- Be conversational and natural, like a real Australian person calling.
-- If the person says they're not interested, politely thank them and end the call.
-- If they ask who you are, say you're calling from Advisor Link.
-- NEVER hallucinate or make up facts. Only relay information from your script.
+GUIDELINES:
+- Follow the script instructions above as your primary guide. Your personality and tone should match what is described above.
+- After your opening message, wait for the client to respond before continuing.
+- If follow-up statements are provided below, deliver them naturally after the client responds to your greeting.
+- Then ask each question one at a time, waiting for a response before moving on.
+- Be conversational, warm, and natural — like a real Australian person calling.
+- If the person says they're not interested, politely thank them and wish them well.
+- NEVER make up facts or information not in your script.
+- Listen carefully to what the client says and respond appropriately — don't talk over them or ignore their answers.
 ${secondMessage}
 QUESTIONS TO ASK (in order):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
@@ -970,14 +971,15 @@ After all questions are asked, follow the closing statements above to wrap up th
 
       const systemPrompt = `${script.system_prompt}
 
-IMPORTANT RULES:
-- You MUST follow this script exactly. Do not deviate or make up information.
-- After your opening message, wait for the client to respond. Then deliver the follow-up statement(s) below (if provided).
-- After the follow-up(s), ask each question one at a time and wait for the response before moving on.
-- Be conversational and natural, like a real Australian person calling.
-- If the person says they're not interested, politely thank them and end the call.
-- If they ask who you are, say you're calling from Advisor Link.
-- NEVER hallucinate or make up facts. Only relay information from your script.
+GUIDELINES:
+- Follow the script instructions above as your primary guide. Your personality and tone should match what is described above.
+- After your opening message, wait for the client to respond before continuing.
+- If follow-up statements are provided below, deliver them naturally after the client responds to your greeting.
+- Then ask each question one at a time, waiting for a response before moving on.
+- Be conversational, warm, and natural — like a real Australian person calling.
+- If the person says they're not interested, politely thank them and wish them well.
+- NEVER make up facts or information not in your script.
+- Listen carefully to what the client says and respond appropriately — don't talk over them or ignore their answers.
 ${secondMessage}
 QUESTIONS TO ASK (in order):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
@@ -1435,14 +1437,15 @@ After all questions are asked, follow the closing statements above to wrap up th
 
       const systemPrompt = `${(script as any).system_prompt}
 
-IMPORTANT RULES:
+GUIDELINES:
 - This is an INBOUND call — the person called YOU. Be welcoming and helpful.
-- You MUST follow this script exactly. Do not deviate or make up information.
-- After your greeting, wait for the caller to respond. Then deliver the follow-up statement(s) below (if provided).
-- After the follow-up(s), ask each question one at a time and wait for the response before moving on.
-- Be conversational and natural, like a real Australian person.
-- If they ask who you are, say you're from Advisor Link.
-- NEVER hallucinate or make up facts. Only relay information from your script.
+- Follow the script instructions above as your primary guide. Your personality and tone should match what is described above.
+- After your greeting, wait for the caller to respond before continuing.
+- If follow-up statements are provided below, deliver them naturally after the caller responds.
+- Then ask each question one at a time, waiting for a response before moving on.
+- Be conversational, warm, and natural — like a real Australian person.
+- NEVER make up facts or information not in your script.
+- Listen carefully to what the caller says and respond appropriately — don't talk over them or ignore their answers.
 ${secondMessage}
 QUESTIONS TO ASK (in order):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
