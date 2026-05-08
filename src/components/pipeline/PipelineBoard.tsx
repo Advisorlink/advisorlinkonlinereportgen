@@ -16,6 +16,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { PipelineColumn } from "./PipelineColumn";
 import { PipelineDealCard } from "./PipelineDealCard";
 import { AddDealDialog } from "./AddDealDialog";
+import { DealProfileDrawer } from "./DealProfileDrawer";
 import { Kanban, Plus, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -39,11 +40,12 @@ export function PipelineBoard() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
   const [addToStage, setAddToStage] = useState<string | null>(null);
+  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor)
   );
 
@@ -76,16 +78,13 @@ export function PipelineBoard() {
     const activeId = active.id as string;
     const overId = over.id as string;
 
-    const activeDeal = deals.find((d) => d.id === activeId);
-    if (!activeDeal) return;
+    const activeDealItem = deals.find((d) => d.id === activeId);
+    if (!activeDealItem) return;
 
-    // Check if dropping over a stage column
     const overStage = stages.find((s) => s.id === overId);
-    // Or over another deal
     const overDeal = deals.find((d) => d.id === overId);
-
     const newStageId = overStage?.id || overDeal?.stage_id;
-    if (!newStageId || activeDeal.stage_id === newStageId) return;
+    if (!newStageId || activeDealItem.stage_id === newStageId) return;
 
     setDeals((prev) =>
       prev.map((d) =>
@@ -97,18 +96,20 @@ export function PipelineBoard() {
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveDeal(null);
-    if (!over) return;
+    if (!over) {
+      // Dropped outside — revert by refetching
+      fetchData();
+      return;
+    }
 
     const activeId = active.id as string;
     const deal = deals.find((d) => d.id === activeId);
     if (!deal) return;
 
-    // Determine target stage
     const overStage = stages.find((s) => s.id === (over.id as string));
     const overDeal = deals.find((d) => d.id === (over.id as string));
     const targetStageId = overStage?.id || overDeal?.stage_id || deal.stage_id;
 
-    // Calculate new position
     const stageDeals = deals
       .filter((d) => d.stage_id === targetStageId && d.id !== activeId)
       .sort((a, b) => a.position - b.position);
@@ -121,7 +122,6 @@ export function PipelineBoard() {
       newPosition = stageDeals.length;
     }
 
-    // Optimistic update
     const updated = deals.map((d) => {
       if (d.id === activeId) return { ...d, stage_id: targetStageId, position: newPosition };
       return d;
@@ -147,6 +147,10 @@ export function PipelineBoard() {
   const handleDeleteDeal = async (dealId: string) => {
     setDeals((prev) => prev.filter((d) => d.id !== dealId));
     await supabase.from("pipeline_deals").delete().eq("id", dealId);
+  };
+
+  const handleDealClick = (deal: Deal) => {
+    setSelectedDeal(deal);
   };
 
   if (loading) {
@@ -215,6 +219,7 @@ export function PipelineBoard() {
                   deals={stageDeals}
                   onAddDeal={() => setAddToStage(stage.id)}
                   onDeleteDeal={handleDeleteDeal}
+                  onDealClick={handleDealClick}
                 />
               );
             })}
@@ -232,6 +237,15 @@ export function PipelineBoard() {
         stageId={addToStage || ""}
         stages={stages}
         onDealAdded={handleDealAdded}
+      />
+
+      <DealProfileDrawer
+        deal={selectedDeal}
+        stages={stages}
+        open={!!selectedDeal}
+        onOpenChange={(open) => { if (!open) setSelectedDeal(null); }}
+        onDealUpdated={() => { fetchData(); }}
+        onDeleteDeal={handleDeleteDeal}
       />
     </div>
   );

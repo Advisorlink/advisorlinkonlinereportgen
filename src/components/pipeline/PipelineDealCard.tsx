@@ -1,6 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Mail, Phone, DollarSign, Trash2 } from "lucide-react";
+import { useRef } from "react";
 
 type Deal = {
   id: string;
@@ -19,9 +20,10 @@ interface PipelineDealCardProps {
   deal: Deal;
   isOverlay?: boolean;
   onDelete?: (id: string) => void;
+  onClick?: (deal: Deal) => void;
 }
 
-export function PipelineDealCard({ deal, isOverlay, onDelete }: PipelineDealCardProps) {
+export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: PipelineDealCardProps) {
   const {
     attributes,
     listeners,
@@ -30,6 +32,8 @@ export function PipelineDealCard({ deal, isOverlay, onDelete }: PipelineDealCard
     transition,
     isDragging,
   } = useSortable({ id: deal.id });
+
+  const pointerStart = useRef<{ x: number; y: number } | null>(null);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -43,6 +47,24 @@ export function PipelineDealCard({ deal, isOverlay, onDelete }: PipelineDealCard
     .toUpperCase()
     .slice(0, 2);
 
+  const handlePointerDown = (e: React.PointerEvent) => {
+    pointerStart.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!pointerStart.current) {
+      onClick?.(deal);
+      return;
+    }
+    const dx = Math.abs(e.clientX - pointerStart.current.x);
+    const dy = Math.abs(e.clientY - pointerStart.current.y);
+    // Only open profile if the pointer barely moved (not a drag)
+    if (dx < 5 && dy < 5) {
+      onClick?.(deal);
+    }
+    pointerStart.current = null;
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -55,6 +77,11 @@ export function PipelineDealCard({ deal, isOverlay, onDelete }: PipelineDealCard
       `}
       {...attributes}
       {...listeners}
+      onPointerDown={(e) => {
+        handlePointerDown(e);
+        listeners?.onPointerDown?.(e);
+      }}
+      onClick={handleClick}
     >
       <div className="flex items-start gap-2.5">
         <div className="w-8 h-8 rounded-lg gradient-accent flex items-center justify-center shrink-0 text-[11px] font-bold text-white shadow-sm">
@@ -82,7 +109,7 @@ export function PipelineDealCard({ deal, isOverlay, onDelete }: PipelineDealCard
         )}
       </div>
 
-      {(deal.client_email || deal.client_phone || deal.notes) && (
+      {(deal.client_email || deal.client_phone) && (
         <div className="mt-2.5 pt-2.5 border-t border-border/30 space-y-1">
           {deal.client_email && (
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
@@ -95,9 +122,6 @@ export function PipelineDealCard({ deal, isOverlay, onDelete }: PipelineDealCard
               <Phone className="w-3 h-3 shrink-0" />
               {deal.client_phone}
             </div>
-          )}
-          {deal.notes && (
-            <p className="text-[11px] text-muted-foreground/70 line-clamp-2 mt-1">{deal.notes}</p>
           )}
         </div>
       )}
