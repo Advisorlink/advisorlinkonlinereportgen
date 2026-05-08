@@ -151,6 +151,11 @@ export function AICallerCampaigns() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      if (data?.noPendingContacts) {
+        toast.info(data.message || "No pending contacts left to call");
+        load();
+        return;
+      }
       toast.success(`Campaign started! ${data.callsInitiated} calls initiated, ${data.callsFailed} failed.`);
       load();
     } catch (e: any) {
