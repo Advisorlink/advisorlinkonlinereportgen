@@ -22,9 +22,10 @@ interface PipelineColumnProps {
   deals: Deal[];
   onAddDeal: () => void;
   onDeleteDeal: (id: string) => void;
+  onDealClick?: (deal: Deal) => void;
 }
 
-export function PipelineColumn({ stage, deals, onAddDeal, onDeleteDeal }: PipelineColumnProps) {
+export function PipelineColumn({ stage, deals, onAddDeal, onDeleteDeal, onDealClick }: PipelineColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: stage.id });
 
   const stageValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
@@ -65,7 +66,7 @@ export function PipelineColumn({ stage, deals, onAddDeal, onDeleteDeal }: Pipeli
       >
         <SortableContext items={deals.map((d) => d.id)} strategy={verticalListSortingStrategy}>
           {deals.map((deal) => (
-            <PipelineDealCard key={deal.id} deal={deal} onDelete={onDeleteDeal} />
+            <PipelineDealCard key={deal.id} deal={deal} onDelete={onDeleteDeal} onClick={onDealClick} />
           ))}
         </SortableContext>
 
