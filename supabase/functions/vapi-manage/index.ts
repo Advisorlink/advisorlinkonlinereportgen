@@ -992,6 +992,7 @@ After all questions are asked, follow the closing statements above to wrap up th
         model: {
           provider: "openai",
           model: script.model || "gpt-4o",
+          maxTokens: 1024,
           messages: [{ role: "system", content: systemPrompt }],
           tools:
             questions.length > 0
@@ -1458,6 +1459,7 @@ After all questions are asked, follow the closing statements above to wrap up th
         model: {
           provider: "openai",
           model: (script as any).model || "gpt-4o",
+          maxTokens: 1024,
           messages: [{ role: "system", content: systemPrompt }],
           tools: questions.length > 0 ? [{
             type: "function",
