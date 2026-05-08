@@ -1,4 +1,4 @@
-import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall, ClipboardList, MessageSquare, Send, Sparkles } from "lucide-react";
+import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall, ClipboardList, MessageSquare, Send, Sparkles, Kanban } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -18,6 +18,7 @@ import logoSvg from "@/assets/logo.svg";
 
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: BarChart3 },
+  { title: "Pipeline", url: "/pipeline", icon: Kanban, badge: "NEW", badgeColor: "gradient-accent" },
   { title: "Presentations", url: "/presentations", icon: Monitor },
   { title: "Messages", url: "/messages", icon: MessageSquare, badge: "NEW", badgeColor: "gradient-accent" },
   { title: "SMS Hub", url: "/sms-hub", icon: Send },
