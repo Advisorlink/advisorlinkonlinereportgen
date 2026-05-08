@@ -1089,6 +1089,7 @@ After all questions have been asked (or if the client wants to end early), wrap 
         },
         voice: buildVoiceConfig(script, supabaseUrl),
         firstMessage: script.first_message || "Hi there, how are you today?",
+        firstMessageMode: "assistant-waits-for-user",
         endCallFunctionEnabled: true,
         recordingEnabled: true,
         maxDurationSeconds: script.max_duration_seconds || 300,
