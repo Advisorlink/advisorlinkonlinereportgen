@@ -356,7 +356,45 @@ serve(async (req) => {
         contactId,
         duration,
         extractedFields,
+        hasRecording: !!recordingUrl,
       });
+
+      // If no recording URL yet, schedule a background fetch from Vapi API
+      if (!recordingUrl && vapiCallId && duration > 5) {
+        const vapiKey = Deno.env.get("VAPI_API_KEY");
+        if (vapiKey) {
+          EdgeRuntime.waitUntil((async () => {
+            // Wait 30 seconds for Vapi to finish processing the recording
+            await new Promise(r => setTimeout(r, 30000));
+            try {
+              const resp = await fetch(`https://api.vapi.ai/call/${vapiCallId}`, {
+                headers: { Authorization: `Bearer ${vapiKey}` },
+              });
+              if (resp.ok) {
+                const callData = await resp.json();
+                const recUrl = callData.recordingUrl || callData.artifact?.recordingUrl;
+                if (recUrl) {
+                  console.log("Background fetch: found recording for", vapiCallId);
+                  await supabase
+                    .from("ai_caller_call_logs")
+                    .update({ recording_url: recUrl })
+                    .eq("vapi_call_id", vapiCallId);
+                  
+                  if (contactId) {
+                    await supabase
+                      .from("ai_caller_leads")
+                      .update({ recording_url: recUrl })
+                      .eq("contact_id", contactId)
+                      .is("recording_url", null);
+                  }
+                }
+              }
+            } catch (e) {
+              console.error("Background recording fetch failed:", e);
+            }
+          })());
+        }
+      }
     }
 
     // Handle status-update events — Vapi often sends recordingUrl here after processing
