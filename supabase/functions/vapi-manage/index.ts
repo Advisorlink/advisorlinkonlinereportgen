@@ -323,7 +323,7 @@ After all questions have been asked (or if the client wants to end early), wrap 
         model: {
           provider: "openai",
           model: script.model || "gpt-4o",
-          maxTokens: 4096,
+          maxTokens: 512,
           messages: [{ role: "system", content: systemPrompt }],
           tools:
             questions.length > 0
@@ -351,7 +351,7 @@ After all questions have been asked (or if the client wants to end early), wrap 
         recordingEnabled: true,
         maxDurationSeconds: script.max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
-        responseDelaySeconds: 0.5,
+        responseDelaySeconds: 0.3,
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
           : undefined,
@@ -1064,7 +1064,7 @@ After all questions have been asked (or if the client wants to end early), wrap 
         model: {
           provider: "openai",
           model: script.model || "gpt-4o",
-          maxTokens: 4096,
+          maxTokens: 512,
           messages: [{ role: "system", content: systemPrompt }],
           tools:
             questions.length > 0
@@ -1092,7 +1092,7 @@ After all questions have been asked (or if the client wants to end early), wrap 
         recordingEnabled: true,
         maxDurationSeconds: script.max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
-        responseDelaySeconds: 0.5,
+        responseDelaySeconds: 0.3,
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
           : undefined,
@@ -1559,7 +1559,7 @@ After all questions have been asked (or if the caller wants to end early), wrap 
         model: {
           provider: "openai",
           model: (script as any).model || "gpt-4o",
-          maxTokens: 4096,
+          maxTokens: 512,
           messages: [{ role: "system", content: systemPrompt }],
           tools: questions.length > 0 ? [{
             type: "function",
@@ -1581,7 +1581,7 @@ After all questions have been asked (or if the caller wants to end early), wrap 
         recordingEnabled: true,
         maxDurationSeconds: (script as any).max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
-        responseDelaySeconds: 0.5,
+        responseDelaySeconds: 0.3,
         backgroundSound: (script as any).background_sound_enabled
           ? (script as any).background_sound || "office"
           : undefined,
