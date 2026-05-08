@@ -32,27 +32,27 @@ export function PipelineColumn({ stage, deals, onAddDeal, onDeleteDeal }: Pipeli
   return (
     <div
       className={`
-        w-[280px] shrink-0 flex flex-col rounded-2xl transition-all duration-300
+        w-[300px] shrink-0 flex flex-col rounded-2xl transition-all duration-300
         ${isOver
           ? "bg-accent/50 ring-2 ring-primary/20 shadow-lg scale-[1.01]"
-          : "bg-muted/30"
+          : "bg-muted/40 border border-border/30"
         }
       `}
     >
       {/* Column header */}
-      <div className="p-3 pb-2">
-        <div className="flex items-center gap-2.5 mb-1">
+      <div className="p-4 pb-2">
+        <div className="flex items-center gap-2.5 mb-1.5">
           <div
-            className="w-3 h-3 rounded-full shadow-sm"
+            className="w-3.5 h-3.5 rounded-full shadow-sm ring-2 ring-white"
             style={{ backgroundColor: stage.color }}
           />
-          <h3 className="text-sm font-semibold text-foreground tracking-tight">{stage.name}</h3>
-          <span className="ml-auto text-xs font-medium text-muted-foreground bg-background/80 px-2 py-0.5 rounded-full">
+          <h3 className="text-sm font-bold text-foreground tracking-tight uppercase">{stage.name}</h3>
+          <span className="ml-auto text-xs font-bold text-foreground bg-background px-2.5 py-1 rounded-full border border-border/50 shadow-sm">
             {deals.length}
           </span>
         </div>
         {stageValue > 0 && (
-          <p className="text-[11px] text-muted-foreground font-medium pl-5">
+          <p className="text-xs text-muted-foreground font-semibold pl-6">
             ${stageValue.toLocaleString()}
           </p>
         )}
