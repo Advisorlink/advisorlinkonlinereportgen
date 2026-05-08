@@ -957,8 +957,26 @@ After all questions have been asked (or if the client wants to end early), wrap 
         .eq("campaign_id", campaignId)
         .eq("call_status", "pending");
 
-      if (!contacts || contacts.length === 0)
-        throw new Error("No pending contacts to call");
+      if (!contacts || contacts.length === 0) {
+        await supabase
+          .from("ai_caller_campaigns")
+          .update({
+            status: "completed",
+            completed_at: new Date().toISOString(),
+          })
+          .eq("id", campaignId);
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            noPendingContacts: true,
+            callsInitiated: 0,
+            callsFailed: 0,
+            message: "No pending contacts left to call",
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
 
       // Create Vapi assistant from script
       const questions = script.questions || [];
