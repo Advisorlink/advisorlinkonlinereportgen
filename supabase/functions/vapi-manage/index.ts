@@ -1248,6 +1248,24 @@ After all questions are asked, follow the closing statements above to wrap up th
       });
     }
 
+    if (action === "delete-phone-number") {
+      const { phoneNumberId } = body;
+      if (!phoneNumberId) throw new Error("phoneNumberId is required");
+
+      const vapiRes = await fetch(`${VAPI_BASE}/phone-number/${phoneNumberId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
+      });
+      if (!vapiRes.ok) {
+        const errText = await vapiRes.text();
+        throw new Error(`Vapi delete phone number failed [${vapiRes.status}]: ${errText}`);
+      }
+      const result = await vapiRes.json();
+      return new Response(JSON.stringify({ deleted: true, result }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "reprocess-lead") {
       const { leadId } = body;
       if (!leadId) throw new Error("leadId is required");
