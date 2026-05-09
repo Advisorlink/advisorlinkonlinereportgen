@@ -22,6 +22,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { ReportStartForm } from "@/components/ReportStartForm";
 
 type Conversation = {
   id: string; contact_id: string; status: string; is_unread: boolean;
