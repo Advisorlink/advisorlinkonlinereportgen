@@ -733,7 +733,7 @@ export default function Messages() {
         })()}
 
         {/* Hidden file input for MMS */}
-        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" />
+        <input ref={fileInputRef} type="file" multiple accept="image/*,application/pdf,.doc,.docx,.txt" className="hidden" onChange={handleFilePick} />
 
         {/* New Chat Dialog */}
         <Dialog open={showNewChat} onOpenChange={setShowNewChat}>
