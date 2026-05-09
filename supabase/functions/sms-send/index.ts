@@ -134,12 +134,20 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Send via the appropriate provider
+    // Send via the appropriate provider (or simulate)
     const statusCallbackUrl = `${SUPABASE_URL}/functions/v1/sms-status-callback`;
     const telnyxWebhookUrl = `${SUPABASE_URL}/functions/v1/sms-inbound-telnyx`;
     let result: { sid: string; status: string; segments: number };
 
-    if (provider === "telnyx") {
+    const isSimulated = simulate === true || provider === "simulation";
+
+    if (isSimulated) {
+      result = {
+        sid: `SIM${crypto.randomUUID().replace(/-/g, "").slice(0, 30)}`,
+        status: "delivered",
+        segments: Math.max(1, Math.ceil((body?.length || 0) / 160)),
+      };
+    } else if (provider === "telnyx") {
       result = await sendViaTelnyx(to, from, body, mediaUrls, telnyxWebhookUrl);
     } else {
       result = await sendViaTwilio(to, from, body, mediaUrls, statusCallbackUrl);
