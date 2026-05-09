@@ -206,13 +206,14 @@ export default function Messages() {
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const handleSend = async () => {
-    if (!messageText.trim() || !activeConv) return;
+    if ((!messageText.trim() && pendingMedia.length === 0) || !activeConv) return;
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("sms-send", {
         body: {
           to: activeConv.sms_contacts.phone,
           body: messageText,
+          mediaUrls: pendingMedia.map(m => m.url),
           contactId: activeConv.contact_id,
           conversationId: activeConv.id,
           fromNumber: selectedFromNumber || undefined,
@@ -222,6 +223,7 @@ export default function Messages() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       setMessageText("");
+      setPendingMedia([]);
       fetchMessages(activeConv.id);
       fetchConversations();
     } catch (err: unknown) {
