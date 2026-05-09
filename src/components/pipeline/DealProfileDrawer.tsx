@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, DollarSign, Tag, StickyNote,
-  MessageSquare, Save, Loader2, Clock, Send, Trash2, Plus,
+  MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -33,6 +33,11 @@ type Deal = {
   client_address?: string | null;
   tags?: string[] | null;
   source?: string | null;
+  age?: string | null;
+  super_fund_name?: string | null;
+  super_balance?: number | null;
+  state?: string | null;
+  had_review_before?: boolean | null;
 };
 type DealNote = {
   id: string;
@@ -61,7 +66,13 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
     notes: "",
     stage_id: "",
     source: "",
+    age: "",
+    super_fund_name: "",
+    super_balance: "",
+    state: "",
+    had_review_before: "" as "" | "yes" | "no",
   });
+  const [originalStageId, setOriginalStageId] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [notes, setNotes] = useState<DealNote[]>([]);
   const [newNote, setNewNote] = useState("");
@@ -71,16 +82,23 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
 
   useEffect(() => {
     if (deal) {
+      const d = deal as any;
       setForm({
         client_name: deal.client_name || "",
         client_email: deal.client_email || "",
         client_phone: deal.client_phone || "",
-        client_address: (deal as any).client_address || "",
+        client_address: d.client_address || "",
         value: deal.value != null ? String(deal.value) : "",
         notes: deal.notes || "",
         stage_id: deal.stage_id,
-        source: (deal as any).source || "",
+        source: d.source || "",
+        age: d.age || "",
+        super_fund_name: d.super_fund_name || "",
+        super_balance: d.super_balance != null ? String(d.super_balance) : "",
+        state: d.state || "",
+        had_review_before: d.had_review_before === true ? "yes" : d.had_review_before === false ? "no" : "",
       });
+      setOriginalStageId(deal.stage_id);
       fetchNotes(deal.id);
     }
   }, [deal]);
@@ -97,7 +115,30 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
   const handleSave = async () => {
     if (!deal) return;
     setSaving(true);
-    const { error } = await supabase.from("pipeline_deals").update({
+
+    const stageChanged = form.stage_id !== originalStageId;
+
+    // If stage changed, shift others in target stage down so this card appears at top
+    if (stageChanged) {
+      const { data: targetDeals } = await supabase
+        .from("pipeline_deals")
+        .select("id, position")
+        .eq("stage_id", form.stage_id)
+        .neq("id", deal.id);
+      if (targetDeals?.length) {
+        await Promise.all(
+          targetDeals.map((d) =>
+            supabase.from("pipeline_deals").update({ position: (d.position ?? 0) + 1 }).eq("id", d.id)
+          )
+        );
+      }
+    }
+
+    const targetStage = stages.find((s) => s.id === form.stage_id);
+    const wasLost = stages.find((s) => s.id === originalStageId)?.name.toLowerCase() === "lost";
+    const nowLost = targetStage?.name.toLowerCase() === "lost";
+
+    const updates: any = {
       client_name: form.client_name.trim(),
       client_email: form.client_email.trim() || null,
       client_phone: form.client_phone.trim() || null,
@@ -106,13 +147,27 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
       notes: form.notes.trim() || null,
       stage_id: form.stage_id,
       source: form.source.trim() || null,
-    }).eq("id", deal.id);
+      age: form.age.trim() || null,
+      super_fund_name: form.super_fund_name.trim() || null,
+      super_balance: form.super_balance ? parseFloat(form.super_balance) : null,
+      state: form.state.trim() || null,
+      had_review_before:
+        form.had_review_before === "yes" ? true : form.had_review_before === "no" ? false : null,
+    };
+    if (stageChanged) updates.position = 0;
+    if (wasLost && !nowLost) {
+      updates.lost_reason_id = null;
+      updates.lost_reason_note = null;
+    }
+
+    const { error } = await supabase.from("pipeline_deals").update(updates).eq("id", deal.id);
     setSaving(false);
 
     if (error) {
       toast({ title: "Failed to save", variant: "destructive" });
     } else {
-      toast({ title: "Client updated" });
+      toast({ title: stageChanged ? "Client moved & updated" : "Client updated" });
+      setOriginalStageId(form.stage_id);
       onDealUpdated();
     }
   };
@@ -203,6 +258,9 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
                 ))}
               </SelectContent>
             </Select>
+            {form.stage_id !== originalStageId && (
+              <p className="text-[11px] text-cyan-600 mt-1.5">Save to move card to top of new column.</p>
+            )}
           </div>
 
           {/* Contact details */}
@@ -224,9 +282,46 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
                 <Input id="prof-phone" value={form.client_phone} onChange={(e) => setForm((p) => ({ ...p, client_phone: e.target.value }))} className="mt-1" />
               </div>
             </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <Label htmlFor="prof-age" className="text-xs">Age</Label>
+                <Input id="prof-age" value={form.age} onChange={(e) => setForm((p) => ({ ...p, age: e.target.value }))} className="mt-1" />
+              </div>
+              <div className="col-span-2">
+                <Label htmlFor="prof-state" className="text-xs">State</Label>
+                <Input id="prof-state" value={form.state} onChange={(e) => setForm((p) => ({ ...p, state: e.target.value }))} className="mt-1" placeholder="NSW, VIC…" />
+              </div>
+            </div>
             <div>
               <Label htmlFor="prof-address" className="text-xs flex items-center gap-1"><MapPin className="w-3 h-3" /> Address</Label>
               <Input id="prof-address" value={form.client_address} onChange={(e) => setForm((p) => ({ ...p, client_address: e.target.value }))} className="mt-1" />
+            </div>
+          </div>
+
+          {/* Superannuation */}
+          <div className="space-y-3">
+            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+              <Landmark className="w-3.5 h-3.5" /> Superannuation
+            </h3>
+            <div>
+              <Label htmlFor="prof-fund" className="text-xs">Super Fund Name</Label>
+              <Input id="prof-fund" value={form.super_fund_name} onChange={(e) => setForm((p) => ({ ...p, super_fund_name: e.target.value }))} className="mt-1" placeholder="AustralianSuper, Hostplus…" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="prof-balance" className="text-xs">Super Balance ($)</Label>
+                <Input id="prof-balance" type="number" step="0.01" value={form.super_balance} onChange={(e) => setForm((p) => ({ ...p, super_balance: e.target.value }))} className="mt-1" />
+              </div>
+              <div>
+                <Label htmlFor="prof-review" className="text-xs">Reviewed Before?</Label>
+                <Select value={form.had_review_before} onValueChange={(v) => setForm((p) => ({ ...p, had_review_before: v as any }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

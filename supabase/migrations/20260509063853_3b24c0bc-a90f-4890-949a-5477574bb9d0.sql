@@ -1,0 +1,6 @@
+ALTER TABLE public.pipeline_deals
+  ADD COLUMN IF NOT EXISTS age TEXT,
+  ADD COLUMN IF NOT EXISTS super_fund_name TEXT,
+  ADD COLUMN IF NOT EXISTS super_balance NUMERIC,
+  ADD COLUMN IF NOT EXISTS state TEXT,
+  ADD COLUMN IF NOT EXISTS had_review_before BOOLEAN;
