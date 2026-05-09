@@ -264,12 +264,12 @@ export default function UploadDocuments() {
             </div>
             <div className="space-y-5 px-7 py-7">
               <div>
-                <Label htmlFor="fullName" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">Full legal name</Label>
+                <Label htmlFor="fullName" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">First name</Label>
                 <Input
                   id="fullName"
                   value={client.fullName}
                   onChange={(e) => setClient({ ...client, fullName: e.target.value })}
-                  placeholder="As shown on your ID"
+                  placeholder="Your first name"
                   className="mt-1.5 h-11 rounded-sm border-[hsl(215_60%_12%)]/15 bg-white text-[hsl(215_60%_12%)] placeholder:text-[hsl(215_60%_12%)]/30 focus-visible:border-[hsl(215_60%_12%)] focus-visible:ring-1 focus-visible:ring-[hsl(215_60%_12%)]"
                 />
                 {errors.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName}</p>}
