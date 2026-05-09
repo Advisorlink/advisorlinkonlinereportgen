@@ -398,6 +398,60 @@ export type Database = {
         }
         Relationships: []
       }
+      client_documents: {
+        Row: {
+          client_email: string
+          client_name: string
+          client_phone: string | null
+          consent_given: boolean
+          created_at: string
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          ip_address: string | null
+          mime_type: string | null
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_email: string
+          client_name: string
+          client_phone?: string | null
+          consent_given?: boolean
+          created_at?: string
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          ip_address?: string | null
+          mime_type?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_email?: string
+          client_name?: string
+          client_phone?: string | null
+          consent_given?: boolean
+          created_at?: string
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          ip_address?: string | null
+          mime_type?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       esign_documents: {
         Row: {
           client_address: string | null
