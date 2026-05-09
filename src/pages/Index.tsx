@@ -56,6 +56,16 @@ export default function Index() {
   const exportPDF = async () => {
     if (!reportRef.current) return;
     setExporting(true);
+    // Force light mode for the PDF render regardless of the user's current theme
+    const root = document.documentElement;
+    const wasDark = root.classList.contains("dark");
+    const prevColorScheme = root.style.colorScheme;
+    if (wasDark) {
+      root.classList.remove("dark");
+      root.style.colorScheme = "light";
+      // Allow the browser to recompute styles before snapshotting
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    }
     try {
       const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
         import("html2canvas"),
@@ -138,6 +148,10 @@ export default function Index() {
       console.error(e);
       toast.error("PDF export failed");
     } finally {
+      if (wasDark) {
+        root.classList.add("dark");
+        root.style.colorScheme = prevColorScheme || "dark";
+      }
       setExporting(false);
     }
   };
