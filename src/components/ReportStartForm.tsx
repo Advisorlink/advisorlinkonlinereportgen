@@ -56,6 +56,27 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
 
   const [submitting, setSubmitting] = useState(false);
 
+  const handleSimulate = () => {
+    setAge("42");
+    setRetirementAge("67");
+    setAnnualIncome("95,000");
+    setSuperFundName(superFundName || "AustralianSuper");
+    setSuperBalance(superBalance || "145,000");
+    setPrimaryOption("Balanced");
+    setOptions([
+      { name: "High Growth", allocationPct: "30" },
+      { name: "Indexed Shares", allocationPct: "20" },
+    ]);
+    setMakesContrib("yes");
+    setContribAmount("250");
+    setContribType("dollar");
+    setContribFrequency("Monthly");
+    setGoalBalance("750,000");
+    setDesiredIncomeAmount("1,200");
+    setDesiredIncomeFrequency("Weekly");
+    toast.success("Sample data loaded — review then Generate Report");
+  };
+
   const addOption = () =>
     setOptions((p) => [...p, { name: "", allocationPct: "" }]);
   const updateOption = (i: number, patch: Partial<OptionRow>) =>
