@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Download, Eye, FileText, Image as ImageIcon, RefreshCw, Search, Shield, Trash2 } from "lucide-react";
+import { Download, Eye, FileText, Image as ImageIcon, RefreshCw, Search, Send, Shield, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { SendUploadLinkDialog } from "@/components/documents/SendUploadLinkDialog";
 
 type ClientDocument = {
   id: string;
@@ -46,6 +47,7 @@ export default function Documents() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [preview, setPreview] = useState<{ doc: ClientDocument; url: string } | null>(null);
+  const [sendOpen, setSendOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -123,10 +125,16 @@ export default function Documents() {
               Securely uploaded identification and financial documents.
             </p>
           </div>
-          <Button onClick={load} variant="outline" size="sm" className="gap-2">
-            <RefreshCw className="w-4 h-4" /> Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setSendOpen(true)} size="sm" className="gap-2">
+              <Send className="w-4 h-4" /> Send upload link
+            </Button>
+            <Button onClick={load} variant="outline" size="sm" className="gap-2">
+              <RefreshCw className="w-4 h-4" /> Refresh
+            </Button>
+          </div>
         </div>
+        <SendUploadLinkDialog open={sendOpen} onOpenChange={setSendOpen} />
 
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
