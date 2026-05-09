@@ -661,8 +661,9 @@ export default function Messages() {
                   </div>
                 </div>
               </div>
-          </div>
-        )}
+            </div>
+          );
+        })()}
 
         {/* Hidden file input for MMS */}
         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" />
