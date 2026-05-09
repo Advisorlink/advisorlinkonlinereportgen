@@ -361,20 +361,20 @@ export function PipelineBoard() {
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-border/50 bg-background/80 dark:bg-background/60 backdrop-blur-xl shrink-0">
-        <div className="flex items-center justify-between max-w-full">
-          <div>
-            <h1 className="text-2xl font-bold font-heading text-foreground tracking-tight flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl gradient-accent flex items-center justify-center shadow-lg shadow-cyan/20">
-                <Kanban className="w-4.5 h-4.5 text-white" />
+      <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-border/50 bg-background/80 dark:bg-background/60 backdrop-blur-xl shrink-0">
+        <div className="flex items-start sm:items-center justify-between gap-3 max-w-full">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold font-heading text-foreground tracking-tight flex items-center gap-2 sm:gap-2.5">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl gradient-accent flex items-center justify-center shadow-lg shadow-cyan/20 shrink-0">
+                <Kanban className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" />
               </div>
               Pipeline
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               {deals.length} deal{deals.length !== 1 ? "s" : ""} in pipeline
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
             <div className="relative hidden md:block">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -389,21 +389,22 @@ export function PipelineBoard() {
               size="sm"
               onClick={handleSyncQualified}
               disabled={syncing}
-              className="gap-1.5 h-9"
+              className="gap-1.5 h-9 px-2.5 sm:px-3"
               title="Import AI Caller leads with 80%+ qualification into New Lead"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{syncing ? "Syncing…" : "Sync Qualified"}</span>
             </Button>
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
               <DollarSign className="w-4 h-4 text-emerald-500" />
               <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                 ${totalValue.toLocaleString()}
               </span>
             </div>
             <Button
+              size="sm"
               onClick={() => setAddToStage(stages.find((s) => !isWonStage(s) && !isLostStage(s))?.id || stages[0]?.id || null)}
-              className="gradient-accent text-white border-0 shadow-lg shadow-cyan/20 hover:shadow-cyan/30 gap-2"
+              className="h-9 gradient-accent text-white border-0 shadow-lg shadow-cyan/20 hover:shadow-cyan/30 gap-1.5 px-2.5 sm:px-3"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Add Deal</span>
@@ -411,8 +412,19 @@ export function PipelineBoard() {
           </div>
         </div>
 
+        {/* Mobile search */}
+        <div className="relative mt-3 md:hidden">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search deals…"
+            className="pl-9 h-9 bg-background/60"
+          />
+        </div>
+
         {/* Filter tabs */}
-        <div className="mt-4 flex items-center gap-1.5 bg-muted/40 p-1 rounded-xl w-fit">
+        <div className="mt-3 sm:mt-4 flex items-center gap-1 sm:gap-1.5 bg-muted/40 p-1 rounded-xl w-fit max-w-full overflow-x-auto">
           {filterTabs.map((t) => {
             const Icon = t.icon;
             const isActive = view === t.id;
@@ -420,7 +432,7 @@ export function PipelineBoard() {
               <button
                 key={t.id}
                 onClick={() => setView(t.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all shrink-0 ${
                   isActive
                     ? "bg-card shadow-sm text-foreground"
                     : "text-muted-foreground hover:text-foreground"
@@ -440,7 +452,7 @@ export function PipelineBoard() {
       </div>
 
       {/* Board */}
-      <div className="flex-1 overflow-x-auto overflow-y-hidden p-4 md:p-6">
+      <div className="flex-1 overflow-x-auto overflow-y-hidden p-3 sm:p-4 md:p-6">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
