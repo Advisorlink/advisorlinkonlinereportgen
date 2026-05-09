@@ -79,12 +79,40 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const sendEmail = () => {
+  const sendEmail = async () => {
     if (!email) return toast.error("Enter an email address");
-    const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
-    window.location.href = mailto;
-    toast.success("Opening your email client...");
-    onOpenChange(false);
+    setSending(true);
+    try {
+      const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const html = emailBody
+        .split("\n")
+        .map(line => {
+          if (line.trim() === "") return "<br>";
+          const safe = escape(line).replace(
+            /(https?:\/\/[^\s]+)/g,
+            '<a href="$1" style="color:#0891b2;text-decoration:underline">$1</a>'
+          );
+          return `<p style="margin:0 0 8px 0">${safe}</p>`;
+        })
+        .join("\n");
+      const { data, error } = await supabase.functions.invoke("send-report-email", {
+        body: {
+          recipientEmail: email,
+          clientName: name,
+          customSubject: subject,
+          customBody: html,
+          isHtml: true,
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success(`Email sent to ${email}`);
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.error(`Could not send email: ${e.message || e}`);
+    } finally {
+      setSending(false);
+    }
   };
 
   const sendSMS = async () => {
@@ -174,10 +202,10 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
               <Label htmlFor="ul-body">Message</Label>
               <Textarea id="ul-body" rows={7} value={emailBody} onChange={e => setEmailBody(e.target.value)} />
             </div>
-            <Button onClick={sendEmail} className="w-full gap-2">
-              <Send className="w-4 h-4" /> Open in email client
+            <Button onClick={sendEmail} disabled={sending} className="w-full gap-2">
+              <Send className="w-4 h-4" /> {sending ? "Sending..." : "Send email"}
             </Button>
-            <p className="text-xs text-muted-foreground text-center">This opens your default email app pre-filled, ready to send.</p>
+            <p className="text-xs text-muted-foreground text-center">Sent directly from your AdvisorLink inbox with your signature.</p>
           </TabsContent>
           <TabsContent value="sms" className="space-y-3 pt-3">
             <div className="space-y-1.5">
