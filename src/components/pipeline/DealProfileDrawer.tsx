@@ -17,6 +17,7 @@ import {
   MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ReportStartForm } from "@/components/ReportStartForm";
 
 type Stage = { id: string; name: string; color: string; position: number };
 type Deal = {
