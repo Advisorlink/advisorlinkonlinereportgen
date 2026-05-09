@@ -350,7 +350,27 @@ export function PipelineBoard() {
               {deals.length} deal{deals.length !== 1 ? "s" : ""} in pipeline
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="relative hidden md:block">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search deals…"
+                className="pl-9 w-56 h-9 bg-background/60"
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSyncQualified}
+              disabled={syncing}
+              className="gap-1.5 h-9"
+              title="Import AI Caller leads with 80%+ qualification into New Lead"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{syncing ? "Syncing…" : "Sync Qualified"}</span>
+            </Button>
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200/50">
               <DollarSign className="w-4 h-4 text-emerald-600" />
               <span className="text-sm font-semibold text-emerald-700">
