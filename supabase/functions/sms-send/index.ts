@@ -224,6 +224,14 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error("sms-send error:", err);
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const raw = err?.message || String(err);
+    let friendly = raw;
+    if (/21659/.test(raw)) friendly = "The sending number isn't registered in your Twilio account. Buy/port it in Twilio, or switch to a number you own.";
+    else if (/21211/.test(raw)) friendly = "The recipient number is invalid. Use international format (e.g. +614xxxxxxxx).";
+    else if (/40305/.test(raw)) friendly = "The sending number isn't on your Telnyx Messaging Profile. Assign it in Telnyx, or switch providers.";
+    return new Response(
+      JSON.stringify({ error: friendly, details: raw }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });
