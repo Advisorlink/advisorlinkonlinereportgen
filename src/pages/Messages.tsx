@@ -547,6 +547,24 @@ export default function Messages() {
                     </Button>
                   </div>
 
+                  {pendingMedia.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {pendingMedia.map((m, i) => (
+                        <div key={i} className="relative group rounded-lg border border-border bg-muted/40 p-1.5 pr-7 flex items-center gap-2 text-xs">
+                          {m.type.startsWith("image/") ? (
+                            <img src={m.url} alt={m.name} className="w-10 h-10 rounded object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded bg-muted flex items-center justify-center"><FileText className="w-4 h-4 text-muted-foreground" /></div>
+                          )}
+                          <span className="max-w-[140px] truncate">{m.name}</span>
+                          <button onClick={() => removePendingMedia(i)} className="absolute top-1 right-1 w-5 h-5 rounded-full bg-background border border-border flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="relative rounded-2xl border border-border bg-muted/30 focus-within:border-cyan/60 focus-within:bg-card focus-within:shadow-[0_0_0_4px_hsl(var(--cyan)/0.08)] transition-all">
                     <Textarea
                       value={messageText}
@@ -556,14 +574,14 @@ export default function Messages() {
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                     />
                     <div className="absolute right-2 bottom-2 flex items-center gap-1">
-                      <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => fileInputRef.current?.click()}>
-                        <Paperclip className="w-4 h-4" />
+                      <Button size="icon" variant="ghost" disabled={uploadingMedia} className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => fileInputRef.current?.click()} title="Attach image or document">
+                        <Paperclip className={`w-4 h-4 ${uploadingMedia ? "animate-pulse" : ""}`} />
                       </Button>
                       <Button
                         size="icon"
                         className="h-9 w-9 rounded-full bg-cyan hover:bg-cyan/90 text-white shadow-md disabled:opacity-40"
                         onClick={handleSend}
-                        disabled={!messageText.trim() || sending}
+                        disabled={(!messageText.trim() && pendingMedia.length === 0) || sending}
                       >
                         <Send className="w-4 h-4" />
                       </Button>
