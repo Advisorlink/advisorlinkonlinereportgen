@@ -126,8 +126,9 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     };
 
     setInputs(next);
-    toast.success("Report inputs loaded — looking up fund details…");
-    setTimeout(() => navigate("/"), 350);
+    celebrate();
+    toast.success("🎉 Report inputs loaded — looking up fund details…");
+    setTimeout(() => navigate("/"), 850);
   };
 
   return (
