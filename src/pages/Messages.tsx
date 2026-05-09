@@ -541,81 +541,126 @@ export default function Messages() {
           </div>
         )}
 
-        {/* RIGHT — Contact Panel */}
-        {activeConv && showContactPanel && (
-          <div className="hidden lg:flex flex-col w-80 border-l border-border bg-card shrink-0">
-            <div className="p-4 border-b border-border">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-foreground">Contact Details</h3>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setShowContactPanel(false)}>
-                  <X className="w-3 h-3" />
+        {/* RIGHT — Contact Panel (rich profile, mirrors client profile) */}
+        {activeConv && showContactPanel && (() => {
+          const c = activeConv.sms_contacts;
+          const cf = (c.custom_fields || {}) as Record<string, any>;
+          const initials = (c.full_name || "?").split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+          const balance = cf.super_balance != null ? Number(cf.super_balance) : null;
+          return (
+            <div className="hidden lg:flex flex-col w-80 border-l border-border bg-card shrink-0 overflow-y-auto">
+              {/* Hero header */}
+              <div className="bg-gradient-to-br from-[hsl(var(--navy))] to-[hsl(215,60%,18%)] p-5 pb-6 relative">
+                <Button size="icon" variant="ghost" className="absolute top-3 right-3 h-7 w-7 text-white/70 hover:text-white hover:bg-white/10" onClick={() => setShowContactPanel(false)}>
+                  <X className="w-3.5 h-3.5" />
                 </Button>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-navy flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
-                  {activeConv.sms_contacts.full_name.charAt(0).toUpperCase()}
+                <p className="text-white/60 text-[11px] font-medium uppercase tracking-wider mb-3">Client Profile</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-2xl gradient-accent flex items-center justify-center text-lg font-bold text-white shadow-lg shrink-0">
+                    {initials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-white text-base truncate">{c.full_name}</h4>
+                    <p className="text-[11px] text-white/60 truncate mt-0.5">{c.phone}</p>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {c.lead_status && (
+                        <Badge className="text-[9px] px-1.5 py-0 h-4 bg-white/10 text-white/90 border-white/10 hover:bg-white/15">
+                          {c.lead_status}
+                        </Badge>
+                      )}
+                      {c.opt_in_status && !c.opt_out_status && (
+                        <Badge className="text-[9px] px-1.5 py-0 h-4 bg-online/20 text-online border-online/30">Opted In</Badge>
+                      )}
+                      {c.opt_out_status && <Badge variant="destructive" className="text-[9px] px-1.5 py-0 h-4">Opted Out</Badge>}
+                    </div>
+                  </div>
                 </div>
-                <h4 className="font-semibold text-foreground">{activeConv.sms_contacts.full_name}</h4>
-                <p className="text-xs text-muted-foreground mt-0.5">{activeConv.sms_contacts.phone}</p>
               </div>
-            </div>
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <DetailRow icon={<Phone className="w-3.5 h-3.5" />} label="Phone" value={activeConv.sms_contacts.phone} />
-                  {activeConv.sms_contacts.email && <DetailRow icon={<Mail className="w-3.5 h-3.5" />} label="Email" value={activeConv.sms_contacts.email} />}
-                  {activeConv.sms_contacts.lead_source && <DetailRow icon={<Tag className="w-3.5 h-3.5" />} label="Source" value={activeConv.sms_contacts.lead_source} />}
+
+              <div className="p-4 space-y-5">
+                {/* Assigned to */}
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5 flex items-center gap-1.5">
+                    <UserCog className="w-3 h-3" /> Assigned to
+                  </p>
+                  <Select
+                    value={activeConv.assigned_user_id || "__unassigned"}
+                    onValueChange={handleReassign}
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Unassigned" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__unassigned"><span className="text-muted-foreground">Unassigned</span></SelectItem>
+                      {teamMembers.map((m) => (
+                        <SelectItem key={m.id} value={m.id}>{m.email}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="border-t border-border pt-3">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Status</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <Badge variant={activeConv.sms_contacts.lead_status === "new" ? "default" : "secondary"} className="text-[10px]">
-                      {activeConv.sms_contacts.lead_status || "New"}
-                    </Badge>
-                    {activeConv.sms_contacts.opt_in_status && !activeConv.sms_contacts.opt_out_status && (
-                      <Badge className="text-[10px] bg-online/20 text-online border-online/30">Opted In</Badge>
-                    )}
-                    {activeConv.sms_contacts.opt_out_status && (
-                      <Badge variant="destructive" className="text-[10px]">Opted Out</Badge>
-                    )}
+                {/* Contact details */}
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 flex items-center gap-1.5">
+                    <User className="w-3 h-3" /> Contact Details
+                  </p>
+                  <div className="space-y-2 bg-muted/30 rounded-xl p-3">
+                    <DetailRow icon={<Phone className="w-3.5 h-3.5" />} label="Phone" value={c.phone} />
+                    {c.email && <DetailRow icon={<Mail className="w-3.5 h-3.5" />} label="Email" value={c.email} />}
+                    {cf.age && <DetailRow icon={<Calendar className="w-3.5 h-3.5" />} label="Age" value={String(cf.age)} />}
+                    {cf.state && <DetailRow icon={<MapPin className="w-3.5 h-3.5" />} label="State" value={String(cf.state)} />}
+                    {c.lead_source && <DetailRow icon={<Tag className="w-3.5 h-3.5" />} label="Source" value={c.lead_source} />}
                   </div>
                 </div>
 
-                {activeConv.sms_contacts.tags && activeConv.sms_contacts.tags.length > 0 && (
-                  <div className="border-t border-border pt-3">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tags</p>
+                {/* Superannuation */}
+                {(cf.super_fund_name || balance != null || cf.had_review_before != null) && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 flex items-center gap-1.5">
+                      <Landmark className="w-3 h-3" /> Superannuation
+                    </p>
+                    <div className="space-y-2 bg-muted/30 rounded-xl p-3">
+                      {cf.super_fund_name && <DetailRow icon={<Landmark className="w-3.5 h-3.5" />} label="Fund" value={String(cf.super_fund_name)} />}
+                      {balance != null && (
+                        <DetailRow icon={<span className="text-xs">$</span>} label="Balance" value={`$${balance.toLocaleString()}`} />
+                      )}
+                      {cf.had_review_before != null && (
+                        <DetailRow icon={<Check className="w-3.5 h-3.5" />} label="Reviewed before" value={cf.had_review_before ? "Yes" : "No"} />
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {c.tags && c.tags.length > 0 && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Tags</p>
                     <div className="flex flex-wrap gap-1">
-                      {activeConv.sms_contacts.tags.map((t) => (
+                      {c.tags.map((t) => (
                         <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {activeConv.sms_contacts.notes && (
-                  <div className="border-t border-border pt-3">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Notes</p>
-                    <p className="text-xs text-muted-foreground">{activeConv.sms_contacts.notes}</p>
+                {/* Notes */}
+                {c.notes && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Notes</p>
+                    <p className="text-xs text-muted-foreground bg-muted/30 rounded-xl p-3 whitespace-pre-wrap">{c.notes}</p>
                   </div>
                 )}
 
-                <div className="border-t border-border pt-3">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Activity</p>
-                  <div className="space-y-1.5">
-                    {activeConv.sms_contacts.last_message_at && (
-                      <p className="text-[11px] text-muted-foreground">Last message: {new Date(activeConv.sms_contacts.last_message_at).toLocaleDateString()}</p>
-                    )}
-                    {activeConv.sms_contacts.opt_in_date && (
-                      <p className="text-[11px] text-muted-foreground">Opted in: {new Date(activeConv.sms_contacts.opt_in_date).toLocaleDateString()}</p>
-                    )}
-                    {activeConv.sms_contacts.opt_out_date && (
-                      <p className="text-[11px] text-destructive">Opted out: {new Date(activeConv.sms_contacts.opt_out_date).toLocaleDateString()}</p>
-                    )}
+                {/* Activity */}
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Activity</p>
+                  <div className="space-y-1 text-[11px] text-muted-foreground">
+                    {c.last_message_at && <p>Last message: {new Date(c.last_message_at).toLocaleDateString()}</p>}
+                    {c.opt_in_date && <p>Opted in: {new Date(c.opt_in_date).toLocaleDateString()}</p>}
+                    {c.opt_out_date && <p className="text-destructive">Opted out: {new Date(c.opt_out_date).toLocaleDateString()}</p>}
                   </div>
                 </div>
               </div>
-            </ScrollArea>
           </div>
         )}
 
