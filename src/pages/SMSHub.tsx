@@ -164,7 +164,7 @@ export default function SMSHub() {
 
   return (
     <CRMLayout>
-      <div className="p-4 md:p-6 space-y-6">
+      <div className="p-3 sm:p-4 md:p-6 space-y-6 max-w-full overflow-x-hidden">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
