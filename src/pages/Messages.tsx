@@ -91,6 +91,12 @@ export default function Messages() {
   // From number selector
   const [smsNumbers, setSmsNumbers] = useState<SmsNumber[]>([]);
   const [selectedFromNumber, setSelectedFromNumber] = useState<string>("");
+  const [simulateMode, setSimulateMode] = useState<boolean>(() => {
+    try { return localStorage.getItem("sms_simulate_mode") === "1"; } catch { return false; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("sms_simulate_mode", simulateMode ? "1" : "0"); } catch { /* noop */ }
+  }, [simulateMode]);
 
   // Template quick-insert
   const [templates, setTemplates] = useState<Template[]>([]);
