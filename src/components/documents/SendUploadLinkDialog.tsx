@@ -202,10 +202,10 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
               <Label htmlFor="ul-body">Message</Label>
               <Textarea id="ul-body" rows={7} value={emailBody} onChange={e => setEmailBody(e.target.value)} />
             </div>
-            <Button onClick={sendEmail} className="w-full gap-2">
-              <Send className="w-4 h-4" /> Open in email client
+            <Button onClick={sendEmail} disabled={sending} className="w-full gap-2">
+              <Send className="w-4 h-4" /> {sending ? "Sending..." : "Send email"}
             </Button>
-            <p className="text-xs text-muted-foreground text-center">This opens your default email app pre-filled, ready to send.</p>
+            <p className="text-xs text-muted-foreground text-center">Sent directly from your AdvisorLink inbox with your signature.</p>
           </TabsContent>
           <TabsContent value="sms" className="space-y-3 pt-3">
             <div className="space-y-1.5">
