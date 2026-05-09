@@ -18,10 +18,10 @@ import {
 import { toast } from "sonner";
 import {
   Shield, Lock, FileCheck2, Camera, Upload, CheckCircle2,
-  IdCard, FileText, AlertCircle, Loader2, X, Eye, ChevronRight,
-  ShieldCheck, Sparkles, BadgeCheck,
+  IdCard, FileText, AlertCircle, Loader2, X, ChevronRight,
 } from "lucide-react";
 import { z } from "zod";
+import logoSvg from "@/assets/logo.svg";
 
 const clientSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name").max(100),
@@ -90,7 +90,6 @@ export default function UploadDocuments() {
     if (!pendingPick) return;
     const { slotKey, source } = pendingPick;
     setPendingPick(null);
-    // Defer one tick to allow dialog to close before opening file picker
     setTimeout(() => triggerInput(slotKey, source, multiple), 50);
   };
 
@@ -185,177 +184,143 @@ export default function UploadDocuments() {
   const pendingSlot = pendingPick ? DOC_SLOTS.find((s) => s.key === pendingPick.slotKey) : null;
   const pendingNoun = pendingSlot?.kind === "photo" ? "photos" : "documents";
 
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-[hsl(var(--navy))] text-[hsl(var(--navy-foreground))]">
-      {/* Ambient background */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-80"
-        style={{
-          backgroundImage: `
-            radial-gradient(ellipse 70% 50% at 50% -10%, hsl(var(--cyan) / 0.18), transparent 60%),
-            radial-gradient(ellipse 50% 40% at 100% 100%, hsl(215 80% 40% / 0.25), transparent 60%),
-            radial-gradient(ellipse 40% 30% at 0% 30%, hsl(var(--cyan) / 0.08), transparent 60%)
-          `,
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-          maskImage: "radial-gradient(ellipse at center, black 30%, transparent 75%)",
-        }}
-      />
+  // Brand colors as inline style refs
+  const navy = "hsl(215 60% 12%)";
 
-      {/* Top trust bar */}
-      <header className="relative border-b border-white/10 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3.5">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[hsl(var(--cyan))] to-[hsl(var(--cyan-glow))] shadow-[0_0_20px_-4px_hsl(var(--cyan)/0.6)]">
-              <ShieldCheck className="h-4 w-4 text-[hsl(var(--navy))]" strokeWidth={2.5} />
+  return (
+    <div className="min-h-screen bg-[#f7f5f0] text-[hsl(215_32%_14%)]">
+      {/* Top brand bar */}
+      <header className="border-b border-[hsl(215_60%_12%)]/10 bg-white">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-[hsl(215_60%_12%)] p-1.5">
+              <img src={logoSvg} alt="AdvisorLink" className="h-full w-auto" />
             </div>
             <div className="leading-tight">
-              <p className="font-heading text-sm font-bold tracking-tight">AdvisorLink</p>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-white/60">Secure Client Portal</p>
+              <p className="font-heading text-[15px] font-bold tracking-tight text-[hsl(215_60%_12%)]">Advisor Link Online</p>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[hsl(215_60%_12%)]/55">Authorised Representative</p>
             </div>
           </div>
-          <div className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-medium text-white/80 sm:flex">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[hsl(var(--accent-online))] opacity-60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent-online))]" />
-            </span>
-            Encrypted Session
+          <div className="hidden items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/60 sm:flex">
+            <Lock className="h-3 w-3" />
+            Secure Channel
           </div>
         </div>
       </header>
 
-      <main className="relative mx-auto max-w-3xl px-4 py-8 sm:py-12">
+      <main className="mx-auto max-w-2xl px-5 py-10 sm:py-14">
         {/* Hero */}
-        <div className="mb-8 sm:mb-10">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--cyan))]/30 bg-[hsl(var(--cyan))]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--cyan-glow))]">
-            <Lock className="h-3 w-3" />
-            Bank-Grade Encryption
+        <div className="mb-10 text-center">
+          <div className="mb-4 inline-flex items-center gap-1.5 border-y border-[hsl(215_60%_12%)]/15 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.25em] text-[hsl(215_60%_12%)]/70">
+            <span className="h-px w-4 bg-[hsl(215_60%_12%)]/30" />
+            Confidential Client Portal
+            <span className="h-px w-4 bg-[hsl(215_60%_12%)]/30" />
           </div>
-          <h1 className="font-heading text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl">
-            Submit your documents <span className="bg-gradient-to-r from-[hsl(var(--cyan))] to-[hsl(var(--cyan-glow))] bg-clip-text text-transparent">securely</span>
+          <h1 className="font-heading text-[28px] font-bold leading-tight tracking-tight text-[hsl(215_60%_12%)] sm:text-[34px]">
+            Document Submission
           </h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">
-            Your adviser has invited you to upload your identification and supporting financial
-            documents through this private, encrypted channel. Takes less than 2 minutes.
+          <p className="mx-auto mt-3 max-w-md text-[14px] leading-relaxed text-[hsl(215_60%_12%)]/65">
+            Your adviser has invited you to submit your identification and supporting
+            documents through our private, encrypted portal.
           </p>
         </div>
 
-        {/* Step indicator */}
-        <div className="mb-7 flex items-center gap-2">
+        {/* Step indicator — refined serial */}
+        <div className="mx-auto mb-8 flex max-w-md items-center justify-between">
           {[
-            { n: 1, label: "Your details" },
-            { n: 2, label: "Upload" },
-            { n: 3, label: "Done" },
+            { n: 1, label: "Identity" },
+            { n: 2, label: "Documents" },
+            { n: 3, label: "Confirmed" },
           ].map((s, i) => (
-            <div key={s.n} className="flex flex-1 items-center gap-2">
+            <div key={s.n} className="flex flex-1 items-center">
               <div className="flex flex-col items-center gap-1.5">
                 <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                  className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-[11px] font-bold transition-all ${
                     step >= s.n
-                      ? "bg-gradient-to-br from-[hsl(var(--cyan))] to-[hsl(var(--cyan-glow))] text-[hsl(var(--navy))] shadow-[0_0_20px_-4px_hsl(var(--cyan)/0.6)]"
-                      : "border border-white/15 bg-white/5 text-white/50"
+                      ? "border-[hsl(215_60%_12%)] bg-[hsl(215_60%_12%)] text-white"
+                      : "border-[hsl(215_60%_12%)]/20 bg-white text-[hsl(215_60%_12%)]/40"
                   }`}
                 >
                   {step > s.n ? <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} /> : s.n}
                 </div>
-                <span className={`hidden text-[10px] font-medium sm:block ${step >= s.n ? "text-white" : "text-white/40"}`}>{s.label}</span>
+                <span className={`text-[10px] font-semibold uppercase tracking-wider ${step >= s.n ? "text-[hsl(215_60%_12%)]" : "text-[hsl(215_60%_12%)]/35"}`}>
+                  {s.label}
+                </span>
               </div>
-              {i < 2 && <div className={`h-px flex-1 ${step > s.n ? "bg-[hsl(var(--cyan))]" : "bg-white/10"}`} />}
+              {i < 2 && <div className={`mx-2 mb-5 h-px flex-1 ${step > s.n ? "bg-[hsl(215_60%_12%)]" : "bg-[hsl(215_60%_12%)]/15"}`} />}
             </div>
           ))}
         </div>
 
         {/* STEP 1 */}
         {step === 1 && (
-          <div className="page-enter rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-2xl backdrop-blur-xl sm:p-8">
-            <div className="mb-6 flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--cyan))]/10 text-[hsl(var(--cyan-glow))]">
-                <BadgeCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="font-heading text-xl font-semibold">Verify your identity</h2>
-                <p className="mt-0.5 text-sm text-white/60">
-                  Confirm your details so we can match the documents to your file.
-                </p>
-              </div>
+          <section className="page-enter overflow-hidden rounded-md border border-[hsl(215_60%_12%)]/10 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.12)]">
+            <div className="border-b border-[hsl(215_60%_12%)]/10 bg-[hsl(215_60%_12%)] px-7 py-5 text-white">
+              <h2 className="font-heading text-lg font-semibold">Verify your identity</h2>
+              <p className="mt-0.5 text-[12px] text-white/65">
+                Please confirm your details so we can match the documents to your file.
+              </p>
             </div>
-
-            <div className="space-y-4">
+            <div className="space-y-5 px-7 py-7">
               <div>
-                <Label htmlFor="fullName" className="text-white/80">Full legal name</Label>
+                <Label htmlFor="fullName" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">Full legal name</Label>
                 <Input
                   id="fullName"
                   value={client.fullName}
                   onChange={(e) => setClient({ ...client, fullName: e.target.value })}
                   placeholder="As shown on your ID"
-                  className="mt-1.5 h-11 border-white/10 bg-white/5 text-white placeholder:text-white/30 focus-visible:ring-[hsl(var(--cyan))]"
+                  className="mt-1.5 h-11 rounded-sm border-[hsl(215_60%_12%)]/15 bg-white text-[hsl(215_60%_12%)] placeholder:text-[hsl(215_60%_12%)]/30 focus-visible:border-[hsl(215_60%_12%)] focus-visible:ring-1 focus-visible:ring-[hsl(215_60%_12%)]"
                 />
                 {errors.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName}</p>}
               </div>
               <div>
-                <Label htmlFor="email" className="text-white/80">Email address</Label>
+                <Label htmlFor="email" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">Email address</Label>
                 <Input
                   id="email"
                   type="email"
                   value={client.email}
                   onChange={(e) => setClient({ ...client, email: e.target.value })}
                   placeholder="you@example.com"
-                  className="mt-1.5 h-11 border-white/10 bg-white/5 text-white placeholder:text-white/30 focus-visible:ring-[hsl(var(--cyan))]"
+                  className="mt-1.5 h-11 rounded-sm border-[hsl(215_60%_12%)]/15 bg-white text-[hsl(215_60%_12%)] placeholder:text-[hsl(215_60%_12%)]/30 focus-visible:border-[hsl(215_60%_12%)] focus-visible:ring-1 focus-visible:ring-[hsl(215_60%_12%)]"
                 />
                 {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
               </div>
               <div>
-                <Label htmlFor="phone" className="text-white/80">Mobile number</Label>
+                <Label htmlFor="phone" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">Mobile number</Label>
                 <Input
                   id="phone"
                   type="tel"
                   value={client.phone}
                   onChange={(e) => setClient({ ...client, phone: e.target.value })}
                   placeholder="04XX XXX XXX"
-                  className="mt-1.5 h-11 border-white/10 bg-white/5 text-white placeholder:text-white/30 focus-visible:ring-[hsl(var(--cyan))]"
+                  className="mt-1.5 h-11 rounded-sm border-[hsl(215_60%_12%)]/15 bg-white text-[hsl(215_60%_12%)] placeholder:text-[hsl(215_60%_12%)]/30 focus-visible:border-[hsl(215_60%_12%)] focus-visible:ring-1 focus-visible:ring-[hsl(215_60%_12%)]"
                 />
                 {errors.phone && <p className="mt-1 text-xs text-destructive">{errors.phone}</p>}
               </div>
-            </div>
 
-            <Button
-              onClick={handleClientNext}
-              size="lg"
-              className="mt-7 h-12 w-full bg-gradient-to-r from-[hsl(var(--cyan))] to-[hsl(var(--cyan-glow))] font-semibold text-[hsl(var(--navy))] shadow-[0_0_28px_-6px_hsl(var(--cyan)/0.7)] hover:from-[hsl(var(--cyan-glow))] hover:to-[hsl(var(--cyan))] hover:opacity-100"
-            >
-              Continue to upload <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-
-            <div className="mt-5 flex items-center justify-center gap-1.5 text-[11px] text-white/50">
-              <Lock className="h-3 w-3" />
-              Your information is encrypted end-to-end
+              <Button
+                onClick={handleClientNext}
+                size="lg"
+                className="mt-2 h-12 w-full rounded-sm bg-[hsl(215_60%_12%)] font-semibold tracking-wide text-white hover:bg-[hsl(215_60%_18%)]"
+              >
+                Continue <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
             </div>
-          </div>
+          </section>
         )}
 
         {/* STEP 2 */}
         {step === 2 && (
           <div className="page-enter space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-2xl backdrop-blur-xl sm:p-8">
-              <div className="mb-6 flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--cyan))]/10 text-[hsl(var(--cyan-glow))]">
-                  <Upload className="h-5 w-5" />
-                </div>
-                <div>
-                  <h2 className="font-heading text-xl font-semibold">Upload your documents</h2>
-                  <p className="mt-0.5 text-sm text-white/60">
-                    Take a photo or choose a file. JPG, PNG, PDF — up to 10MB each.
-                  </p>
-                </div>
+            <section className="overflow-hidden rounded-md border border-[hsl(215_60%_12%)]/10 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.12)]">
+              <div className="border-b border-[hsl(215_60%_12%)]/10 bg-[hsl(215_60%_12%)] px-7 py-5 text-white">
+                <h2 className="font-heading text-lg font-semibold">Upload your documents</h2>
+                <p className="mt-0.5 text-[12px] text-white/65">
+                  Take a photo or choose a file. JPG, PNG, PDF — up to 10MB each.
+                </p>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-3 p-5 sm:p-6">
                 {DOC_SLOTS.map((slot) => {
                   const uploaded = files[slot.key] || [];
                   const Icon = slot.icon;
@@ -363,68 +328,68 @@ export default function UploadDocuments() {
                   return (
                     <div
                       key={slot.key}
-                      className={`group rounded-xl border p-4 transition-all ${
+                      className={`rounded-md border p-4 transition-all ${
                         hasFiles
-                          ? "border-[hsl(var(--cyan))]/40 bg-[hsl(var(--cyan))]/[0.04]"
-                          : "border-white/10 bg-white/[0.02] hover:border-white/20"
+                          ? "border-[hsl(215_60%_12%)]/40 bg-[hsl(215_60%_12%)]/[0.025]"
+                          : "border-[hsl(215_60%_12%)]/12 bg-white hover:border-[hsl(215_60%_12%)]/25"
                       }`}
                     >
                       <div className="flex items-start gap-3">
                         <div
-                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-sm ${
                             hasFiles
-                              ? "bg-gradient-to-br from-[hsl(var(--cyan))] to-[hsl(var(--cyan-glow))] text-[hsl(var(--navy))]"
-                              : "bg-white/5 text-white/70"
+                              ? "bg-[hsl(215_60%_12%)] text-white"
+                              : "border border-[hsl(215_60%_12%)]/15 bg-white text-[hsl(215_60%_12%)]/70"
                           }`}
                         >
                           <Icon className="h-5 w-5" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-sm font-semibold text-white">{slot.label}</p>
+                            <p className="text-[14px] font-semibold text-[hsl(215_60%_12%)]">{slot.label}</p>
                             {slot.required ? (
-                              <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-destructive">
+                              <span className="rounded-sm bg-[hsl(215_60%_12%)]/[0.06] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[hsl(215_60%_12%)]">
                                 Required
                               </span>
                             ) : (
-                              <span className="rounded-full bg-white/5 px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider text-white/50">
+                              <span className="text-[9px] font-medium uppercase tracking-wider text-[hsl(215_60%_12%)]/40">
                                 Optional
                               </span>
                             )}
                             {hasFiles && (
-                              <span className="rounded-full bg-[hsl(var(--accent-online))]/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[hsl(var(--accent-online))]">
+                              <span className="rounded-sm bg-emerald-700/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-700">
                                 {uploaded.length} file{uploaded.length > 1 ? "s" : ""}
                               </span>
                             )}
                           </div>
-                          <p className="mt-0.5 text-xs text-white/55">{slot.description}</p>
+                          <p className="mt-0.5 text-[12px] text-[hsl(215_60%_12%)]/55">{slot.description}</p>
                         </div>
                       </div>
 
                       {hasFiles && (
-                        <div className="mt-3 space-y-2">
+                        <div className="mt-3 space-y-1.5">
                           {uploaded.map((u, idx) => (
                             <div
                               key={idx}
-                              className="flex items-center gap-3 rounded-lg border border-[hsl(var(--cyan))]/20 bg-[hsl(var(--cyan))]/[0.05] p-2"
+                              className="flex items-center gap-2.5 rounded-sm border border-[hsl(215_60%_12%)]/10 bg-[#f7f5f0] p-2"
                             >
                               {u.preview ? (
-                                <img src={u.preview} alt="" className="h-11 w-11 rounded-md object-cover ring-1 ring-white/10" />
+                                <img src={u.preview} alt="" className="h-10 w-10 rounded-sm object-cover ring-1 ring-[hsl(215_60%_12%)]/10" />
                               ) : (
-                                <div className="flex h-11 w-11 items-center justify-center rounded-md bg-white/5">
-                                  <FileCheck2 className="h-5 w-5 text-[hsl(var(--cyan-glow))]" />
+                                <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-white">
+                                  <FileCheck2 className="h-5 w-5 text-[hsl(215_60%_12%)]" />
                                 </div>
                               )}
                               <div className="min-w-0 flex-1">
-                                <p className="truncate text-xs font-medium text-white">{u.file.name}</p>
-                                <p className="text-[10px] text-white/50">
+                                <p className="truncate text-[12px] font-medium text-[hsl(215_60%_12%)]">{u.file.name}</p>
+                                <p className="text-[10px] text-[hsl(215_60%_12%)]/50">
                                   {(u.file.size / 1024 / 1024).toFixed(2)} MB · Ready
                                 </p>
                               </div>
-                              <CheckCircle2 className="h-4 w-4 shrink-0 text-[hsl(var(--cyan-glow))]" />
+                              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-700" />
                               <button
                                 onClick={() => handleRemove(slot.key, idx)}
-                                className="shrink-0 rounded-md p-1 text-white/40 hover:bg-white/10 hover:text-white"
+                                className="shrink-0 rounded-sm p-1 text-[hsl(215_60%_12%)]/40 hover:bg-[hsl(215_60%_12%)]/[0.06] hover:text-[hsl(215_60%_12%)]"
                                 aria-label="Remove file"
                               >
                                 <X className="h-3.5 w-3.5" />
@@ -454,7 +419,7 @@ export default function UploadDocuments() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="border-white/15 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+                          className="rounded-sm border-[hsl(215_60%_12%)]/20 bg-white text-[hsl(215_60%_12%)] hover:bg-[hsl(215_60%_12%)] hover:text-white"
                           onClick={() => askMultiple(slot.key, "camera")}
                         >
                           <Camera className="mr-1.5 h-4 w-4" />
@@ -464,7 +429,7 @@ export default function UploadDocuments() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="border-white/15 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+                          className="rounded-sm border-[hsl(215_60%_12%)]/20 bg-white text-[hsl(215_60%_12%)] hover:bg-[hsl(215_60%_12%)] hover:text-white"
                           onClick={() => askMultiple(slot.key, "file")}
                         >
                           <Upload className="mr-1.5 h-4 w-4" />
@@ -475,46 +440,32 @@ export default function UploadDocuments() {
                   );
                 })}
               </div>
-            </div>
+            </section>
 
-            {/* Trust + consent */}
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-2xl backdrop-blur-xl sm:p-6">
-              <div className="mb-5 grid grid-cols-3 gap-2 sm:gap-3">
-                {[
-                  { icon: Lock, label: "TLS 1.3", sub: "In transit" },
-                  { icon: Shield, label: "AES-256", sub: "At rest" },
-                  { icon: Eye, label: "Private", sub: "Adviser only" },
-                ].map((t) => (
-                  <div key={t.label} className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-center">
-                    <t.icon className="mx-auto mb-1.5 h-4 w-4 text-[hsl(var(--cyan-glow))]" />
-                    <p className="text-[11px] font-bold text-white">{t.label}</p>
-                    <p className="text-[9px] uppercase tracking-wider text-white/40">{t.sub}</p>
-                  </div>
-                ))}
-              </div>
-
-              <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-white/10 bg-white/[0.02] p-3">
+            {/* Consent */}
+            <section className="rounded-md border border-[hsl(215_60%_12%)]/10 bg-white p-5">
+              <label className="flex cursor-pointer items-start gap-3">
                 <Checkbox
                   checked={consent}
                   onCheckedChange={(v) => setConsent(v === true)}
-                  className="mt-0.5 border-white/30 data-[state=checked]:bg-[hsl(var(--cyan))] data-[state=checked]:text-[hsl(var(--navy))]"
+                  className="mt-0.5 border-[hsl(215_60%_12%)]/30 data-[state=checked]:border-[hsl(215_60%_12%)] data-[state=checked]:bg-[hsl(215_60%_12%)] data-[state=checked]:text-white"
                 />
-                <span className="text-[11px] leading-relaxed text-white/70">
+                <span className="text-[12px] leading-relaxed text-[hsl(215_60%_12%)]/75">
                   I confirm these documents are mine and consent to AdvisorLink collecting,
                   storing and using them to provide financial advice services. My data is
-                  handled in accordance with the <span className="font-medium text-white/90">Australian Privacy Act 1988</span>.
+                  handled in accordance with the <span className="font-semibold text-[hsl(215_60%_12%)]">Australian Privacy Act 1988</span>.
                 </span>
               </label>
-            </div>
+            </section>
 
             {submitting && (
-              <div className="rounded-2xl border border-[hsl(var(--cyan))]/30 bg-[hsl(var(--cyan))]/[0.05] p-4 backdrop-blur-xl">
-                <div className="mb-2 flex items-center gap-2 text-sm text-white">
-                  <Loader2 className="h-4 w-4 animate-spin text-[hsl(var(--cyan-glow))]" />
+              <div className="rounded-md border border-[hsl(215_60%_12%)]/15 bg-white p-4">
+                <div className="mb-2 flex items-center gap-2 text-[13px] text-[hsl(215_60%_12%)]">
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Securely uploading your documents…</span>
-                  <span className="ml-auto text-xs text-white/60">{progress}%</span>
+                  <span className="ml-auto text-xs text-[hsl(215_60%_12%)]/60">{progress}%</span>
                 </div>
-                <Progress value={progress} className="bg-white/10" />
+                <Progress value={progress} />
               </div>
             )}
 
@@ -523,7 +474,7 @@ export default function UploadDocuments() {
                 variant="outline"
                 onClick={() => setStep(1)}
                 disabled={submitting}
-                className="border-white/15 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+                className="rounded-sm border-[hsl(215_60%_12%)]/20 bg-white text-[hsl(215_60%_12%)] hover:bg-[hsl(215_60%_12%)]/[0.04]"
               >
                 Back
               </Button>
@@ -531,7 +482,7 @@ export default function UploadDocuments() {
                 onClick={handleSubmit}
                 disabled={submitting}
                 size="lg"
-                className="h-12 flex-1 bg-gradient-to-r from-[hsl(var(--cyan))] to-[hsl(var(--cyan-glow))] font-semibold text-[hsl(var(--navy))] shadow-[0_0_28px_-6px_hsl(var(--cyan)/0.7)] hover:opacity-90"
+                className="h-12 flex-1 rounded-sm bg-[hsl(215_60%_12%)] font-semibold tracking-wide text-white hover:bg-[hsl(215_60%_18%)]"
               >
                 {submitting ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading…</>
@@ -542,7 +493,7 @@ export default function UploadDocuments() {
             </div>
 
             {requiredMissing.length > 0 && !submitting && (
-              <p className="flex items-center gap-1.5 text-xs text-white/60">
+              <p className="flex items-center gap-1.5 text-xs text-[hsl(215_60%_12%)]/60">
                 <AlertCircle className="h-3.5 w-3.5" />
                 Still needed: {requiredMissing.map((s) => s.label).join(", ")}
               </p>
@@ -552,66 +503,64 @@ export default function UploadDocuments() {
 
         {/* STEP 3 */}
         {step === 3 && (
-          <div className="page-enter overflow-hidden rounded-2xl border border-[hsl(var(--cyan))]/30 bg-white/[0.03] p-8 text-center shadow-2xl backdrop-blur-xl">
-            <div className="relative mx-auto mb-5 flex h-20 w-20 items-center justify-center">
-              <div className="absolute inset-0 animate-ping rounded-full bg-[hsl(var(--cyan))]/20" />
-              <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[hsl(var(--cyan))] to-[hsl(var(--cyan-glow))] shadow-[0_0_40px_-4px_hsl(var(--cyan)/0.7)]">
-                <CheckCircle2 className="h-10 w-10 text-[hsl(var(--navy))]" strokeWidth={2.5} />
+          <section className="page-enter overflow-hidden rounded-md border border-[hsl(215_60%_12%)]/10 bg-white text-center shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.12)]">
+            <div className="border-b border-[hsl(215_60%_12%)]/10 bg-[hsl(215_60%_12%)] px-7 py-8 text-white">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/30 bg-white/10">
+                <CheckCircle2 className="h-7 w-7 text-white" strokeWidth={2.5} />
               </div>
-            </div>
-            <h2 className="font-heading text-2xl font-bold">Documents received securely</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-white/70">
-              Thank you, <span className="font-semibold text-white">{client.fullName.split(" ")[0]}</span>. Your documents have been encrypted
-              and delivered to your adviser. We'll be in touch shortly via {client.email}.
-            </p>
-            <div className="mx-auto mt-6 max-w-sm rounded-xl border border-white/10 bg-white/[0.02] p-4 text-left text-xs text-white/70">
-              <p className="mb-2 flex items-center gap-1.5 font-bold text-white">
-                <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--cyan-glow))]" />
-                What happens next?
+              <h2 className="font-heading text-2xl font-bold">Documents received</h2>
+              <p className="mx-auto mt-2 max-w-md text-[13px] text-white/70">
+                Thank you, {client.fullName.split(" ")[0]}. Your documents have been encrypted
+                and delivered to your adviser.
               </p>
-              <ul className="space-y-1.5">
-                <li className="flex gap-2"><span className="text-[hsl(var(--cyan-glow))]">•</span> Your adviser is notified immediately</li>
-                <li className="flex gap-2"><span className="text-[hsl(var(--cyan-glow))]">•</span> Documents are reviewed within 1 business day</li>
-                <li className="flex gap-2"><span className="text-[hsl(var(--cyan-glow))]">•</span> You'll receive a confirmation email shortly</li>
+            </div>
+            <div className="px-7 py-6 text-left">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">
+                What happens next
+              </p>
+              <ul className="space-y-2 text-[13px] text-[hsl(215_60%_12%)]/75">
+                <li className="flex gap-2"><span className="text-[hsl(215_60%_12%)]">›</span> Your adviser is notified immediately</li>
+                <li className="flex gap-2"><span className="text-[hsl(215_60%_12%)]">›</span> Documents are reviewed within 1 business day</li>
+                <li className="flex gap-2"><span className="text-[hsl(215_60%_12%)]">›</span> You'll receive a confirmation email at {client.email}</li>
               </ul>
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Footer trust */}
-        <footer className="mt-10 flex flex-col items-center gap-2 text-center text-[10px] text-white/40">
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-            <span className="flex items-center gap-1"><Lock className="h-3 w-3" /> TLS 1.3</span>
-            <span className="opacity-30">·</span>
-            <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> AES-256</span>
-            <span className="opacity-30">·</span>
-            <span className="flex items-center gap-1"><FileCheck2 className="h-3 w-3" /> Privacy Act 1988</span>
+        {/* Trust seal footer */}
+        <footer className="mt-10 border-t border-[hsl(215_60%_12%)]/10 pt-6">
+          <div className="mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(215_60%_12%)]/55">
+            <span className="flex items-center gap-1.5"><Lock className="h-3 w-3" /> TLS 1.3 Encrypted</span>
+            <span className="flex items-center gap-1.5"><Shield className="h-3 w-3" /> AES-256 At Rest</span>
+            <span className="flex items-center gap-1.5"><FileCheck2 className="h-3 w-3" /> Privacy Act 1988</span>
           </div>
-          <p>© {new Date().getFullYear()} AdvisorLink · Authorised Representative</p>
+          <p className="text-center text-[11px] text-[hsl(215_60%_12%)]/45">
+            © {new Date().getFullYear()} Advisor Link Online · Authorised Representative
+          </p>
         </footer>
       </main>
 
       {/* Multi-file question dialog */}
       <AlertDialog open={!!pendingPick} onOpenChange={(o) => !o && setPendingPick(null)}>
-        <AlertDialogContent className="border-white/10 bg-[hsl(var(--navy))] text-white">
+        <AlertDialogContent className="border-[hsl(215_60%_12%)]/15 bg-white">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-heading">
+            <AlertDialogTitle className="font-heading text-[hsl(215_60%_12%)]">
               {pendingSlot?.kind === "photo" ? "Multiple photos?" : "Multiple documents?"}
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-white/70">
+            <AlertDialogDescription className="text-[hsl(215_60%_12%)]/70">
               Are you uploading multiple {pendingNoun}? You can select them all at once.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
               onClick={() => resolvePick(false)}
-              className="border-white/15 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+              className="rounded-sm border-[hsl(215_60%_12%)]/20 bg-white text-[hsl(215_60%_12%)] hover:bg-[hsl(215_60%_12%)]/[0.04]"
             >
               No, just one
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => resolvePick(true)}
-              className="bg-gradient-to-r from-[hsl(var(--cyan))] to-[hsl(var(--cyan-glow))] font-semibold text-[hsl(var(--navy))] hover:opacity-90"
+              className="rounded-sm bg-[hsl(215_60%_12%)] font-semibold text-white hover:bg-[hsl(215_60%_18%)]"
             >
               Yes, select multiple
             </AlertDialogAction>
