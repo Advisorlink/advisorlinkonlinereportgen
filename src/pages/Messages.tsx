@@ -503,6 +503,19 @@ export default function Messages() {
                         </ScrollArea>
                       </PopoverContent>
                     </Popover>
+
+                    <Button
+                      variant={simulateMode ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => {
+                        setSimulateMode(!simulateMode);
+                        toast({ title: !simulateMode ? "Simulation mode ON" : "Simulation mode OFF", description: !simulateMode ? "Messages will be faked locally with auto-replies." : "Messages will be sent via the real provider." });
+                      }}
+                      className={`h-7 text-[11px] gap-1.5 px-2 ml-auto ${simulateMode ? "bg-amber-500 hover:bg-amber-500/90 text-black" : "text-muted-foreground hover:text-foreground"}`}
+                      title="Toggle simulation mode for testing flows without sending real SMS"
+                    >
+                      {simulateMode ? "🧪 Simulating" : "Simulate"}
+                    </Button>
                   </div>
 
                   <div className="relative rounded-2xl border border-border bg-muted/30 focus-within:border-cyan/60 focus-within:bg-card focus-within:shadow-[0_0_0_4px_hsl(var(--cyan)/0.08)] transition-all">
