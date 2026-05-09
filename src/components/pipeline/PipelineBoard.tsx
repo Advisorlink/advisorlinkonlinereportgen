@@ -17,8 +17,9 @@ import { PipelineDealCard } from "./PipelineDealCard";
 import { AddDealDialog } from "./AddDealDialog";
 import { DealProfileDrawer } from "./DealProfileDrawer";
 import { LostReasonDialog } from "./LostReasonDialog";
-import { Kanban, Plus, DollarSign, Trophy, XCircle, Layers } from "lucide-react";
+import { Kanban, Plus, DollarSign, Trophy, XCircle, Layers, Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
 type Stage = { id: string; name: string; color: string; position: number };
@@ -50,6 +51,8 @@ export function PipelineBoard() {
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewFilter>("active");
+  const [search, setSearch] = useState("");
+  const [syncing, setSyncing] = useState(false);
   const [pendingLost, setPendingLost] = useState<{
     dealId: string;
     targetStageId: string;
@@ -82,8 +85,21 @@ export function PipelineBoard() {
     return stages.filter((s) => !isWonStage(s) && !isLostStage(s));
   }, [stages, view]);
 
-  const dealsInStage = (stageId: string) =>
-    deals.filter((d) => d.stage_id === stageId).sort((a, b) => a.position - b.position);
+  const dealsInStage = (stageId: string) => {
+    const q = search.trim().toLowerCase();
+    return deals
+      .filter((d) => d.stage_id === stageId)
+      .filter((d) => {
+        if (!q) return true;
+        return (
+          d.client_name?.toLowerCase().includes(q) ||
+          d.client_email?.toLowerCase().includes(q) ||
+          d.client_phone?.toLowerCase().includes(q) ||
+          d.notes?.toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => a.position - b.position);
+  };
 
   const totalValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
   const wonCount = deals.filter((d) => isWonStage(stages.find((s) => s.id === d.stage_id))).length;
@@ -118,21 +134,36 @@ export function PipelineBoard() {
   };
 
   const persistMove = async (dealId: string, targetStageId: string, extra: Record<string, any> = {}) => {
-    const stageDeals = deals
+    // Drop at TOP: shift other cards in target stage down by 1, place dropped card at position 0
+    const otherIds = deals
       .filter((d) => d.stage_id === targetStageId && d.id !== dealId)
-      .sort((a, b) => a.position - b.position);
-    const newPosition = stageDeals.length;
+      .map((d) => d.id);
 
     setDeals((prev) =>
-      prev.map((d) =>
-        d.id === dealId ? { ...d, stage_id: targetStageId, position: newPosition, ...extra } : d
-      )
+      prev.map((d) => {
+        if (d.id === dealId) return { ...d, stage_id: targetStageId, position: 0, ...extra };
+        if (otherIds.includes(d.id)) return { ...d, position: d.position + 1 };
+        return d;
+      })
     );
 
     const { error } = await supabase
       .from("pipeline_deals")
-      .update({ stage_id: targetStageId, position: newPosition, ...extra })
+      .update({ stage_id: targetStageId, position: 0, ...extra })
       .eq("id", dealId);
+
+    // Best-effort shift others (ignore errors — UI already updated optimistically)
+    if (otherIds.length) {
+      await Promise.all(
+        otherIds.map((id) => {
+          const cur = deals.find((d) => d.id === id);
+          return supabase
+            .from("pipeline_deals")
+            .update({ position: (cur?.position ?? 0) + 1 })
+            .eq("id", id);
+        })
+      );
+    }
 
     if (error) {
       toast({ title: "Failed to move deal", variant: "destructive" });
@@ -211,6 +242,78 @@ export function PipelineBoard() {
 
   const handleDealClick = (deal: Deal) => setSelectedDeal(deal);
 
+  const handleSyncQualified = async () => {
+    const newLeadStage = stages.find((s) => s.name.toLowerCase() === "new lead");
+    if (!newLeadStage) {
+      toast({ title: "No 'New Lead' stage found", variant: "destructive" });
+      return;
+    }
+    setSyncing(true);
+    try {
+      const { data: leads, error } = await supabase
+        .from("ai_caller_leads")
+        .select("*")
+        .gte("qualification_score", 80);
+
+      if (error) throw error;
+
+      // Build set of existing phones to avoid duplicates
+      const existingPhones = new Set(
+        deals.map((d) => (d.client_phone || "").replace(/\s+/g, ""))
+      );
+
+      const toInsert: any[] = [];
+      for (const l of leads || []) {
+        const cleanPhone = (l.phone || "").replace(/\s+/g, "");
+        if (cleanPhone && existingPhones.has(cleanPhone)) continue;
+        const f: any = l.extracted_fields || {};
+        const noteParts = [
+          f.age && `Age: ${f.age}`,
+          f.balance && `Balance: $${Number(f.balance).toLocaleString()}`,
+          f.super_fund_name && `Fund: ${f.super_fund_name}`,
+          f.had_review_before && `Reviewed before: ${f.had_review_before}`,
+          l.transcript_summary && `\nSummary: ${l.transcript_summary}`,
+        ].filter(Boolean);
+        toInsert.push({
+          stage_id: newLeadStage.id,
+          client_name: l.name || "Unknown",
+          client_phone: l.phone || null,
+          client_email: l.email || null,
+          value: f.balance ? Number(f.balance) : null,
+          source: "AI Caller",
+          notes: noteParts.join(" • "),
+          position: 0,
+        });
+        existingPhones.add(cleanPhone);
+      }
+
+      if (!toInsert.length) {
+        toast({ title: "Nothing new to sync", description: "All qualified leads are already in the pipeline." });
+        return;
+      }
+
+      // Shift existing New Lead deals down
+      const newLeadDeals = deals.filter((d) => d.stage_id === newLeadStage.id);
+      await Promise.all(
+        newLeadDeals.map((d) =>
+          supabase.from("pipeline_deals").update({ position: d.position + toInsert.length }).eq("id", d.id)
+        )
+      );
+
+      // Assign positions 0..n-1
+      toInsert.forEach((d, i) => (d.position = i));
+      const { error: insErr } = await supabase.from("pipeline_deals").insert(toInsert);
+      if (insErr) throw insErr;
+
+      toast({ title: `Synced ${toInsert.length} qualified lead${toInsert.length !== 1 ? "s" : ""}` });
+      fetchData();
+    } catch (e: any) {
+      toast({ title: "Sync failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -247,7 +350,27 @@ export function PipelineBoard() {
               {deals.length} deal{deals.length !== 1 ? "s" : ""} in pipeline
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="relative hidden md:block">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search deals…"
+                className="pl-9 w-56 h-9 bg-background/60"
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSyncQualified}
+              disabled={syncing}
+              className="gap-1.5 h-9"
+              title="Import AI Caller leads with 80%+ qualification into New Lead"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{syncing ? "Syncing…" : "Sync Qualified"}</span>
+            </Button>
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200/50">
               <DollarSign className="w-4 h-4 text-emerald-600" />
               <span className="text-sm font-semibold text-emerald-700">
