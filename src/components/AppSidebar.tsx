@@ -26,6 +26,7 @@ const navItems = [
   { title: "Report Generator", url: "/", icon: FileText },
   { title: "Fact Find", url: "/fact-find", icon: ClipboardList },
   { title: "E-Sign Docs", url: "/esign", icon: FileSignature },
+  { title: "Documents", url: "/documents", icon: ShieldCheck, badge: "NEW", badgeColor: "gradient-accent" },
   { title: "Dialer", url: "/ai-caller", icon: PhoneCall, badge: "LEAP", badgeColor: "bg-emerald-500" },
   { title: "Referrals", url: "/referrals", icon: Gift, badge: "12 new" },
   { title: "Client Reports", url: "/admin", icon: Settings },
