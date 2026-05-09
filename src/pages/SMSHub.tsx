@@ -176,12 +176,14 @@ export default function SMSHub() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-muted/50">
-            <TabsTrigger value="templates" className="gap-1.5"><FileText className="w-3.5 h-3.5" /> Templates</TabsTrigger>
-            <TabsTrigger value="campaigns" className="gap-1.5"><Target className="w-3.5 h-3.5" /> Campaigns</TabsTrigger>
-            <TabsTrigger value="numbers" className="gap-1.5"><Phone className="w-3.5 h-3.5" /> Numbers</TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> Analytics</TabsTrigger>
-          </TabsList>
+          <div className="-mx-3 sm:mx-0 overflow-x-auto">
+            <TabsList className="bg-muted/50 w-max sm:w-auto mx-3 sm:mx-0">
+              <TabsTrigger value="templates" className="gap-1.5"><FileText className="w-3.5 h-3.5" /> Templates</TabsTrigger>
+              <TabsTrigger value="campaigns" className="gap-1.5"><Target className="w-3.5 h-3.5" /> Campaigns</TabsTrigger>
+              <TabsTrigger value="numbers" className="gap-1.5"><Phone className="w-3.5 h-3.5" /> Numbers</TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> Analytics</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* TEMPLATES TAB */}
           <TabsContent value="templates" className="mt-4 space-y-4">
