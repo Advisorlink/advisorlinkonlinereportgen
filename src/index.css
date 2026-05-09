@@ -171,6 +171,21 @@
 }
 .report-page:last-child { page-break-after: auto; }
 
+/* Scale the A4 preview down to fit narrow viewports without horizontal scrolling */
+@media (max-width: 900px) {
+  .report-preview {
+    --report-scale: calc((100vw - 32px) / 210mm);
+  }
+  .report-preview .report-page {
+    transform: scale(var(--report-scale));
+    transform-origin: top left;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: calc(297mm * (var(--report-scale) - 1) + 16px);
+    width: 210mm;
+  }
+}
+
 @media print {
   @page { size: A4; margin: 0; }
   body { background: white; }
