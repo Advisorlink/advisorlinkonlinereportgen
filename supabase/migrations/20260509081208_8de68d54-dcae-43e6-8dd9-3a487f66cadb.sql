@@ -1,0 +1,1 @@
+UPDATE public.sms_twilio_numbers SET provider='twilio' WHERE phone_number='+18606829218';
