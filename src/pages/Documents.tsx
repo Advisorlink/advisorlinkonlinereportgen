@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Download, Eye, FileText, Image as ImageIcon, RefreshCw, Search, Shield, Trash2 } from "lucide-react";
+import { Download, Eye, FileText, Image as ImageIcon, RefreshCw, Search, Send, Shield, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { SendUploadLinkDialog } from "@/components/documents/SendUploadLinkDialog";
 
 type ClientDocument = {
   id: string;
