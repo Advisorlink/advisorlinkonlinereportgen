@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, DollarSign, Tag, StickyNote,
-  MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark,
+  MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark, ArrowLeft,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ReportStartForm } from "@/components/ReportStartForm";
@@ -215,11 +215,24 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto p-0">
+      <SheetContent
+        side="right"
+        className="w-screen h-[100dvh] max-w-none sm:max-w-2xl sm:h-full overflow-y-auto p-0 border-0 sm:border-l"
+      >
         {/* Hero header */}
         <div className="bg-gradient-to-br from-[hsl(var(--navy))] to-[hsl(215,60%,18%)] p-6 pb-8">
+          {/* Mobile back button */}
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="sm:hidden inline-flex items-center gap-1.5 text-white/80 hover:text-white text-sm font-medium mb-4 -ml-1 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
+            aria-label="Back"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
           <SheetHeader className="mb-4">
-            <SheetTitle className="text-white/90 text-sm font-medium">Client Profile</SheetTitle>
+            <SheetTitle className="text-white/90 text-sm font-medium text-left">Client Profile</SheetTitle>
           </SheetHeader>
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl gradient-accent flex items-center justify-center text-xl font-bold text-white shadow-lg">
