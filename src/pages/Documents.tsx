@@ -124,10 +124,16 @@ export default function Documents() {
               Securely uploaded identification and financial documents.
             </p>
           </div>
-          <Button onClick={load} variant="outline" size="sm" className="gap-2">
-            <RefreshCw className="w-4 h-4" /> Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setSendOpen(true)} size="sm" className="gap-2">
+              <Send className="w-4 h-4" /> Send upload link
+            </Button>
+            <Button onClick={load} variant="outline" size="sm" className="gap-2">
+              <RefreshCw className="w-4 h-4" /> Refresh
+            </Button>
+          </div>
         </div>
+        <SendUploadLinkDialog open={sendOpen} onOpenChange={setSendOpen} />
 
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
