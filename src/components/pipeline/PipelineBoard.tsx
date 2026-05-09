@@ -361,7 +361,7 @@ export function PipelineBoard() {
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-border/50 bg-white/80 backdrop-blur-xl shrink-0">
+      <div className="px-6 py-5 border-b border-border/50 bg-background/80 dark:bg-background/60 backdrop-blur-xl shrink-0">
         <div className="flex items-center justify-between max-w-full">
           <div>
             <h1 className="text-2xl font-bold font-heading text-foreground tracking-tight flex items-center gap-2.5">
@@ -395,9 +395,9 @@ export function PipelineBoard() {
               <Sparkles className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{syncing ? "Syncing…" : "Sync Qualified"}</span>
             </Button>
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200/50">
-              <DollarSign className="w-4 h-4 text-emerald-600" />
-              <span className="text-sm font-semibold text-emerald-700">
+            <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <DollarSign className="w-4 h-4 text-emerald-500" />
+              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                 ${totalValue.toLocaleString()}
               </span>
             </div>
@@ -422,7 +422,7 @@ export function PipelineBoard() {
                 onClick={() => setView(t.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   isActive
-                    ? "bg-white shadow-sm text-foreground"
+                    ? "bg-card shadow-sm text-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >

@@ -57,7 +57,7 @@ export default function Dashboard() {
             <button
               key={c.label}
               onClick={() => nav(c.link)}
-              className={`group relative bg-white rounded-2xl shadow-card hover:shadow-elevated p-5 flex flex-col gap-4 transition-all duration-300 text-left overflow-hidden border border-border/50 hover:border-border`}
+              className={`group relative bg-card rounded-2xl shadow-card hover:shadow-elevated p-5 flex flex-col gap-4 transition-all duration-300 text-left overflow-hidden border border-border/60 hover:border-border`}
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${c.gradient} opacity-0 group-hover:opacity-100 transition-opacity`} />
               <div className="relative flex items-center justify-between">
@@ -76,7 +76,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Quick actions */}
-          <div className="bg-white rounded-2xl shadow-card border border-border/50 p-6">
+          <div className="bg-card rounded-2xl shadow-card border border-border/60 p-6">
             <h2 className="text-lg font-bold font-heading text-foreground mb-4">Quick Actions</h2>
             <div className="space-y-2.5">
               <Button
@@ -98,7 +98,7 @@ export default function Dashboard() {
           </div>
 
           {/* Recent reports */}
-          <div className="bg-white rounded-2xl shadow-card border border-border/50 p-6">
+          <div className="bg-card rounded-2xl shadow-card border border-border/60 p-6">
             <h2 className="text-lg font-bold font-heading text-foreground mb-4">Recent Reports</h2>
             {recentReports.length === 0 ? (
               <div className="py-8 text-center">

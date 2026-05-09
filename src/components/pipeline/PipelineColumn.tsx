@@ -44,7 +44,7 @@ export function PipelineColumn({ stage, deals, onAddDeal, onDeleteDeal, onDealCl
       <div className="p-4 pb-2">
         <div className="flex items-center gap-2.5 mb-1.5">
           <div
-            className="w-3.5 h-3.5 rounded-full shadow-sm ring-2 ring-white"
+            className="w-3.5 h-3.5 rounded-full shadow-sm ring-2 ring-background"
             style={{ backgroundColor: stage.color }}
           />
           <h3 className="text-sm font-bold text-foreground tracking-tight uppercase">{stage.name}</h3>

@@ -70,7 +70,7 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
       ref={setNodeRef}
       style={style}
       className={`
-        group bg-white rounded-xl border border-border/50 p-3 shadow-sm
+        group bg-card rounded-xl border border-border/60 p-3 shadow-sm
         transition-all duration-200 cursor-grab active:cursor-grabbing
         ${isDragging ? "opacity-30 scale-95" : "hover:shadow-md hover:border-border hover:-translate-y-0.5"}
         ${isOverlay ? "shadow-xl rotate-2 scale-105 border-primary/30" : ""}

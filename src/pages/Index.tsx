@@ -244,7 +244,7 @@ export default function Index() {
   return (
     <CRMLayout>
       <div className="h-[calc(100vh-48px)] overflow-hidden">
-        <div className="no-print px-4 py-2.5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b border-border/60">
+        <div className="no-print px-4 py-2.5 flex items-center justify-between bg-background/80 dark:bg-background/60 backdrop-blur-xl border-b border-border/60">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-cyan/10 flex items-center justify-center">
               <FileText className="w-4 h-4 text-cyan" />
