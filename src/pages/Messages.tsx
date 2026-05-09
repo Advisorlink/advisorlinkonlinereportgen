@@ -616,7 +616,7 @@ export default function Messages() {
           const initials = (c.full_name || "?").split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
           const balance = cf.super_balance != null ? Number(cf.super_balance) : null;
           return (
-            <div className="hidden lg:flex flex-col w-80 border-l border-border bg-card shrink-0 overflow-y-auto">
+            <div className="hidden lg:flex flex-col w-[26rem] border-l border-border bg-card shrink-0 overflow-y-auto">
               {/* Hero header */}
               <div className="bg-gradient-to-br from-[hsl(var(--navy))] to-[hsl(215,60%,18%)] p-5 pb-6 relative">
                 <Button size="icon" variant="ghost" className="absolute top-3 right-3 h-7 w-7 text-white/70 hover:text-white hover:bg-white/10" onClick={() => setShowContactPanel(false)}>
