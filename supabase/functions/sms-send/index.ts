@@ -63,10 +63,31 @@ Deno.serve(async (req) => {
     }
     const userId = claimsData.user.id;
 
-    const { to, body, mediaUrls, contactId, conversationId, fromNumber } = await req.json();
+    const { to: rawTo, body, mediaUrls, contactId, conversationId, fromNumber } = await req.json();
 
-    if (!to || !body) {
+    if (!rawTo || !body) {
       return new Response(JSON.stringify({ error: "Missing 'to' or 'body'" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Normalize destination number to E.164. Defaults to AU (+61) for local-format numbers.
+    function normalizePhone(input: string, defaultCountry: "AU" | "US" = "AU"): string {
+      let n = String(input).trim().replace(/[\s\-().]/g, "");
+      if (n.startsWith("+")) return n;
+      if (n.startsWith("00")) return "+" + n.slice(2);
+      if (defaultCountry === "AU") {
+        if (n.startsWith("0")) return "+61" + n.slice(1);
+        if (/^4\d{8}$/.test(n)) return "+61" + n;
+        if (n.startsWith("61")) return "+" + n;
+      }
+      if (defaultCountry === "US") {
+        if (n.length === 10) return "+1" + n;
+        if (n.length === 11 && n.startsWith("1")) return "+" + n;
+      }
+      return "+" + n;
+    }
+    const to = normalizePhone(rawTo);
+    if (!/^\+\d{8,15}$/.test(to)) {
+      return new Response(JSON.stringify({ error: `Invalid 'to' phone number: ${rawTo}` }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // Get default from number and its provider
