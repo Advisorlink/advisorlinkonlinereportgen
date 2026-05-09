@@ -1,0 +1,286 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useClientInputs } from "@/hooks/useClientInputs";
+import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
+import type { ClientInputs, IncomeFrequency, InvestmentOption } from "@/lib/calc";
+import { toast } from "sonner";
+import {
+  Sparkles, DollarSign, Landmark, Target, TrendingUp, Cake, PiggyBank,
+  Plus, Trash2, Wand2, ArrowRight,
+} from "lucide-react";
+
+export interface ReportStartPrefill {
+  clientName?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  age?: string | number | null;
+  superFundName?: string | null;
+  superBalance?: string | number | null;
+}
+
+type OptionRow = { name: string; allocationPct: string };
+
+const num = (v: string | number | null | undefined, fb = 0) => {
+  if (v == null || v === "") return fb;
+  const n = typeof v === "number" ? v : parseFloat(String(v).replace(/,/g, ""));
+  return Number.isFinite(n) ? n : fb;
+};
+
+export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
+  const navigate = useNavigate();
+  const { setInputs } = useClientInputs();
+
+  const [annualIncome, setAnnualIncome] = useState("");
+  const [superFundName, setSuperFundName] = useState(prefill.superFundName ?? "");
+  const [superBalance, setSuperBalance] = useState(
+    prefill.superBalance != null ? String(prefill.superBalance) : ""
+  );
+  const [age, setAge] = useState(prefill.age != null ? String(prefill.age) : "");
+  const [retirementAge, setRetirementAge] = useState("67");
+
+  const [makesContrib, setMakesContrib] = useState<"yes" | "no">("no");
+  const [contribAmount, setContribAmount] = useState("");
+  const [contribFrequency, setContribFrequency] = useState<IncomeFrequency>("Monthly");
+  const [contribType, setContribType] = useState<"dollar" | "percent">("dollar");
+
+  const [primaryOption, setPrimaryOption] = useState("Growth (Default)");
+  const [options, setOptions] = useState<OptionRow[]>([]);
+
+  const [goalBalance, setGoalBalance] = useState("");
+  const [desiredIncomeAmount, setDesiredIncomeAmount] = useState("");
+  const [desiredIncomeFrequency, setDesiredIncomeFrequency] = useState<IncomeFrequency>("Weekly");
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const addOption = () =>
+    setOptions((p) => [...p, { name: "", allocationPct: "" }]);
+  const updateOption = (i: number, patch: Partial<OptionRow>) =>
+    setOptions((p) => p.map((o, idx) => (idx === i ? { ...o, ...patch } : o)));
+  const removeOption = (i: number) =>
+    setOptions((p) => p.filter((_, idx) => idx !== i));
+
+  const handleSubmit = () => {
+    if (!age || !annualIncome || !superFundName) {
+      toast.error("Add at least age, income and super fund to continue.");
+      return;
+    }
+    setSubmitting(true);
+
+    const investmentOptions: InvestmentOption[] = options
+      .filter((o) => o.name.trim())
+      .map((o) => ({
+        name: o.name.trim(),
+        allocationPct: Math.max(0, Math.min(1, num(o.allocationPct) / 100)),
+        growthAssetsPct: 0.7,
+        fiveYearReturn: 0.08,
+      }));
+
+    const allocSum = investmentOptions.reduce((s, o) => s + o.allocationPct, 0);
+    const primaryAllocationPct = Math.max(0, 1 - allocSum);
+
+    const next: ClientInputs = {
+      ...DEFAULT_INPUTS,
+      clientName: prefill.clientName || DEFAULT_INPUTS.clientName,
+      clientEmail: prefill.clientEmail || "",
+      clientPhone: prefill.clientPhone || "",
+      age: num(age, DEFAULT_INPUTS.age),
+      retirementAge: num(retirementAge, DEFAULT_INPUTS.retirementAge),
+      annualIncome: num(annualIncome),
+      fundName: superFundName.trim(),
+      superBalance: num(superBalance),
+      modelLabel: primaryOption || "Growth (Default)",
+      goalBalance: num(goalBalance, DEFAULT_INPUTS.goalBalance),
+      desiredIncomeAmount: num(desiredIncomeAmount, DEFAULT_INPUTS.desiredIncomeAmount),
+      desiredIncomeFrequency,
+      personalContributionAmount: makesContrib === "yes" ? num(contribAmount) : 0,
+      personalContributionFrequency: contribFrequency,
+      personalContributionType: contribType,
+      investmentOptions: investmentOptions.length ? investmentOptions : undefined,
+      primaryAllocationPct: investmentOptions.length ? primaryAllocationPct : undefined,
+    };
+
+    setInputs(next);
+    toast.success("Report inputs loaded — looking up fund details…");
+    setTimeout(() => navigate("/"), 350);
+  };
+
+  return (
+    <div className="rounded-2xl border border-cyan/30 bg-gradient-to-br from-cyan/5 via-background to-background overflow-hidden">
+      {/* Header */}
+      <div className="relative bg-gradient-to-br from-[hsl(var(--navy))] to-[hsl(215,60%,18%)] px-5 py-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl gradient-accent flex items-center justify-center shadow-lg">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-white tracking-tight">Generate Super Report</h3>
+            <p className="text-[11px] text-white/60">Quick details to kick off the analysis</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-5 space-y-5">
+        {/* About them */}
+        <Section icon={<Cake className="w-3.5 h-3.5" />} title="About them">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Current age">
+              <Input value={age} onChange={(e) => setAge(e.target.value)} placeholder="42" inputMode="numeric" />
+            </Field>
+            <Field label="Retirement age">
+              <Input value={retirementAge} onChange={(e) => setRetirementAge(e.target.value)} placeholder="67" inputMode="numeric" />
+            </Field>
+          </div>
+          <Field label="Yearly income (before tax)" icon={<DollarSign className="w-3 h-3" />}>
+            <Input value={annualIncome} onChange={(e) => setAnnualIncome(e.target.value)} placeholder="85,000" inputMode="numeric" />
+          </Field>
+        </Section>
+
+        {/* Super fund */}
+        <Section icon={<Landmark className="w-3.5 h-3.5" />} title="Their super fund">
+          <Field label="Super fund name">
+            <Input value={superFundName} onChange={(e) => setSuperFundName(e.target.value)} placeholder="AustralianSuper, Hostplus…" />
+          </Field>
+          <Field label="Current balance ($)">
+            <Input value={superBalance} onChange={(e) => setSuperBalance(e.target.value)} placeholder="120,000" inputMode="numeric" />
+          </Field>
+          <Field label="Primary investment option">
+            <Input value={primaryOption} onChange={(e) => setPrimaryOption(e.target.value)} placeholder="Growth (Default)" />
+          </Field>
+
+          {/* Extra investment options */}
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between">
+              <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Additional options
+              </Label>
+              <Button type="button" size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={addOption}>
+                <Plus className="w-3 h-3" /> Add
+              </Button>
+            </div>
+            {options.length === 0 && (
+              <p className="text-[11px] text-muted-foreground/60 italic">
+                Optional — split balance across multiple options
+              </p>
+            )}
+            {options.map((opt, i) => (
+              <div key={i} className="flex gap-2 items-end bg-muted/30 rounded-lg p-2">
+                <div className="flex-1">
+                  <Label className="text-[10px] text-muted-foreground">Option name</Label>
+                  <Input value={opt.name} onChange={(e) => updateOption(i, { name: e.target.value })} placeholder="High Growth" className="h-8 text-xs" />
+                </div>
+                <div className="w-20">
+                  <Label className="text-[10px] text-muted-foreground">Alloc %</Label>
+                  <Input value={opt.allocationPct} onChange={(e) => updateOption(i, { allocationPct: e.target.value })} placeholder="50" className="h-8 text-xs" inputMode="numeric" />
+                </div>
+                <Button type="button" size="icon" variant="ghost" className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => removeOption(i)}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* Personal contributions */}
+        <Section icon={<PiggyBank className="w-3.5 h-3.5" />} title="Personal contributions">
+          <Field label="Are they making personal contributions?">
+            <Select value={makesContrib} onValueChange={(v) => setMakesContrib(v as "yes" | "no")}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no">No</SelectItem>
+                <SelectItem value="yes">Yes</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          {makesContrib === "yes" && (
+            <div className="grid grid-cols-3 gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+              <Field label="Amount">
+                <Input value={contribAmount} onChange={(e) => setContribAmount(e.target.value)} placeholder="200" inputMode="numeric" />
+              </Field>
+              <Field label="Type">
+                <Select value={contribType} onValueChange={(v) => setContribType(v as "dollar" | "percent")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="dollar">$</SelectItem>
+                    <SelectItem value="percent">% income</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Frequency">
+                <Select value={contribFrequency} onValueChange={(v) => setContribFrequency(v as IncomeFrequency)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Weekly">Weekly</SelectItem>
+                    <SelectItem value="Monthly">Monthly</SelectItem>
+                    <SelectItem value="Annually">Annually</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+            </div>
+          )}
+        </Section>
+
+        {/* Retirement goals */}
+        <Section icon={<Target className="w-3.5 h-3.5" />} title="Retirement goals">
+          <Field label="Desired balance at retirement ($)" icon={<TrendingUp className="w-3 h-3" />}>
+            <Input value={goalBalance} onChange={(e) => setGoalBalance(e.target.value)} placeholder="700,000" inputMode="numeric" />
+          </Field>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="col-span-2">
+              <Field label="Desired retirement income ($)">
+                <Input value={desiredIncomeAmount} onChange={(e) => setDesiredIncomeAmount(e.target.value)} placeholder="1,000" inputMode="numeric" />
+              </Field>
+            </div>
+            <Field label="Per">
+              <Select value={desiredIncomeFrequency} onValueChange={(v) => setDesiredIncomeFrequency(v as IncomeFrequency)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Weekly">Week</SelectItem>
+                  <SelectItem value="Monthly">Month</SelectItem>
+                  <SelectItem value="Annually">Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+        </Section>
+
+        <Button
+          onClick={handleSubmit}
+          disabled={submitting}
+          className="w-full h-12 gradient-accent text-white border-0 shadow-lg shadow-cyan/20 hover:shadow-cyan/40 transition-all group"
+        >
+          <Wand2 className="w-4 h-4 mr-2" />
+          Generate Report
+          <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-2.5">
+      <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-semibold text-foreground/70">
+        <span className="text-cyan">{icon}</span>
+        {title}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function Field({ label, icon, children }: { label: string; icon?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div>
+      <Label className="text-[11px] text-muted-foreground flex items-center gap-1 mb-1">
+        {icon}
+        {label}
+      </Label>
+      {children}
+    </div>
+  );
+}
