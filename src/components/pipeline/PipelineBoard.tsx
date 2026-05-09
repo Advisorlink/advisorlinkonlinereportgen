@@ -242,6 +242,78 @@ export function PipelineBoard() {
 
   const handleDealClick = (deal: Deal) => setSelectedDeal(deal);
 
+  const handleSyncQualified = async () => {
+    const newLeadStage = stages.find((s) => s.name.toLowerCase() === "new lead");
+    if (!newLeadStage) {
+      toast({ title: "No 'New Lead' stage found", variant: "destructive" });
+      return;
+    }
+    setSyncing(true);
+    try {
+      const { data: leads, error } = await supabase
+        .from("ai_caller_leads")
+        .select("*")
+        .gte("qualification_score", 80);
+
+      if (error) throw error;
+
+      // Build set of existing phones to avoid duplicates
+      const existingPhones = new Set(
+        deals.map((d) => (d.client_phone || "").replace(/\s+/g, ""))
+      );
+
+      const toInsert: any[] = [];
+      for (const l of leads || []) {
+        const cleanPhone = (l.phone || "").replace(/\s+/g, "");
+        if (cleanPhone && existingPhones.has(cleanPhone)) continue;
+        const f: any = l.extracted_fields || {};
+        const noteParts = [
+          f.age && `Age: ${f.age}`,
+          f.balance && `Balance: $${Number(f.balance).toLocaleString()}`,
+          f.super_fund_name && `Fund: ${f.super_fund_name}`,
+          f.had_review_before && `Reviewed before: ${f.had_review_before}`,
+          l.transcript_summary && `\nSummary: ${l.transcript_summary}`,
+        ].filter(Boolean);
+        toInsert.push({
+          stage_id: newLeadStage.id,
+          client_name: l.name || "Unknown",
+          client_phone: l.phone || null,
+          client_email: l.email || null,
+          value: f.balance ? Number(f.balance) : null,
+          source: "AI Caller",
+          notes: noteParts.join(" • "),
+          position: 0,
+        });
+        existingPhones.add(cleanPhone);
+      }
+
+      if (!toInsert.length) {
+        toast({ title: "Nothing new to sync", description: "All qualified leads are already in the pipeline." });
+        return;
+      }
+
+      // Shift existing New Lead deals down
+      const newLeadDeals = deals.filter((d) => d.stage_id === newLeadStage.id);
+      await Promise.all(
+        newLeadDeals.map((d) =>
+          supabase.from("pipeline_deals").update({ position: d.position + toInsert.length }).eq("id", d.id)
+        )
+      );
+
+      // Assign positions 0..n-1
+      toInsert.forEach((d, i) => (d.position = i));
+      const { error: insErr } = await supabase.from("pipeline_deals").insert(toInsert);
+      if (insErr) throw insErr;
+
+      toast({ title: `Synced ${toInsert.length} qualified lead${toInsert.length !== 1 ? "s" : ""}` });
+      fetchData();
+    } catch (e: any) {
+      toast({ title: "Sync failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
