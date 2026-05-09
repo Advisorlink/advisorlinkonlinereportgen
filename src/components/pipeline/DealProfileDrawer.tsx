@@ -215,7 +215,7 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto p-0">
         {/* Hero header */}
         <div className="bg-gradient-to-br from-[hsl(var(--navy))] to-[hsl(215,60%,18%)] p-6 pb-8">
           <SheetHeader className="mb-4">
