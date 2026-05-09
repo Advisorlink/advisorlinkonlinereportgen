@@ -17,6 +17,7 @@ import {
   Search, Send, Paperclip, Phone, Mail, User, MessageSquare,
   Archive, X, MoreVertical, Clock, CheckCheck, Check,
   AlertCircle, Ban, Plus, Tag, ArrowLeft, FileText, ChevronDown,
+  Landmark, MapPin, UserCog, Calendar, Smile,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
