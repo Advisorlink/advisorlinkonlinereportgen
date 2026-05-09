@@ -23,6 +23,7 @@ import ESignPublic from "./pages/ESignPublic.tsx";
 import ReferralForm from "./pages/ReferralForm.tsx";
 import ReferralLanding from "./pages/ReferralLanding.tsx";
 import MeetingJoin from "./pages/MeetingJoin.tsx";
+import UploadDocuments from "./pages/UploadDocuments.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
