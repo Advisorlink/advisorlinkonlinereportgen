@@ -347,6 +347,18 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
             </div>
           </div>
 
+          {/* Generate Report form */}
+          <ReportStartForm
+            prefill={{
+              clientName: form.client_name,
+              clientEmail: form.client_email,
+              clientPhone: form.client_phone,
+              age: form.age,
+              superFundName: form.super_fund_name,
+              superBalance: form.super_balance,
+            }}
+          />
+
           {/* Save + actions */}
           <div className="flex gap-2">
             <Button onClick={handleSave} disabled={saving} className="flex-1 gradient-accent text-white border-0">
