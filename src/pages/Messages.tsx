@@ -246,6 +246,23 @@ export default function Messages() {
     fetchConversations();
   };
 
+  const handleReassign = async (userId: string) => {
+    if (!activeConv) return;
+    const newId = userId === "__unassigned" ? null : userId;
+    const { error } = await supabase
+      .from("sms_conversations")
+      .update({ assigned_user_id: newId })
+      .eq("id", activeConv.id);
+    if (error) {
+      toast({ title: "Failed to reassign", variant: "destructive" });
+    } else {
+      await supabase.from("sms_contacts").update({ assigned_user_id: newId }).eq("id", activeConv.contact_id);
+      setActiveConv({ ...activeConv, assigned_user_id: newId });
+      toast({ title: "Conversation reassigned" });
+      fetchConversations();
+    }
+  };
+
   const filtered = conversations.filter((c) => {
     if (filterTab === "unread" && !c.is_unread) return false;
     if (filterTab === "open" && c.status !== "open") return false;
