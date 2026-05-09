@@ -263,27 +263,36 @@ export function PipelineBoard() {
       );
 
       const toInsert: any[] = [];
+      const summariesByPhone = new Map<string, string>();
       for (const l of leads || []) {
         const cleanPhone = (l.phone || "").replace(/\s+/g, "");
         if (cleanPhone && existingPhones.has(cleanPhone)) continue;
         const f: any = l.extracted_fields || {};
-        const noteParts = [
-          f.age && `Age: ${f.age}`,
-          f.balance && `Balance: $${Number(f.balance).toLocaleString()}`,
-          f.super_fund_name && `Fund: ${f.super_fund_name}`,
-          f.had_review_before && `Reviewed before: ${f.had_review_before}`,
-          l.transcript_summary && `\nSummary: ${l.transcript_summary}`,
-        ].filter(Boolean);
+        const balanceNum = f.balance ? Number(String(f.balance).replace(/[^\d.]/g, "")) : null;
+        const reviewed =
+          f.had_review_before === true || /^(y|yes|true)$/i.test(String(f.had_review_before || ""))
+            ? true
+            : f.had_review_before === false || /^(n|no|false)$/i.test(String(f.had_review_before || ""))
+            ? false
+            : null;
         toInsert.push({
           stage_id: newLeadStage.id,
           client_name: l.name || "Unknown",
           client_phone: l.phone || null,
           client_email: l.email || null,
-          value: f.balance ? Number(f.balance) : null,
+          age: f.age ? String(f.age) : null,
+          super_fund_name: f.super_fund_name || f.fund || null,
+          super_balance: balanceNum,
+          state: f.state || null,
+          had_review_before: reviewed,
+          value: balanceNum,
           source: "AI Caller",
-          notes: noteParts.join(" • "),
+          notes: null,
           position: 0,
         });
+        if (l.transcript_summary && cleanPhone) {
+          summariesByPhone.set(cleanPhone, l.transcript_summary);
+        }
         existingPhones.add(cleanPhone);
       }
 
@@ -302,8 +311,23 @@ export function PipelineBoard() {
 
       // Assign positions 0..n-1
       toInsert.forEach((d, i) => (d.position = i));
-      const { error: insErr } = await supabase.from("pipeline_deals").insert(toInsert);
+      const { data: inserted, error: insErr } = await supabase
+        .from("pipeline_deals")
+        .insert(toInsert)
+        .select("id, client_phone");
       if (insErr) throw insErr;
+
+      // Add transcript summaries as activity notes on each deal
+      const noteRows = (inserted || [])
+        .map((row: any) => {
+          const cleanPhone = (row.client_phone || "").replace(/\s+/g, "");
+          const summary = summariesByPhone.get(cleanPhone);
+          return summary ? { deal_id: row.id, content: `Call summary: ${summary}` } : null;
+        })
+        .filter(Boolean);
+      if (noteRows.length) {
+        await supabase.from("pipeline_deal_notes").insert(noteRows as any);
+      }
 
       toast({ title: `Synced ${toInsert.length} qualified lead${toInsert.length !== 1 ? "s" : ""}` });
       fetchData();
