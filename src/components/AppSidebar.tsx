@@ -98,7 +98,17 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="bg-[hsl(215,58%,8%)] border-t border-white/[0.06] p-3">
+      <SidebarFooter className="bg-[hsl(215,58%,8%)] border-t border-white/[0.06] p-3 space-y-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full text-white/60 hover:text-white hover:bg-white/[0.08] justify-start gap-2.5 rounded-lg transition-all"
+          onClick={toggleTheme}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {theme === "dark" ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-cyan" />}
+          {!collapsed && <span className="text-[13px]">{theme === "dark" ? "Light mode" : "Dark mode"}</span>}
+        </Button>
         <Button
           variant="ghost"
           size="sm"
