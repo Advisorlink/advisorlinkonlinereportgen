@@ -17,6 +17,7 @@ import {
   MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ReportStartForm } from "@/components/ReportStartForm";
 
 type Stage = { id: string; name: string; color: string; position: number };
 type Deal = {
@@ -214,7 +215,7 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto p-0">
         {/* Hero header */}
         <div className="bg-gradient-to-br from-[hsl(var(--navy))] to-[hsl(215,60%,18%)] p-6 pb-8">
           <SheetHeader className="mb-4">
@@ -345,6 +346,18 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
               <Textarea id="prof-notes" value={form.notes} onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))} className="mt-1 resize-none" rows={2} />
             </div>
           </div>
+
+          {/* Generate Report form */}
+          <ReportStartForm
+            prefill={{
+              clientName: form.client_name,
+              clientEmail: form.client_email,
+              clientPhone: form.client_phone,
+              age: form.age,
+              superFundName: form.super_fund_name,
+              superBalance: form.super_balance,
+            }}
+          />
 
           {/* Save + actions */}
           <div className="flex gap-2">
