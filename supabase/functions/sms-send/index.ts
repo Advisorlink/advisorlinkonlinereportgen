@@ -123,7 +123,12 @@ Deno.serve(async (req) => {
     }
 
     if (!from) {
-      return new Response(JSON.stringify({ error: "No sending number configured" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (simulate === true) {
+        from = "+15550000000";
+        provider = "simulation";
+      } else {
+        return new Response(JSON.stringify({ error: "No sending number configured" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
     }
 
     // Check opt-out status
