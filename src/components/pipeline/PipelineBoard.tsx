@@ -85,8 +85,21 @@ export function PipelineBoard() {
     return stages.filter((s) => !isWonStage(s) && !isLostStage(s));
   }, [stages, view]);
 
-  const dealsInStage = (stageId: string) =>
-    deals.filter((d) => d.stage_id === stageId).sort((a, b) => a.position - b.position);
+  const dealsInStage = (stageId: string) => {
+    const q = search.trim().toLowerCase();
+    return deals
+      .filter((d) => d.stage_id === stageId)
+      .filter((d) => {
+        if (!q) return true;
+        return (
+          d.client_name?.toLowerCase().includes(q) ||
+          d.client_email?.toLowerCase().includes(q) ||
+          d.client_phone?.toLowerCase().includes(q) ||
+          d.notes?.toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => a.position - b.position);
+  };
 
   const totalValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
   const wonCount = deals.filter((d) => isWonStage(stages.find((s) => s.id === d.stage_id))).length;
