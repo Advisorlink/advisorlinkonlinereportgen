@@ -70,23 +70,50 @@
   }
 
   .dark {
-    --background: 215 60% 8%;
+    /* Deep navy base with subtle blue undertone */
+    --background: 220 45% 6%;
     --foreground: 210 40% 98%;
-    --card: 215 50% 12%;
+
+    --card: 218 42% 10%;
     --card-foreground: 210 40% 98%;
-    --popover: 215 50% 12%;
+
+    --popover: 218 42% 11%;
     --popover-foreground: 210 40% 98%;
-    --primary: 192 90% 55%;
-    --primary-foreground: 215 60% 8%;
-    --secondary: 215 40% 18%;
+
+    /* Brand stays vibrant in dark */
+    --navy: 215 60% 8%;
+    --navy-foreground: 0 0% 100%;
+    --cyan: 188 95% 55%;
+    --cyan-foreground: 220 45% 6%;
+    --cyan-glow: 188 95% 65%;
+    --accent-online: 160 75% 50%;
+
+    --primary: 188 95% 55%;
+    --primary-foreground: 220 45% 6%;
+
+    --secondary: 218 35% 16%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 215 40% 18%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 192 90% 55%;
-    --accent-foreground: 215 60% 8%;
-    --border: 215 40% 22%;
-    --input: 215 40% 22%;
-    --ring: 192 90% 55%;
+
+    --muted: 218 32% 14%;
+    --muted-foreground: 215 18% 68%;
+
+    --accent: 188 95% 55%;
+    --accent-foreground: 220 45% 6%;
+
+    --destructive: 0 75% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 218 30% 20%;
+    --input: 218 30% 18%;
+    --ring: 188 95% 55%;
+
+    --shadow-card: 0 1px 3px 0 hsl(220 60% 2% / 0.5), 0 1px 2px -1px hsl(220 60% 2% / 0.4);
+    --shadow-elevated: 0 8px 32px -4px hsl(220 60% 2% / 0.6), 0 2px 12px -2px hsl(220 60% 2% / 0.4);
+    --shadow-glow: 0 0 32px -4px hsl(188 95% 55% / 0.35);
+
+    --sidebar: 222 50% 5%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-accent: 188 95% 55%;
   }
 }
 
@@ -97,11 +124,18 @@
     font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
+  /* Subtle radial glow in dark mode for extra polish */
+  .dark body {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, hsl(188 95% 55% / 0.08), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, hsl(215 80% 40% / 0.08), transparent 60%);
+    background-attachment: fixed;
+  }
 }
 
-/* Glass card utility */
+/* Glass card utility — adapts to theme */
 .glass-card {
-  background: hsl(0 0% 100% / 0.85);
+  background: hsl(var(--card) / 0.85);
   backdrop-filter: blur(12px) saturate(180%);
   border: 1px solid hsl(var(--border) / 0.5);
 }
