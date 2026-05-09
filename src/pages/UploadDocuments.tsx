@@ -23,10 +23,17 @@ import {
 import { z } from "zod";
 import logoSvg from "@/assets/logo.svg";
 
+const REPRESENTATIVES = [
+  "Travis Miller",
+  "Sarah Chen",
+  "James O'Connor",
+  "Olivia Bennett",
+];
+
 const clientSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name").max(100),
   email: z.string().trim().email("Please enter a valid email").max(255),
-  phone: z.string().trim().min(6, "Please enter a valid phone number").max(30),
+  representative: z.string().trim().min(1, "Please select your representative"),
 });
 
 type DocSlot = {
