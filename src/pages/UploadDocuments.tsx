@@ -21,7 +21,7 @@ import {
   IdCard, FileText, AlertCircle, Loader2, X, ChevronRight,
 } from "lucide-react";
 import { z } from "zod";
-import logoSvg from "@/assets/logo.svg";
+const LOGO_BLACK_URL = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png";
 
 const REPRESENTATIVES = [
   "Travis Miller",
@@ -200,7 +200,7 @@ export default function UploadDocuments() {
       <header className="border-b border-[hsl(215_60%_12%)]/10 bg-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-4">
           <div className="flex items-center">
-            <img src={logoSvg} alt="Advisor Link Online" className="h-11 w-auto" />
+            <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-10 w-auto" />
           </div>
           <div className="hidden items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/60 sm:flex">
             <Lock className="h-3 w-3" />
