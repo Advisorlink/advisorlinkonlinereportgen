@@ -14,6 +14,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/hooks/useTheme";
 import logoSvg from "@/assets/logo.svg";
 
 const navItems = [
