@@ -87,6 +87,33 @@ export default function Messages() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [pendingMedia, setPendingMedia] = useState<{ url: string; name: string; type: string }[]>([]);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
+
+  const handleFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!files.length || !user) return;
+    setUploadingMedia(true);
+    try {
+      for (const file of files) {
+        if (file.size > 5 * 1024 * 1024) {
+          toast({ title: "File too large", description: `${file.name} exceeds 5MB MMS limit.`, variant: "destructive" });
+          continue;
+        }
+        const ext = file.name.split(".").pop() || "bin";
+        const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("sms-media").upload(path, file, { contentType: file.type, upsert: false });
+        if (upErr) { toast({ title: "Upload failed", description: upErr.message, variant: "destructive" }); continue; }
+        const { data: pub } = supabase.storage.from("sms-media").getPublicUrl(path);
+        setPendingMedia(prev => [...prev, { url: pub.publicUrl, name: file.name, type: file.type }]);
+      }
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
+  const removePendingMedia = (idx: number) => setPendingMedia(prev => prev.filter((_, i) => i !== idx));
 
   // From number selector
   const [smsNumbers, setSmsNumbers] = useState<SmsNumber[]>([]);
@@ -179,13 +206,14 @@ export default function Messages() {
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const handleSend = async () => {
-    if (!messageText.trim() || !activeConv) return;
+    if ((!messageText.trim() && pendingMedia.length === 0) || !activeConv) return;
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("sms-send", {
         body: {
           to: activeConv.sms_contacts.phone,
           body: messageText,
+          mediaUrls: pendingMedia.map(m => m.url),
           contactId: activeConv.contact_id,
           conversationId: activeConv.id,
           fromNumber: selectedFromNumber || undefined,
@@ -195,6 +223,7 @@ export default function Messages() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       setMessageText("");
+      setPendingMedia([]);
       fetchMessages(activeConv.id);
       fetchConversations();
     } catch (err: unknown) {
@@ -518,6 +547,24 @@ export default function Messages() {
                     </Button>
                   </div>
 
+                  {pendingMedia.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {pendingMedia.map((m, i) => (
+                        <div key={i} className="relative group rounded-lg border border-border bg-muted/40 p-1.5 pr-7 flex items-center gap-2 text-xs">
+                          {m.type.startsWith("image/") ? (
+                            <img src={m.url} alt={m.name} className="w-10 h-10 rounded object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded bg-muted flex items-center justify-center"><FileText className="w-4 h-4 text-muted-foreground" /></div>
+                          )}
+                          <span className="max-w-[140px] truncate">{m.name}</span>
+                          <button onClick={() => removePendingMedia(i)} className="absolute top-1 right-1 w-5 h-5 rounded-full bg-background border border-border flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="relative rounded-2xl border border-border bg-muted/30 focus-within:border-cyan/60 focus-within:bg-card focus-within:shadow-[0_0_0_4px_hsl(var(--cyan)/0.08)] transition-all">
                     <Textarea
                       value={messageText}
@@ -527,14 +574,14 @@ export default function Messages() {
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                     />
                     <div className="absolute right-2 bottom-2 flex items-center gap-1">
-                      <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => fileInputRef.current?.click()}>
-                        <Paperclip className="w-4 h-4" />
+                      <Button size="icon" variant="ghost" disabled={uploadingMedia} className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => fileInputRef.current?.click()} title="Attach image or document">
+                        <Paperclip className={`w-4 h-4 ${uploadingMedia ? "animate-pulse" : ""}`} />
                       </Button>
                       <Button
                         size="icon"
                         className="h-9 w-9 rounded-full bg-cyan hover:bg-cyan/90 text-white shadow-md disabled:opacity-40"
                         onClick={handleSend}
-                        disabled={!messageText.trim() || sending}
+                        disabled={(!messageText.trim() && pendingMedia.length === 0) || sending}
                       >
                         <Send className="w-4 h-4" />
                       </Button>
@@ -686,7 +733,7 @@ export default function Messages() {
         })()}
 
         {/* Hidden file input for MMS */}
-        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" />
+        <input ref={fileInputRef} type="file" multiple accept="image/*,application/pdf,.doc,.docx,.txt" className="hidden" onChange={handleFilePick} />
 
         {/* New Chat Dialog */}
         <Dialog open={showNewChat} onOpenChange={setShowNewChat}>
