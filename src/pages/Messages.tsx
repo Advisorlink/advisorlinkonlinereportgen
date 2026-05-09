@@ -189,6 +189,7 @@ export default function Messages() {
           contactId: activeConv.contact_id,
           conversationId: activeConv.id,
           fromNumber: selectedFromNumber || undefined,
+          simulate: simulateMode,
         },
       });
       if (error) throw error;
