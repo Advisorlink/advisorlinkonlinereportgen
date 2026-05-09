@@ -96,6 +96,9 @@ export default function Messages() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
 
+  // Team members for assignment
+  const [teamMembers, setTeamMembers] = useState<{ id: string; email: string }[]>([]);
+
   const fetchConversations = useCallback(async () => {
     const { data, error } = await supabase
       .from("sms_conversations")
