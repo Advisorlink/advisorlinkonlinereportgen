@@ -88,6 +88,7 @@ export default function Messages() {
   const [newChatPhone, setNewChatPhone] = useState("");
   const [newChatName, setNewChatName] = useState("");
   const [showContactPanel, setShowContactPanel] = useState(true);
+  const isBelowLg = useMediaQuery("(max-width: 1023px)");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
