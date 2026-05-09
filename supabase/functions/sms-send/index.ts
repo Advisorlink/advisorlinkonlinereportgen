@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
     }
     const userId = claimsData.user.id;
 
-    const { to: rawTo, body, mediaUrls, contactId, conversationId, fromNumber } = await req.json();
+    const { to: rawTo, body, mediaUrls, contactId, conversationId, fromNumber, simulate } = await req.json();
 
     if (!rawTo || !body) {
       return new Response(JSON.stringify({ error: "Missing 'to' or 'body'" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -123,7 +123,12 @@ Deno.serve(async (req) => {
     }
 
     if (!from) {
-      return new Response(JSON.stringify({ error: "No sending number configured" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (simulate === true) {
+        from = "+15550000000";
+        provider = "simulation";
+      } else {
+        return new Response(JSON.stringify({ error: "No sending number configured" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
     }
 
     // Check opt-out status
@@ -134,12 +139,20 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Send via the appropriate provider
+    // Send via the appropriate provider (or simulate)
     const statusCallbackUrl = `${SUPABASE_URL}/functions/v1/sms-status-callback`;
     const telnyxWebhookUrl = `${SUPABASE_URL}/functions/v1/sms-inbound-telnyx`;
     let result: { sid: string; status: string; segments: number };
 
-    if (provider === "telnyx") {
+    const isSimulated = simulate === true || provider === "simulation";
+
+    if (isSimulated) {
+      result = {
+        sid: `SIM${crypto.randomUUID().replace(/-/g, "").slice(0, 30)}`,
+        status: "delivered",
+        segments: Math.max(1, Math.ceil((body?.length || 0) / 160)),
+      };
+    } else if (provider === "telnyx") {
       result = await sendViaTelnyx(to, from, body, mediaUrls, telnyxWebhookUrl);
     } else {
       result = await sendViaTwilio(to, from, body, mediaUrls, statusCallbackUrl);
@@ -219,7 +232,55 @@ Deno.serve(async (req) => {
 
     await supabase.from("sms_contacts").update({ last_message_at: new Date().toISOString() }).eq("id", contId);
 
-    return new Response(JSON.stringify({ success: true, messageSid: result.sid, messageId: msg?.id, provider }), {
+    // Schedule a simulated inbound reply
+    if (isSimulated && convId && contId) {
+      const replies = [
+        "Thanks for the message! Sounds good 👍",
+        "Got it, can you tell me more?",
+        "Hey! Yes I'm interested.",
+        "Sorry, who is this?",
+        "Cheers, will get back to you shortly.",
+        "Perfect, what's the next step?",
+      ];
+      const replyBody = replies[Math.floor(Math.random() * replies.length)];
+      const delayMs = 1500 + Math.floor(Math.random() * 2500);
+      const replyTask = new Promise<void>((resolve) => {
+        setTimeout(async () => {
+          try {
+            await supabase.from("sms_messages").insert({
+              conversation_id: convId,
+              contact_id: contId,
+              user_id: userId,
+              twilio_sid: `SIM${crypto.randomUUID().replace(/-/g, "").slice(0, 30)}`,
+              direction: "inbound",
+              channel: "sms",
+              from_number: to,
+              to_number: from,
+              body: replyBody,
+              media_urls: [],
+              status: "received",
+            });
+            const { data: convData } = await supabase.from("sms_conversations").select("unread_count").eq("id", convId).single();
+            await supabase.from("sms_conversations").update({
+              last_message_body: replyBody,
+              last_message_at: new Date().toISOString(),
+              last_message_direction: "inbound",
+              is_unread: true,
+              unread_count: (convData?.unread_count || 0) + 1,
+              status: "open",
+            }).eq("id", convId);
+            await supabase.from("sms_contacts").update({ last_message_at: new Date().toISOString() }).eq("id", contId);
+          } catch (e) {
+            console.error("simulated reply error:", e);
+          }
+          resolve();
+        }, delayMs);
+      });
+      // @ts-ignore EdgeRuntime is available in Supabase Functions
+      if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) EdgeRuntime.waitUntil(replyTask);
+    }
+
+    return new Response(JSON.stringify({ success: true, messageSid: result.sid, messageId: msg?.id, provider, simulated: isSimulated }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
