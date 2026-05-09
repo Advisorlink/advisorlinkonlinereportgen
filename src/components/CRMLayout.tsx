@@ -9,8 +9,8 @@ export function CRMLayout({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center border-b border-border/60 bg-white/80 backdrop-blur-xl px-4 shrink-0 sticky top-0 z-30">
-            <SidebarTrigger className="text-foreground/60 hover:text-foreground transition-colors">
+          <header className="h-14 flex items-center justify-between gap-2 border-b border-border/60 bg-background/80 dark:bg-background/60 backdrop-blur-xl px-4 shrink-0 sticky top-0 z-30">
+            <SidebarTrigger className="text-foreground/70 hover:text-foreground transition-colors">
               <Menu className="w-5 h-5" />
             </SidebarTrigger>
           </header>
