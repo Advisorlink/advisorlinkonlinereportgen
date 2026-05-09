@@ -164,7 +164,7 @@ export default function SMSHub() {
 
   return (
     <CRMLayout>
-      <div className="p-4 md:p-6 space-y-6">
+      <div className="p-3 sm:p-4 md:p-6 space-y-6 max-w-full overflow-x-hidden">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -176,12 +176,14 @@ export default function SMSHub() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-muted/50">
-            <TabsTrigger value="templates" className="gap-1.5"><FileText className="w-3.5 h-3.5" /> Templates</TabsTrigger>
-            <TabsTrigger value="campaigns" className="gap-1.5"><Target className="w-3.5 h-3.5" /> Campaigns</TabsTrigger>
-            <TabsTrigger value="numbers" className="gap-1.5"><Phone className="w-3.5 h-3.5" /> Numbers</TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> Analytics</TabsTrigger>
-          </TabsList>
+          <div className="-mx-3 sm:mx-0 overflow-x-auto">
+            <TabsList className="bg-muted/50 w-max sm:w-auto mx-3 sm:mx-0">
+              <TabsTrigger value="templates" className="gap-1.5"><FileText className="w-3.5 h-3.5" /> Templates</TabsTrigger>
+              <TabsTrigger value="campaigns" className="gap-1.5"><Target className="w-3.5 h-3.5" /> Campaigns</TabsTrigger>
+              <TabsTrigger value="numbers" className="gap-1.5"><Phone className="w-3.5 h-3.5" /> Numbers</TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> Analytics</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* TEMPLATES TAB */}
           <TabsContent value="templates" className="mt-4 space-y-4">
@@ -250,12 +252,12 @@ export default function SMSHub() {
                 {campaigns.map((c) => (
                   <Card key={c.id}>
                     <CardContent className="py-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-semibold text-foreground">{c.name}</h4>
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{c.message_body}</p>
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-semibold text-foreground truncate">{c.name}</h4>
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 break-words">{c.message_body}</p>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 shrink-0">
                           <Badge variant={c.status === "draft" ? "secondary" : c.status === "completed" ? "default" : "outline"} className="capitalize">
                             {c.status}
                           </Badge>
