@@ -56,6 +56,27 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
 
   const [submitting, setSubmitting] = useState(false);
 
+  const handleSimulate = () => {
+    setAge("42");
+    setRetirementAge("67");
+    setAnnualIncome("95,000");
+    setSuperFundName(superFundName || "AustralianSuper");
+    setSuperBalance(superBalance || "145,000");
+    setPrimaryOption("Balanced");
+    setOptions([
+      { name: "High Growth", allocationPct: "30" },
+      { name: "Indexed Shares", allocationPct: "20" },
+    ]);
+    setMakesContrib("yes");
+    setContribAmount("250");
+    setContribType("dollar");
+    setContribFrequency("Monthly");
+    setGoalBalance("750,000");
+    setDesiredIncomeAmount("1,200");
+    setDesiredIncomeFrequency("Weekly");
+    toast.success("Sample data loaded — review then Generate Report");
+  };
+
   const addOption = () =>
     setOptions((p) => [...p, { name: "", allocationPct: "" }]);
   const updateOption = (i: number, patch: Partial<OptionRow>) =>
@@ -112,14 +133,26 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     <div className="rounded-2xl border border-cyan/30 bg-gradient-to-br from-cyan/5 via-background to-background overflow-hidden">
       {/* Header */}
       <div className="relative bg-gradient-to-br from-[hsl(var(--navy))] to-[hsl(215,60%,18%)] px-5 py-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl gradient-accent flex items-center justify-center shadow-lg">
-            <Sparkles className="w-4 h-4 text-white" />
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl gradient-accent flex items-center justify-center shadow-lg">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white tracking-tight">Generate Super Report</h3>
+              <p className="text-[11px] text-white/60">Quick details to kick off the analysis</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-white tracking-tight">Generate Super Report</h3>
-            <p className="text-[11px] text-white/60">Quick details to kick off the analysis</p>
-          </div>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleSimulate}
+            className="h-8 gap-1.5 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white text-xs"
+          >
+            <Wand2 className="w-3 h-3" />
+            Simulate
+          </Button>
         </div>
       </div>
 
