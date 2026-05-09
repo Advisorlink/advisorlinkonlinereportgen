@@ -148,6 +148,10 @@ export default function Index() {
       console.error(e);
       toast.error("PDF export failed");
     } finally {
+      if (wasDark) {
+        root.classList.add("dark");
+        root.style.colorScheme = prevColorScheme || "dark";
+      }
       setExporting(false);
     }
   };
