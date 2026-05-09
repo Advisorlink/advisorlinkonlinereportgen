@@ -54,6 +54,7 @@ const App = () => (
                 <Route path="/refer/claim" element={<ReferralLanding />} />
                 <Route path="/meeting/join" element={<MeetingJoin />} />
                 <Route path="/esign/sign" element={<ESignPublic />} />
+                <Route path="/upload" element={<UploadDocuments />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </MeetingHostProvider>
