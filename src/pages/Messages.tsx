@@ -139,7 +139,12 @@ export default function Messages() {
     if (data) setTemplates(data as unknown as Template[]);
   }, []);
 
-  useEffect(() => { fetchConversations(); fetchSmsNumbers(); fetchTemplates(); }, [fetchConversations, fetchSmsNumbers, fetchTemplates]);
+  const fetchTeam = useCallback(async () => {
+    const { data } = await supabase.from("profiles").select("id, email").order("email");
+    if (data) setTeamMembers(data);
+  }, []);
+
+  useEffect(() => { fetchConversations(); fetchSmsNumbers(); fetchTemplates(); fetchTeam(); }, [fetchConversations, fetchSmsNumbers, fetchTemplates, fetchTeam]);
 
   // Realtime subscriptions
   useEffect(() => {
