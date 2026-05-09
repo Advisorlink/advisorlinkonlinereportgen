@@ -51,6 +51,8 @@ export function PipelineBoard() {
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewFilter>("active");
+  const [search, setSearch] = useState("");
+  const [syncing, setSyncing] = useState(false);
   const [pendingLost, setPendingLost] = useState<{
     dealId: string;
     targetStageId: string;
