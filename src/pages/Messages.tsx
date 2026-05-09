@@ -498,23 +498,21 @@ export default function Messages() {
                     </Popover>
                   </div>
 
-                  <div className="flex items-end gap-2">
-                    <div className="flex-1 relative">
-                      <Textarea
-                        value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
-                        placeholder="Type your message..."
-                        className="min-h-[44px] max-h-32 resize-none pr-10 text-sm"
-                        onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                      />
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button size="icon" variant="ghost" className="h-9 w-9 text-muted-foreground hover:text-foreground" onClick={() => fileInputRef.current?.click()}>
+                  <div className="relative rounded-2xl border border-border bg-muted/30 focus-within:border-cyan/60 focus-within:bg-card focus-within:shadow-[0_0_0_4px_hsl(var(--cyan)/0.08)] transition-all">
+                    <Textarea
+                      value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
+                      placeholder="Type a message…"
+                      className="min-h-[56px] max-h-40 resize-none border-0 bg-transparent px-4 py-3 pr-28 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                    />
+                    <div className="absolute right-2 bottom-2 flex items-center gap-1">
+                      <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => fileInputRef.current?.click()}>
                         <Paperclip className="w-4 h-4" />
                       </Button>
                       <Button
                         size="icon"
-                        className="h-9 w-9 bg-cyan hover:bg-cyan/90 text-white"
+                        className="h-9 w-9 rounded-full bg-cyan hover:bg-cyan/90 text-white shadow-md disabled:opacity-40"
                         onClick={handleSend}
                         disabled={!messageText.trim() || sending}
                       >
