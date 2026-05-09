@@ -199,14 +199,8 @@ export default function UploadDocuments() {
       {/* Top brand bar */}
       <header className="border-b border-[hsl(215_60%_12%)]/10 bg-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-[hsl(215_60%_12%)] p-1.5">
-              <img src={logoSvg} alt="AdvisorLink" className="h-full w-auto" />
-            </div>
-            <div className="leading-tight">
-              <p className="font-heading text-[15px] font-bold tracking-tight text-[hsl(215_60%_12%)]">Advisor Link Online</p>
-              <p className="text-[10px] uppercase tracking-[0.22em] text-[hsl(215_60%_12%)]/55">Authorised Representative</p>
-            </div>
+          <div className="flex items-center">
+            <img src={logoSvg} alt="Advisor Link Online" className="h-11 w-auto" />
           </div>
           <div className="hidden items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/60 sm:flex">
             <Lock className="h-3 w-3" />
@@ -270,12 +264,12 @@ export default function UploadDocuments() {
             </div>
             <div className="space-y-5 px-7 py-7">
               <div>
-                <Label htmlFor="fullName" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">Full legal name</Label>
+                <Label htmlFor="fullName" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">First name</Label>
                 <Input
                   id="fullName"
                   value={client.fullName}
                   onChange={(e) => setClient({ ...client, fullName: e.target.value })}
-                  placeholder="As shown on your ID"
+                  placeholder="Your first name"
                   className="mt-1.5 h-11 rounded-sm border-[hsl(215_60%_12%)]/15 bg-white text-[hsl(215_60%_12%)] placeholder:text-[hsl(215_60%_12%)]/30 focus-visible:border-[hsl(215_60%_12%)] focus-visible:ring-1 focus-visible:ring-[hsl(215_60%_12%)]"
                 />
                 {errors.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName}</p>}
