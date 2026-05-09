@@ -60,7 +60,7 @@ type PendingPick = { slotKey: string; source: "camera" | "file" } | null;
 
 export default function UploadDocuments() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [client, setClient] = useState({ fullName: "", email: "", phone: "" });
+  const [client, setClient] = useState({ fullName: "", email: "", representative: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [files, setFiles] = useState<Record<string, UploadedFile[]>>({});
   const [consent, setConsent] = useState(false);
