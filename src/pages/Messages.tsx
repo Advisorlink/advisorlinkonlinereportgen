@@ -727,6 +727,7 @@ export default function Messages() {
                     {c.opt_in_date && <p>Opted in: {new Date(c.opt_in_date).toLocaleDateString()}</p>}
                     {c.opt_out_date && <p className="text-destructive">Opted out: {new Date(c.opt_out_date).toLocaleDateString()}</p>}
                   </div>
+                </div>
 
                 {/* Generate report form */}
                 <ReportStartForm
