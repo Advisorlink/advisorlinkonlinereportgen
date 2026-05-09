@@ -163,7 +163,7 @@ export default function UploadDocuments() {
         const { error: dbErr } = await supabase.from("client_documents").insert({
           client_name: client.fullName,
           client_email: client.email,
-          client_phone: client.phone,
+          client_phone: `Adviser: ${client.representative}`,
           document_type: slot.key,
           file_path: path,
           file_name: uf.file.name,
@@ -293,16 +293,19 @@ export default function UploadDocuments() {
                 {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
               </div>
               <div>
-                <Label htmlFor="phone" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">Mobile number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={client.phone}
-                  onChange={(e) => setClient({ ...client, phone: e.target.value })}
-                  placeholder="04XX XXX XXX"
-                  className="mt-1.5 h-11 rounded-sm border-[hsl(215_60%_12%)]/15 bg-white text-[hsl(215_60%_12%)] placeholder:text-[hsl(215_60%_12%)]/30 focus-visible:border-[hsl(215_60%_12%)] focus-visible:ring-1 focus-visible:ring-[hsl(215_60%_12%)]"
-                />
-                {errors.phone && <p className="mt-1 text-xs text-destructive">{errors.phone}</p>}
+                <Label htmlFor="representative" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">Your representative</Label>
+                <select
+                  id="representative"
+                  value={client.representative}
+                  onChange={(e) => setClient({ ...client, representative: e.target.value })}
+                  className="mt-1.5 flex h-11 w-full rounded-sm border border-[hsl(215_60%_12%)]/15 bg-white px-3 py-2 text-sm text-[hsl(215_60%_12%)] focus-visible:border-[hsl(215_60%_12%)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[hsl(215_60%_12%)]"
+                >
+                  <option value="" disabled>Select your representative</option>
+                  {REPRESENTATIVES.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+                {errors.representative && <p className="mt-1 text-xs text-destructive">{errors.representative}</p>}
               </div>
 
               <Button
