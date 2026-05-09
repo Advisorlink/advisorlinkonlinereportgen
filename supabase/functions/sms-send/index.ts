@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
     }
     const userId = claimsData.user.id;
 
-    const { to: rawTo, body, mediaUrls, contactId, conversationId, fromNumber } = await req.json();
+    const { to: rawTo, body, mediaUrls, contactId, conversationId, fromNumber, simulate } = await req.json();
 
     if (!rawTo || !body) {
       return new Response(JSON.stringify({ error: "Missing 'to' or 'body'" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
