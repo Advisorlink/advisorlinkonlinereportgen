@@ -47,6 +47,7 @@ export default function Documents() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [preview, setPreview] = useState<{ doc: ClientDocument; url: string } | null>(null);
+  const [sendOpen, setSendOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
