@@ -87,6 +87,33 @@ export default function Messages() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [pendingMedia, setPendingMedia] = useState<{ url: string; name: string; type: string }[]>([]);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
+
+  const handleFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!files.length || !user) return;
+    setUploadingMedia(true);
+    try {
+      for (const file of files) {
+        if (file.size > 5 * 1024 * 1024) {
+          toast({ title: "File too large", description: `${file.name} exceeds 5MB MMS limit.`, variant: "destructive" });
+          continue;
+        }
+        const ext = file.name.split(".").pop() || "bin";
+        const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("sms-media").upload(path, file, { contentType: file.type, upsert: false });
+        if (upErr) { toast({ title: "Upload failed", description: upErr.message, variant: "destructive" }); continue; }
+        const { data: pub } = supabase.storage.from("sms-media").getPublicUrl(path);
+        setPendingMedia(prev => [...prev, { url: pub.publicUrl, name: file.name, type: file.type }]);
+      }
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
+  const removePendingMedia = (idx: number) => setPendingMedia(prev => prev.filter((_, i) => i !== idx));
 
   // From number selector
   const [smsNumbers, setSmsNumbers] = useState<SmsNumber[]>([]);
