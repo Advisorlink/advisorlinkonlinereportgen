@@ -8,6 +8,7 @@ import { useClientInputs } from "@/hooks/useClientInputs";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
 import type { ClientInputs, IncomeFrequency, InvestmentOption } from "@/lib/calc";
 import { toast } from "sonner";
+import { celebrate } from "@/lib/celebration";
 import {
   Sparkles, DollarSign, Landmark, Target, TrendingUp, Cake, PiggyBank,
   Plus, Trash2, Wand2, ArrowRight,
