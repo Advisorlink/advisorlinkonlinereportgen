@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, DollarSign, Tag, StickyNote,
-  MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark,
+  MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark, ArrowLeft,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ReportStartForm } from "@/components/ReportStartForm";
