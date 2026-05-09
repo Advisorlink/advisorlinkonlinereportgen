@@ -134,21 +134,36 @@ export function PipelineBoard() {
   };
 
   const persistMove = async (dealId: string, targetStageId: string, extra: Record<string, any> = {}) => {
-    const stageDeals = deals
+    // Drop at TOP: shift other cards in target stage down by 1, place dropped card at position 0
+    const otherIds = deals
       .filter((d) => d.stage_id === targetStageId && d.id !== dealId)
-      .sort((a, b) => a.position - b.position);
-    const newPosition = stageDeals.length;
+      .map((d) => d.id);
 
     setDeals((prev) =>
-      prev.map((d) =>
-        d.id === dealId ? { ...d, stage_id: targetStageId, position: newPosition, ...extra } : d
-      )
+      prev.map((d) => {
+        if (d.id === dealId) return { ...d, stage_id: targetStageId, position: 0, ...extra };
+        if (otherIds.includes(d.id)) return { ...d, position: d.position + 1 };
+        return d;
+      })
     );
 
     const { error } = await supabase
       .from("pipeline_deals")
-      .update({ stage_id: targetStageId, position: newPosition, ...extra })
+      .update({ stage_id: targetStageId, position: 0, ...extra })
       .eq("id", dealId);
+
+    // Best-effort shift others (ignore errors — UI already updated optimistically)
+    if (otherIds.length) {
+      await Promise.all(
+        otherIds.map((id) => {
+          const cur = deals.find((d) => d.id === id);
+          return supabase
+            .from("pipeline_deals")
+            .update({ position: (cur?.position ?? 0) + 1 })
+            .eq("id", id);
+        })
+      );
+    }
 
     if (error) {
       toast({ title: "Failed to move deal", variant: "destructive" });
