@@ -622,11 +622,13 @@ export type Database = {
       }
       pipeline_deals: {
         Row: {
+          age: string | null
           client_address: string | null
           client_email: string | null
           client_name: string
           client_phone: string | null
           created_at: string
+          had_review_before: boolean | null
           id: string
           lost_reason_id: string | null
           lost_reason_note: string | null
@@ -634,16 +636,21 @@ export type Database = {
           position: number
           source: string | null
           stage_id: string
+          state: string | null
+          super_balance: number | null
+          super_fund_name: string | null
           tags: string[] | null
           updated_at: string
           value: number | null
         }
         Insert: {
+          age?: string | null
           client_address?: string | null
           client_email?: string | null
           client_name: string
           client_phone?: string | null
           created_at?: string
+          had_review_before?: boolean | null
           id?: string
           lost_reason_id?: string | null
           lost_reason_note?: string | null
@@ -651,16 +658,21 @@ export type Database = {
           position?: number
           source?: string | null
           stage_id: string
+          state?: string | null
+          super_balance?: number | null
+          super_fund_name?: string | null
           tags?: string[] | null
           updated_at?: string
           value?: number | null
         }
         Update: {
+          age?: string | null
           client_address?: string | null
           client_email?: string | null
           client_name?: string
           client_phone?: string | null
           created_at?: string
+          had_review_before?: boolean | null
           id?: string
           lost_reason_id?: string | null
           lost_reason_note?: string | null
@@ -668,6 +680,9 @@ export type Database = {
           position?: number
           source?: string | null
           stage_id?: string
+          state?: string | null
+          super_balance?: number | null
+          super_fund_name?: string | null
           tags?: string[] | null
           updated_at?: string
           value?: number | null
