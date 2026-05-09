@@ -243,40 +243,46 @@ export default function Index() {
 
   return (
     <CRMLayout>
-      <div className="h-[calc(100vh-48px)] overflow-hidden">
-        <div className="no-print px-4 py-2.5 flex items-center justify-between bg-background/80 dark:bg-background/60 backdrop-blur-xl border-b border-border/60">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-cyan/10 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.5rem)] lg:overflow-hidden">
+        <div className="no-print px-3 sm:px-4 py-2.5 flex flex-wrap items-center gap-2 justify-between bg-background/80 dark:bg-background/60 backdrop-blur-xl border-b border-border/60">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-cyan/10 flex items-center justify-center shrink-0">
               <FileText className="w-4 h-4 text-cyan" />
             </div>
-            <span className="text-sm font-semibold text-foreground font-heading">Report Generator</span>
+            <span className="text-sm font-semibold text-foreground font-heading truncate">Report Generator</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <input
               ref={fileRef} type="file" accept=".xlsx,.xls" className="hidden"
               onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.currentTarget.value = ""; }}
             />
-            <Button variant="outline" size="sm" className="h-9 hover:bg-muted/50" onClick={() => fileRef.current?.click()}>
-              Upload XLSX
+            <Button variant="outline" size="sm" className="h-9 px-2.5 sm:px-3 hover:bg-muted/50" onClick={() => fileRef.current?.click()}>
+              <span className="hidden sm:inline">Upload XLSX</span>
+              <span className="sm:hidden">Upload</span>
             </Button>
-            <Button size="sm" onClick={exportPDF} disabled={exporting} className="h-9 gradient-accent text-white border-0 shadow-md shadow-cyan/20 hover:shadow-cyan/30 transition-all">
-              {exporting ? "Exporting…" : "Download PDF"}
+            <Button size="sm" onClick={exportPDF} disabled={exporting} className="h-9 px-2.5 sm:px-3 gradient-accent text-white border-0 shadow-md shadow-cyan/20 hover:shadow-cyan/30 transition-all">
+              {exporting ? "Exporting…" : (
+                <>
+                  <span className="hidden sm:inline">Download PDF</span>
+                  <span className="sm:hidden">PDF</span>
+                </>
+              )}
             </Button>
-            <Button variant="outline" size="icon" className="h-9 w-9 hover:bg-muted/50" onClick={openFullScreen} title="Full screen">
+            <Button variant="outline" size="icon" className="hidden sm:inline-flex h-9 w-9 hover:bg-muted/50" onClick={openFullScreen} title="Full screen">
               <Maximize2 className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
-        <div className="px-6 py-4 grid h-[calc(100vh-48px-52px)] grid-cols-1 grid-rows-[minmax(280px,42vh)_1fr] gap-6 overflow-hidden lg:grid-cols-[420px_1fr] lg:grid-rows-1">
-          <aside className="no-print min-h-0 overflow-y-auto pr-2 pb-6">
+        <div className="px-3 sm:px-6 py-4 grid gap-4 lg:gap-6 grid-cols-1 lg:grid-cols-[420px_1fr] lg:h-[calc(100vh-3.5rem-52px)] lg:grid-rows-1 lg:overflow-hidden">
+          <aside className="no-print min-h-0 lg:overflow-y-auto lg:pr-2 pb-2 lg:pb-6">
             <ClientForm value={inputs} onChange={setInputs} />
             <p className="mt-3 text-[11px] text-muted-foreground">
               Tip: edits update the report instantly. Use <strong>Upload XLSX</strong> to load a saved
               Client Data sheet, then download the PDF when you're happy.
             </p>
           </aside>
-          <section ref={reportRef} className="min-h-0 space-y-0 overflow-y-auto pb-6">
+          <section ref={reportRef} className="report-preview min-h-0 space-y-0 lg:overflow-y-auto pb-6">
             <CoverPage s={summary} />
             <WhoWeArePage s={summary} />
             <SnapshotPage s={summary} />
