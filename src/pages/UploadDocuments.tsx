@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import {
   Shield, Lock, FileCheck2, Camera, Upload, CheckCircle2,
   IdCard, FileText, Image as ImageIcon, ArrowRight, ArrowLeft,
-  Loader2, X, ChevronRight, RotateCcw, Plus,
+  Loader2, X, ChevronRight, Plus, Check,
 } from "lucide-react";
 import { z } from "zod";
 
@@ -59,8 +59,6 @@ type Stage =
   | "details"
   | "done";
 
-const NAVY = "hsl(215 60% 12%)";
-
 export default function UploadDocuments() {
   const [stage, setStage] = useState<Stage>("choose");
   const [captured, setCaptured] = useState<CapturedFile[]>([]);
@@ -72,7 +70,8 @@ export default function UploadDocuments() {
 
   // license/statement capture sub-state
   const [licenseSide, setLicenseSide] = useState<"front" | "back">("front");
-  const [licenseFront, setLicenseFront] = useState<CapturedFile | null>(null);
+  const [statementCount, setStatementCount] = useState(0);
+  const [flash, setFlash] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputContextRef = useRef<{ docType: DocType; label: string; useCamera: boolean } | null>(null);
@@ -127,14 +126,10 @@ export default function UploadDocuments() {
     if (!item) return;
 
     if (ctx.docType === "license") {
+      addCaptured(item);
       if (licenseSide === "front") {
-        setLicenseFront(item);
         setLicenseSide("back");
-        // stay on upload stage to pick back
       } else {
-        if (licenseFront) addCaptured(licenseFront);
-        addCaptured(item);
-        setLicenseFront(null);
         setLicenseSide("front");
         setStage("review");
       }
@@ -146,9 +141,10 @@ export default function UploadDocuments() {
 
   // ===== Live camera =====
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
-  const [cameraPreview, setCameraPreview] = useState<CapturedFile | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -185,16 +181,45 @@ export default function UploadDocuments() {
     return () => stopCamera();
   }, [stage, startCamera, stopCamera]);
 
-  const captureFromVideo = (label: string, docType: DocType): Promise<CapturedFile | null> => {
+  // Capture cropped to overlay rectangle
+  const captureCropped = (label: string, docType: DocType): Promise<CapturedFile | null> => {
     return new Promise((resolve) => {
       const v = videoRef.current;
-      if (!v || !v.videoWidth) return resolve(null);
+      const overlay = overlayRef.current;
+      if (!v || !v.videoWidth || !overlay) return resolve(null);
+
+      const vw = v.videoWidth;
+      const vh = v.videoHeight;
+      const containerRect = v.getBoundingClientRect();
+      const overlayRect = overlay.getBoundingClientRect();
+
+      // object-cover scale
+      const scale = Math.max(containerRect.width / vw, containerRect.height / vh);
+      const displayedW = vw * scale;
+      const displayedH = vh * scale;
+      const offsetX = (displayedW - containerRect.width) / 2;
+      const offsetY = (displayedH - containerRect.height) / 2;
+
+      const relX = overlayRect.left - containerRect.left + offsetX;
+      const relY = overlayRect.top - containerRect.top + offsetY;
+
+      let srcX = relX / scale;
+      let srcY = relY / scale;
+      let srcW = overlayRect.width / scale;
+      let srcH = overlayRect.height / scale;
+
+      // Clamp
+      srcX = Math.max(0, Math.min(srcX, vw - 1));
+      srcY = Math.max(0, Math.min(srcY, vh - 1));
+      srcW = Math.max(1, Math.min(srcW, vw - srcX));
+      srcH = Math.max(1, Math.min(srcH, vh - srcY));
+
       const canvas = document.createElement("canvas");
-      canvas.width = v.videoWidth;
-      canvas.height = v.videoHeight;
+      canvas.width = Math.round(srcW);
+      canvas.height = Math.round(srcH);
       const ctx = canvas.getContext("2d");
       if (!ctx) return resolve(null);
-      ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(v, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
       canvas.toBlob(
         (blob) => {
           if (!blob) return resolve(null);
@@ -215,41 +240,54 @@ export default function UploadDocuments() {
     });
   };
 
-  const handleLicenseCapture = async () => {
-    const label = licenseSide === "front" ? "Licence — Front" : "Licence — Back";
-    const item = await captureFromVideo(label, "license");
-    if (!item) return toast.error("Couldn't capture image, try again");
-    setCameraPreview(item);
+  const triggerFlash = () => {
+    setFlash(true);
+    setTimeout(() => setFlash(false), 180);
   };
 
-  const acceptLicensePreview = () => {
-    if (!cameraPreview) return;
+  const handleLicenseCapture = async () => {
+    if (busy || !cameraReady) return;
+    setBusy(true);
+    const label = licenseSide === "front" ? "Licence — Front" : "Licence — Back";
+    const item = await captureCropped(label, "license");
+    if (!item) {
+      setBusy(false);
+      return toast.error("Couldn't capture image, try again");
+    }
+    triggerFlash();
+    addCaptured(item);
     if (licenseSide === "front") {
-      setLicenseFront(cameraPreview);
-      setCameraPreview(null);
       setLicenseSide("back");
+      toast.success("Front captured");
+      setBusy(false);
     } else {
-      if (licenseFront) addCaptured(licenseFront);
-      addCaptured(cameraPreview);
-      setLicenseFront(null);
-      setCameraPreview(null);
+      toast.success("Back captured");
       setLicenseSide("front");
       stopCamera();
       setStage("review");
+      setBusy(false);
     }
   };
 
   const handleStatementCapture = async () => {
-    const item = await captureFromVideo("Statement", "statement");
-    if (!item) return toast.error("Couldn't capture image, try again");
-    setCameraPreview(item);
+    if (busy || !cameraReady) return;
+    setBusy(true);
+    const label = `Statement ${statementCount + 1}`;
+    const item = await captureCropped(label, "statement");
+    if (!item) {
+      setBusy(false);
+      return toast.error("Couldn't capture image, try again");
+    }
+    triggerFlash();
+    addCaptured(item);
+    setStatementCount((n) => n + 1);
+    toast.success(`Page ${statementCount + 1} saved`);
+    setBusy(false);
   };
 
-  const acceptStatementPreview = () => {
-    if (!cameraPreview) return;
-    addCaptured(cameraPreview);
-    setCameraPreview(null);
+  const finishStatementCapture = () => {
     stopCamera();
+    setStatementCount(0);
     setStage("review");
   };
 
@@ -318,7 +356,7 @@ export default function UploadDocuments() {
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-4">
           <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-9 w-auto" />
           <ArrowRight className="h-4 w-4 shrink-0 text-[hsl(215_60%_12%)]/40" />
-          <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className="h-7 w-auto sm:h-9" />
+          <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className="h-11 w-auto sm:h-14" />
         </div>
       </header>
 
@@ -380,25 +418,9 @@ export default function UploadDocuments() {
           <MethodChoice
             title="Driver's Licence"
             subtitle="We'll capture the front and back. Choose how you'd like to add the photos."
-            onCamera={() => { setLicenseSide("front"); setLicenseFront(null); setStage("license_camera"); }}
-            onUpload={() => { setLicenseSide("front"); setLicenseFront(null); setStage("license_upload"); }}
+            onCamera={() => { setLicenseSide("front"); setStage("license_camera"); }}
+            onUpload={() => { setLicenseSide("front"); setStage("license_upload"); }}
             onBack={() => setStage("choose")}
-          />
-        )}
-
-        {/* ============ LICENSE — CAMERA ============ */}
-        {stage === "license_camera" && (
-          <CameraStage
-            instruction={licenseSide === "front" ? "Front of licence" : "Back of licence"}
-            helper="Place your licence inside the frame. Make sure all details are clear and readable."
-            ready={cameraReady}
-            videoRef={videoRef}
-            preview={cameraPreview}
-            onCapture={handleLicenseCapture}
-            onRetake={() => { if (cameraPreview?.preview) URL.revokeObjectURL(cameraPreview.preview); setCameraPreview(null); }}
-            onAccept={acceptLicensePreview}
-            onCancel={() => { setCameraPreview(null); setLicenseFront(null); setLicenseSide("front"); setStage("license_method"); }}
-            sideLabel={licenseSide === "front" ? "Step 1 of 2" : "Step 2 of 2"}
           />
         )}
 
@@ -414,16 +436,6 @@ export default function UploadDocuments() {
             <p className="mt-1 text-[13px] text-[hsl(215_60%_12%)]/65">
               Choose a clear photo from your device. Make sure all details are readable.
             </p>
-            {licenseFront && licenseSide === "back" && (
-              <div className="mt-4 flex items-center gap-3 rounded-sm border border-[hsl(215_60%_12%)]/10 bg-[#f7f5f0] p-2">
-                <img src={licenseFront.preview} alt="" className="h-12 w-16 rounded-sm object-cover" />
-                <div className="flex-1 text-[12px]">
-                  <p className="font-semibold text-[hsl(215_60%_12%)]">Front captured</p>
-                  <p className="text-[hsl(215_60%_12%)]/60">Now select the back</p>
-                </div>
-                <CheckCircle2 className="h-4 w-4 text-emerald-700" />
-              </div>
-            )}
             <Button
               onClick={() => triggerFilePick("license", licenseSide === "front" ? "Licence — Front" : "Licence — Back", false)}
               size="lg"
@@ -432,7 +444,7 @@ export default function UploadDocuments() {
               <Upload className="mr-2 h-4 w-4" /> Choose photo
             </Button>
             <button
-              onClick={() => { setLicenseFront(null); setLicenseSide("front"); setStage("license_method"); }}
+              onClick={() => { setLicenseSide("front"); setStage("license_method"); }}
               className="mt-3 w-full text-center text-[12px] text-[hsl(215_60%_12%)]/55 hover:text-[hsl(215_60%_12%)]"
             >
               ← Back
@@ -445,27 +457,10 @@ export default function UploadDocuments() {
           <MethodChoice
             title="Statement"
             subtitle="Take a photo or upload a PDF / image of your statement."
-            onCamera={() => setStage("statement_camera")}
+            onCamera={() => { setStatementCount(0); setStage("statement_camera"); }}
             onUpload={() => triggerFilePick("statement", "Statement", false)}
             onBack={() => setStage("choose")}
             uploadLabel="Upload file (PDF or image)"
-          />
-        )}
-
-        {/* ============ STATEMENT — CAMERA ============ */}
-        {stage === "statement_camera" && (
-          <CameraStage
-            instruction="Statement"
-            helper="Place your statement inside the frame. Hold steady so all text is readable."
-            ready={cameraReady}
-            videoRef={videoRef}
-            preview={cameraPreview}
-            onCapture={handleStatementCapture}
-            onRetake={() => { if (cameraPreview?.preview) URL.revokeObjectURL(cameraPreview.preview); setCameraPreview(null); }}
-            onAccept={acceptStatementPreview}
-            onCancel={() => { setCameraPreview(null); setStage("statement_method"); }}
-            sideLabel="Capture"
-            shape="document"
           />
         )}
 
@@ -681,6 +676,44 @@ export default function UploadDocuments() {
       </main>
 
       <input ref={fileInputRef} type="file" className="hidden" onChange={onHiddenFileChange} />
+
+      {/* ============ FULLSCREEN CAMERA OVERLAY ============ */}
+      {(stage === "license_camera" || stage === "statement_camera") && (
+        <FullscreenCamera
+          mode={stage === "license_camera" ? "license" : "statement"}
+          licenseSide={licenseSide}
+          ready={cameraReady}
+          videoRef={videoRef}
+          overlayRef={overlayRef}
+          flash={flash}
+          busy={busy}
+          capturedCount={
+            stage === "license_camera"
+              ? captured.filter((c) => c.docType === "license").length
+              : statementCount
+          }
+          onCapture={stage === "license_camera" ? handleLicenseCapture : handleStatementCapture}
+          onFinish={
+            stage === "statement_camera"
+              ? finishStatementCapture
+              : () => {
+                  stopCamera();
+                  setLicenseSide("front");
+                  setStage(captured.length > 0 ? "review" : "license_method");
+                }
+          }
+          onCancel={() => {
+            stopCamera();
+            if (stage === "license_camera") {
+              setLicenseSide("front");
+              setStage("license_method");
+            } else {
+              setStatementCount(0);
+              setStage("statement_method");
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -729,92 +762,124 @@ function MethodChoice({
   );
 }
 
-function CameraStage({
-  instruction, helper, ready, videoRef, preview, onCapture, onRetake, onAccept, onCancel, sideLabel, shape = "id",
+function FullscreenCamera({
+  mode, licenseSide, ready, videoRef, overlayRef, flash, busy, capturedCount,
+  onCapture, onFinish, onCancel,
 }: {
-  instruction: string;
-  helper: string;
+  mode: "license" | "statement";
+  licenseSide: "front" | "back";
   ready: boolean;
   videoRef: React.RefObject<HTMLVideoElement>;
-  preview: CapturedFile | null;
+  overlayRef: React.RefObject<HTMLDivElement>;
+  flash: boolean;
+  busy: boolean;
+  capturedCount: number;
   onCapture: () => void;
-  onRetake: () => void;
-  onAccept: () => void;
+  onFinish: () => void;
   onCancel: () => void;
-  sideLabel: string;
-  shape?: "id" | "document";
 }) {
-  // ID card aspect ~ 1.586:1 (CR80). Document tall.
-  const overlayClass = shape === "id"
-    ? "aspect-[1.586/1] w-[88%] max-w-[460px]"
-    : "aspect-[3/4] w-[78%] max-w-[380px]";
+  const isLicense = mode === "license";
+  const instruction = isLicense
+    ? (licenseSide === "front" ? "Front of licence" : "Back of licence")
+    : "Statement";
+  const helper = isLicense
+    ? "Place your licence inside the frame. Make sure all details are clear."
+    : "Place each page inside the frame. Tap the shutter to save.";
+  const sideLabel = isLicense
+    ? (licenseSide === "front" ? "Step 1 of 2" : "Step 2 of 2")
+    : `Page ${capturedCount + 1}`;
+
+  // ID card aspect ~ 1.586:1, statement ~ A4 portrait
+  const overlayClass = isLicense
+    ? "aspect-[1.586/1] w-[88%] max-w-[560px]"
+    : "aspect-[1/1.414] w-[78%] max-w-[480px] max-h-[68vh]";
 
   return (
-    <section className="page-enter overflow-hidden rounded-md border border-[hsl(215_60%_12%)]/15 bg-[hsl(215_60%_12%)] text-white shadow-[0_8px_24px_-12px_rgba(15,23,42,0.4)]">
-      <div className="flex items-center justify-between px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">
-        <span>{sideLabel}</span>
-        <button onClick={onCancel} className="rounded-sm p-1 hover:bg-white/10" aria-label="Cancel">
-          <X className="h-4 w-4" />
+    <div className="fixed inset-0 z-[100] flex flex-col bg-black text-white">
+      {/* Top bar */}
+      <div className="flex shrink-0 items-center justify-between bg-black/85 px-5 py-3 backdrop-blur">
+        <button
+          onClick={onCancel}
+          className="rounded-sm p-2 text-white/80 hover:bg-white/10 hover:text-white"
+          aria-label="Close camera"
+        >
+          <X className="h-5 w-5" />
         </button>
-      </div>
-      <div className="px-5 pb-3 text-center">
-        <h2 className="font-heading text-xl font-bold">{instruction}</h2>
-        <p className="mt-1 text-[12px] text-white/70">{helper}</p>
-      </div>
-
-      <div className="relative mx-auto aspect-[3/4] max-h-[70vh] w-full overflow-hidden bg-black sm:aspect-[4/3]">
-        {!preview ? (
-          <>
-            <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />
-            {/* Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className={`relative ${overlayClass} rounded-xl border-2 border-white/95 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]`}>
-                {/* Corners */}
-                <span className="absolute -left-0.5 -top-0.5 h-6 w-6 rounded-tl-xl border-l-4 border-t-4 border-white" />
-                <span className="absolute -right-0.5 -top-0.5 h-6 w-6 rounded-tr-xl border-r-4 border-t-4 border-white" />
-                <span className="absolute -bottom-0.5 -left-0.5 h-6 w-6 rounded-bl-xl border-b-4 border-l-4 border-white" />
-                <span className="absolute -bottom-0.5 -right-0.5 h-6 w-6 rounded-br-xl border-b-4 border-r-4 border-white" />
-              </div>
-            </div>
-            {!ready && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-sm">
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Starting camera…
-              </div>
-            )}
-          </>
-        ) : (
-          <img src={preview.preview} alt="Captured" className="absolute inset-0 h-full w-full object-contain" />
-        )}
+        <div className="text-center">
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/60">{sideLabel}</p>
+          <p className="font-heading text-[15px] font-semibold">{instruction}</p>
+        </div>
+        <div className="w-9" />
       </div>
 
-      <div className="flex items-center justify-center gap-3 bg-[hsl(215_60%_12%)] px-5 py-5">
-        {!preview ? (
-          <button
-            onClick={onCapture}
-            disabled={!ready}
-            aria-label="Capture"
-            className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-white/95 text-[hsl(215_60%_12%)] transition active:scale-95 disabled:opacity-40"
+      {/* Camera view */}
+      <div className="relative flex-1 overflow-hidden bg-black">
+        <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />
+
+        {/* Overlay frame */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div
+            ref={overlayRef}
+            className={`relative ${overlayClass} rounded-xl border-2 border-white/95 shadow-[0_0_0_9999px_rgba(0,0,0,0.62)]`}
           >
-            <span className="block h-12 w-12 rounded-full bg-white ring-2 ring-[hsl(215_60%_12%)]/15" />
-          </button>
-        ) : (
-          <>
-            <Button
-              onClick={onRetake}
-              variant="outline"
-              className="rounded-sm border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
-            >
-              <RotateCcw className="mr-2 h-4 w-4" /> Retake
-            </Button>
-            <Button
-              onClick={onAccept}
-              className="rounded-sm bg-white font-semibold text-[hsl(215_60%_12%)] hover:bg-white/90"
-            >
-              <CheckCircle2 className="mr-2 h-4 w-4" /> Use this photo
-            </Button>
-          </>
+            <span className="absolute -left-0.5 -top-0.5 h-7 w-7 rounded-tl-xl border-l-4 border-t-4 border-white" />
+            <span className="absolute -right-0.5 -top-0.5 h-7 w-7 rounded-tr-xl border-r-4 border-t-4 border-white" />
+            <span className="absolute -bottom-0.5 -left-0.5 h-7 w-7 rounded-bl-xl border-b-4 border-l-4 border-white" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-7 w-7 rounded-br-xl border-b-4 border-r-4 border-white" />
+          </div>
+        </div>
+
+        {/* Helper text */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center px-6">
+          <p className="rounded-full bg-black/55 px-4 py-1.5 text-center text-[12px] text-white/85 backdrop-blur">
+            {helper}
+          </p>
+        </div>
+
+        {/* Flash effect */}
+        {flash && <div className="pointer-events-none absolute inset-0 bg-white/85 transition-opacity" />}
+
+        {!ready && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-sm">
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Starting camera…
+          </div>
         )}
       </div>
-    </section>
+
+      {/* Bottom controls */}
+      <div className="relative flex shrink-0 items-center justify-between bg-black/90 px-6 py-5 backdrop-blur">
+        {/* Left: thumbnail count */}
+        <div className="flex w-20 items-center">
+          {capturedCount > 0 ? (
+            <div className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[12px] font-semibold text-white">
+              <Check className="h-3.5 w-3.5 text-emerald-400" />
+              {capturedCount}
+            </div>
+          ) : null}
+        </div>
+
+        {/* Shutter */}
+        <button
+          onClick={onCapture}
+          disabled={!ready || busy}
+          aria-label="Capture"
+          className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-white/10 transition active:scale-95 disabled:opacity-40"
+        >
+          <span className="block h-14 w-14 rounded-full bg-white" />
+        </button>
+
+        {/* Right: finish (statement) */}
+        <div className="flex w-20 justify-end">
+          {!isLicense && capturedCount > 0 && (
+            <button
+              onClick={onFinish}
+              className="rounded-full bg-white px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-black hover:bg-white/90"
+            >
+              Finished
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
