@@ -894,8 +894,7 @@ export default function UploadDocuments() {
                   className="mt-0.5 border-[hsl(var(--ink))]/30 data-[state=checked]:border-[hsl(var(--ink))] data-[state=checked]:bg-[hsl(var(--ink))] data-[state=checked]:text-white"
                 />
                 <span className="text-[12px] leading-relaxed text-[hsl(var(--ink))]/75">
-                  I confirm these documents are mine and consent to Pure Private Wealth collecting,
-                  storing and using them, and to <span className="font-semibold text-[hsl(var(--ink))]">being contacted by Pure Private Wealth</span>, in accordance with the <span className="font-semibold text-[hsl(var(--ink))]">Australian Privacy Act 1988</span>.
+                  I confirm these documents are mine and consent to Pure Private Wealth collecting and storing them, and to <span className="font-semibold text-[hsl(var(--ink))]">being contacted by Pure Private Wealth</span>, in accordance with the <span className="font-semibold text-[hsl(var(--ink))]">Australian Privacy Act 1988</span>.
                 </span>
               </label>
 
