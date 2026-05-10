@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Folder, ChevronRight, ArrowLeft, Loader2, Search, Check, HardDrive } from "lucide-react";
+import { Folder, ChevronRight, ArrowLeft, Loader2, Search, Check, HardDrive, FolderPlus, X } from "lucide-react";
 
 type DriveFolder = { id: string; name: string };
 
