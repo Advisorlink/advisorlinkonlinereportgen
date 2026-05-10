@@ -289,7 +289,20 @@ export default function Documents() {
                 </DialogHeader>
               </div>
 
-              <div className="p-5 max-h-[65vh] overflow-y-auto">
+              <div className="px-5 pt-4 flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    setDrivePicker({ docIds: openClient.items.map((i) => i.id) })
+                  }
+                  className="gap-2"
+                >
+                  <HardDrive className="w-4 h-4" />
+                  Send all to Google Drive
+                </Button>
+              </div>
+
+              <div className="p-5 max-h-[60vh] overflow-y-auto">
                 <div className="grid sm:grid-cols-2 gap-3">
                   {openClient.items.map((d) => (
                     <FileTile
@@ -297,6 +310,7 @@ export default function Documents() {
                       doc={d}
                       onPreview={() => handlePreview(d)}
                       onDelete={() => handleDelete(d)}
+                      onSendToDrive={() => setDrivePicker({ docIds: [d.id] })}
                     />
                   ))}
                 </div>
