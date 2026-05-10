@@ -42,8 +42,8 @@ const VARIANTS: Record<1 | 2 | 3 | 4 | 5, VariantConfig> = {
   1: {
     label: "AdvisorLink",
     page: "bg-[hsl(var(--page-alt))]",
-    ink: "215_60%_12%",
-    accent: "192_90%_42%",
+    ink: "215 60% 12%",
+    accent: "192 90% 42%",
     surface: "bg-white",
     border: "border-[hsl(var(--ink))]/10",
     radius: "rounded-xl",
@@ -54,8 +54,8 @@ const VARIANTS: Record<1 | 2 | 3 | 4 | 5, VariantConfig> = {
   2: {
     label: "Private Bank",
     page: "bg-[hsl(var(--page-alt))]",
-    ink: "215_60%_12%",
-    accent: "215_60%_12%",
+    ink: "215 60% 12%",
+    accent: "215 60% 12%",
     surface: "bg-white",
     border: "border-[hsl(var(--ink))]/10",
     radius: "rounded-md",
@@ -66,8 +66,8 @@ const VARIANTS: Record<1 | 2 | 3 | 4 | 5, VariantConfig> = {
   3: {
     label: "Soft Modern",
     page: "bg-[#f4f6fb]",
-    ink: "222_47%_18%",
-    accent: "221_83%_53%",
+    ink: "222 47% 18%",
+    accent: "221 83% 53%",
     surface: "bg-white",
     border: "border-[hsl(222_47%_18%)]/8",
     radius: "rounded-2xl",
@@ -78,8 +78,8 @@ const VARIANTS: Record<1 | 2 | 3 | 4 | 5, VariantConfig> = {
   4: {
     label: "Mono Lux",
     page: "bg-black",
-    ink: "0_0%_100%",
-    accent: "45_85%_60%",
+    ink: "0 0% 100%",
+    accent: "45 85% 60%",
     surface: "bg-[#0e0e0e]",
     border: "border-white/10",
     radius: "rounded-none",
