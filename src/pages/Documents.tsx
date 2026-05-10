@@ -506,16 +506,30 @@ function FileTile({
           </div>
         </div>
       </button>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/50 text-white grid place-items-center opacity-0 group-hover:opacity-100 hover:bg-destructive transition-all"
-        title="Delete"
-      >
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
+      <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        {onSendToDrive && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSendToDrive();
+            }}
+            className="h-7 w-7 rounded-full bg-black/50 text-white grid place-items-center hover:bg-primary transition-all"
+            title="Send to Google Drive"
+          >
+            <HardDrive className="w-3.5 h-3.5" />
+          </button>
+        )}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="h-7 w-7 rounded-full bg-black/50 text-white grid place-items-center hover:bg-destructive transition-all"
+          title="Delete"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
     </div>
   );
 }
