@@ -71,6 +71,34 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
     load(next[next.length - 1].id, null);
   };
 
+  const createFolder = async () => {
+    const name = newFolderName.trim();
+    if (!name) return;
+    setCreating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("gdrive-send", {
+        body: { action: "create_folder", parent: current.id ?? "root", name },
+      });
+      if (error) throw error;
+      const folder = (data as any)?.folder as DriveFolder | undefined;
+      toast.success(`Created "${name}"`);
+      setNewFolderOpen(false);
+      setNewFolderName("");
+      if (folder) {
+        // Open the new folder so user can send straight into it
+        setStack((s) => [...s, { id: folder.id, name: folder.name }]);
+        setSearch("");
+        load(folder.id, null);
+      } else {
+        load(current.id, search.trim() || null);
+      }
+    } catch (e: any) {
+      toast.error("Couldn't create folder", { description: e?.message });
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const sendHere = async () => {
     if (!current.id) {
       toast.error("Pick a folder", { description: "Open a folder first or create one in Google Drive." });
