@@ -72,6 +72,16 @@ export default function UploadDocuments() {
   const [licenseSide, setLicenseSide] = useState<"front" | "back">("front");
   const [statementCount, setStatementCount] = useState(0);
   const [flash, setFlash] = useState(false);
+  const [captureBanner, setCaptureBanner] = useState<string | null>(null);
+
+  // Design variant (1–4) for testing different aesthetics
+  const [variant, setVariant] = useState<1 | 2 | 3 | 4>(1);
+  const v = VARIANTS[variant];
+
+  const showCaptureBanner = (msg: string) => {
+    setCaptureBanner(msg);
+    setTimeout(() => setCaptureBanner(null), 1400);
+  };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputContextRef = useRef<{ docType: DocType; label: string; useCamera: boolean } | null>(null);
