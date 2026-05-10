@@ -919,6 +919,17 @@ function FullscreenCamera({
       <div className="relative flex-1 overflow-hidden bg-black">
         <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />
 
+        {/* Capture confirmation banner — slides from TOP so it never covers the shutter */}
+        {banner && (
+          <div className="pointer-events-none absolute inset-x-0 top-3 z-30 flex justify-center px-4">
+            <div className="flex items-center gap-2 rounded-full bg-emerald-500/95 px-4 py-2 text-[13px] font-semibold text-white shadow-lg ring-1 ring-white/20 animate-in fade-in slide-in-from-top-2">
+              <Check className="h-4 w-4" />
+              {banner}
+            </div>
+          </div>
+        )}
+
+
         {/* Overlay frame */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div
