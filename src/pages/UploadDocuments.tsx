@@ -153,7 +153,7 @@ export default function UploadDocuments() {
   const [captureBanner, setCaptureBanner] = useState<string | null>(null);
 
   // Design variant (1–4) for testing different aesthetics
-  const [variant, setVariant] = useState<1 | 2 | 3 | 4>(1);
+  const [variant, setVariant] = useState<1 | 2 | 3 | 4 | 5>(1);
   const v = VARIANTS[variant];
 
   const showCaptureBanner = (msg: string) => {
