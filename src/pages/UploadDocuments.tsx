@@ -38,8 +38,20 @@ type VariantConfig = {
   vibe: string;       // short description shown in switcher
 };
 
-const VARIANTS: Record<1 | 2 | 3 | 4, VariantConfig> = {
+const VARIANTS: Record<1 | 2 | 3 | 4 | 5, VariantConfig> = {
   1: {
+    label: "AdvisorLink",
+    page: "bg-[hsl(var(--page-alt))]",
+    ink: "215_60%_12%",
+    accent: "192_90%_42%",
+    surface: "bg-white",
+    border: "border-[hsl(var(--ink))]/10",
+    radius: "rounded-xl",
+    btnRadius: "rounded-lg",
+    heading: "font-heading",
+    vibe: "Navy · cyan · product feel",
+  },
+  2: {
     label: "Private Bank",
     page: "bg-[hsl(var(--page-alt))]",
     ink: "215_60%_12%",
@@ -51,7 +63,7 @@ const VARIANTS: Record<1 | 2 | 3 | 4, VariantConfig> = {
     heading: "font-heading",
     vibe: "Ivory · navy · editorial",
   },
-  2: {
+  3: {
     label: "Soft Modern",
     page: "bg-[#f4f6fb]",
     ink: "222_47%_18%",
@@ -63,7 +75,7 @@ const VARIANTS: Record<1 | 2 | 3 | 4, VariantConfig> = {
     heading: "font-sans",
     vibe: "Rounded · airy · blue accent",
   },
-  3: {
+  4: {
     label: "Mono Lux",
     page: "bg-black",
     ink: "0_0%_100%",
@@ -75,7 +87,7 @@ const VARIANTS: Record<1 | 2 | 3 | 4, VariantConfig> = {
     heading: "font-heading",
     vibe: "Black · gold · brutalist",
   },
-  4: {
+  5: {
     label: "Warm Trust",
     page: "bg-[#faf6f1]",
     ink: "20_30%_18%",
@@ -141,7 +153,7 @@ export default function UploadDocuments() {
   const [captureBanner, setCaptureBanner] = useState<string | null>(null);
 
   // Design variant (1–4) for testing different aesthetics
-  const [variant, setVariant] = useState<1 | 2 | 3 | 4>(1);
+  const [variant, setVariant] = useState<1 | 2 | 3 | 4 | 5>(1);
   const v = VARIANTS[variant];
 
   const showCaptureBanner = (msg: string) => {
@@ -433,14 +445,14 @@ export default function UploadDocuments() {
         ["--ink" as never]: v.ink,
         ["--accent" as never]: v.accent,
         ["--page-alt" as never]:
-          variant === 3 ? "0 0% 8%" : variant === 2 ? "220 30% 96%" : variant === 4 ? "30 40% 94%" : "44 33% 95%",
+          variant === 4 ? "0 0% 8%" : variant === 3 ? "220 30% 96%" : variant === 5 ? "30 40% 94%" : variant === 2 ? "44 33% 95%" : "210 30% 97%",
       } as React.CSSProperties}
     >
       {/* Variant switcher (testing) */}
       <div className="border-b border-[hsl(var(--ink))]/10 bg-[hsl(var(--ink))]/[0.03]">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-2 px-5 py-2.5">
           <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--ink))]/60">Design:</span>
-          {([1, 2, 3, 4] as const).map((n) => (
+          {([1, 2, 3, 4, 5] as const).map((n) => (
             <button
               key={n}
               onClick={() => setVariant(n)}
@@ -460,9 +472,9 @@ export default function UploadDocuments() {
       {/* Top brand bar — AdvisorLink → Pure Private Wealth */}
       <header className={`border-b border-[hsl(var(--ink))]/10 ${v.surface}`}>
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-4">
-          <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className={`h-9 w-auto ${variant === 3 ? "invert" : ""}`} />
+          <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className={`h-9 w-auto ${variant === 4 ? "invert" : ""}`} />
           <ArrowRight className="h-4 w-4 shrink-0 text-[hsl(var(--ink))]/40" />
-          <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className={`h-14 w-auto sm:h-16 ${variant === 3 ? "invert" : ""}`} />
+          <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className={`h-14 w-auto sm:h-16 ${variant === 4 ? "invert" : ""}`} />
 
         </div>
       </header>
