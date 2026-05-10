@@ -894,8 +894,7 @@ export default function UploadDocuments() {
                   className="mt-0.5 border-[hsl(var(--ink))]/30 data-[state=checked]:border-[hsl(var(--ink))] data-[state=checked]:bg-[hsl(var(--ink))] data-[state=checked]:text-white"
                 />
                 <span className="text-[12px] leading-relaxed text-[hsl(var(--ink))]/75">
-                  I confirm these documents are mine and consent to Pure Private Wealth collecting,
-                  storing and using them, and to <span className="font-semibold text-[hsl(var(--ink))]">being contacted by Pure Private Wealth</span>, in accordance with the <span className="font-semibold text-[hsl(var(--ink))]">Australian Privacy Act 1988</span>.
+                  I confirm these documents are mine and consent to Pure Private Wealth collecting and storing them, and to <span className="font-semibold text-[hsl(var(--ink))]">being contacted by Pure Private Wealth</span>, in accordance with the <span className="font-semibold text-[hsl(var(--ink))]">Australian Privacy Act 1988</span>.
                 </span>
               </label>
 
@@ -1122,8 +1121,8 @@ function FullscreenCamera({
 
 
         {/* Helper text — above the frame for clear readability */}
-        <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-center px-6">
-          <p className="max-w-[92%] rounded-lg bg-black/70 px-4 py-2 text-center text-[13px] font-medium text-white shadow-md backdrop-blur">
+        <div className="pointer-events-none absolute inset-x-0 top-10 z-20 flex justify-center px-6">
+          <p className="max-w-[92%] rounded-lg bg-black/75 px-5 py-2.5 text-center text-[15px] font-semibold text-white shadow-lg backdrop-blur">
             {helper}
           </p>
         </div>
