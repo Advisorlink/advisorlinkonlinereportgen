@@ -445,7 +445,7 @@ export default function UploadDocuments() {
         ["--ink" as never]: v.ink,
         ["--accent" as never]: v.accent,
         ["--page-alt" as never]:
-          variant === 3 ? "0 0% 8%" : variant === 2 ? "220 30% 96%" : variant === 4 ? "30 40% 94%" : "44 33% 95%",
+          variant === 4 ? "0 0% 8%" : variant === 3 ? "220 30% 96%" : variant === 5 ? "30 40% 94%" : variant === 2 ? "44 33% 95%" : "210 30% 97%",
       } as React.CSSProperties}
     >
       {/* Variant switcher (testing) */}
