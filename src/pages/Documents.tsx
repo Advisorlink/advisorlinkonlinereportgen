@@ -358,6 +358,13 @@ export default function Documents() {
           )}
         </DialogContent>
       </Dialog>
+
+      <GoogleDriveFolderPicker
+        open={!!drivePicker}
+        onOpenChange={(o) => !o && setDrivePicker(null)}
+        docIds={drivePicker?.docIds ?? []}
+        fileCount={drivePicker?.docIds.length ?? 0}
+      />
     </CRMLayout>
   );
 }
