@@ -788,6 +788,7 @@ export default function UploadDocuments() {
           overlayRef={overlayRef}
           flash={flash}
           busy={busy}
+          banner={captureBanner}
           capturedCount={
             stage === "license_camera"
               ? captured.filter((c) => c.docType === "license").length
