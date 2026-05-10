@@ -426,13 +426,44 @@ export default function UploadDocuments() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--page-alt))] text-[hsl(215_32%_14%)]">
+    <div
+      className={`min-h-screen ${v.page} text-[hsl(var(--ink))]`}
+      style={{
+        // CSS variables consumed by all interior `[hsl(var(--ink))]` / `[hsl(var(--page-alt))]` classes.
+        ["--ink" as never]: v.ink,
+        ["--accent" as never]: v.accent,
+        ["--page-alt" as never]:
+          variant === 3 ? "0 0% 8%" : variant === 2 ? "220 30% 96%" : variant === 4 ? "30 40% 94%" : "44 33% 95%",
+      } as React.CSSProperties}
+    >
+      {/* Variant switcher (testing) */}
+      <div className="border-b border-[hsl(var(--ink))]/10 bg-[hsl(var(--ink))]/[0.03]">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-2 px-5 py-2.5">
+          <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--ink))]/60">Design:</span>
+          {([1, 2, 3, 4] as const).map((n) => (
+            <button
+              key={n}
+              onClick={() => setVariant(n)}
+              className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${
+                variant === n
+                  ? "bg-[hsl(var(--ink))] text-[hsl(var(--page-alt))]"
+                  : "bg-white text-[hsl(var(--ink))]/70 ring-1 ring-[hsl(var(--ink))]/15 hover:text-[hsl(var(--ink))]"
+              }`}
+            >
+              {n}. {VARIANTS[n].label}
+            </button>
+          ))}
+          <span className="ml-2 hidden text-[10px] text-[hsl(var(--ink))]/50 sm:inline">{v.vibe}</span>
+        </div>
+      </div>
+
       {/* Top brand bar — AdvisorLink → Pure Private Wealth */}
-      <header className="border-b border-[hsl(var(--ink))]/10 bg-white">
+      <header className={`border-b border-[hsl(var(--ink))]/10 ${v.surface}`}>
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-4">
-          <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-9 w-auto" />
+          <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className={`h-9 w-auto ${variant === 3 ? "invert" : ""}`} />
           <ArrowRight className="h-4 w-4 shrink-0 text-[hsl(var(--ink))]/40" />
-          <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className="h-11 w-auto sm:h-14" />
+          <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className={`h-14 w-auto sm:h-16 ${variant === 3 ? "invert" : ""}`} />
+
         </div>
       </header>
 
