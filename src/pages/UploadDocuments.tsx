@@ -916,7 +916,7 @@ export default function UploadDocuments() {
                 />
                 <span className="text-[12px] leading-relaxed text-[hsl(var(--ink))]/75">
                   I confirm these documents are mine and consent to Pure Private Wealth collecting,
-                  storing and using them in accordance with the <span className="font-semibold text-[hsl(var(--ink))]">Australian Privacy Act 1988</span>.
+                  storing and using them, and to <span className="font-semibold text-[hsl(var(--ink))]">being contacted by Pure Private Wealth</span>, in accordance with the <span className="font-semibold text-[hsl(var(--ink))]">Australian Privacy Act 1988</span>.
                 </span>
               </label>
 
