@@ -23,6 +23,72 @@ const REPRESENTATIVES = [
   "Olivia Bennett",
 ];
 
+// Four design variants for the user to A/B test the look & feel.
+// Only colour, surface, font feel and button radius change — the flow is identical.
+type VariantConfig = {
+  label: string;
+  page: string;       // page background
+  ink: string;        // primary ink colour (HSL inside arbitrary value)
+  accent: string;     // accent colour (HSL)
+  surface: string;    // card/surface background
+  border: string;     // standard border colour
+  radius: string;     // tailwind radius class for cards
+  btnRadius: string;  // tailwind radius for buttons
+  heading: string;    // heading font class
+  vibe: string;       // short description shown in switcher
+};
+
+const VARIANTS: Record<1 | 2 | 3 | 4, VariantConfig> = {
+  1: {
+    label: "Private Bank",
+    page: "bg-[hsl(var(--page-alt))]",
+    ink: "215_60%_12%",
+    accent: "215_60%_12%",
+    surface: "bg-white",
+    border: "border-[hsl(var(--ink))]/10",
+    radius: "rounded-md",
+    btnRadius: "rounded-sm",
+    heading: "font-heading",
+    vibe: "Ivory · navy · editorial",
+  },
+  2: {
+    label: "Soft Modern",
+    page: "bg-[#f4f6fb]",
+    ink: "222_47%_18%",
+    accent: "221_83%_53%",
+    surface: "bg-white",
+    border: "border-[hsl(222_47%_18%)]/8",
+    radius: "rounded-2xl",
+    btnRadius: "rounded-xl",
+    heading: "font-sans",
+    vibe: "Rounded · airy · blue accent",
+  },
+  3: {
+    label: "Mono Lux",
+    page: "bg-black",
+    ink: "0_0%_100%",
+    accent: "45_85%_60%",
+    surface: "bg-[#0e0e0e]",
+    border: "border-white/10",
+    radius: "rounded-none",
+    btnRadius: "rounded-none",
+    heading: "font-heading",
+    vibe: "Black · gold · brutalist",
+  },
+  4: {
+    label: "Warm Trust",
+    page: "bg-[#faf6f1]",
+    ink: "20_30%_18%",
+    accent: "16_72%_46%",
+    surface: "bg-white",
+    border: "border-[hsl(20_30%_18%)]/10",
+    radius: "rounded-3xl",
+    btnRadius: "rounded-full",
+    heading: "font-heading",
+    vibe: "Warm · terracotta · friendly",
+  },
+};
+
 const detailsSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your first name").max(100),
   email: z.string().trim().email("Please enter a valid email").max(255),
@@ -72,6 +138,16 @@ export default function UploadDocuments() {
   const [licenseSide, setLicenseSide] = useState<"front" | "back">("front");
   const [statementCount, setStatementCount] = useState(0);
   const [flash, setFlash] = useState(false);
+  const [captureBanner, setCaptureBanner] = useState<string | null>(null);
+
+  // Design variant (1–4) for testing different aesthetics
+  const [variant, setVariant] = useState<1 | 2 | 3 | 4>(1);
+  const v = VARIANTS[variant];
+
+  const showCaptureBanner = (msg: string) => {
+    setCaptureBanner(msg);
+    setTimeout(() => setCaptureBanner(null), 1400);
+  };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputContextRef = useRef<{ docType: DocType; label: string; useCamera: boolean } | null>(null);
@@ -258,10 +334,10 @@ export default function UploadDocuments() {
     addCaptured(item);
     if (licenseSide === "front") {
       setLicenseSide("back");
-      toast.success("Front captured");
+      showCaptureBanner("Front saved — now capture the back");
       setBusy(false);
     } else {
-      toast.success("Back captured");
+      showCaptureBanner("Back saved");
       setLicenseSide("front");
       stopCamera();
       setStage("review");
@@ -281,7 +357,7 @@ export default function UploadDocuments() {
     triggerFlash();
     addCaptured(item);
     setStatementCount((n) => n + 1);
-    toast.success(`Page ${statementCount + 1} saved`);
+    showCaptureBanner(`Page ${statementCount + 1} saved`);
     setBusy(false);
   };
 
@@ -350,19 +426,50 @@ export default function UploadDocuments() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f5f0] text-[hsl(215_32%_14%)]">
+    <div
+      className={`min-h-screen ${v.page} text-[hsl(var(--ink))]`}
+      style={{
+        // CSS variables consumed by all interior `[hsl(var(--ink))]` / `[hsl(var(--page-alt))]` classes.
+        ["--ink" as never]: v.ink,
+        ["--accent" as never]: v.accent,
+        ["--page-alt" as never]:
+          variant === 3 ? "0 0% 8%" : variant === 2 ? "220 30% 96%" : variant === 4 ? "30 40% 94%" : "44 33% 95%",
+      } as React.CSSProperties}
+    >
+      {/* Variant switcher (testing) */}
+      <div className="border-b border-[hsl(var(--ink))]/10 bg-[hsl(var(--ink))]/[0.03]">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-2 px-5 py-2.5">
+          <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--ink))]/60">Design:</span>
+          {([1, 2, 3, 4] as const).map((n) => (
+            <button
+              key={n}
+              onClick={() => setVariant(n)}
+              className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${
+                variant === n
+                  ? "bg-[hsl(var(--ink))] text-[hsl(var(--page-alt))]"
+                  : "bg-white text-[hsl(var(--ink))]/70 ring-1 ring-[hsl(var(--ink))]/15 hover:text-[hsl(var(--ink))]"
+              }`}
+            >
+              {n}. {VARIANTS[n].label}
+            </button>
+          ))}
+          <span className="ml-2 hidden text-[10px] text-[hsl(var(--ink))]/50 sm:inline">{v.vibe}</span>
+        </div>
+      </div>
+
       {/* Top brand bar — AdvisorLink → Pure Private Wealth */}
-      <header className="border-b border-[hsl(215_60%_12%)]/10 bg-white">
+      <header className={`border-b border-[hsl(var(--ink))]/10 ${v.surface}`}>
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-4">
-          <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-9 w-auto" />
-          <ArrowRight className="h-4 w-4 shrink-0 text-[hsl(215_60%_12%)]/40" />
-          <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className="h-11 w-auto sm:h-14" />
+          <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className={`h-9 w-auto ${variant === 3 ? "invert" : ""}`} />
+          <ArrowRight className="h-4 w-4 shrink-0 text-[hsl(var(--ink))]/40" />
+          <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className={`h-14 w-auto sm:h-16 ${variant === 3 ? "invert" : ""}`} />
+
         </div>
       </header>
 
       <main className="mx-auto max-w-2xl px-5 py-8 sm:py-12">
         {/* Progress strip */}
-        <div className="mb-6 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-[hsl(215_60%_12%)]/55">
+        <div className="mb-6 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-[hsl(var(--ink))]/55">
           <Lock className="h-3 w-3" /> Secure document upload for Pure Private Wealth
         </div>
 
@@ -370,10 +477,10 @@ export default function UploadDocuments() {
         {stage === "choose" && (
           <section className="page-enter">
             <div className="mb-8 text-center">
-              <h1 className="font-heading text-[28px] font-bold leading-tight tracking-tight text-[hsl(215_60%_12%)] sm:text-[34px]">
+              <h1 className="font-heading text-[28px] font-bold leading-tight tracking-tight text-[hsl(var(--ink))] sm:text-[34px]">
                 What document would you like to upload?
               </h1>
-              <p className="mx-auto mt-2 max-w-md text-[14px] text-[hsl(215_60%_12%)]/65">
+              <p className="mx-auto mt-2 max-w-md text-[14px] text-[hsl(var(--ink))]/65">
                 Choose the type of document you'd like to send to your adviser.
               </p>
             </div>
@@ -388,16 +495,16 @@ export default function UploadDocuments() {
                       else if (opt.type === "statement") setStage("statement_method");
                       else setStage("screenshot_pick");
                     }}
-                    className="group flex items-center gap-4 rounded-md border border-[hsl(215_60%_12%)]/12 bg-white px-5 py-5 text-left transition-all hover:border-[hsl(215_60%_12%)] hover:shadow-[0_8px_24px_-12px_rgba(15,23,42,0.18)]"
+                    className="group flex items-center gap-4 rounded-md border border-[hsl(var(--ink))]/12 bg-white px-5 py-5 text-left transition-all hover:border-[hsl(var(--ink))] hover:shadow-[0_8px_24px_-12px_rgba(15,23,42,0.18)]"
                   >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm border border-[hsl(215_60%_12%)]/15 bg-[hsl(215_60%_12%)]/[0.03] text-[hsl(215_60%_12%)] group-hover:bg-[hsl(215_60%_12%)] group-hover:text-white">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm border border-[hsl(var(--ink))]/15 bg-[hsl(var(--ink))]/[0.03] text-[hsl(var(--ink))] group-hover:bg-[hsl(var(--ink))] group-hover:text-white">
                       <Icon className="h-6 w-6" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[15px] font-semibold text-[hsl(215_60%_12%)]">{opt.label}</p>
-                      <p className="mt-0.5 text-[12px] text-[hsl(215_60%_12%)]/60">{opt.description}</p>
+                      <p className="text-[15px] font-semibold text-[hsl(var(--ink))]">{opt.label}</p>
+                      <p className="mt-0.5 text-[12px] text-[hsl(var(--ink))]/60">{opt.description}</p>
                     </div>
-                    <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(215_60%_12%)]/30 transition-transform group-hover:translate-x-0.5 group-hover:text-[hsl(215_60%_12%)]" />
+                    <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/30 transition-transform group-hover:translate-x-0.5 group-hover:text-[hsl(var(--ink))]" />
                   </button>
                 );
               })}
@@ -405,7 +512,7 @@ export default function UploadDocuments() {
             {captured.length > 0 && (
               <button
                 onClick={() => setStage("review")}
-                className="mt-6 w-full rounded-sm border border-[hsl(215_60%_12%)]/15 bg-white py-3 text-[12px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)] hover:bg-[hsl(215_60%_12%)] hover:text-white"
+                className="mt-6 w-full rounded-sm border border-[hsl(var(--ink))]/15 bg-white py-3 text-[12px] font-semibold uppercase tracking-wider text-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))] hover:text-white"
               >
                 View {captured.length} uploaded · Continue →
               </button>
@@ -426,26 +533,26 @@ export default function UploadDocuments() {
 
         {/* ============ LICENSE — UPLOAD ============ */}
         {stage === "license_upload" && (
-          <section className="page-enter rounded-md border border-[hsl(215_60%_12%)]/10 bg-white p-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[hsl(215_60%_12%)]/55">
+          <section className="page-enter rounded-md border border-[hsl(var(--ink))]/10 bg-white p-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[hsl(var(--ink))]/55">
               {licenseSide === "front" ? "Step 1 of 2" : "Step 2 of 2"}
             </p>
-            <h2 className="mt-1 font-heading text-xl font-bold text-[hsl(215_60%_12%)]">
+            <h2 className="mt-1 font-heading text-xl font-bold text-[hsl(var(--ink))]">
               Upload {licenseSide} of licence
             </h2>
-            <p className="mt-1 text-[13px] text-[hsl(215_60%_12%)]/65">
+            <p className="mt-1 text-[13px] text-[hsl(var(--ink))]/65">
               Choose a clear photo from your device. Make sure all details are readable.
             </p>
             <Button
               onClick={() => triggerFilePick("license", licenseSide === "front" ? "Licence — Front" : "Licence — Back", false)}
               size="lg"
-              className="mt-5 h-12 w-full rounded-sm bg-[hsl(215_60%_12%)] font-semibold text-white hover:bg-[hsl(215_60%_18%)]"
+              className="mt-5 h-12 w-full rounded-sm bg-[hsl(var(--ink))] font-semibold text-white hover:bg-[hsl(215_60%_18%)]"
             >
               <Upload className="mr-2 h-4 w-4" /> Choose photo
             </Button>
             <button
               onClick={() => { setLicenseSide("front"); setStage("license_method"); }}
-              className="mt-3 w-full text-center text-[12px] text-[hsl(215_60%_12%)]/55 hover:text-[hsl(215_60%_12%)]"
+              className="mt-3 w-full text-center text-[12px] text-[hsl(var(--ink))]/55 hover:text-[hsl(var(--ink))]"
             >
               ← Back
             </button>
@@ -466,21 +573,21 @@ export default function UploadDocuments() {
 
         {/* ============ SCREENSHOT ============ */}
         {stage === "screenshot_pick" && (
-          <section className="page-enter rounded-md border border-[hsl(215_60%_12%)]/10 bg-white p-6">
-            <h2 className="font-heading text-xl font-bold text-[hsl(215_60%_12%)]">Upload a screenshot</h2>
-            <p className="mt-1 text-[13px] text-[hsl(215_60%_12%)]/65">
+          <section className="page-enter rounded-md border border-[hsl(var(--ink))]/10 bg-white p-6">
+            <h2 className="font-heading text-xl font-bold text-[hsl(var(--ink))]">Upload a screenshot</h2>
+            <p className="mt-1 text-[13px] text-[hsl(var(--ink))]/65">
               Choose an image from your device.
             </p>
             <Button
               onClick={() => triggerFilePick("screenshot", "Screenshot", false)}
               size="lg"
-              className="mt-5 h-12 w-full rounded-sm bg-[hsl(215_60%_12%)] font-semibold text-white hover:bg-[hsl(215_60%_18%)]"
+              className="mt-5 h-12 w-full rounded-sm bg-[hsl(var(--ink))] font-semibold text-white hover:bg-[hsl(215_60%_18%)]"
             >
               <ImageIcon className="mr-2 h-4 w-4" /> Choose screenshot
             </Button>
             <button
               onClick={() => setStage("choose")}
-              className="mt-3 w-full text-center text-[12px] text-[hsl(215_60%_12%)]/55 hover:text-[hsl(215_60%_12%)]"
+              className="mt-3 w-full text-center text-[12px] text-[hsl(var(--ink))]/55 hover:text-[hsl(var(--ink))]"
             >
               ← Back
             </button>
@@ -490,31 +597,31 @@ export default function UploadDocuments() {
         {/* ============ REVIEW ============ */}
         {stage === "review" && (
           <section className="page-enter space-y-4">
-            <div className="rounded-md border border-[hsl(215_60%_12%)]/10 bg-white p-6">
-              <h2 className="font-heading text-xl font-bold text-[hsl(215_60%_12%)]">Your documents</h2>
-              <p className="mt-1 text-[13px] text-[hsl(215_60%_12%)]/65">
+            <div className="rounded-md border border-[hsl(var(--ink))]/10 bg-white p-6">
+              <h2 className="font-heading text-xl font-bold text-[hsl(var(--ink))]">Your documents</h2>
+              <p className="mt-1 text-[13px] text-[hsl(var(--ink))]/65">
                 {captured.length} item{captured.length === 1 ? "" : "s"} ready to send. Add more or continue.
               </p>
               <div className="mt-4 space-y-2">
                 {captured.map((c) => (
-                  <div key={c.id} className="flex items-center gap-3 rounded-sm border border-[hsl(215_60%_12%)]/10 bg-[#f7f5f0] p-2">
+                  <div key={c.id} className="flex items-center gap-3 rounded-sm border border-[hsl(var(--ink))]/10 bg-[hsl(var(--page-alt))] p-2">
                     {c.preview ? (
-                      <img src={c.preview} alt="" className="h-12 w-16 rounded-sm object-cover ring-1 ring-[hsl(215_60%_12%)]/10" />
+                      <img src={c.preview} alt="" className="h-12 w-16 rounded-sm object-cover ring-1 ring-[hsl(var(--ink))]/10" />
                     ) : (
                       <div className="flex h-12 w-16 items-center justify-center rounded-sm bg-white">
-                        <FileText className="h-5 w-5 text-[hsl(215_60%_12%)]" />
+                        <FileText className="h-5 w-5 text-[hsl(var(--ink))]" />
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-semibold text-[hsl(215_60%_12%)]">{c.label}</p>
-                      <p className="text-[11px] text-[hsl(215_60%_12%)]/55">
+                      <p className="truncate text-[13px] font-semibold text-[hsl(var(--ink))]">{c.label}</p>
+                      <p className="text-[11px] text-[hsl(var(--ink))]/55">
                         {(c.file.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
                     <CheckCircle2 className="h-4 w-4 text-emerald-700" />
                     <button
                       onClick={() => removeCaptured(c.id)}
-                      className="rounded-sm p-1 text-[hsl(215_60%_12%)]/40 hover:bg-[hsl(215_60%_12%)]/[0.06] hover:text-[hsl(215_60%_12%)]"
+                      className="rounded-sm p-1 text-[hsl(var(--ink))]/40 hover:bg-[hsl(var(--ink))]/[0.06] hover:text-[hsl(var(--ink))]"
                       aria-label="Remove"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -524,7 +631,7 @@ export default function UploadDocuments() {
               </div>
               <button
                 onClick={() => setStage("choose")}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-sm border border-dashed border-[hsl(215_60%_12%)]/25 bg-white py-3 text-[13px] font-semibold text-[hsl(215_60%_12%)] hover:border-[hsl(215_60%_12%)] hover:bg-[hsl(215_60%_12%)]/[0.03]"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-sm border border-dashed border-[hsl(var(--ink))]/25 bg-white py-3 text-[13px] font-semibold text-[hsl(var(--ink))] hover:border-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))]/[0.03]"
               >
                 <Plus className="h-4 w-4" /> Add another document
               </button>
@@ -533,7 +640,7 @@ export default function UploadDocuments() {
               onClick={() => setStage("details")}
               disabled={captured.length === 0}
               size="lg"
-              className="h-12 w-full rounded-sm bg-[hsl(215_60%_12%)] font-semibold text-white hover:bg-[hsl(215_60%_18%)]"
+              className="h-12 w-full rounded-sm bg-[hsl(var(--ink))] font-semibold text-white hover:bg-[hsl(215_60%_18%)]"
             >
               Continue <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
@@ -542,8 +649,8 @@ export default function UploadDocuments() {
 
         {/* ============ DETAILS ============ */}
         {stage === "details" && (
-          <section className="page-enter overflow-hidden rounded-md border border-[hsl(215_60%_12%)]/10 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.12)]">
-            <div className="border-b border-[hsl(215_60%_12%)]/10 bg-[hsl(215_60%_12%)] px-7 py-5 text-white">
+          <section className="page-enter overflow-hidden rounded-md border border-[hsl(var(--ink))]/10 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.12)]">
+            <div className="border-b border-[hsl(var(--ink))]/10 bg-[hsl(var(--ink))] px-7 py-5 text-white">
               <h2 className="font-heading text-lg font-semibold">Almost done</h2>
               <p className="mt-0.5 text-[12px] text-white/65">
                 Tell us who you are so we can send these to the right adviser.
@@ -551,35 +658,35 @@ export default function UploadDocuments() {
             </div>
             <div className="space-y-5 px-7 py-7">
               <div>
-                <Label htmlFor="fullName" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">First name</Label>
+                <Label htmlFor="fullName" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--ink))]/70">First name</Label>
                 <Input
                   id="fullName"
                   value={client.fullName}
                   onChange={(e) => setClient({ ...client, fullName: e.target.value })}
                   placeholder="Your first name"
-                  className="mt-1.5 h-11 rounded-sm border-[hsl(215_60%_12%)]/15"
+                  className="mt-1.5 h-11 rounded-sm border-[hsl(var(--ink))]/15"
                 />
                 {errors.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName}</p>}
               </div>
               <div>
-                <Label htmlFor="email" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">Email address</Label>
+                <Label htmlFor="email" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--ink))]/70">Email address</Label>
                 <Input
                   id="email"
                   type="email"
                   value={client.email}
                   onChange={(e) => setClient({ ...client, email: e.target.value })}
                   placeholder="you@example.com"
-                  className="mt-1.5 h-11 rounded-sm border-[hsl(215_60%_12%)]/15"
+                  className="mt-1.5 h-11 rounded-sm border-[hsl(var(--ink))]/15"
                 />
                 {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
               </div>
               <div>
-                <Label htmlFor="representative" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">Your consultant</Label>
+                <Label htmlFor="representative" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--ink))]/70">Your consultant</Label>
                 <select
                   id="representative"
                   value={client.representative}
                   onChange={(e) => setClient({ ...client, representative: e.target.value })}
-                  className="mt-1.5 flex h-11 w-full rounded-sm border border-[hsl(215_60%_12%)]/15 bg-white px-3 py-2 text-sm text-[hsl(215_60%_12%)] focus-visible:border-[hsl(215_60%_12%)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[hsl(215_60%_12%)]"
+                  className="mt-1.5 flex h-11 w-full rounded-sm border border-[hsl(var(--ink))]/15 bg-white px-3 py-2 text-sm text-[hsl(var(--ink))] focus-visible:border-[hsl(var(--ink))] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[hsl(var(--ink))]"
                 >
                   <option value="" disabled>Select your consultant</option>
                   {REPRESENTATIVES.map((r) => (
@@ -593,20 +700,20 @@ export default function UploadDocuments() {
                 <Checkbox
                   checked={consent}
                   onCheckedChange={(v) => setConsent(v === true)}
-                  className="mt-0.5 border-[hsl(215_60%_12%)]/30 data-[state=checked]:border-[hsl(215_60%_12%)] data-[state=checked]:bg-[hsl(215_60%_12%)] data-[state=checked]:text-white"
+                  className="mt-0.5 border-[hsl(var(--ink))]/30 data-[state=checked]:border-[hsl(var(--ink))] data-[state=checked]:bg-[hsl(var(--ink))] data-[state=checked]:text-white"
                 />
-                <span className="text-[12px] leading-relaxed text-[hsl(215_60%_12%)]/75">
+                <span className="text-[12px] leading-relaxed text-[hsl(var(--ink))]/75">
                   I confirm these documents are mine and consent to Pure Private Wealth collecting,
-                  storing and using them in accordance with the <span className="font-semibold text-[hsl(215_60%_12%)]">Australian Privacy Act 1988</span>.
+                  storing and using them in accordance with the <span className="font-semibold text-[hsl(var(--ink))]">Australian Privacy Act 1988</span>.
                 </span>
               </label>
 
               {submitting && (
-                <div className="rounded-sm border border-[hsl(215_60%_12%)]/15 bg-[#f7f5f0] p-3">
-                  <div className="mb-2 flex items-center gap-2 text-[13px] text-[hsl(215_60%_12%)]">
+                <div className="rounded-sm border border-[hsl(var(--ink))]/15 bg-[hsl(var(--page-alt))] p-3">
+                  <div className="mb-2 flex items-center gap-2 text-[13px] text-[hsl(var(--ink))]">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>Securely uploading…</span>
-                    <span className="ml-auto text-xs text-[hsl(215_60%_12%)]/60">{progress}%</span>
+                    <span className="ml-auto text-xs text-[hsl(var(--ink))]/60">{progress}%</span>
                   </div>
                   <Progress value={progress} />
                 </div>
@@ -617,7 +724,7 @@ export default function UploadDocuments() {
                   variant="outline"
                   onClick={() => setStage("review")}
                   disabled={submitting}
-                  className="rounded-sm border-[hsl(215_60%_12%)]/20 bg-white"
+                  className="rounded-sm border-[hsl(var(--ink))]/20 bg-white"
                 >
                   <ArrowLeft className="mr-1 h-4 w-4" /> Back
                 </Button>
@@ -625,7 +732,7 @@ export default function UploadDocuments() {
                   onClick={handleSubmit}
                   disabled={submitting}
                   size="lg"
-                  className="h-12 flex-1 rounded-sm bg-[hsl(215_60%_12%)] font-semibold tracking-wide text-white hover:bg-[hsl(215_60%_18%)]"
+                  className="h-12 flex-1 rounded-sm bg-[hsl(var(--ink))] font-semibold tracking-wide text-white hover:bg-[hsl(215_60%_18%)]"
                 >
                   {submitting ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…</>
@@ -640,36 +747,30 @@ export default function UploadDocuments() {
 
         {/* ============ DONE ============ */}
         {stage === "done" && (
-          <section className="page-enter overflow-hidden rounded-md border border-[hsl(215_60%_12%)]/10 bg-white text-center shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.12)]">
-            <div className="border-b border-[hsl(215_60%_12%)]/10 bg-[hsl(215_60%_12%)] px-7 py-8 text-white">
-              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/30 bg-white/10">
-                <CheckCircle2 className="h-7 w-7 text-white" strokeWidth={2.5} />
+          <section className={`page-enter overflow-hidden ${v.radius} border ${v.border} ${v.surface} text-center shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.12)]`}>
+            <div className={`border-b ${v.border} bg-[hsl(var(--ink))] px-7 py-10 text-[hsl(var(--page-alt))]`}>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-current/30 bg-current/10">
+                <CheckCircle2 className="h-8 w-8" strokeWidth={2.5} />
               </div>
-              <h2 className="font-heading text-2xl font-bold">Documents received</h2>
-              <p className="mx-auto mt-2 max-w-md text-[13px] text-white/70">
-                Thank you{client.fullName ? `, ${client.fullName.split(" ")[0]}` : ""}. Your documents have been encrypted
-                and delivered to {client.representative || "your adviser"} at Pure Private Wealth.
+              <h2 className={`${v.heading} text-2xl font-bold`}>
+                Documents received{client.fullName ? `, ${client.fullName.split(" ")[0]}` : ""}
+              </h2>
+              <p className="mx-auto mt-3 max-w-md text-[13px] opacity-80">
+                Your documents have been encrypted and delivered to Pure Private Wealth.
               </p>
-            </div>
-            <div className="px-7 py-6 text-left">
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[hsl(215_60%_12%)]/70">What happens next</p>
-              <ul className="space-y-2 text-[13px] text-[hsl(215_60%_12%)]/75">
-                <li className="flex gap-2"><span className="text-[hsl(215_60%_12%)]">›</span> Your adviser is notified immediately</li>
-                <li className="flex gap-2"><span className="text-[hsl(215_60%_12%)]">›</span> Documents are reviewed within 1 business day</li>
-                <li className="flex gap-2"><span className="text-[hsl(215_60%_12%)]">›</span> You'll receive a confirmation email at {client.email}</li>
-              </ul>
             </div>
           </section>
         )}
 
+
         {/* Trust seal footer */}
-        <footer className="mt-10 border-t border-[hsl(215_60%_12%)]/10 pt-6">
-          <div className="mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(215_60%_12%)]/55">
+        <footer className="mt-10 border-t border-[hsl(var(--ink))]/10 pt-6">
+          <div className="mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--ink))]/55">
             <span className="flex items-center gap-1.5"><Lock className="h-3 w-3" /> TLS 1.3 Encrypted</span>
             <span className="flex items-center gap-1.5"><Shield className="h-3 w-3" /> AES-256 At Rest</span>
             <span className="flex items-center gap-1.5"><FileCheck2 className="h-3 w-3" /> Privacy Act 1988</span>
           </div>
-          <p className="text-center text-[11px] text-[hsl(215_60%_12%)]/45">
+          <p className="text-center text-[11px] text-[hsl(var(--ink))]/45">
             © {new Date().getFullYear()} Pure Private Wealth · Powered by Advisor Link Online
           </p>
         </footer>
@@ -687,6 +788,7 @@ export default function UploadDocuments() {
           overlayRef={overlayRef}
           flash={flash}
           busy={busy}
+          banner={captureBanner}
           capturedCount={
             stage === "license_camera"
               ? captured.filter((c) => c.docType === "license").length
@@ -731,30 +833,30 @@ function MethodChoice({
   uploadLabel?: string;
 }) {
   return (
-    <section className="page-enter rounded-md border border-[hsl(215_60%_12%)]/10 bg-white p-6">
-      <h2 className="font-heading text-xl font-bold text-[hsl(215_60%_12%)]">{title}</h2>
-      <p className="mt-1 text-[13px] text-[hsl(215_60%_12%)]/65">{subtitle}</p>
+    <section className="page-enter rounded-md border border-[hsl(var(--ink))]/10 bg-white p-6">
+      <h2 className="font-heading text-xl font-bold text-[hsl(var(--ink))]">{title}</h2>
+      <p className="mt-1 text-[13px] text-[hsl(var(--ink))]/65">{subtitle}</p>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <button
           onClick={onCamera}
-          className="group flex flex-col items-center gap-2 rounded-md border border-[hsl(215_60%_12%)]/15 bg-white p-6 text-center hover:border-[hsl(215_60%_12%)] hover:bg-[hsl(215_60%_12%)] hover:text-white"
+          className="group flex flex-col items-center gap-2 rounded-md border border-[hsl(var(--ink))]/15 bg-white p-6 text-center hover:border-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))] hover:text-white"
         >
-          <Camera className="h-7 w-7 text-[hsl(215_60%_12%)] group-hover:text-white" />
-          <p className="text-[14px] font-semibold text-[hsl(215_60%_12%)] group-hover:text-white">Take photo</p>
-          <p className="text-[11px] text-[hsl(215_60%_12%)]/55 group-hover:text-white/75">Use your camera</p>
+          <Camera className="h-7 w-7 text-[hsl(var(--ink))] group-hover:text-white" />
+          <p className="text-[14px] font-semibold text-[hsl(var(--ink))] group-hover:text-white">Take photo</p>
+          <p className="text-[11px] text-[hsl(var(--ink))]/55 group-hover:text-white/75">Use your camera</p>
         </button>
         <button
           onClick={onUpload}
-          className="group flex flex-col items-center gap-2 rounded-md border border-[hsl(215_60%_12%)]/15 bg-white p-6 text-center hover:border-[hsl(215_60%_12%)] hover:bg-[hsl(215_60%_12%)] hover:text-white"
+          className="group flex flex-col items-center gap-2 rounded-md border border-[hsl(var(--ink))]/15 bg-white p-6 text-center hover:border-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))] hover:text-white"
         >
-          <Upload className="h-7 w-7 text-[hsl(215_60%_12%)] group-hover:text-white" />
-          <p className="text-[14px] font-semibold text-[hsl(215_60%_12%)] group-hover:text-white">{uploadLabel || "Upload photo"}</p>
-          <p className="text-[11px] text-[hsl(215_60%_12%)]/55 group-hover:text-white/75">From your device</p>
+          <Upload className="h-7 w-7 text-[hsl(var(--ink))] group-hover:text-white" />
+          <p className="text-[14px] font-semibold text-[hsl(var(--ink))] group-hover:text-white">{uploadLabel || "Upload photo"}</p>
+          <p className="text-[11px] text-[hsl(var(--ink))]/55 group-hover:text-white/75">From your device</p>
         </button>
       </div>
       <button
         onClick={onBack}
-        className="mt-5 w-full text-center text-[12px] text-[hsl(215_60%_12%)]/55 hover:text-[hsl(215_60%_12%)]"
+        className="mt-5 w-full text-center text-[12px] text-[hsl(var(--ink))]/55 hover:text-[hsl(var(--ink))]"
       >
         ← Back
       </button>
@@ -763,7 +865,7 @@ function MethodChoice({
 }
 
 function FullscreenCamera({
-  mode, licenseSide, ready, videoRef, overlayRef, flash, busy, capturedCount,
+  mode, licenseSide, ready, videoRef, overlayRef, flash, busy, capturedCount, banner,
   onCapture, onFinish, onCancel,
 }: {
   mode: "license" | "statement";
@@ -774,6 +876,7 @@ function FullscreenCamera({
   flash: boolean;
   busy: boolean;
   capturedCount: number;
+  banner: string | null;
   onCapture: () => void;
   onFinish: () => void;
   onCancel: () => void;
@@ -815,6 +918,17 @@ function FullscreenCamera({
       {/* Camera view */}
       <div className="relative flex-1 overflow-hidden bg-black">
         <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />
+
+        {/* Capture confirmation banner — slides from TOP so it never covers the shutter */}
+        {banner && (
+          <div className="pointer-events-none absolute inset-x-0 top-3 z-30 flex justify-center px-4">
+            <div className="flex items-center gap-2 rounded-full bg-emerald-500/95 px-4 py-2 text-[13px] font-semibold text-white shadow-lg ring-1 ring-white/20 animate-in fade-in slide-in-from-top-2">
+              <Check className="h-4 w-4" />
+              {banner}
+            </div>
+          </div>
+        )}
+
 
         {/* Overlay frame */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
