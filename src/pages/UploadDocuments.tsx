@@ -38,8 +38,20 @@ type VariantConfig = {
   vibe: string;       // short description shown in switcher
 };
 
-const VARIANTS: Record<1 | 2 | 3 | 4, VariantConfig> = {
+const VARIANTS: Record<1 | 2 | 3 | 4 | 5, VariantConfig> = {
   1: {
+    label: "AdvisorLink",
+    page: "bg-[hsl(var(--page-alt))]",
+    ink: "215_60%_12%",
+    accent: "192_90%_42%",
+    surface: "bg-white",
+    border: "border-[hsl(var(--ink))]/10",
+    radius: "rounded-xl",
+    btnRadius: "rounded-lg",
+    heading: "font-heading",
+    vibe: "Navy · cyan · product feel",
+  },
+  2: {
     label: "Private Bank",
     page: "bg-[hsl(var(--page-alt))]",
     ink: "215_60%_12%",
@@ -51,7 +63,7 @@ const VARIANTS: Record<1 | 2 | 3 | 4, VariantConfig> = {
     heading: "font-heading",
     vibe: "Ivory · navy · editorial",
   },
-  2: {
+  3: {
     label: "Soft Modern",
     page: "bg-[#f4f6fb]",
     ink: "222_47%_18%",
@@ -63,7 +75,7 @@ const VARIANTS: Record<1 | 2 | 3 | 4, VariantConfig> = {
     heading: "font-sans",
     vibe: "Rounded · airy · blue accent",
   },
-  3: {
+  4: {
     label: "Mono Lux",
     page: "bg-black",
     ink: "0_0%_100%",
@@ -75,7 +87,7 @@ const VARIANTS: Record<1 | 2 | 3 | 4, VariantConfig> = {
     heading: "font-heading",
     vibe: "Black · gold · brutalist",
   },
-  4: {
+  5: {
     label: "Warm Trust",
     page: "bg-[#faf6f1]",
     ink: "20_30%_18%",
