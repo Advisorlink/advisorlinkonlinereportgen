@@ -625,31 +625,32 @@ export default function UploadDocuments() {
             );
           }
 
-          // V3 — Soft Modern: 3-up tile grid, pastel
+          // V3 — Soft Modern: compact row cards that fit on mobile
           if (variant === 3) {
             return (
               <section className="page-enter">
-                <div className="mb-10 text-center">
-                  <h1 className="font-heading text-[30px] font-bold leading-tight tracking-tight text-[hsl(var(--ink))] sm:text-[38px]">
+                <div className="mb-6 text-center sm:mb-8">
+                  <h1 className="font-heading text-[26px] font-bold leading-tight tracking-tight text-[hsl(var(--ink))] sm:text-[34px]">
                     What document would<br />you like to upload?
                   </h1>
-                  <p className="mx-auto mt-3 max-w-md text-[14px] text-[hsl(var(--ink))]/60">
-                    Tap a card to get started — it only takes a minute.
+                  <p className="mx-auto mt-2 max-w-md text-[13px] text-[hsl(var(--ink))]/60 sm:text-[14px]">
+                    Tap an option to get started — it only takes a minute.
                   </p>
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="space-y-3">
                   {DOC_OPTIONS.map((opt) => {
                     const Icon = opt.icon;
                     return (
                       <button key={opt.type} onClick={() => onPick(opt.type)}
-                        className="group flex flex-col items-center gap-4 rounded-3xl bg-white p-6 text-center transition-all hover:-translate-y-1 hover:shadow-[0_24px_48px_-16px_rgba(15,23,42,0.18)]">
-                        <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[hsl(221_83%_92%)] to-[hsl(221_83%_85%)] text-[hsl(221_83%_45%)] transition-transform group-hover:scale-110">
-                          <Icon className="h-9 w-9" />
+                        className="group flex w-full items-center gap-4 rounded-2xl bg-white px-4 py-4 text-left shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] ring-1 ring-[hsl(var(--ink))]/5 transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-12px_rgba(15,23,42,0.18)] hover:ring-[hsl(221_83%_53%)]/30">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[hsl(221_83%_92%)] to-[hsl(221_83%_85%)] text-[hsl(221_83%_45%)] transition-transform group-hover:scale-105">
+                          <Icon className="h-7 w-7" />
                         </div>
-                        <div>
-                          <p className="text-[16px] font-bold text-[hsl(var(--ink))]">{opt.label}</p>
-                          <p className="mt-1 text-[11px] leading-relaxed text-[hsl(var(--ink))]/55">{opt.description}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[15px] font-bold text-[hsl(var(--ink))]">{opt.label}</p>
+                          <p className="mt-0.5 text-[12px] leading-snug text-[hsl(var(--ink))]/55">{opt.description}</p>
                         </div>
+                        <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/30 transition-all group-hover:translate-x-0.5 group-hover:text-[hsl(221_83%_53%)]" />
                       </button>
                     );
                   })}
