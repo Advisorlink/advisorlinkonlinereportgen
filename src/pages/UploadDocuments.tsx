@@ -747,27 +747,21 @@ export default function UploadDocuments() {
 
         {/* ============ DONE ============ */}
         {stage === "done" && (
-          <section className="page-enter overflow-hidden rounded-md border border-[hsl(var(--ink))]/10 bg-white text-center shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.12)]">
-            <div className="border-b border-[hsl(var(--ink))]/10 bg-[hsl(var(--ink))] px-7 py-8 text-white">
-              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/30 bg-white/10">
-                <CheckCircle2 className="h-7 w-7 text-white" strokeWidth={2.5} />
+          <section className={`page-enter overflow-hidden ${v.radius} border ${v.border} ${v.surface} text-center shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.12)]`}>
+            <div className={`border-b ${v.border} bg-[hsl(var(--ink))] px-7 py-10 text-[hsl(var(--page-alt))]`}>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-current/30 bg-current/10">
+                <CheckCircle2 className="h-8 w-8" strokeWidth={2.5} />
               </div>
-              <h2 className="font-heading text-2xl font-bold">Documents received</h2>
-              <p className="mx-auto mt-2 max-w-md text-[13px] text-white/70">
-                Thank you{client.fullName ? `, ${client.fullName.split(" ")[0]}` : ""}. Your documents have been encrypted
-                and delivered to {client.representative || "your adviser"} at Pure Private Wealth.
+              <h2 className={`${v.heading} text-2xl font-bold`}>
+                Documents received{client.fullName ? `, ${client.fullName.split(" ")[0]}` : ""}
+              </h2>
+              <p className="mx-auto mt-3 max-w-md text-[13px] opacity-80">
+                Your documents have been encrypted and delivered to Pure Private Wealth.
               </p>
-            </div>
-            <div className="px-7 py-6 text-left">
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[hsl(var(--ink))]/70">What happens next</p>
-              <ul className="space-y-2 text-[13px] text-[hsl(var(--ink))]/75">
-                <li className="flex gap-2"><span className="text-[hsl(var(--ink))]">›</span> Your adviser is notified immediately</li>
-                <li className="flex gap-2"><span className="text-[hsl(var(--ink))]">›</span> Documents are reviewed within 1 business day</li>
-                <li className="flex gap-2"><span className="text-[hsl(var(--ink))]">›</span> You'll receive a confirmation email at {client.email}</li>
-              </ul>
             </div>
           </section>
         )}
+
 
         {/* Trust seal footer */}
         <footer className="mt-10 border-t border-[hsl(var(--ink))]/10 pt-6">
