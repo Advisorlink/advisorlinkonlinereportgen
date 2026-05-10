@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import {
   Eye, FileText, Image as ImageIcon, RefreshCw, Search, Send, Shield,
-  Trash2, ChevronRight, ArrowLeft, Mail, Phone, Calendar, FileCheck2, X, HardDrive,
+  Trash2, ChevronRight, ArrowLeft, Mail, Phone, Calendar, FileCheck2, X, HardDrive, Pencil, Check,
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { SendUploadLinkDialog } from "@/components/documents/SendUploadLinkDialog";
@@ -131,6 +131,27 @@ export default function Documents() {
     setOpenClient((g) =>
       g ? { ...g, items: g.items.filter((d) => d.id !== doc.id) } : g
     );
+  };
+
+  const handleRename = async (doc: ClientDocument, newName: string) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === doc.file_name) return;
+    const { error } = await supabase
+      .from("client_documents")
+      .update({ file_name: trimmed })
+      .eq("id", doc.id);
+    if (error) {
+      toast.error("Rename failed", { description: error.message });
+      return;
+    }
+    toast.success("Renamed");
+    setDocs((prev) => prev.map((d) => (d.id === doc.id ? { ...d, file_name: trimmed } : d)));
+    setOpenClient((g) =>
+      g
+        ? { ...g, items: g.items.map((d) => (d.id === doc.id ? { ...d, file_name: trimmed } : d)) }
+        : g
+    );
+    setPreview((p) => (p && p.doc.id === doc.id ? { ...p, doc: { ...p.doc, file_name: trimmed } } : p));
   };
 
   const filteredDocs = useMemo(() => {
@@ -311,6 +332,7 @@ export default function Documents() {
                       onPreview={() => handlePreview(d)}
                       onDelete={() => handleDelete(d)}
                       onSendToDrive={() => setDrivePicker({ docIds: [d.id] })}
+                      onRename={(name) => handleRename(d, name)}
                     />
                   ))}
                 </div>
@@ -441,15 +463,19 @@ function FileTile({
   onPreview,
   onDelete,
   onSendToDrive,
+  onRename,
 }: {
   doc: ClientDocument;
   onPreview: () => void;
   onDelete: () => void;
   onSendToDrive?: () => void;
+  onRename?: (name: string) => void;
 }) {
   const isImage = doc.mime_type?.startsWith("image/");
   const isPdf = doc.mime_type === "application/pdf";
   const [thumb, setThumb] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(doc.file_name);
 
   useEffect(() => {
     let cancelled = false;
@@ -464,6 +490,15 @@ function FileTile({
       cancelled = true;
     };
   }, [doc.file_path, isImage]);
+
+  useEffect(() => {
+    if (!editing) setDraft(doc.file_name);
+  }, [doc.file_name, editing]);
+
+  const saveRename = () => {
+    if (onRename) onRename(draft);
+    setEditing(false);
+  };
 
   return (
     <div className="group relative rounded-xl border bg-card overflow-hidden hover:border-primary/40 hover:shadow-md transition-all">
@@ -494,18 +529,66 @@ function FileTile({
             </Badge>
           </div>
         </div>
-        <div className="p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="text-[10px]">
-              {docTypeLabels[doc.document_type] || doc.document_type}
-            </Badge>
-          </div>
-          <div className="text-sm font-medium truncate">{doc.notes || doc.file_name}</div>
-          <div className="text-xs text-muted-foreground mt-0.5">
-            {formatBytes(doc.file_size)} • {format(new Date(doc.created_at), "dd MMM, h:mma")}
-          </div>
-        </div>
       </button>
+      <div className="p-3">
+        <div className="flex items-center gap-2 mb-1">
+          <Badge variant="outline" className="text-[10px]">
+            {docTypeLabels[doc.document_type] || doc.document_type}
+          </Badge>
+        </div>
+        {editing ? (
+          <div className="flex items-center gap-1.5">
+            <Input
+              autoFocus
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  saveRename();
+                } else if (e.key === "Escape") {
+                  setDraft(doc.file_name);
+                  setEditing(false);
+                }
+              }}
+              className="h-8 text-sm"
+            />
+            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={saveRename} title="Save">
+              <Check className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 p-0"
+              onClick={() => {
+                setDraft(doc.file_name);
+                setEditing(false);
+              }}
+              title="Cancel"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 group/name">
+            <div className="text-sm font-medium truncate flex-1" title={doc.file_name}>
+              {doc.file_name}
+            </div>
+            {onRename && (
+              <button
+                onClick={() => setEditing(true)}
+                className="opacity-0 group-hover/name:opacity-100 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity shrink-0"
+                title="Rename"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        )}
+        <div className="text-xs text-muted-foreground mt-0.5">
+          {formatBytes(doc.file_size)} • {format(new Date(doc.created_at), "dd MMM, h:mma")}
+        </div>
+      </div>
       <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
         {onSendToDrive && (
           <button
