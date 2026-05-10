@@ -9,10 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import {
   Eye, FileText, Image as ImageIcon, RefreshCw, Search, Send, Shield,
-  Trash2, ChevronRight, ArrowLeft, Mail, Phone, Calendar, FileCheck2, X,
+  Trash2, ChevronRight, ArrowLeft, Mail, Phone, Calendar, FileCheck2, X, HardDrive,
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { SendUploadLinkDialog } from "@/components/documents/SendUploadLinkDialog";
+import { GoogleDriveFolderPicker } from "@/components/documents/GoogleDriveFolderPicker";
 
 type ClientDocument = {
   id: string;
@@ -86,6 +87,7 @@ export default function Documents() {
   const [openClient, setOpenClient] = useState<ClientGroup | null>(null);
   const [preview, setPreview] = useState<{ doc: ClientDocument; url: string } | null>(null);
   const [sendOpen, setSendOpen] = useState(false);
+  const [drivePicker, setDrivePicker] = useState<{ docIds: string[] } | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -287,7 +289,20 @@ export default function Documents() {
                 </DialogHeader>
               </div>
 
-              <div className="p-5 max-h-[65vh] overflow-y-auto">
+              <div className="px-5 pt-4 flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    setDrivePicker({ docIds: openClient.items.map((i) => i.id) })
+                  }
+                  className="gap-2"
+                >
+                  <HardDrive className="w-4 h-4" />
+                  Send all to Google Drive
+                </Button>
+              </div>
+
+              <div className="p-5 max-h-[60vh] overflow-y-auto">
                 <div className="grid sm:grid-cols-2 gap-3">
                   {openClient.items.map((d) => (
                     <FileTile
@@ -295,6 +310,7 @@ export default function Documents() {
                       doc={d}
                       onPreview={() => handlePreview(d)}
                       onDelete={() => handleDelete(d)}
+                      onSendToDrive={() => setDrivePicker({ docIds: [d.id] })}
                     />
                   ))}
                 </div>
@@ -342,6 +358,13 @@ export default function Documents() {
           )}
         </DialogContent>
       </Dialog>
+
+      <GoogleDriveFolderPicker
+        open={!!drivePicker}
+        onOpenChange={(o) => !o && setDrivePicker(null)}
+        docIds={drivePicker?.docIds ?? []}
+        fileCount={drivePicker?.docIds.length ?? 0}
+      />
     </CRMLayout>
   );
 }
@@ -417,10 +440,12 @@ function FileTile({
   doc,
   onPreview,
   onDelete,
+  onSendToDrive,
 }: {
   doc: ClientDocument;
   onPreview: () => void;
   onDelete: () => void;
+  onSendToDrive?: () => void;
 }) {
   const isImage = doc.mime_type?.startsWith("image/");
   const isPdf = doc.mime_type === "application/pdf";
@@ -481,16 +506,30 @@ function FileTile({
           </div>
         </div>
       </button>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/50 text-white grid place-items-center opacity-0 group-hover:opacity-100 hover:bg-destructive transition-all"
-        title="Delete"
-      >
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
+      <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        {onSendToDrive && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSendToDrive();
+            }}
+            className="h-7 w-7 rounded-full bg-black/50 text-white grid place-items-center hover:bg-primary transition-all"
+            title="Send to Google Drive"
+          >
+            <HardDrive className="w-3.5 h-3.5" />
+          </button>
+        )}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="h-7 w-7 rounded-full bg-black/50 text-white grid place-items-center hover:bg-destructive transition-all"
+          title="Delete"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
     </div>
   );
 }
