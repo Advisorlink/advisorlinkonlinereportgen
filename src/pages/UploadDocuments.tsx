@@ -448,27 +448,6 @@ export default function UploadDocuments() {
           variant === 4 ? "0 0% 8%" : variant === 3 ? "220 30% 96%" : variant === 5 ? "30 40% 94%" : variant === 2 ? "44 33% 95%" : "210 30% 97%",
       } as React.CSSProperties}
     >
-      {/* Variant switcher (testing) */}
-      <div className="border-b border-[hsl(var(--ink))]/10 bg-[hsl(var(--ink))]/[0.03]">
-        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-2 px-5 py-2.5">
-          <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--ink))]/60">Design:</span>
-          {([1, 2, 3, 4, 5] as const).map((n) => (
-            <button
-              key={n}
-              onClick={() => setVariant(n)}
-              className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${
-                variant === n
-                  ? "bg-[hsl(var(--ink))] text-[hsl(var(--page-alt))]"
-                  : "bg-white text-[hsl(var(--ink))]/70 ring-1 ring-[hsl(var(--ink))]/15 hover:text-[hsl(var(--ink))]"
-              }`}
-            >
-              {n}. {VARIANTS[n].label}
-            </button>
-          ))}
-          <span className="ml-2 hidden text-[10px] text-[hsl(var(--ink))]/50 sm:inline">{v.vibe}</span>
-        </div>
-      </div>
-
       {/* ============ VARIANT-SPECIFIC HEADER ============ */}
       {variant === 1 && (
         // AdvisorLink — product feel, dark navy bar with cyan rule
