@@ -140,28 +140,39 @@ Deno.serve(async (req) => {
         .in("id", docIds);
       if (error) throw error;
 
-      const results: any[] = [];
-      for (const d of docs || []) {
-        const { data: signed, error: sErr } = await admin.storage
-          .from("client-documents")
-          .createSignedUrl(d.file_path, 60);
-        if (sErr || !signed) {
-          results.push({ id: d.id, ok: false, error: sErr?.message || "signed url failed" });
-          continue;
-        }
-        const fileRes = await fetch(signed.signedUrl);
-        if (!fileRes.ok) {
-          results.push({ id: d.id, ok: false, error: `download ${fileRes.status}` });
-          continue;
-        }
-        const buf = new Uint8Array(await fileRes.arrayBuffer());
+      // Process all files in parallel for much faster uploads
+      const processOne = async (d: any) => {
         try {
+          const { data: signed, error: sErr } = await admin.storage
+            .from("client-documents")
+            .createSignedUrl(d.file_path, 120);
+          if (sErr || !signed) {
+            return { id: d.id, ok: false, error: sErr?.message || "signed url failed" };
+          }
+          const fileRes = await fetch(signed.signedUrl);
+          if (!fileRes.ok) {
+            return { id: d.id, ok: false, error: `download ${fileRes.status}` };
+          }
+          const buf = new Uint8Array(await fileRes.arrayBuffer());
           const up = await uploadOne(folderId, d.file_name, d.mime_type || "application/octet-stream", buf);
-          results.push({ id: d.id, ok: true, drive_id: up.id });
+          return { id: d.id, ok: true, drive_id: up.id };
         } catch (e) {
-          results.push({ id: d.id, ok: false, error: e instanceof Error ? e.message : String(e) });
+          return { id: d.id, ok: false, error: e instanceof Error ? e.message : String(e) };
         }
-      }
+      };
+
+      // Run with a concurrency cap to avoid memory spikes on large batches
+      const CONCURRENCY = 6;
+      const queue = [...(docs || [])];
+      const results: any[] = [];
+      const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
+        while (queue.length) {
+          const next = queue.shift();
+          if (!next) break;
+          results.push(await processOne(next));
+        }
+      });
+      await Promise.all(workers);
 
       return new Response(JSON.stringify({ results }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
