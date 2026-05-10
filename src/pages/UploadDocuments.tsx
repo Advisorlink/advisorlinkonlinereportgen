@@ -1030,19 +1030,19 @@ function MethodChoice({
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <button
           onClick={onCamera}
-          className="group flex flex-col items-center gap-2 rounded-md border-2 border-blue-500 bg-white p-6 text-center transition-colors hover:bg-blue-500 hover:text-white"
+          className="group flex flex-col items-center gap-2 rounded-md bg-white p-6 text-center shadow-[0_4px_14px_rgba(15,23,42,0.08)] ring-1 ring-[hsl(var(--ink))]/5 transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,23,42,0.12)]"
         >
-          <Camera className="h-7 w-7 text-blue-600 group-hover:text-white" />
-          <p className="text-[14px] font-semibold text-[hsl(var(--ink))] group-hover:text-white">Take photo</p>
-          <p className="text-[11px] text-[hsl(var(--ink))]/55 group-hover:text-white/85">Use your camera</p>
+          <Camera className="h-7 w-7 text-[hsl(var(--ink))]" />
+          <p className="text-[14px] font-semibold text-[hsl(var(--ink))]">Take photo</p>
+          <p className="text-[11px] text-[hsl(var(--ink))]/55">Use your camera</p>
         </button>
         <button
           onClick={onUpload}
-          className="group flex flex-col items-center gap-2 rounded-md border-2 border-blue-500 bg-white p-6 text-center transition-colors hover:bg-blue-500 hover:text-white"
+          className="group flex flex-col items-center gap-2 rounded-md bg-white p-6 text-center shadow-[0_4px_14px_rgba(15,23,42,0.08)] ring-1 ring-[hsl(var(--ink))]/5 transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,23,42,0.12)]"
         >
-          <Upload className="h-7 w-7 text-blue-600 group-hover:text-white" />
-          <p className="text-[14px] font-semibold text-[hsl(var(--ink))] group-hover:text-white">{uploadLabel || "Upload photo"}</p>
-          <p className="text-[11px] text-[hsl(var(--ink))]/55 group-hover:text-white/85">From your device</p>
+          <Upload className="h-7 w-7 text-[hsl(var(--ink))]" />
+          <p className="text-[14px] font-semibold text-[hsl(var(--ink))]">{uploadLabel || "Upload photo"}</p>
+          <p className="text-[11px] text-[hsl(var(--ink))]/55">From your device</p>
         </button>
       </div>
       <button
