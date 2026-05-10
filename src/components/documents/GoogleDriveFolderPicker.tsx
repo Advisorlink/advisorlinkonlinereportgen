@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Folder, ChevronRight, ArrowLeft, Loader2, Search, Check, HardDrive } from "lucide-react";
+import { Folder, ChevronRight, ArrowLeft, Loader2, Search, Check, HardDrive, FolderPlus, X } from "lucide-react";
 
 type DriveFolder = { id: string; name: string };
 
@@ -22,6 +22,9 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
   const [stack, setStack] = useState<{ id: string | null; name: string }[]>([{ id: null, name: "My Drive" }]);
   const [search, setSearch] = useState("");
   const [sending, setSending] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newFolderOpen, setNewFolderOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
 
   const current = stack[stack.length - 1];
 
@@ -66,6 +69,34 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
     setStack(next);
     setSearch("");
     load(next[next.length - 1].id, null);
+  };
+
+  const createFolder = async () => {
+    const name = newFolderName.trim();
+    if (!name) return;
+    setCreating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("gdrive-send", {
+        body: { action: "create_folder", parent: current.id ?? "root", name },
+      });
+      if (error) throw error;
+      const folder = (data as any)?.folder as DriveFolder | undefined;
+      toast.success(`Created "${name}"`);
+      setNewFolderOpen(false);
+      setNewFolderName("");
+      if (folder) {
+        // Open the new folder so user can send straight into it
+        setStack((s) => [...s, { id: folder.id, name: folder.name }]);
+        setSearch("");
+        load(folder.id, null);
+      } else {
+        load(current.id, search.trim() || null);
+      }
+    } catch (e: any) {
+      toast.error("Couldn't create folder", { description: e?.message });
+    } finally {
+      setCreating(false);
+    }
   };
 
   const sendHere = async () => {
@@ -120,8 +151,8 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
           </div>
         </div>
 
-        <div className="px-5 pb-2">
-          <div className="relative">
+        <div className="px-5 pb-2 flex gap-2">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search folders in this location"
@@ -130,7 +161,48 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setNewFolderOpen((v) => !v);
+              setNewFolderName("");
+            }}
+            className="gap-1.5 shrink-0"
+            title="Create new folder here"
+          >
+            <FolderPlus className="w-4 h-4" /> New folder
+          </Button>
         </div>
+
+        {newFolderOpen && (
+          <div className="px-5 pb-2">
+            <div className="flex gap-2 rounded-lg border bg-muted/40 p-2">
+              <Input
+                autoFocus
+                placeholder={`New folder in "${current.name}" (e.g. client name)`}
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                onKeyDown={async (e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    await createFolder();
+                  } else if (e.key === "Escape") {
+                    setNewFolderOpen(false);
+                  }
+                }}
+                className="h-9"
+              />
+              <Button size="sm" onClick={createFolder} disabled={creating || !newFolderName.trim()} className="gap-1.5">
+                {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                Create
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setNewFolderOpen(false)} className="px-2">
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="px-2 pb-2 max-h-[50vh] overflow-y-auto">
           {loading ? (

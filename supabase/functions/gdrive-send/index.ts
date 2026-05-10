@@ -91,6 +91,26 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "create_folder") {
+      const name = (body.name as string)?.trim();
+      const parent = (body.parent as string) || "root";
+      if (!name) throw new Error("name required");
+      const r = await fetch(`${GATEWAY}/drive/v3/files?supportsAllDrives=true`, {
+        method: "POST",
+        headers: { ...gwHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          mimeType: "application/vnd.google-apps.folder",
+          parents: [parent],
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(`Create folder failed [${r.status}]: ${JSON.stringify(data)}`);
+      return new Response(JSON.stringify({ folder: { id: data.id, name: data.name } }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "send") {
       const folderId = body.folder_id as string;
       const docIds = (body.doc_ids as string[]) || [];
