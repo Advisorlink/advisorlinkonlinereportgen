@@ -472,9 +472,9 @@ export default function UploadDocuments() {
       {/* Top brand bar — AdvisorLink → Pure Private Wealth */}
       <header className={`border-b border-[hsl(var(--ink))]/10 ${v.surface}`}>
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-4">
-          <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className={`h-9 w-auto ${variant === 3 ? "invert" : ""}`} />
+          <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className={`h-9 w-auto ${variant === 4 ? "invert" : ""}`} />
           <ArrowRight className="h-4 w-4 shrink-0 text-[hsl(var(--ink))]/40" />
-          <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className={`h-14 w-auto sm:h-16 ${variant === 3 ? "invert" : ""}`} />
+          <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className={`h-14 w-auto sm:h-16 ${variant === 4 ? "invert" : ""}`} />
 
         </div>
       </header>
