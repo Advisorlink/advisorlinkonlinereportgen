@@ -22,6 +22,9 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
   const [stack, setStack] = useState<{ id: string | null; name: string }[]>([{ id: null, name: "My Drive" }]);
   const [search, setSearch] = useState("");
   const [sending, setSending] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newFolderOpen, setNewFolderOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
 
   const current = stack[stack.length - 1];
 
