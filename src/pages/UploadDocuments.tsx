@@ -90,8 +90,8 @@ const VARIANTS: Record<1 | 2 | 3 | 4 | 5, VariantConfig> = {
   5: {
     label: "Warm Trust",
     page: "bg-[#faf6f1]",
-    ink: "20_30%_18%",
-    accent: "16_72%_46%",
+    ink: "20 30% 18%",
+    accent: "16 72% 46%",
     surface: "bg-white",
     border: "border-[hsl(20_30%_18%)]/10",
     radius: "rounded-3xl",
