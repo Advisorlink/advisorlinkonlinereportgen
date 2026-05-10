@@ -332,6 +332,7 @@ export default function Documents() {
                       onPreview={() => handlePreview(d)}
                       onDelete={() => handleDelete(d)}
                       onSendToDrive={() => setDrivePicker({ docIds: [d.id] })}
+                      onRename={(name) => handleRename(d, name)}
                     />
                   ))}
                 </div>
