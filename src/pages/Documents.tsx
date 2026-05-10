@@ -133,6 +133,27 @@ export default function Documents() {
     );
   };
 
+  const handleRename = async (doc: ClientDocument, newName: string) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === doc.file_name) return;
+    const { error } = await supabase
+      .from("client_documents")
+      .update({ file_name: trimmed })
+      .eq("id", doc.id);
+    if (error) {
+      toast.error("Rename failed", { description: error.message });
+      return;
+    }
+    toast.success("Renamed");
+    setDocs((prev) => prev.map((d) => (d.id === doc.id ? { ...d, file_name: trimmed } : d)));
+    setOpenClient((g) =>
+      g
+        ? { ...g, items: g.items.map((d) => (d.id === doc.id ? { ...d, file_name: trimmed } : d)) }
+        : g
+    );
+    setPreview((p) => (p && p.doc.id === doc.id ? { ...p, doc: { ...p.doc, file_name: trimmed } } : p));
+  };
+
   const filteredDocs = useMemo(() => {
     const q = search.toLowerCase();
     if (!q) return docs;
