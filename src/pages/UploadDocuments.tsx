@@ -452,7 +452,7 @@ export default function UploadDocuments() {
       <div className="border-b border-[hsl(var(--ink))]/10 bg-[hsl(var(--ink))]/[0.03]">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-2 px-5 py-2.5">
           <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--ink))]/60">Design:</span>
-          {([1, 2, 3, 4] as const).map((n) => (
+          {([1, 2, 3, 4, 5] as const).map((n) => (
             <button
               key={n}
               onClick={() => setVariant(n)}
