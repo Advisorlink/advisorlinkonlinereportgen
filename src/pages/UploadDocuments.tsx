@@ -334,10 +334,10 @@ export default function UploadDocuments() {
     addCaptured(item);
     if (licenseSide === "front") {
       setLicenseSide("back");
-      toast.success("Front captured");
+      showCaptureBanner("Front saved — now capture the back");
       setBusy(false);
     } else {
-      toast.success("Back captured");
+      showCaptureBanner("Back saved");
       setLicenseSide("front");
       stopCamera();
       setStage("review");
@@ -357,7 +357,7 @@ export default function UploadDocuments() {
     triggerFlash();
     addCaptured(item);
     setStatementCount((n) => n + 1);
-    toast.success(`Page ${statementCount + 1} saved`);
+    showCaptureBanner(`Page ${statementCount + 1} saved`);
     setBusy(false);
   };
 
