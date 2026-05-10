@@ -17,10 +17,8 @@ const LOGO_BLACK_URL = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/obje
 const PURE_LOGO_URL = "/pure-private-wealth-logo.png";
 
 const REPRESENTATIVES = [
-  "Travis Miller",
-  "Sarah Chen",
-  "James O'Connor",
-  "Olivia Bennett",
+  "Travis Seckold",
+  "Stas Stanislav",
 ];
 
 // Four design variants for the user to A/B test the look & feel.
