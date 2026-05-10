@@ -448,27 +448,6 @@ export default function UploadDocuments() {
           variant === 4 ? "0 0% 8%" : variant === 3 ? "220 30% 96%" : variant === 5 ? "30 40% 94%" : variant === 2 ? "44 33% 95%" : "210 30% 97%",
       } as React.CSSProperties}
     >
-      {/* Variant switcher (testing) */}
-      <div className="border-b border-[hsl(var(--ink))]/10 bg-[hsl(var(--ink))]/[0.03]">
-        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-2 px-5 py-2.5">
-          <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--ink))]/60">Design:</span>
-          {([1, 2, 3, 4, 5] as const).map((n) => (
-            <button
-              key={n}
-              onClick={() => setVariant(n)}
-              className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${
-                variant === n
-                  ? "bg-[hsl(var(--ink))] text-[hsl(var(--page-alt))]"
-                  : "bg-white text-[hsl(var(--ink))]/70 ring-1 ring-[hsl(var(--ink))]/15 hover:text-[hsl(var(--ink))]"
-              }`}
-            >
-              {n}. {VARIANTS[n].label}
-            </button>
-          ))}
-          <span className="ml-2 hidden text-[10px] text-[hsl(var(--ink))]/50 sm:inline">{v.vibe}</span>
-        </div>
-      </div>
-
       {/* ============ VARIANT-SPECIFIC HEADER ============ */}
       {variant === 1 && (
         // AdvisorLink — product feel, dark navy bar with cyan rule
@@ -1051,19 +1030,19 @@ function MethodChoice({
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <button
           onClick={onCamera}
-          className="group flex flex-col items-center gap-2 rounded-md border-2 border-blue-500 bg-white p-6 text-center transition-colors hover:bg-blue-500 hover:text-white"
+          className="group flex flex-col items-center gap-2 rounded-md bg-white p-6 text-center shadow-[0_4px_14px_rgba(15,23,42,0.08)] ring-1 ring-[hsl(var(--ink))]/5 transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,23,42,0.12)]"
         >
-          <Camera className="h-7 w-7 text-blue-600 group-hover:text-white" />
-          <p className="text-[14px] font-semibold text-[hsl(var(--ink))] group-hover:text-white">Take photo</p>
-          <p className="text-[11px] text-[hsl(var(--ink))]/55 group-hover:text-white/85">Use your camera</p>
+          <Camera className="h-7 w-7 text-[hsl(var(--ink))]" />
+          <p className="text-[14px] font-semibold text-[hsl(var(--ink))]">Take photo</p>
+          <p className="text-[11px] text-[hsl(var(--ink))]/55">Use your camera</p>
         </button>
         <button
           onClick={onUpload}
-          className="group flex flex-col items-center gap-2 rounded-md border-2 border-blue-500 bg-white p-6 text-center transition-colors hover:bg-blue-500 hover:text-white"
+          className="group flex flex-col items-center gap-2 rounded-md bg-white p-6 text-center shadow-[0_4px_14px_rgba(15,23,42,0.08)] ring-1 ring-[hsl(var(--ink))]/5 transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,23,42,0.12)]"
         >
-          <Upload className="h-7 w-7 text-blue-600 group-hover:text-white" />
-          <p className="text-[14px] font-semibold text-[hsl(var(--ink))] group-hover:text-white">{uploadLabel || "Upload photo"}</p>
-          <p className="text-[11px] text-[hsl(var(--ink))]/55 group-hover:text-white/85">From your device</p>
+          <Upload className="h-7 w-7 text-[hsl(var(--ink))]" />
+          <p className="text-[14px] font-semibold text-[hsl(var(--ink))]">{uploadLabel || "Upload photo"}</p>
+          <p className="text-[11px] text-[hsl(var(--ink))]/55">From your device</p>
         </button>
       </div>
       <button
