@@ -23,6 +23,72 @@ const REPRESENTATIVES = [
   "Olivia Bennett",
 ];
 
+// Four design variants for the user to A/B test the look & feel.
+// Only colour, surface, font feel and button radius change — the flow is identical.
+type VariantConfig = {
+  label: string;
+  page: string;       // page background
+  ink: string;        // primary ink colour (HSL inside arbitrary value)
+  accent: string;     // accent colour (HSL)
+  surface: string;    // card/surface background
+  border: string;     // standard border colour
+  radius: string;     // tailwind radius class for cards
+  btnRadius: string;  // tailwind radius for buttons
+  heading: string;    // heading font class
+  vibe: string;       // short description shown in switcher
+};
+
+const VARIANTS: Record<1 | 2 | 3 | 4, VariantConfig> = {
+  1: {
+    label: "Private Bank",
+    page: "bg-[#f7f5f0]",
+    ink: "215_60%_12%",
+    accent: "215_60%_12%",
+    surface: "bg-white",
+    border: "border-[hsl(215_60%_12%)]/10",
+    radius: "rounded-md",
+    btnRadius: "rounded-sm",
+    heading: "font-heading",
+    vibe: "Ivory · navy · editorial",
+  },
+  2: {
+    label: "Soft Modern",
+    page: "bg-[#f4f6fb]",
+    ink: "222_47%_18%",
+    accent: "221_83%_53%",
+    surface: "bg-white",
+    border: "border-[hsl(222_47%_18%)]/8",
+    radius: "rounded-2xl",
+    btnRadius: "rounded-xl",
+    heading: "font-sans",
+    vibe: "Rounded · airy · blue accent",
+  },
+  3: {
+    label: "Mono Lux",
+    page: "bg-black",
+    ink: "0_0%_100%",
+    accent: "45_85%_60%",
+    surface: "bg-[#0e0e0e]",
+    border: "border-white/10",
+    radius: "rounded-none",
+    btnRadius: "rounded-none",
+    heading: "font-heading",
+    vibe: "Black · gold · brutalist",
+  },
+  4: {
+    label: "Warm Trust",
+    page: "bg-[#faf6f1]",
+    ink: "20_30%_18%",
+    accent: "16_72%_46%",
+    surface: "bg-white",
+    border: "border-[hsl(20_30%_18%)]/10",
+    radius: "rounded-3xl",
+    btnRadius: "rounded-full",
+    heading: "font-heading",
+    vibe: "Warm · terracotta · friendly",
+  },
+};
+
 const detailsSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your first name").max(100),
   email: z.string().trim().email("Please enter a valid email").max(255),
