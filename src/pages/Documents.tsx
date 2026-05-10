@@ -87,6 +87,7 @@ export default function Documents() {
   const [openClient, setOpenClient] = useState<ClientGroup | null>(null);
   const [preview, setPreview] = useState<{ doc: ClientDocument; url: string } | null>(null);
   const [sendOpen, setSendOpen] = useState(false);
+  const [drivePicker, setDrivePicker] = useState<{ docIds: string[] } | null>(null);
 
   const load = async () => {
     setLoading(true);
