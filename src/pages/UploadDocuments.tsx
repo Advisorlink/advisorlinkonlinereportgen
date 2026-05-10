@@ -469,15 +469,79 @@ export default function UploadDocuments() {
         </div>
       </div>
 
-      {/* Top brand bar — AdvisorLink → Pure Private Wealth */}
-      <header className={`border-b border-[hsl(var(--ink))]/10 ${v.surface}`}>
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-4">
-          <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className={`h-9 w-auto ${variant === 4 ? "invert" : ""}`} />
-          <ArrowRight className="h-4 w-4 shrink-0 text-[hsl(var(--ink))]/40" />
-          <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className={`h-14 w-auto sm:h-16 ${variant === 4 ? "invert" : ""}`} />
+      {/* ============ VARIANT-SPECIFIC HEADER ============ */}
+      {variant === 1 && (
+        // AdvisorLink — product feel, dark navy bar with cyan rule
+        <header className="relative overflow-hidden bg-[hsl(215_60%_10%)] text-white">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[hsl(192_90%_50%)]/25 blur-3xl" />
+          <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[hsl(192_90%_60%)]/15 blur-3xl" />
+          <div className="relative mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-5">
+            <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-9 w-auto invert" />
+            <div className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/15 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-[hsl(192_90%_55%)] shadow-[0_0_12px_2px_hsl(192_90%_55%)]" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Secure Channel</span>
+            </div>
+            <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className="h-14 w-auto invert sm:h-16" />
+          </div>
+          <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-[hsl(192_90%_55%)] to-transparent" />
+        </header>
+      )}
 
-        </div>
-      </header>
+      {variant === 2 && (
+        // Private Bank — editorial, hairline rules, centered crest
+        <header className="bg-[hsl(var(--page-alt))]">
+          <div className="mx-auto max-w-3xl px-5 pt-7">
+            <div className="flex items-center justify-between gap-4 pb-5">
+              <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-7 w-auto opacity-80" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.4em] text-[hsl(var(--ink))]/50">Confidential</span>
+              <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className="h-12 w-auto sm:h-14" />
+            </div>
+            <div className="border-t border-[hsl(var(--ink))]/30" />
+            <div className="mt-px border-t border-[hsl(var(--ink))]/15" />
+          </div>
+        </header>
+      )}
+
+      {variant === 3 && (
+        // Soft Modern — pill nav floating on tinted surface
+        <header className="bg-[hsl(var(--page-alt))] pt-5">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 rounded-2xl bg-white px-5 py-3 shadow-[0_4px_24px_-8px_rgba(15,23,42,0.08)] sm:mx-5 md:mx-auto">
+            <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-8 w-auto" />
+            <div className="flex items-center gap-2 rounded-full bg-[hsl(221_83%_53%)]/8 px-3 py-1 text-[hsl(221_83%_45%)]">
+              <ArrowRight className="h-3 w-3" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">Sharing with</span>
+            </div>
+            <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className="h-12 w-auto sm:h-14" />
+          </div>
+        </header>
+      )}
+
+      {variant === 4 && (
+        // Mono Lux — full bleed black, gold hairline, oversized typography
+        <header className="bg-black text-white">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-6">
+            <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-8 w-auto invert" />
+            <div className="text-[9px] font-bold uppercase tracking-[0.5em] text-[hsl(45_85%_60%)]">Vault · Secure</div>
+            <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className="h-12 w-auto invert sm:h-14" />
+          </div>
+          <div className="h-px w-full bg-[hsl(45_85%_60%)]" />
+        </header>
+      )}
+
+      {variant === 5 && (
+        // Warm Trust — illustrated peach band, rounded card
+        <header className="bg-[#f5e6d8]">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-5">
+            <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-9 w-auto" />
+            <div className="hidden items-center gap-2 sm:flex">
+              <span className="h-px w-8 bg-[hsl(16_72%_46%)]/60" />
+              <ArrowRight className="h-4 w-4 text-[hsl(16_72%_46%)]" />
+              <span className="h-px w-8 bg-[hsl(16_72%_46%)]/60" />
+            </div>
+            <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className="h-14 w-auto sm:h-16" />
+          </div>
+        </header>
+      )}
 
       <main className="mx-auto max-w-2xl px-5 py-8 sm:py-12">
         {/* Progress strip */}
@@ -485,51 +549,186 @@ export default function UploadDocuments() {
           <Lock className="h-3 w-3" /> Secure document upload for Pure Private Wealth
         </div>
 
-        {/* ============ CHOOSE ============ */}
-        {stage === "choose" && (
-          <section className="page-enter">
-            <div className="mb-8 text-center">
-              <h1 className="font-heading text-[28px] font-bold leading-tight tracking-tight text-[hsl(var(--ink))] sm:text-[34px]">
-                What document would you like to upload?
-              </h1>
-              <p className="mx-auto mt-2 max-w-md text-[14px] text-[hsl(var(--ink))]/65">
-                Choose the type of document you'd like to send to your adviser.
-              </p>
-            </div>
-            <div className="grid gap-3">
-              {DOC_OPTIONS.map((opt) => {
-                const Icon = opt.icon;
-                return (
-                  <button
-                    key={opt.type}
-                    onClick={() => {
-                      if (opt.type === "license") setStage("license_method");
-                      else if (opt.type === "statement") setStage("statement_method");
-                      else setStage("screenshot_pick");
-                    }}
-                    className="group flex items-center gap-4 rounded-md border border-[hsl(var(--ink))]/12 bg-white px-5 py-5 text-left transition-all hover:border-[hsl(var(--ink))] hover:shadow-[0_8px_24px_-12px_rgba(15,23,42,0.18)]"
-                  >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm border border-[hsl(var(--ink))]/15 bg-[hsl(var(--ink))]/[0.03] text-[hsl(var(--ink))] group-hover:bg-[hsl(var(--ink))] group-hover:text-white">
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[15px] font-semibold text-[hsl(var(--ink))]">{opt.label}</p>
-                      <p className="mt-0.5 text-[12px] text-[hsl(var(--ink))]/60">{opt.description}</p>
-                    </div>
-                    <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/30 transition-transform group-hover:translate-x-0.5 group-hover:text-[hsl(var(--ink))]" />
-                  </button>
-                );
-              })}
-            </div>
-            {captured.length > 0 && (
-              <button
-                onClick={() => setStage("review")}
-                className="mt-6 w-full rounded-sm border border-[hsl(var(--ink))]/15 bg-white py-3 text-[12px] font-semibold uppercase tracking-wider text-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))] hover:text-white"
-              >
-                View {captured.length} uploaded · Continue →
-              </button>
-            )}
-          </section>
+        {/* ============ CHOOSE — VARIANT-SPECIFIC LAYOUTS ============ */}
+        {stage === "choose" && (() => {
+          const onPick = (t: DocType) => {
+            if (t === "license") setStage("license_method");
+            else if (t === "statement") setStage("statement_method");
+            else setStage("screenshot_pick");
+          };
+
+          // V1 — AdvisorLink product cards with cyan accent
+          if (variant === 1) {
+            return (
+              <section className="page-enter">
+                <div className="mb-8 text-center">
+                  <span className="inline-block rounded-full bg-[hsl(192_90%_50%)]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[hsl(192_90%_35%)]">Step 1 · Choose document</span>
+                  <h1 className="font-heading mt-3 text-[28px] font-bold leading-tight tracking-tight text-[hsl(var(--ink))] sm:text-[34px]">
+                    What document would you like to upload?
+                  </h1>
+                </div>
+                <div className="grid gap-3">
+                  {DOC_OPTIONS.map((opt) => {
+                    const Icon = opt.icon;
+                    return (
+                      <button key={opt.type} onClick={() => onPick(opt.type)}
+                        className="group flex items-center gap-4 rounded-xl border border-[hsl(var(--ink))]/10 bg-white px-5 py-5 text-left transition-all hover:-translate-y-0.5 hover:border-[hsl(192_90%_50%)]/40 hover:shadow-[0_12px_32px_-12px_hsl(192_90%_50%/0.4)]">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[hsl(215_60%_12%)] to-[hsl(215_60%_22%)] text-[hsl(192_90%_55%)] shadow-[0_4px_16px_-4px_hsl(215_60%_12%/0.4)]">
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[15px] font-semibold text-[hsl(var(--ink))]">{opt.label}</p>
+                          <p className="mt-0.5 text-[12px] text-[hsl(var(--ink))]/60">{opt.description}</p>
+                        </div>
+                        <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/30 transition-transform group-hover:translate-x-0.5 group-hover:text-[hsl(192_90%_45%)]" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          }
+
+          // V2 — Private Bank: editorial numbered list, no boxes
+          if (variant === 2) {
+            return (
+              <section className="page-enter">
+                <div className="mb-10">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[hsl(var(--ink))]/50">— A confidential transfer</p>
+                  <h1 className="font-heading mt-4 text-[34px] font-bold leading-[1.05] tracking-tight text-[hsl(var(--ink))] sm:text-[44px]">
+                    What document would<br />you like to upload?
+                  </h1>
+                  <p className="mt-3 max-w-md text-[13px] italic text-[hsl(var(--ink))]/60">
+                    Select one of the three options below to begin a secure submission to your adviser.
+                  </p>
+                </div>
+                <ul className="border-t border-[hsl(var(--ink))]/20">
+                  {DOC_OPTIONS.map((opt, i) => {
+                    const Icon = opt.icon;
+                    return (
+                      <li key={opt.type} className="border-b border-[hsl(var(--ink))]/15">
+                        <button onClick={() => onPick(opt.type)}
+                          className="group flex w-full items-center gap-6 py-6 text-left transition-colors hover:bg-[hsl(var(--ink))]/[0.03]">
+                          <span className="font-heading w-10 text-[22px] font-light tabular-nums text-[hsl(var(--ink))]/40">0{i + 1}</span>
+                          <Icon className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/55" />
+                          <div className="min-w-0 flex-1">
+                            <p className="font-heading text-[20px] font-semibold tracking-tight text-[hsl(var(--ink))]">{opt.label}</p>
+                            <p className="mt-0.5 text-[12px] italic text-[hsl(var(--ink))]/55">{opt.description}</p>
+                          </div>
+                          <ArrowRight className="h-4 w-4 shrink-0 text-[hsl(var(--ink))]/30 transition-transform group-hover:translate-x-1 group-hover:text-[hsl(var(--ink))]" />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            );
+          }
+
+          // V3 — Soft Modern: 3-up tile grid, pastel
+          if (variant === 3) {
+            return (
+              <section className="page-enter">
+                <div className="mb-10 text-center">
+                  <h1 className="font-heading text-[30px] font-bold leading-tight tracking-tight text-[hsl(var(--ink))] sm:text-[38px]">
+                    What document would<br />you like to upload?
+                  </h1>
+                  <p className="mx-auto mt-3 max-w-md text-[14px] text-[hsl(var(--ink))]/60">
+                    Tap a card to get started — it only takes a minute.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  {DOC_OPTIONS.map((opt) => {
+                    const Icon = opt.icon;
+                    return (
+                      <button key={opt.type} onClick={() => onPick(opt.type)}
+                        className="group flex flex-col items-center gap-4 rounded-3xl bg-white p-6 text-center transition-all hover:-translate-y-1 hover:shadow-[0_24px_48px_-16px_rgba(15,23,42,0.18)]">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[hsl(221_83%_92%)] to-[hsl(221_83%_85%)] text-[hsl(221_83%_45%)] transition-transform group-hover:scale-110">
+                          <Icon className="h-9 w-9" />
+                        </div>
+                        <div>
+                          <p className="text-[16px] font-bold text-[hsl(var(--ink))]">{opt.label}</p>
+                          <p className="mt-1 text-[11px] leading-relaxed text-[hsl(var(--ink))]/55">{opt.description}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          }
+
+          // V4 — Mono Lux: brutalist slab rows, oversized numerals
+          if (variant === 4) {
+            return (
+              <section className="page-enter">
+                <div className="mb-12">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.6em] text-[hsl(45_85%_60%)]">// Begin Submission</p>
+                  <h1 className="font-heading mt-5 text-[42px] font-black uppercase leading-[0.9] tracking-tight text-white sm:text-[60px]">
+                    Choose<br /><span className="text-[hsl(45_85%_60%)]">Document.</span>
+                  </h1>
+                </div>
+                <div>
+                  {DOC_OPTIONS.map((opt, i) => {
+                    const Icon = opt.icon;
+                    return (
+                      <button key={opt.type} onClick={() => onPick(opt.type)}
+                        className="group flex w-full items-center gap-6 border-t border-white/15 py-6 text-left transition-colors last:border-b hover:bg-white/[0.04]">
+                        <span className="font-heading w-12 text-[28px] font-black tabular-nums text-[hsl(45_85%_60%)]">.0{i + 1}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-heading text-[22px] font-bold uppercase tracking-tight text-white">{opt.label}</p>
+                          <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-white/45">{opt.description}</p>
+                        </div>
+                        <Icon className="h-6 w-6 shrink-0 text-white/40 transition-colors group-hover:text-[hsl(45_85%_60%)]" />
+                        <ArrowRight className="h-5 w-5 shrink-0 text-white/40 transition-transform group-hover:translate-x-1 group-hover:text-[hsl(45_85%_60%)]" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          }
+
+          // V5 — Warm Trust: friendly pill cards
+          return (
+            <section className="page-enter">
+              <div className="mb-8 text-center">
+                <h1 className="font-heading text-[30px] font-bold leading-tight tracking-tight text-[hsl(var(--ink))] sm:text-[38px]">
+                  What would you like<br />to upload today?
+                </h1>
+                <p className="mx-auto mt-3 max-w-md text-[14px] text-[hsl(var(--ink))]/65">
+                  We'll guide you through it — quick, friendly, secure.
+                </p>
+              </div>
+              <div className="space-y-4">
+                {DOC_OPTIONS.map((opt) => {
+                  const Icon = opt.icon;
+                  return (
+                    <button key={opt.type} onClick={() => onPick(opt.type)}
+                      className="group flex w-full items-center gap-4 rounded-full border-2 border-[hsl(20_30%_18%)]/8 bg-white py-3 pl-3 pr-6 text-left transition-all hover:border-[hsl(16_72%_46%)] hover:shadow-[0_8px_24px_-8px_hsl(16_72%_46%/0.4)]">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[hsl(16_72%_46%)]/10 text-[hsl(16_72%_46%)] group-hover:bg-[hsl(16_72%_46%)] group-hover:text-white">
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[16px] font-bold text-[hsl(var(--ink))]">{opt.label}</p>
+                        <p className="text-[12px] text-[hsl(var(--ink))]/60">{opt.description}</p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/30 group-hover:text-[hsl(16_72%_46%)]" />
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })()}
+
+        {captured.length > 0 && stage === "choose" && (
+          <button
+            onClick={() => setStage("review")}
+            className={`mt-6 w-full ${v.btnRadius} border border-[hsl(var(--ink))]/15 bg-white py-3 text-[12px] font-semibold uppercase tracking-wider text-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))] hover:text-[hsl(var(--page-alt))]`}
+          >
+            View {captured.length} uploaded · Continue →
+          </button>
         )}
 
         {/* ============ LICENSE — METHOD ============ */}
