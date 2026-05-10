@@ -865,7 +865,7 @@ function MethodChoice({
 }
 
 function FullscreenCamera({
-  mode, licenseSide, ready, videoRef, overlayRef, flash, busy, capturedCount,
+  mode, licenseSide, ready, videoRef, overlayRef, flash, busy, capturedCount, banner,
   onCapture, onFinish, onCancel,
 }: {
   mode: "license" | "statement";
@@ -876,6 +876,7 @@ function FullscreenCamera({
   flash: boolean;
   busy: boolean;
   capturedCount: number;
+  banner: string | null;
   onCapture: () => void;
   onFinish: () => void;
   onCancel: () => void;
