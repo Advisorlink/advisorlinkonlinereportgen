@@ -1051,26 +1051,26 @@ function MethodChoice({
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <button
           onClick={onCamera}
-          className="group flex flex-col items-center gap-2 rounded-md border border-[hsl(var(--ink))]/15 bg-white p-6 text-center hover:border-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))] hover:text-white"
+          className="group flex flex-col items-center gap-2 rounded-md border-2 border-blue-500 bg-white p-6 text-center transition-colors hover:bg-blue-500 hover:text-white"
         >
-          <Camera className="h-7 w-7 text-[hsl(var(--ink))] group-hover:text-white" />
+          <Camera className="h-7 w-7 text-blue-600 group-hover:text-white" />
           <p className="text-[14px] font-semibold text-[hsl(var(--ink))] group-hover:text-white">Take photo</p>
-          <p className="text-[11px] text-[hsl(var(--ink))]/55 group-hover:text-white/75">Use your camera</p>
+          <p className="text-[11px] text-[hsl(var(--ink))]/55 group-hover:text-white/85">Use your camera</p>
         </button>
         <button
           onClick={onUpload}
-          className="group flex flex-col items-center gap-2 rounded-md border border-[hsl(var(--ink))]/15 bg-white p-6 text-center hover:border-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))] hover:text-white"
+          className="group flex flex-col items-center gap-2 rounded-md border-2 border-blue-500 bg-white p-6 text-center transition-colors hover:bg-blue-500 hover:text-white"
         >
-          <Upload className="h-7 w-7 text-[hsl(var(--ink))] group-hover:text-white" />
+          <Upload className="h-7 w-7 text-blue-600 group-hover:text-white" />
           <p className="text-[14px] font-semibold text-[hsl(var(--ink))] group-hover:text-white">{uploadLabel || "Upload photo"}</p>
-          <p className="text-[11px] text-[hsl(var(--ink))]/55 group-hover:text-white/75">From your device</p>
+          <p className="text-[11px] text-[hsl(var(--ink))]/55 group-hover:text-white/85">From your device</p>
         </button>
       </div>
       <button
         onClick={onBack}
-        className="mt-5 w-full text-center text-[12px] text-[hsl(var(--ink))]/55 hover:text-[hsl(var(--ink))]"
+        className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-[hsl(var(--ink))]/20 bg-white px-4 py-2.5 text-[13px] font-semibold text-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))]/5"
       >
-        ← Back
+        <ArrowLeft className="h-4 w-4" /> Back
       </button>
     </section>
   );
