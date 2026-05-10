@@ -440,10 +440,12 @@ function FileTile({
   doc,
   onPreview,
   onDelete,
+  onSendToDrive,
 }: {
   doc: ClientDocument;
   onPreview: () => void;
   onDelete: () => void;
+  onSendToDrive?: () => void;
 }) {
   const isImage = doc.mime_type?.startsWith("image/");
   const isPdf = doc.mime_type === "application/pdf";
