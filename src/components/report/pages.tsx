@@ -437,7 +437,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
             <SectionCard title="Comparison scenario" icon="◉">
               <Row label="Scenario" value="Aligned to risk profile" />
               <Row label="Risk profile" value={s.riskProfile} />
-              <Row label="Net return (tiered by profile)" value={fmtPct(s.comparisonReturn - s.comparisonAdminPct - (Math.min(total * 0.0176, 5000) / (total || 1)))} />
+              <Row label="Net return (tiered by profile)" value={fmtPct(s.comparisonReturn)} />
               <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
               <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
               <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
