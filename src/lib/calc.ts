@@ -257,14 +257,16 @@ export function projectAccumulation(i: ClientInputs): YearRow[] {
   const wGrowth = weightedGrowthPct(i);
   const profile = inferRiskProfile(wGrowth);
   const total = totalBalance(i);
-  const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdminPct = total > 0 ? COMPARISON_ADMIN_FLAT / total + comparisonAdminPct(total) : 0;
-  const cmpAnnualPct = total > 0 ? comparisonAnnualFeePct(total) : 0;
+  // Comparison return is simply +2.5% above what the client is currently on track for,
+  // using their existing risk profile. No more lookup table comparisons.
+  const cmpReturn = exReturn + 0.025;
+  const cmpAdminPct = exAdmin;
+  const cmpAnnualPct = 0;
   const cmpRate = cmpReturn - 0.025 - cmpAdminPct - cmpAnnualPct;
 
   // P59 = total balance - N37 (advice fee deducted upfront)
   const startEx = total;
-  const startCmp = startEx - comparisonAdviceFee(total);
+  const startCmp = startEx;
 
   const rows: YearRow[] = [{ age: startAge, existing: startEx, comparison: startCmp }];
   let age = startAge;
@@ -295,11 +297,8 @@ export function projectWithdrawal(i: ClientInputs): { existing: YearRow[]; compa
 
   const exAdmin = existingAdminPct(i);
   const exReturn = existingReturnPct(i);
-  const wGrowth = weightedGrowthPct(i);
-  const profile = inferRiskProfile(wGrowth);
-  const total = totalBalance(i);
-  const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdminPct = total > 0 ? COMPARISON_ADMIN_FLAT / total + comparisonAdminPct(total) : 0;
+  const cmpReturn = exReturn + 0.025;
+  const cmpAdminPct = exAdmin;
 
   // Existing growth in withdrawal: weighted return * 0.5 - admin (defensive mix, half return, full fees)
   const exFactor = (1 + exReturn * 0.5 - exAdmin);
@@ -377,8 +376,8 @@ export function buildSummary(i: ClientInputs): ReportSummary {
   const exAdmin = existingAdminPct(i);
   const exReturn = existingReturnPct(i);
   const total = totalBalance(i);
-  const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdmin = total > 0 ? COMPARISON_ADMIN_FLAT / total + comparisonAdminPct(total) : 0;
+  const cmpReturn = exReturn + 0.025;
+  const cmpAdmin = exAdmin;
 
   return {
     inputs: i,
