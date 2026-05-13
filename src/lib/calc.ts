@@ -297,11 +297,8 @@ export function projectWithdrawal(i: ClientInputs): { existing: YearRow[]; compa
 
   const exAdmin = existingAdminPct(i);
   const exReturn = existingReturnPct(i);
-  const wGrowth = weightedGrowthPct(i);
-  const profile = inferRiskProfile(wGrowth);
-  const total = totalBalance(i);
-  const cmpReturn = comparisonReturnFor(profile);
-  const cmpAdminPct = total > 0 ? COMPARISON_ADMIN_FLAT / total + comparisonAdminPct(total) : 0;
+  const cmpReturn = exReturn + 0.025;
+  const cmpAdminPct = exAdmin;
 
   // Existing growth in withdrawal: weighted return * 0.5 - admin (defensive mix, half return, full fees)
   const exFactor = (1 + exReturn * 0.5 - exAdmin);
