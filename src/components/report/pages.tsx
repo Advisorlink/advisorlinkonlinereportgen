@@ -794,7 +794,7 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
             <div className="text-right">Comparison</div>
           </div>
           <Row label="Net investment return (accumulation)" value={
-            <span><span className="text-muted-foreground font-semibold mr-3">{fmtPct(s.existingNetReturn)}</span><span className="text-cyan">{fmtPct(s.comparisonReturn - s.comparisonAdminPct - (Math.min(s.inputs.superBalance * 0.0176, 5000) / s.inputs.superBalance))}</span></span>
+            <span><span className="text-muted-foreground font-semibold mr-3">{fmtPct(s.existingNetReturn)}</span><span className="text-cyan">{fmtPct(s.comparisonReturn)}</span></span>
           } />
           <Row label="Admin fee % of balance" value={
             <span><span className="text-muted-foreground font-semibold mr-3">{fmtPct(s.existingAdminPct, 2)}</span><span className="text-cyan">{fmtPct(s.comparisonAdminPct, 2)}</span></span>
