@@ -24,15 +24,22 @@ export interface FundEntry {
   primaryAllocationPct?: number; // 0-1, portion remaining in the primary/original option
 }
 
-// Compute weighted averages from investment options if present
+// Compute weighted averages from investment options if present.
+// If options' fiveYearReturn values are all zero (e.g. user only filled the
+// fund-level 5-year net return %), fall back to f.grossReturn so the typed
+// value is always reflected.
 export function resolvedFundReturn(f: FundEntry): number {
   if (f.investmentOptions && f.investmentOptions.length > 0) {
-    const primaryAlloc = f.primaryAllocationPct ?? 0;
-    const totalAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0) + primaryAlloc;
-    if (totalAlloc > 0) {
-      const optionsWeighted = f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.fiveYearReturn, 0);
+    const optionsAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0);
+    // Primary allocation defaults to "remainder" so the typed grossReturn is
+    // always represented when the user hasn't explicitly split allocations.
+    const primaryAlloc = f.primaryAllocationPct ?? Math.max(0, 1 - optionsAlloc);
+    const totalAlloc = optionsAlloc + primaryAlloc;
+    const optionsWeighted = f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.fiveYearReturn, 0);
+    if (totalAlloc > 0 && (optionsWeighted > 0 || primaryAlloc > 0)) {
       const primaryWeighted = primaryAlloc * f.grossReturn;
-      return (optionsWeighted + primaryWeighted) / totalAlloc;
+      const result = (optionsWeighted + primaryWeighted) / totalAlloc;
+      if (result > 0) return result;
     }
   }
   return f.grossReturn;
@@ -40,12 +47,14 @@ export function resolvedFundReturn(f: FundEntry): number {
 
 export function resolvedFundGrowth(f: FundEntry): number {
   if (f.investmentOptions && f.investmentOptions.length > 0) {
-    const primaryAlloc = f.primaryAllocationPct ?? 0;
-    const totalAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0) + primaryAlloc;
-    if (totalAlloc > 0) {
-      const optionsWeighted = f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.growthAssetsPct, 0);
+    const optionsAlloc = f.investmentOptions.reduce((s, o) => s + o.allocationPct, 0);
+    const primaryAlloc = f.primaryAllocationPct ?? Math.max(0, 1 - optionsAlloc);
+    const totalAlloc = optionsAlloc + primaryAlloc;
+    const optionsWeighted = f.investmentOptions.reduce((s, o) => s + o.allocationPct * o.growthAssetsPct, 0);
+    if (totalAlloc > 0 && (optionsWeighted > 0 || primaryAlloc > 0)) {
       const primaryWeighted = primaryAlloc * f.growthAssetsPct;
-      return (optionsWeighted + primaryWeighted) / totalAlloc;
+      const result = (optionsWeighted + primaryWeighted) / totalAlloc;
+      if (result > 0) return result;
     }
   }
   return f.growthAssetsPct;
