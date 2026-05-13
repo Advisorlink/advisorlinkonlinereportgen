@@ -437,7 +437,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
             <SectionCard title="Comparison scenario" icon="◉">
               <Row label="Scenario" value="Aligned to risk profile" />
               <Row label="Risk profile" value={s.riskProfile} />
-              <Row label="Net return (tiered by profile)" value={fmtPct(s.comparisonReturn - s.comparisonAdminPct - (Math.min(total * 0.0176, 5000) / (total || 1)))} />
+              <Row label="Net return (tiered by profile)" value={fmtPct(s.comparisonReturn)} />
               <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
               <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
               <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
@@ -480,7 +480,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           <SectionCard title="Comparison scenario" icon="◉">
             <Row label="Scenario" value="Aligned to risk profile" />
             <Row label="Risk profile" value={s.riskProfile} />
-            <Row label="Net return (tiered by profile)" value={fmtPct(s.comparisonReturn - s.comparisonAdminPct - (Math.min(i.superBalance * 0.0176, 5000) / i.superBalance))} />
+            <Row label="Net return (tiered by profile)" value={fmtPct(s.comparisonReturn)} />
             <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
             <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
             <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
@@ -540,7 +540,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
 /* ------------------------------------------------------------------ */
 export function ProjectionPage({ s }: { s: ReportSummary }) {
   const i = s.inputs;
-  const cmpAfterFees = s.comparisonReturn - s.comparisonAdminPct - Math.min(i.superBalance * 0.0176, 5000) / i.superBalance;
+  const cmpAfterFees = s.comparisonReturn;
   return (
     <PageShell>
       <PageHeader pageLabel="ACCUMULATION" />
@@ -794,7 +794,7 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
             <div className="text-right">Comparison</div>
           </div>
           <Row label="Net investment return (accumulation)" value={
-            <span><span className="text-muted-foreground font-semibold mr-3">{fmtPct(s.existingNetReturn)}</span><span className="text-cyan">{fmtPct(s.comparisonReturn - s.comparisonAdminPct - (Math.min(s.inputs.superBalance * 0.0176, 5000) / s.inputs.superBalance))}</span></span>
+            <span><span className="text-muted-foreground font-semibold mr-3">{fmtPct(s.existingNetReturn)}</span><span className="text-cyan">{fmtPct(s.comparisonReturn)}</span></span>
           } />
           <Row label="Admin fee % of balance" value={
             <span><span className="text-muted-foreground font-semibold mr-3">{fmtPct(s.existingAdminPct, 2)}</span><span className="text-cyan">{fmtPct(s.comparisonAdminPct, 2)}</span></span>
