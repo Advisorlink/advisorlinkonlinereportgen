@@ -266,7 +266,7 @@ export function projectAccumulation(i: ClientInputs): YearRow[] {
 
   // P59 = total balance - N37 (advice fee deducted upfront)
   const startEx = total;
-  const startCmp = startEx - comparisonAdviceFee(total);
+  const startCmp = startEx;
 
   const rows: YearRow[] = [{ age: startAge, existing: startEx, comparison: startCmp }];
   let age = startAge;
