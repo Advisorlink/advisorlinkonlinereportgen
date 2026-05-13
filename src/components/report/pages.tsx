@@ -540,7 +540,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
 /* ------------------------------------------------------------------ */
 export function ProjectionPage({ s }: { s: ReportSummary }) {
   const i = s.inputs;
-  const cmpAfterFees = s.comparisonReturn - s.comparisonAdminPct - Math.min(i.superBalance * 0.0176, 5000) / i.superBalance;
+  const cmpAfterFees = s.comparisonReturn;
   return (
     <PageShell>
       <PageHeader pageLabel="ACCUMULATION" />
