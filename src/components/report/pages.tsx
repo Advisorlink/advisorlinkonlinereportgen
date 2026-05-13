@@ -549,13 +549,8 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
         Year-by-year projection of the current fund vs the comparison scenario, including periodic market dips.
       </p>
 
-      <div className="grid grid-cols-3 gap-3 mb-3">
-        <KpiCard label="Current Balance" value={fmtMoney(s.startingBalance)} sub="Today" />
-        <KpiCard label="Projected - Current" value={fmtMoney(s.projectedExisting)} sub={`At age ${s.retirementAge}`} />
-        <KpiCard label="Projected - Comparison" value={fmtMoney(s.projectedComparison)} sub={`At age ${s.retirementAge}`} accent />
-      </div>
-
-      <div className="mb-5 flex items-center justify-between rounded-lg border border-navy bg-navy px-4 py-2.5">
+      {/* 5-year return bar moved above the projection KPIs */}
+      <div className="mb-3 flex items-center justify-between rounded-lg border border-navy bg-navy px-4 py-2.5">
         <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-white">5 Year Return (p.a.)</div>
         <div className="flex items-center gap-6">
           <div className="flex items-baseline gap-2">
@@ -568,6 +563,22 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
             <span className="text-base font-bold text-cyan tabular-nums">{(cmpAfterFees * 100).toFixed(2)}%</span>
           </div>
         </div>
+      </div>
+
+      {/* Disclaimer: the comparison is current + 2.5% */}
+      <div className="mb-3 rounded-xl border border-cyan/30 bg-cyan/5 px-4 py-3">
+        <p className="text-[11px] leading-relaxed text-foreground">
+          <strong className="text-navy">Illustration only:</strong>{" "}
+          We have added an extra <strong>2.5%</strong> to your current net return to produce the comparison figures below.
+          This shows what an additional 2.5% per year could mean for your balance at retirement,
+          keeping the same risk profile and contribution pattern. It is not a guarantee of future performance.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        <KpiCard label="Current Balance" value={fmtMoney(s.startingBalance)} sub="Today" />
+        <KpiCard label="Projected - Current" value={fmtMoney(s.projectedExisting)} sub={`At age ${s.retirementAge}`} />
+        <KpiCard label="Projected - Comparison" value={fmtMoney(s.projectedComparison)} sub={`At age ${s.retirementAge}`} accent />
       </div>
 
       <SectionCard title="Balance projection" icon="◆" className="mb-5">
