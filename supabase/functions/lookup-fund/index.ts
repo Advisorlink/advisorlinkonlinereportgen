@@ -439,11 +439,11 @@ Rules:
   4. Set modelLabel to that exact label (e.g. if client is age 52 and in Aware Super, the MySuper default is "High Growth" → modelLabel = "High Growth"; REST Super's default is "Core Strategy" → modelLabel = "Core Strategy"; AustralianSuper's default is "Balanced" → modelLabel = "Balanced").
   The modelLabel MUST match the row label in the fund's performance table so we can verify the extracted figure against the scraped text. NEVER set modelLabel to "default" or "defult" — always resolve it to the real option name.
   If the fund has an age-based default but no age is provided in the input, use the youngest/accumulation-phase default and add a note explaining the age dependency.
-- Use ONLY URLs that Gemini 3 lookup finds on the fund's own official domain for the actual figures. Never invent URLs. Never use third-party blogs, news, SuperRatings, Canstar, Chant West, etc.
-- EXCEPTION — finder.com.au/super-funds is ALLOWED as a CROSS-CHECK / DISCOVERY source. Always include the relevant Finder page (e.g. https://www.finder.com.au/super-funds/<fund-slug> or https://www.finder.com.au/super-funds) when it covers this fund. Use it to confirm the fund's official website domain, the correct MySuper / default option name, current fees, and the published 5-year return for cross-verification. The official fund page must still be the primary source for extracted figures, but Finder may be included in sourceUrls as an additional reference.
-- Add search terms like "${PREV_MONTH_NAME} ${CURRENT_YEAR}", "${PREV2_MONTH_NAME} ${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}", and "site:finder.com.au/super-funds <fund name>" to find the freshest pages. Prefer live dashboards / current ${CURRENT_YEAR} update pages over older PDS PDFs.
+- PRIMARY SOURCE — finder.com.au/super-funds: ALWAYS look here FIRST. Find the matching fund page on https://www.finder.com.au/super-funds (e.g. https://www.finder.com.au/super-funds/<fund-slug>) and use it to identify the fund's official website, the correct MySuper / default option name, current fees, growth-asset allocation, and the published 5-year return. Put the Finder URL(s) FIRST in sourceUrls.
+- FALLBACK — official fund domain: ONLY if Finder doesn't have the fund or is missing the figure you need, fall back to the fund's own official domain (performance / fees / asset-allocation / PDS pages). Never use other third-party sites (SuperRatings, Canstar, Chant West, blogs, news).
+- Add search terms like "site:finder.com.au/super-funds <fund name>", "${PREV_MONTH_NAME} ${CURRENT_YEAR}", "${PREV2_MONTH_NAME} ${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}". Prefer current ${CURRENT_YEAR} pages over older PDS PDFs.
 - Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages — do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
-- Return up to 7 URLs (official fund pages first by recency, then the matching finder.com.au/super-funds page as a cross-check). The URLs must be real lookup results or pages clearly reached from real lookup results.
+- Return up to 7 URLs: matching finder.com.au/super-funds page(s) FIRST, then official fund pages by recency (newest ${CURRENT_YEAR} first, then ${PREV_YEAR}, then PDS/Investment Guide as last resort). The URLs must be real lookup results or pages clearly reached from real lookup results.
 - Also parse the client's personal details from the free-text input.
 
 Frequencies must be exactly "Weekly", "Monthly", or "Annually".
@@ -498,6 +498,7 @@ const STEP2_SYSTEM =
 
 Strict rules:
 - ONLY use numbers that literally appear in the provided page text. Do NOT use prior knowledge, do NOT estimate, do NOT use other time periods.
+- Sources may be from finder.com.au/super-funds (preferred primary source) AND/OR the fund's official website. Treat them equally — extract from whichever page actually shows the figure. If both show a figure, prefer the one with the most recent "as at" date.
 - grossReturn must be the 5-year p.a. return for the allocated investment option. Some funds use a different label on their performance table than the option's marketing name (e.g. REST Super's "Core Strategy" is listed as "Growth" in the performance table). Match the option by its meaning — use the row that corresponds to the allocated option even if the table label differs slightly. Copy the 5-year p.a. figure straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
 - If MULTIPLE pages each show a 5-year p.a. figure for the option, ALWAYS pick the one with the most recent "as at" date (e.g. prefer "as at 31 ${CURRENT_YEAR}" over a PDS dated ${
     PREV_YEAR - 1
@@ -626,7 +627,12 @@ Deno.serve(async (req) => {
         );
       }
     }
-    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 6);
+    // Put Finder cross-check URLs FIRST (user prefers Finder as primary source)
+    const finderFirst = [
+      ...candidateUrls.filter(isFinderCrossCheck),
+      ...candidateUrls.filter((u) => !isFinderCrossCheck(u)),
+    ];
+    candidateUrls = Array.from(new Set(finderFirst)).slice(0, 6);
 
     // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
     const scrapeBudget = Math.max(8000, Math.min(45000, remaining() - 25000));
