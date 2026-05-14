@@ -627,7 +627,12 @@ Deno.serve(async (req) => {
         );
       }
     }
-    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 6);
+    // Put Finder cross-check URLs FIRST (user prefers Finder as primary source)
+    const finderFirst = [
+      ...candidateUrls.filter(isFinderCrossCheck),
+      ...candidateUrls.filter((u) => !isFinderCrossCheck(u)),
+    ];
+    candidateUrls = Array.from(new Set(finderFirst)).slice(0, 6);
 
     // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
     const scrapeBudget = Math.max(8000, Math.min(45000, remaining() - 25000));
