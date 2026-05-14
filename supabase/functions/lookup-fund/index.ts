@@ -598,9 +598,15 @@ Deno.serve(async (req) => {
       ),
     );
 
+    const isFinderCrossCheck = (url: string) => {
+      const h = hostFrom(url);
+      return !!h && (h === "finder.com.au" || h.endsWith(".finder.com.au")) &&
+        /\/super-funds\b/i.test(url);
+    };
+
     // Always include AI-provided URLs first (they usually include the main performance page)
     const officialAiUrls = aiUrls.filter(
-      (url) => isOfficialFundUrl(url, fundName, officialHosts),
+      (url) => isOfficialFundUrl(url, fundName, officialHosts) || isFinderCrossCheck(url),
     );
     candidateUrls.push(...officialAiUrls);
 
@@ -609,17 +615,18 @@ Deno.serve(async (req) => {
       const searchQueries = [
         `${fundName} ${optionLabel} investment performance ${PREV_MONTH_NAME} ${CURRENT_YEAR}`,
         `${fundName} ${optionLabel} fees asset allocation ${CURRENT_YEAR}`,
+        `site:finder.com.au/super-funds ${fundName}`,
       ];
       const searchResults = await Promise.all(
         searchQueries.map((q) => firecrawlSearch(q, 4)),
       );
       for (const found of searchResults) {
         candidateUrls.push(
-          ...found.filter((url) => isOfficialFundUrl(url, fundName, officialHosts)),
+          ...found.filter((url) => isOfficialFundUrl(url, fundName, officialHosts) || isFinderCrossCheck(url)),
         );
       }
     }
-    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 5);
+    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 6);
 
     // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
     const scrapeBudget = Math.max(8000, Math.min(45000, remaining() - 25000));
