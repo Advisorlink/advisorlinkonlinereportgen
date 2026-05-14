@@ -57,7 +57,6 @@ const BLOCKED_SOURCE_DOMAINS = [
   "rainmaker.com.au",
   "superreview.com.au",
   "moneymag.com.au",
-  "finder.com.au",
   "mozo.com.au",
   "stockspot.com.au",
   "livewiremarkets.com",
