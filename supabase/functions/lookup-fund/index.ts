@@ -498,6 +498,7 @@ const STEP2_SYSTEM =
 
 Strict rules:
 - ONLY use numbers that literally appear in the provided page text. Do NOT use prior knowledge, do NOT estimate, do NOT use other time periods.
+- Sources may be from finder.com.au/super-funds (preferred primary source) AND/OR the fund's official website. Treat them equally — extract from whichever page actually shows the figure. If both show a figure, prefer the one with the most recent "as at" date.
 - grossReturn must be the 5-year p.a. return for the allocated investment option. Some funds use a different label on their performance table than the option's marketing name (e.g. REST Super's "Core Strategy" is listed as "Growth" in the performance table). Match the option by its meaning — use the row that corresponds to the allocated option even if the table label differs slightly. Copy the 5-year p.a. figure straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
 - If MULTIPLE pages each show a 5-year p.a. figure for the option, ALWAYS pick the one with the most recent "as at" date (e.g. prefer "as at 31 ${CURRENT_YEAR}" over a PDS dated ${
     PREV_YEAR - 1
