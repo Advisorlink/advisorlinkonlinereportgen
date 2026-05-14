@@ -17,9 +17,6 @@ import {
 import riskIllustration from "@/assets/risk-illustration.jpg";
 import logoUrl from "@/assets/logo.svg";
 import asicRegistered from "@/assets/asic-registered.png";
-import logoInheritance from "@/assets/logo-inheritance.png";
-import logoMyAdvice from "@/assets/logo-myadvice.png";
-import logoPure from "@/assets/logo-pure.png";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -169,16 +166,42 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
         licensed adviser from our trusted network.
       </p>
 
-      {/* Trusted advisers */}
-      <SectionCard title="Some of our trusted advisers" icon="◆" className="mb-5">
-        <p className="text-xs text-muted-foreground mb-3">
-          We only refer to licensed firms that meet a strict vetting standard.
+      {/* Referral partners */}
+      <SectionCard title="Our referral partners" icon="◆" className="mb-5">
+        <p className="text-xs text-foreground leading-relaxed mb-3">
+          If after reading this report you decide you'd like personal help, we can introduce you
+          to a <strong>fully licensed financial adviser at no extra cost to you</strong>. Every
+          adviser in our referral network must pass a strict qualification process before we
+          ever put them in front of a client - so you can feel confident you're speaking with
+          someone genuinely capable of helping with your situation.
         </p>
-        <div className="rounded-xl bg-white border border-border px-6 py-5 grid grid-cols-3 gap-6 items-center shadow-card">
-          <img src={logoInheritance} alt="Inheritance Financial Advice" className="max-h-12 w-auto object-contain mx-auto" loading="lazy" />
-          <img src={logoMyAdvice} alt="MyAdvice Hub" className="max-h-12 w-auto object-contain mx-auto" loading="lazy" />
-          <img src={logoPure} alt="Pure" className="max-h-12 w-auto object-contain mx-auto" loading="lazy" />
+        <div className="rounded-xl bg-white border border-border px-4 py-3 shadow-card">
+          <div className="text-[11px] font-semibold text-navy mb-2 tracking-wide uppercase">What our partners must meet</div>
+          <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            {[
+              "Hold a current Australian Financial Services Licence (AFSL)",
+              "ASIC registered and RG146 compliant",
+              "Minimum 5 years providing personal advice",
+              "Clean compliance and complaints history",
+              "Independent reputational and reference checks",
+              "Aligned with our client-first values",
+            ].map(q => (
+              <li key={q} className="flex items-start gap-2 text-[11px]">
+                <span className="mt-0.5 inline-flex shrink-0 items-center justify-center w-4 h-4 rounded-full bg-cyan text-cyan-foreground">
+                  <Check className="w-2.5 h-2.5" strokeWidth={3.5} />
+                </span>
+                <span className="text-foreground leading-snug">{q}</span>
+              </li>
+            ))}
+          </ul>
         </div>
+        <p className="text-[11px] text-muted-foreground mt-3 leading-relaxed">
+          This report is factual information only - by law we can't tell you which product to
+          switch to, recommend specific changes, or factor in your personal goals, insurance
+          needs or tax position. A licensed adviser <em>can</em> do all of that: provide
+          personal advice, prepare a Statement of Advice, action the change for you, and review
+          it over time. The introduction is optional and obligation-free.
+        </p>
       </SectionCard>
 
       {/* Two columns: vetting + restrictions */}
@@ -900,7 +923,7 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
           <div>
             <div className="text-[10px] font-bold uppercase tracking-wider opacity-70">Your eligibility</div>
             <div className="mt-1 text-2xl font-bold font-heading !text-white drop-shadow-md">
-              {eligible ? "You qualify for an adviser referral" : "Referral threshold not met"}
+              {eligible ? "You qualify for a free review" : "Referral threshold not met"}
             </div>
             <div className="mt-1 text-xs opacity-80 text-white">
               Total projected extra benefit: <span className="font-bold tabular-nums">{fmtMoney(totalBenefit)}</span> · Threshold: $100,000
