@@ -57,7 +57,6 @@ const BLOCKED_SOURCE_DOMAINS = [
   "rainmaker.com.au",
   "superreview.com.au",
   "moneymag.com.au",
-  "finder.com.au",
   "mozo.com.au",
   "stockspot.com.au",
   "livewiremarkets.com",
@@ -440,10 +439,11 @@ Rules:
   4. Set modelLabel to that exact label (e.g. if client is age 52 and in Aware Super, the MySuper default is "High Growth" → modelLabel = "High Growth"; REST Super's default is "Core Strategy" → modelLabel = "Core Strategy"; AustralianSuper's default is "Balanced" → modelLabel = "Balanced").
   The modelLabel MUST match the row label in the fund's performance table so we can verify the extracted figure against the scraped text. NEVER set modelLabel to "default" or "defult" — always resolve it to the real option name.
   If the fund has an age-based default but no age is provided in the input, use the youngest/accumulation-phase default and add a note explaining the age dependency.
-- Use ONLY URLs that Gemini 3 lookup finds on the fund's own official domain. Never invent URLs. Never use third-party comparison sites, news, blogs, SuperRatings, Canstar, Chant West, etc.
-- Add search terms like "${PREV_MONTH_NAME} ${CURRENT_YEAR}", "${PREV2_MONTH_NAME} ${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}" to find the freshest pages. Prefer live dashboards / current ${CURRENT_YEAR} update pages over older PDS PDFs.
+- Use ONLY URLs that Gemini 3 lookup finds on the fund's own official domain for the actual figures. Never invent URLs. Never use third-party blogs, news, SuperRatings, Canstar, Chant West, etc.
+- EXCEPTION — finder.com.au/super-funds is ALLOWED as a CROSS-CHECK / DISCOVERY source. Always include the relevant Finder page (e.g. https://www.finder.com.au/super-funds/<fund-slug> or https://www.finder.com.au/super-funds) when it covers this fund. Use it to confirm the fund's official website domain, the correct MySuper / default option name, current fees, and the published 5-year return for cross-verification. The official fund page must still be the primary source for extracted figures, but Finder may be included in sourceUrls as an additional reference.
+- Add search terms like "${PREV_MONTH_NAME} ${CURRENT_YEAR}", "${PREV2_MONTH_NAME} ${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}", and "site:finder.com.au/super-funds <fund name>" to find the freshest pages. Prefer live dashboards / current ${CURRENT_YEAR} update pages over older PDS PDFs.
 - Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages — do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
-- Return up to 6 URLs, ordered by RECENCY (newest ${CURRENT_YEAR} performance / fees / asset allocation pages first, then ${PREV_YEAR} updates, then PDS/Investment Guide as last resort). The URLs must be real lookup results or pages clearly reached from real lookup results.
+- Return up to 7 URLs (official fund pages first by recency, then the matching finder.com.au/super-funds page as a cross-check). The URLs must be real lookup results or pages clearly reached from real lookup results.
 - Also parse the client's personal details from the free-text input.
 
 Frequencies must be exactly "Weekly", "Monthly", or "Annually".
@@ -598,9 +598,15 @@ Deno.serve(async (req) => {
       ),
     );
 
+    const isFinderCrossCheck = (url: string) => {
+      const h = hostFrom(url);
+      return !!h && (h === "finder.com.au" || h.endsWith(".finder.com.au")) &&
+        /\/super-funds\b/i.test(url);
+    };
+
     // Always include AI-provided URLs first (they usually include the main performance page)
     const officialAiUrls = aiUrls.filter(
-      (url) => isOfficialFundUrl(url, fundName, officialHosts),
+      (url) => isOfficialFundUrl(url, fundName, officialHosts) || isFinderCrossCheck(url),
     );
     candidateUrls.push(...officialAiUrls);
 
@@ -609,17 +615,18 @@ Deno.serve(async (req) => {
       const searchQueries = [
         `${fundName} ${optionLabel} investment performance ${PREV_MONTH_NAME} ${CURRENT_YEAR}`,
         `${fundName} ${optionLabel} fees asset allocation ${CURRENT_YEAR}`,
+        `site:finder.com.au/super-funds ${fundName}`,
       ];
       const searchResults = await Promise.all(
         searchQueries.map((q) => firecrawlSearch(q, 4)),
       );
       for (const found of searchResults) {
         candidateUrls.push(
-          ...found.filter((url) => isOfficialFundUrl(url, fundName, officialHosts)),
+          ...found.filter((url) => isOfficialFundUrl(url, fundName, officialHosts) || isFinderCrossCheck(url)),
         );
       }
     }
-    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 5);
+    candidateUrls = Array.from(new Set(candidateUrls)).slice(0, 6);
 
     // ---- Step 2: actually scrape those pages and extract figures (in parallel) ----
     const scrapeBudget = Math.max(8000, Math.min(45000, remaining() - 25000));
