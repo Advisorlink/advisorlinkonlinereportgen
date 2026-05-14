@@ -17,9 +17,6 @@ import {
 import riskIllustration from "@/assets/risk-illustration.jpg";
 import logoUrl from "@/assets/logo.svg";
 import asicRegistered from "@/assets/asic-registered.png";
-import logoInheritance from "@/assets/logo-inheritance.png";
-import logoMyAdvice from "@/assets/logo-myadvice.png";
-import logoPure from "@/assets/logo-pure.png";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
