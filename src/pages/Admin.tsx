@@ -164,15 +164,16 @@ export default function Admin() {
       ? `$${Math.round(summary.potentialUplift).toLocaleString()}`
       : "(Potential Extra Amount)";
     const retirementAge = inputs.retirementAge ?? "(Target Retirement Age)";
+    const freeReviewMessage = "Please have a read through it, and if anything concerns you or if you have any questions at all, feel free to reach out. We can arrange a free review and, if you would like to speak with someone, connect you with a fully licensed financial advisor at no extra cost.";
 
     switch (templateKey) {
       case "follow-up":
-        return `Hi ${firstName},\n\nHere is your performance report that you requested. I have tried reaching out a few times because I said I would personally give you a call if there were any concerns. As you can see, there is a potential extra of ${potentialExtra} in your super by the age of ${retirementAge}, so I'm sure you would agree that is a fair bit of money back in your pocket. Please let me know when you have a spare 5 minutes that I can at least let you know what your options are and run you through it properly so at least you know what's going on, and then you can do what you like with that information.\n\nWe are available Monday - Friday 9am - 7pm QLD time.\n\nPlease let me know a time that works for you and I'll work something out in between clients,\n\nOr call me on\n\n0485991688`;
+        return `Hi ${firstName},\n\nHere is your performance report that you requested. I have tried reaching out a few times because I said I would personally give you a call if there were any concerns. As you can see, there is a potential extra of ${potentialExtra} in your super by the age of ${retirementAge}, so I'm sure you would agree that is a fair bit of money back in your pocket.\n\n${freeReviewMessage}\n\nPlease let me know when you have a spare 5 minutes so I can run you through your options properly, and then you can do what you like with that information.\n\nWe are available Monday - Friday 9am - 7pm QLD time.\n\nPlease let me know a time that works for you and I'll work something out in between clients,\n\nOr call me on\n\n0485991688`;
       case "referral":
         return `Hi ${firstName},\n\nDo you know 5 people that would like a free performance report like you got? Give them a call and ask if they'd like us to send them one. If you can get 5, you'll get a $100 Gift Card!! It's that simple.\n\nYou just need to give us permission to say that you have referred them and that's it!! $100 is all yours!\n\nBUT WAIT THERE'S MORE HAHA\n\nIf any of your referrals choose to take on board the advice like you have, you receive a $100 GIFT CARD PER REFERRAL!!!\n\nWe are available Monday - Friday 9am - 7pm QLD time.\n\nOr call me on\n\n0485991688`;
       case "standard":
       default:
-        return `Hi ${firstName},\n\nHere is your free performance report. Please note that this document is NOT to be taken as financial advice. It is just to help you understand if there are potential improvements you could be missing out on.`;
+        return `Hi ${firstName},\n\nHere is your free superannuation performance report. Please note that this document is NOT to be taken as financial advice. It is simply designed to help you understand whether there may be potential improvements you could be missing out on.\n\n${freeReviewMessage}`;
     }
   };
 
