@@ -180,7 +180,13 @@ Deno.serve(async (req) => {
     } else {
       // Plain text — convert to simple HTML
       const plainBody = customBody ??
-        `Hi ${name}\n\nHere is your Free performance report. Please note that this document is NOT to be taken as financial advice. It is just to help you understand if there is potential improvements you could be missing out on.`;
+        `Hi ${name},
+
+Here is your free superannuation performance report.
+
+Please have a read through it, and if there's anything that concerns you or any questions you have, please feel free to reach out. We'd be happy to do a free review with you.
+
+Kind regards,`;
       const bodyHtmlParts = plainBody.split("\n").map((line: string) => line === "" ? "<br>" : `<p style="margin:0">${line.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`);
       fullHtml = bodyHtmlParts.join("\n");
       if (signatureHtml) {
