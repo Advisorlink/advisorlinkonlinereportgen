@@ -8,6 +8,7 @@ const CORS = {
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_mail/gmail/v1";
 const EMAIL_LOGO_URL = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png";
 const EMAIL_LOGO_CID = "advisorlink-logo";
+const REQUIRED_REVIEW_MESSAGE = "Please have a read through it, and if anything concerns you or if you have any questions at all, feel free to reach out. We can arrange a free review and, if you would like to speak with someone, connect you with a fully licensed financial advisor at no extra cost.";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -165,6 +166,9 @@ Deno.serve(async (req) => {
 
     const name = (clientName ?? "").trim() || "there";
     const subject = customSubject ?? "Super Performance Report";
+    const shouldRequireReviewMessage = Boolean(
+      pdfBase64 || fileName || subject.toLowerCase().includes("super performance report"),
+    );
 
     // Fetch Gmail signature
     const signatureHtml = await fetchSignature(LOVABLE_API_KEY, GOOGLE_MAIL_API_KEY);
@@ -174,6 +178,10 @@ Deno.serve(async (req) => {
     if (isHtml && customBody) {
       // Already formatted HTML — use as-is, append signature
       fullHtml = customBody;
+      const lowerHtml = fullHtml.toLowerCase();
+      if (shouldRequireReviewMessage && !lowerHtml.includes("free review") && !lowerHtml.includes("fully licensed financial advisor")) {
+        fullHtml += `\n<br>\n<p style="margin:0">${REQUIRED_REVIEW_MESSAGE}</p>`;
+      }
       if (signatureHtml) {
         fullHtml += `\n<br>\n<div class="gmail_signature">${signatureHtml}</div>`;
       }
@@ -184,10 +192,13 @@ Deno.serve(async (req) => {
 
 Here is your free superannuation performance report.
 
-Please have a read through it, and if there's anything that concerns you or any questions you have, please feel free to reach out. We'd be happy to do a free review with you.
+${REQUIRED_REVIEW_MESSAGE}
 
 Kind regards,`;
-      const bodyHtmlParts = plainBody.split("\n").map((line: string) => line === "" ? "<br>" : `<p style="margin:0">${line.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`);
+      const finalPlainBody = plainBody.toLowerCase().includes("free review") && plainBody.toLowerCase().includes("fully licensed financial advisor")
+        ? plainBody
+        : `${plainBody}\n\n${REQUIRED_REVIEW_MESSAGE}`;
+      const bodyHtmlParts = finalPlainBody.split("\n").map((line: string) => line === "" ? "<br>" : `<p style="margin:0">${line.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`);
       fullHtml = bodyHtmlParts.join("\n");
       if (signatureHtml) {
         fullHtml += `\n<br>\n<div class="gmail_signature">${signatureHtml}</div>`;
