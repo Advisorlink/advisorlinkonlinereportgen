@@ -166,6 +166,9 @@ Deno.serve(async (req) => {
 
     const name = (clientName ?? "").trim() || "there";
     const subject = customSubject ?? "Super Performance Report";
+    const shouldRequireReviewMessage = Boolean(
+      pdfBase64 || fileName || subject.toLowerCase().includes("super performance report"),
+    );
 
     // Fetch Gmail signature
     const signatureHtml = await fetchSignature(LOVABLE_API_KEY, GOOGLE_MAIL_API_KEY);
@@ -176,7 +179,7 @@ Deno.serve(async (req) => {
       // Already formatted HTML — use as-is, append signature
       fullHtml = customBody;
       const lowerHtml = fullHtml.toLowerCase();
-      if (!lowerHtml.includes("free review") && !lowerHtml.includes("fully licensed financial advisor")) {
+      if (shouldRequireReviewMessage && !lowerHtml.includes("free review") && !lowerHtml.includes("fully licensed financial advisor")) {
         fullHtml += `\n<br>\n<p style="margin:0">${REQUIRED_REVIEW_MESSAGE}</p>`;
       }
       if (signatureHtml) {
