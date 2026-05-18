@@ -328,7 +328,7 @@ export default function Documents() {
                 </DialogHeader>
               </div>
 
-              <div className="px-5 pt-4 flex flex-wrap gap-2">
+              <div className="px-5 pt-4 flex flex-wrap items-center gap-2">
                 <Button
                   size="sm"
                   onClick={() =>
@@ -338,6 +338,16 @@ export default function Documents() {
                 >
                   <HardDrive className="w-4 h-4" />
                   Send all to Google Drive
+                </Button>
+                <div className="flex-1" />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleDeleteGroup(openClient)}
+                  className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete entire package
                 </Button>
               </div>
 
