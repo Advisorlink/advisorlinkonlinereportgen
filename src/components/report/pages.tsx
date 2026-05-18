@@ -141,19 +141,25 @@ export function CoverPage({ s }: { s: ReportSummary }) {
 /* ------------------------------------------------------------------ */
 export function WhoWeArePage({ s }: { s: ReportSummary }) {
   const hasPersonalContrib = annualPersonalContrib(s.inputs) > 0;
-  const vetting = [
-    "ASIC Registered",
-    "RG146 Compliant",
-    "Meets our reputational standards",
-    "Aligns with our values",
-    "Minimum 5 years experience providing advice",
+  const requirements = [
+    { label: "AFSL Licensed", detail: "Holds a current Australian Financial Services Licence" },
+    { label: "ASIC Registered", detail: "RG146 compliant and actively monitored" },
+    { label: "5+ Years Experience", detail: "Minimum 5 years giving personal advice" },
+    { label: "Clean Record", detail: "No adverse compliance or complaints history" },
+    { label: "Independently Vetted", detail: "Reputational and reference-checked by us" },
+    { label: "Client-First Values", detail: "Aligned with our advice philosophy" },
+  ];
+  const steps = [
+    { n: "01", title: "You decide", body: "Reading this report places you under no obligation. The introduction is entirely optional." },
+    { n: "02", title: "We match", body: "We hand-pick a licensed adviser from our network who fits your situation." },
+    { n: "03", title: "They advise", body: "Your adviser provides personal advice, prepares a Statement of Advice and can action it for you." },
   ];
   const restrictions = [
-    "Due to ASIC regulations, only a licensed adviser can discuss recommended product names.",
-    ...(hasPersonalContrib
-      ? ["This report includes your personal contributions in projections."]
-      : ["This report does not include your personal contributions."]),
-    "This report does not include insurance considerations.",
+    "Only a licensed adviser can recommend specific products or switches.",
+    hasPersonalContrib
+      ? "Projections include your stated personal contributions."
+      : "Personal contributions are not modelled in this report.",
+    "Insurance and tax position are outside the scope of this report.",
   ];
 
   return (
@@ -166,70 +172,74 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
         licensed adviser from our trusted network.
       </p>
 
-      {/* Referral partners */}
-      <SectionCard title="Our referral partners" icon="◆" className="mb-5">
-        <p className="text-xs text-foreground leading-relaxed mb-3">
-          If after reading this report you decide you'd like personal help, we can introduce you
-          to a <strong>fully licensed financial adviser at no extra cost to you</strong>. Every
-          adviser in our referral network must pass a strict qualification process before we
-          ever put them in front of a client - so you can feel confident you're speaking with
-          someone genuinely capable of helping with your situation.
-        </p>
-        <div className="rounded-xl bg-white border border-border px-4 py-3 shadow-card">
-          <div className="text-[11px] font-semibold text-navy mb-2 tracking-wide uppercase">What our partners must meet</div>
-          <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-            {[
-              "Hold a current Australian Financial Services Licence (AFSL)",
-              "ASIC registered and RG146 compliant",
-              "Minimum 5 years providing personal advice",
-              "Clean compliance and complaints history",
-              "Independent reputational and reference checks",
-              "Aligned with our client-first values",
-            ].map(q => (
-              <li key={q} className="flex items-start gap-2 text-[11px]">
-                <span className="mt-0.5 inline-flex shrink-0 items-center justify-center w-4 h-4 rounded-full bg-cyan text-cyan-foreground">
-                  <Check className="w-2.5 h-2.5" strokeWidth={3.5} />
-                </span>
-                <span className="text-foreground leading-snug">{q}</span>
-              </li>
-            ))}
-          </ul>
+      {/* Referral partners hero */}
+      <div className="mb-5 overflow-hidden rounded-2xl border border-border bg-white shadow-card">
+        <div className="bg-gradient-to-br from-navy to-navy/90 px-5 py-4">
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 w-1.5 rounded-full bg-cyan" />
+            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan">Our Referral Partners</div>
+          </div>
+          <p className="mt-2 text-[12px] leading-relaxed text-white/90">
+            If you'd like personal help, we can introduce you to a{" "}
+            <strong className="text-white">fully licensed financial adviser at no extra cost to you</strong>.
+            Every adviser passes a strict qualification process before we put them in front of a client.
+          </p>
         </div>
-        <p className="text-[11px] text-muted-foreground mt-3 leading-relaxed">
-          This report is factual information only - by law we can't tell you which product to
-          switch to, recommend specific changes, or factor in your personal goals, insurance
-          needs or tax position. A licensed adviser <em>can</em> do all of that: provide
-          personal advice, prepare a Statement of Advice, action the change for you, and review
-          it over time. The introduction is optional and obligation-free.
-        </p>
-      </SectionCard>
 
-      {/* Two columns: vetting + restrictions */}
-      <div className="grid grid-cols-2 gap-4">
-        <SectionCard title="Advisor Link vetting" icon="✓">
-          <ul className="space-y-2">
-            {vetting.map(v => (
-              <li key={v} className="flex items-start gap-2 text-xs">
-                <span className="mt-0.5 inline-flex shrink-0 items-center justify-center w-4 h-4 rounded-full bg-cyan text-cyan-foreground">
-                  <Check className="w-2.5 h-2.5" strokeWidth={3.5} />
-                </span>
-                <span className="text-foreground">{v}</span>
-              </li>
+        <div className="px-5 pt-4 pb-5">
+          <div className="mb-3 flex items-baseline justify-between">
+            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-navy">The Six Standards</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Every partner, every time</div>
+          </div>
+          <div className="grid grid-cols-3 gap-px rounded-xl bg-border overflow-hidden border border-border">
+            {requirements.map((r) => (
+              <div key={r.label} className="bg-white p-3">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-cyan text-cyan-foreground">
+                    <Check className="h-2 w-2" strokeWidth={4} />
+                  </span>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-navy leading-tight">{r.label}</div>
+                </div>
+                <p className="text-[10px] leading-snug text-muted-foreground">{r.detail}</p>
+              </div>
             ))}
-          </ul>
-        </SectionCard>
-        <SectionCard title="Limits of this report" icon="!">
-          <ul className="space-y-2">
-            {restrictions.map(r => (
-              <li key={r} className="flex items-start gap-2 text-xs">
-                <span className="mt-0.5 inline-flex shrink-0 items-center justify-center w-4 h-4 rounded-full bg-navy text-navy-foreground">
-                  <Info className="w-2.5 h-2.5" strokeWidth={3} />
-                </span>
-                <span className="text-foreground leading-snug">{r}</span>
-              </li>
-            ))}
-          </ul>
-        </SectionCard>
+          </div>
+        </div>
+      </div>
+
+      {/* How the introduction works */}
+      <div className="mb-5">
+        <div className="mb-2 flex items-center gap-2">
+          <div className="h-px flex-1 bg-border" />
+          <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-navy">How the introduction works</div>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {steps.map((st) => (
+            <div key={st.n} className="relative rounded-xl border border-border bg-white p-4 shadow-card">
+              <div className="absolute right-3 top-2 text-[28px] font-bold leading-none text-cyan/15 font-heading">{st.n}</div>
+              <div className="relative">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-navy">{st.title}</div>
+                <p className="mt-1 text-[10.5px] leading-snug text-muted-foreground">{st.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Limits of this report */}
+      <div className="rounded-xl border border-navy/15 bg-secondary/40 px-4 py-3">
+        <div className="flex items-center gap-2 mb-2">
+          <Info className="h-3.5 w-3.5 text-navy" strokeWidth={2.5} />
+          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-navy">Limits of this report</div>
+        </div>
+        <ul className="grid grid-cols-3 gap-x-4 gap-y-1">
+          {restrictions.map((r) => (
+            <li key={r} className="text-[10.5px] leading-snug text-muted-foreground">
+              <span className="text-navy">·</span> {r}
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Google-style reviews */}
