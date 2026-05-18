@@ -83,28 +83,8 @@ export default function Admin() {
   };
 
   const downloadReportPdf = async (r: ReportRow) => {
-    if (r.pdf_path) {
-      setPdfBusyId(r.id);
-      try {
-        const { data, error } = await supabase.storage
-          .from("client-reports")
-          .download(r.pdf_path);
-        if (error) throw error;
-        const url = URL.createObjectURL(data);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${r.client_name.trim()} Performance Report.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        toast.success("PDF downloaded");
-        setPdfBusyId(null);
-        return;
-      } catch (e) {
-        console.error("Stored PDF download failed, regenerating:", e);
-      }
-    }
+    // Always regenerate from saved inputs so every report (including older ones)
+    // uses the current report design rather than the PDF that was stored at creation time.
     setPdfBusyId(r.id);
     setPdfStageInputs(resolveInputs(r));
     try {
