@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Trash2, RefreshCw, Search, Eye, Download, Send, X, FileText, Calendar, Mail } from "lucide-react";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { buildReferralEmailHtml } from "@/lib/referral-email-template";
+import { buildReportEmailHtml } from "@/lib/report-email-template";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
 import {
   CoverPage, WhoWeArePage, SnapshotPage, FundsPage,
@@ -196,8 +197,10 @@ export default function Admin() {
       open: true,
       report: r,
       to: clientEmail,
-      subject: "Super Performance Report",
+      subject: "Your Free Super Performance Report",
       body: getTemplateBody("standard", r),
+      htmlBody: buildReportEmailHtml(r.client_name),
+      isHtml: true,
     });
   };
 
@@ -206,12 +209,21 @@ export default function Admin() {
     setSelectedTemplate(templateKey);
     const clientName = emailDialog.report.client_name;
     const isReferral = templateKey === "referral";
+    const isStandard = templateKey === "standard";
     setEmailDialog(prev => ({
       ...prev,
       body: getTemplateBody(templateKey, prev.report!),
-      subject: isReferral ? "Get a $100 Gift Card - Referral Offer" : "Super Performance Report",
-      htmlBody: isReferral ? buildReferralEmailHtml(clientName) : undefined,
-      isHtml: isReferral,
+      subject: isReferral
+        ? "Get a $100 Gift Card - Referral Offer"
+        : isStandard
+          ? "Your Free Super Performance Report"
+          : "Super Performance Report",
+      htmlBody: isReferral
+        ? buildReferralEmailHtml(clientName)
+        : isStandard
+          ? buildReportEmailHtml(clientName)
+          : undefined,
+      isHtml: isReferral || isStandard,
     }));
   };
 
