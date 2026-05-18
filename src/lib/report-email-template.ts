@@ -54,8 +54,8 @@ export function buildReportEmailHtml(
   <!-- HERO BANNER -->
   <tr><td class="hero" style="padding:40px 32px;background:linear-gradient(135deg, ${navy} 0%, ${brandBlueDark} 60%, ${brandBlue} 100%);">
     <p style="margin:0 0 8px;font-size:11px;font-weight:bold;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.75);">Your Free Super Performance Report</p>
-    <p class="hero-title" style="margin:0;font-size:28px;font-weight:800;color:#ffffff;line-height:36px;letter-spacing:-0.5px;">Hi ${safeName}, your report is ready 🎉</p>
-    <p style="margin:14px 0 0;font-size:15px;color:rgba(255,255,255,0.85);line-height:23px;">A simple look at what an extra 2.5% on your current return could mean for you by retirement.</p>
+    <p class="hero-title" style="margin:0;font-size:28px;font-weight:800;color:#ffffff;line-height:36px;letter-spacing:-0.5px;">Hi ${safeName}, your report is ready</p>
+    <p style="margin:14px 0 0;font-size:15px;color:rgba(255,255,255,0.85);line-height:23px;">A simple look at what you could potentially be missing</p>
   </td></tr>
 
   <!-- BODY INTRO -->
