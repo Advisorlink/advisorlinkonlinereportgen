@@ -516,7 +516,7 @@ export default function Admin() {
                 </div>
               )}
               <p className="text-[11px] text-muted-foreground italic">
-                {emailDialog.isHtml ? "No PDF will be attached" : "PDF report will be attached automatically"} &bull; Your Gmail signature will be appended
+                {selectedTemplate === "referral" ? "No PDF will be attached" : "PDF report will be attached automatically"} &bull; Your Gmail signature will be appended
               </p>
             </div>
 
