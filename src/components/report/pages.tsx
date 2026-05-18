@@ -592,9 +592,9 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
       <div className="mb-3 rounded-xl border border-cyan/30 bg-cyan/5 px-4 py-3">
         <p className="text-[11px] leading-relaxed text-foreground">
           <strong className="text-navy">Illustration only:</strong>{" "}
-          We have added an extra <strong>2.5%</strong> to your current net return to produce the comparison figures below.
-          This shows what an additional 2.5% per year could mean for your balance at retirement,
-          keeping the same risk profile and contribution pattern. It is not a guarantee of future performance.
+          It is very common to see at least an additional <strong>2.5%</strong> increase in net return with the right advice.
+          The comparison figures below show what an extra 2.5% per year could mean for your balance at retirement,
+          keeping the same risk profile and contribution pattern. This is not a guarantee of future performance.
         </p>
       </div>
 
