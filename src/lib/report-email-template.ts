@@ -54,8 +54,8 @@ export function buildReportEmailHtml(
   <!-- HERO BANNER -->
   <tr><td class="hero" style="padding:40px 32px;background:linear-gradient(135deg, ${navy} 0%, ${brandBlueDark} 60%, ${brandBlue} 100%);">
     <p style="margin:0 0 8px;font-size:11px;font-weight:bold;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.75);">Your Free Super Performance Report</p>
-    <p class="hero-title" style="margin:0;font-size:28px;font-weight:800;color:#ffffff;line-height:36px;letter-spacing:-0.5px;">Hi ${safeName}, your report is ready 🎉</p>
-    <p style="margin:14px 0 0;font-size:15px;color:rgba(255,255,255,0.85);line-height:23px;">A simple look at what an extra 2.5% on your current return could mean for you by retirement.</p>
+    <p class="hero-title" style="margin:0;font-size:28px;font-weight:800;color:#ffffff;line-height:36px;letter-spacing:-0.5px;">Hi ${safeName}, your report is ready</p>
+    <p style="margin:14px 0 0;font-size:15px;color:rgba(255,255,255,0.85);line-height:23px;">A simple look at what you could potentially be missing</p>
   </td></tr>
 
   <!-- BODY INTRO -->
@@ -65,15 +65,17 @@ export function buildReportEmailHtml(
     </p>
   </td></tr>
 
-  <!-- ATTACHMENT CALL-OUT (mimics a button so it's the visual focal point) -->
+  <!-- ATTACHMENT CALL-OUT (styled as a button) -->
   <tr><td class="px" style="padding:24px 32px 8px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:16px;background:linear-gradient(135deg, ${brandBlueDark}, ${brandBlue});">
-      <tr><td style="padding:26px 28px;text-align:center;">
-        <p style="margin:0 0 6px;font-size:30px;line-height:30px;">📎</p>
-        <p class="cta-text" style="margin:0;font-size:18px;font-weight:800;color:#ffffff;line-height:26px;letter-spacing:0.2px;">Your Free Report is Attached</p>
-        <p style="margin:6px 0 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:20px;">Open the PDF below to view your full report.</p>
-      </td></tr>
-    </table>
+    <a href="#" style="text-decoration:none;display:block;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:16px;background:linear-gradient(135deg, ${brandBlueDark}, ${brandBlue});cursor:pointer;">
+        <tr><td style="padding:26px 28px;text-align:center;">
+          <p style="margin:0 0 6px;font-size:30px;line-height:30px;">📎</p>
+          <p class="cta-text" style="margin:0;font-size:18px;font-weight:800;color:#ffffff;line-height:26px;letter-spacing:0.2px;">Your Free Report is Attached</p>
+          <p style="margin:6px 0 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:20px;">Open the PDF below to view your full report.</p>
+        </td></tr>
+      </table>
+    </a>
   </td></tr>
 
   <!-- HERE TO HELP CARD -->
