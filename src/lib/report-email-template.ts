@@ -63,9 +63,6 @@ export function buildReportEmailHtml(
     <p style="margin:0 0 16px;font-size:16px;color:${bodyText};line-height:26px;">
       Thanks for taking the time to request your free performance report. We've put it together personally for you and it's <strong style="color:${darkText};">attached to this email</strong> as a PDF.
     </p>
-    <p style="margin:0;font-size:16px;color:${bodyText};line-height:26px;">
-      Just a heads up, this isn't a comparison against other funds. It simply shows what an <strong style="color:${darkText};">extra 2.5%</strong> on your current return could potentially look like, so you can see if there may be room to get a bit more out of your super.
-    </p>
   </td></tr>
 
   <!-- ATTACHMENT CALL-OUT (mimics a button so it's the visual focal point) -->
