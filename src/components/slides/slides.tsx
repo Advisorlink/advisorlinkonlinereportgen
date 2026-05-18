@@ -4,81 +4,59 @@ import travis from "@/assets/slides/travis.jpg";
 import handsDesk from "@/assets/slides/hands-desk.jpg";
 import industryLogos from "@/assets/slides/industry-logos.png";
 import activelyManagedCard from "@/assets/slides/actively-managed-card.png";
-import chooseSeal from "@/assets/slides/choose-seal.png";
 import googleReviews from "@/assets/slides/google-reviews.png";
 import stefanoAward from "@/assets/slides/stefano-award.jpg";
-import setupMeeting from "@/assets/slides/setup-meeting.jpg";
 import {
   Award,
-  Heart,
   ShieldCheck,
   UserCheck,
-  DollarSign,
-  Clock,
-  CheckCircle2,
-  Star,
+  Sparkles,
   Check,
   X as XIcon,
   CalendarCheck,
+  ArrowUpRight,
+  Quote,
+  TrendingUp,
+  Building2,
+  Briefcase,
+  Users,
+  FileText,
+  Phone,
+  Mail,
+  MapPin,
 } from "lucide-react";
 
 /* ============================================================
-   Shared design tokens / chrome
+   DESIGN SYSTEM — premium private-wealth editorial
    ============================================================ */
 
-const NAVY = "#0a2a5c";
-const NAVY_DEEP = "#06173a";
-const ACCENT = "#3ee0d0"; // cyan
-const ACCENT_BLUE = "#1e90ff";
-const TEXT_DARK = "#0f172a";
+const INK = "#0B1220";           // near-black headlines
+const GRAPHITE = "#3a4658";      // secondary text
+const MUTED = "#6b7689";         // captions
+const HAIRLINE = "#E5E7EB";      // dividers
+const PAPER = "#F6F4EE";         // warm off-white
+const CREAM = "#EFEAE0";         // accent surface
+const NAVY = "#10243F";          // brand navy
+const NAVY_INK = "#08182E";
+const GOLD = "#B8975A";          // accent gold
+const GOLD_SOFT = "#D7BE8C";
+const SAGE = "#5B7A6E";          // pro green
+const RUST = "#B45A3C";          // con rust
 
-/** Logo block (used everywhere) */
-function Logo({ light = false, size = "lg" }: { light?: boolean; size?: "sm" | "lg" }) {
-  const w = size === "lg" ? 260 : 180;
-  return (
-    <img
-      src={logo}
-      alt="Advisor Link Online"
-      style={{ width: w, height: "auto", filter: light ? "brightness(0) invert(1)" : undefined }}
-    />
-  );
-}
+const SERIF = '"Cormorant Garamond", "Playfair Display", Georgia, serif';
+const SANS = '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
-/** Diagonal split chrome used on slides 1-7. White top-left, navy bottom-right. */
-function DiagonalFrame({ children, footer }: { children: React.ReactNode; footer?: React.ReactNode }) {
-  return (
-    <div style={{ width: 1920, height: 1080, position: "relative", overflow: "hidden", background: "#fff" }}>
-      {/* Navy diagonal */}
-      <svg width="1920" height="1080" style={{ position: "absolute", inset: 0 }}>
-        <defs>
-          <linearGradient id="navyGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#0a2a5c" />
-            <stop offset="100%" stopColor="#1656b8" />
-          </linearGradient>
-        </defs>
-        <polygon points="1920,0 1920,1080 0,1080 920,0" fill="url(#navyGrad)" />
-        {/* thin navy slab top-left for logo backing */}
-        <polygon points="0,0 380,0 0,400" fill="#06173a" />
-      </svg>
+/* ----------------------------- Chrome ----------------------------- */
 
-      {/* Logo */}
-      <div style={{ position: "absolute", top: 70, left: 90, zIndex: 10 }}>
-        <Logo />
-      </div>
-
-      {children}
-
-      {footer && (
-        <div style={{ position: "absolute", bottom: 40, left: 90, color: "#fff", fontSize: 22, lineHeight: 1.5 }}>
-          {footer}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Navy header chrome used on slides 9-14 (rounded navy bar across top). */
-function HeaderFrame({ children, light = true }: { children: React.ReactNode; light?: boolean }) {
+function Stage({
+  bg = PAPER,
+  ink = INK,
+  children,
+}: {
+  bg?: string;
+  ink?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div
       style={{
@@ -86,350 +64,603 @@ function HeaderFrame({ children, light = true }: { children: React.ReactNode; li
         height: 1080,
         position: "relative",
         overflow: "hidden",
-        background: light ? "#f8fafc" : "#fff",
+        background: bg,
+        color: ink,
+        fontFamily: SANS,
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 200,
-          background: "linear-gradient(180deg, #06173a 0%, #0a2a5c 100%)",
-          borderBottomLeftRadius: 48,
-          borderBottomRightRadius: 48,
-        }}
-      />
-      <div style={{ position: "absolute", top: 50, left: 90, zIndex: 10 }}>
-        <Logo light />
-      </div>
       {children}
     </div>
   );
 }
 
-/* ============================================================
-   Slide 1 — Hi 👋 So let's have a chat
-   ============================================================ */
-export function Slide01() {
+function TopBar({ light = false, pageLabel }: { light?: boolean; pageLabel?: string }) {
+  const c = light ? "rgba(255,255,255,0.92)" : INK;
+  const sub = light ? "rgba(255,255,255,0.55)" : MUTED;
+  const line = light ? "rgba(255,255,255,0.18)" : HAIRLINE;
   return (
-    <DiagonalFrame
-      footer={
-        <>
-          <div style={{ fontWeight: 700 }}>ABN 99 671 139 923</div>
-          <div>admin@advisorlinkonline.com.au</div>
-          <div>07 5662 5977</div>
-          <div>2/21 Upton Street, Bundall QLD 4217</div>
-        </>
-      }
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 110,
+        padding: "0 90px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderBottom: `1px solid ${line}`,
+      }}
     >
-      {/* Couple photo card */}
-      <div
-        style={{
-          position: "absolute",
-          left: 280,
-          top: 230,
-          width: 720,
-          height: 820,
-          borderRadius: 18,
-          overflow: "hidden",
-          boxShadow: "0 30px 80px rgba(0,0,0,0.25)",
-        }}
-      >
-        <img src={coupleTablet} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      <img
+        src={logo}
+        alt="Advisor Link Online"
+        style={{ height: 44, width: "auto", filter: light ? "brightness(0) invert(1)" : undefined }}
+      />
+      <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
+        {pageLabel && (
+          <span
+            style={{
+              fontSize: 16,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: sub,
+              fontWeight: 500,
+            }}
+          >
+            {pageLabel}
+          </span>
+        )}
+        <span
+          style={{
+            fontSize: 16,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: c,
+            fontWeight: 600,
+          }}
+        >
+          Private Superannuation Review
+        </span>
       </div>
-      {/* Chat bubble floating */}
-      <div
-        style={{
-          position: "absolute",
-          left: 760,
-          top: 760,
-          width: 160,
-          height: 160,
-          borderRadius: "50%",
-          background: ACCENT_BLUE,
-          display: "grid",
-          placeItems: "center",
-          boxShadow: "0 20px 50px rgba(30,144,255,0.5)",
-        }}
-      >
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z"
-            fill="#fff"
-          />
-          <circle cx="9" cy="12" r="1.2" fill={ACCENT_BLUE} />
-          <circle cx="12" cy="12" r="1.2" fill={ACCENT_BLUE} />
-          <circle cx="15" cy="12" r="1.2" fill={ACCENT_BLUE} />
-        </svg>
-      </div>
+    </div>
+  );
+}
 
-      {/* Headline */}
-      <div style={{ position: "absolute", right: 110, top: 340, color: "#fff", fontWeight: 800, letterSpacing: "-0.02em" }}>
-        <div style={{ fontSize: 130, color: ACCENT, lineHeight: 1 }}>
-          Hi <span style={{ fontSize: 110 }}>👋</span>
-        </div>
-        <div style={{ fontSize: 130, lineHeight: 1.05, marginTop: 20 }}>
-          So let's have
-        </div>
-        <div style={{ fontSize: 130, lineHeight: 1.05 }}>
-          a <span style={{ color: ACCENT }}>chat..</span>
-        </div>
-      </div>
-    </DiagonalFrame>
+function BottomBar({ light = false, page, total = 15 }: { light?: boolean; page: number; total?: number }) {
+  const c = light ? "rgba(255,255,255,0.7)" : MUTED;
+  const line = light ? "rgba(255,255,255,0.18)" : HAIRLINE;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 80,
+        padding: "0 90px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderTop: `1px solid ${line}`,
+        fontSize: 15,
+        letterSpacing: "0.18em",
+        textTransform: "uppercase",
+        color: c,
+      }}
+    >
+      <span>Advisor Link Online · Est. Australia</span>
+      <span>
+        {String(page).padStart(2, "0")} <span style={{ opacity: 0.4 }}>/ {total}</span>
+      </span>
+    </div>
+  );
+}
+
+function Eyebrow({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
+  return (
+    <div
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 14,
+        fontSize: 15,
+        letterSpacing: "0.32em",
+        textTransform: "uppercase",
+        fontWeight: 600,
+        color: light ? GOLD_SOFT : GOLD,
+      }}
+    >
+      <span style={{ width: 36, height: 1, background: light ? GOLD_SOFT : GOLD }} />
+      {children}
+    </div>
+  );
+}
+
+function Display({
+  children,
+  size = 140,
+  light = false,
+  italic = false,
+}: {
+  children: React.ReactNode;
+  size?: number;
+  light?: boolean;
+  italic?: boolean;
+}) {
+  return (
+    <h1
+      style={{
+        fontFamily: SERIF,
+        fontWeight: 500,
+        fontSize: size,
+        lineHeight: 0.98,
+        letterSpacing: "-0.02em",
+        margin: 0,
+        color: light ? "#fff" : INK,
+        fontStyle: italic ? "italic" : "normal",
+      }}
+    >
+      {children}
+    </h1>
   );
 }
 
 /* ============================================================
-   Slide 2 — Important Disclaimer + Travis profile
+   Slide 01 — Cover
    ============================================================ */
-export function Slide02() {
+export function Slide01() {
   return (
-    <DiagonalFrame>
-      {/* Travis card */}
+    <Stage bg={PAPER}>
+      <TopBar pageLabel="Cover" />
+
+      {/* Editorial left */}
+      <div style={{ position: "absolute", left: 90, top: 240, width: 1020 }}>
+        <Eyebrow>A Conversation About Your Future</Eyebrow>
+        <div style={{ marginTop: 50 }}>
+          <Display size={170}>Hi.</Display>
+          <Display size={120} italic>
+            So let&rsquo;s have
+          </Display>
+          <Display size={120}>
+            a <span style={{ color: GOLD, fontStyle: "italic" }}>chat</span>.
+          </Display>
+        </div>
+
+        <p
+          style={{
+            marginTop: 56,
+            maxWidth: 760,
+            fontSize: 26,
+            lineHeight: 1.55,
+            color: GRAPHITE,
+          }}
+        >
+          A clear, no-pressure look at the three paths available for your superannuation —
+          and which one is most likely to take you where you want to go.
+        </p>
+
+        {/* Contact line */}
+        <div
+          style={{
+            marginTop: 80,
+            display: "flex",
+            gap: 48,
+            fontSize: 18,
+            color: MUTED,
+            letterSpacing: "0.04em",
+          }}
+        >
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <Phone size={18} /> 07 5662 5977
+          </span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <Mail size={18} /> admin@advisorlinkonline.com.au
+          </span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <MapPin size={18} /> Bundall QLD 4217
+          </span>
+        </div>
+      </div>
+
+      {/* Photo column */}
       <div
         style={{
           position: "absolute",
-          left: 200,
-          top: 230,
-          width: 560,
-          height: 760,
-          borderRadius: 22,
+          right: 90,
+          top: 170,
+          width: 680,
+          height: 800,
+          borderRadius: 4,
           overflow: "hidden",
-          background: "#fff",
-          boxShadow: "0 30px 70px rgba(0,0,0,0.3)",
+          boxShadow: "0 40px 100px rgba(8,24,46,0.18)",
         }}
       >
-        <div style={{ position: "relative", width: "100%", height: 620 }}>
+        <img src={coupleTablet} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        {/* Gold rule corner */}
+        <div
+          style={{
+            position: "absolute",
+            top: -1,
+            right: -1,
+            width: 120,
+            height: 120,
+            borderTop: `3px solid ${GOLD}`,
+            borderRight: `3px solid ${GOLD}`,
+          }}
+        />
+      </div>
+
+      {/* Vertical caption */}
+      <div
+        style={{
+          position: "absolute",
+          right: 50,
+          top: 200,
+          writingMode: "vertical-rl",
+          fontSize: 14,
+          letterSpacing: "0.4em",
+          textTransform: "uppercase",
+          color: MUTED,
+        }}
+      >
+        Edition 01 — Your Retirement, Reconsidered
+      </div>
+
+      <BottomBar page={1} />
+    </Stage>
+  );
+}
+
+/* ============================================================
+   Slide 02 — Disclaimer + Travis
+   ============================================================ */
+export function Slide02() {
+  return (
+    <Stage bg={PAPER}>
+      <TopBar pageLabel="01 · Welcome" />
+
+      {/* Left: Travis editorial portrait */}
+      <div style={{ position: "absolute", left: 90, top: 170, width: 620 }}>
+        <div
+          style={{
+            width: 620,
+            height: 760,
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: 4,
+            boxShadow: "0 40px 100px rgba(8,24,46,0.2)",
+          }}
+        >
           <img src={travis} alt="Travis Seckold" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           <div
             style={{
               position: "absolute",
               inset: 0,
-              background: "linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.75) 100%)",
+              background: "linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(8,24,46,0.9) 100%)",
             }}
           />
-          <div style={{ position: "absolute", left: 28, bottom: 24, color: "#fff" }}>
-            <div style={{ fontSize: 38, fontWeight: 700 }}>Travis Seckold</div>
-            <div style={{ fontSize: 22, color: "#7dd3fc" }}>Senior Research Analyst</div>
+          <div style={{ position: "absolute", left: 36, right: 36, bottom: 36, color: "#fff" }}>
+            <div style={{ fontSize: 14, letterSpacing: "0.32em", textTransform: "uppercase", color: GOLD_SOFT }}>
+              Your Analyst
+            </div>
+            <div style={{ fontFamily: SERIF, fontSize: 54, marginTop: 8, lineHeight: 1 }}>Travis Seckold</div>
+            <div style={{ fontSize: 18, color: "rgba(255,255,255,0.75)", marginTop: 6 }}>
+              Senior Research Analyst · 6+ years
+            </div>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "22px 28px", color: "#0a2a5c", fontSize: 22 }}>
-          <Award color={ACCENT_BLUE} size={28} />
-          <span>Over 6 years</span>
-        </div>
-      </div>
 
-      {/* Disclaimer card */}
-      <div
-        style={{
-          position: "absolute",
-          right: 110,
-          top: 230,
-          width: 970,
-          padding: "40px 48px",
-          borderRadius: 22,
-          background: "linear-gradient(135deg, #06173a, #1656b8)",
-          color: "#fff",
-          boxShadow: "0 20px 50px rgba(6,23,58,0.4)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 32, fontWeight: 700, marginBottom: 20 }}>
-          <ShieldCheck size={36} /> Important Disclaimer
-        </div>
-        <p style={{ fontSize: 22, lineHeight: 1.55, margin: 0 }}>
-          Under Australian law, it is my duty of care to inform you that this call is being recorded for
-          quality and training purposes. Today I won't be asking you to make any changes or giving you any
-          personal or general advice. Today we will have a look at what you are currently on track for
-          regarding your retirement, examine the three options available for your superannuation, and help you
-          identify any improvements that you feel you would like assistance with. At the end of this call, we
-          will book in a call with one of our FPA-approved advisors to go through the results and their
-          recommendations with you.
-        </p>
-      </div>
-
-      {/* Professional profile card */}
-      <div
-        style={{
-          position: "absolute",
-          right: 110,
-          top: 720,
-          width: 970,
-          padding: "32px 48px",
-          borderRadius: 22,
-          background: "#fff",
-          color: TEXT_DARK,
-          boxShadow: "0 20px 50px rgba(0,0,0,0.15)",
-        }}
-      >
-        <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 18, color: NAVY }}>Professional Profile</div>
-        <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: 18, display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Credentials strip */}
+        <div
+          style={{
+            marginTop: 24,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 16,
+          }}
+        >
           {[
-            { icon: <Award color="#fff" size={22} />, title: "Professional Experience", text: "Over 6 years in the industry with specialised focus on superannuation reviews." },
-            { icon: <Heart color="#fff" size={22} />, title: "Client-Focused Approach", text: "Combines technical expertise with genuine concern for clients' financial wellbeing and long-term security." },
-          ].map((row, i) => (
-            <div key={i} style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", background: ACCENT_BLUE, display: "grid", placeItems: "center", flexShrink: 0 }}>
-                {row.icon}
+            { icon: <Award size={18} />, label: "Experience", value: "6+ Years" },
+            { icon: <ShieldCheck size={18} />, label: "Focus", value: "Super Reviews" },
+          ].map((c, i) => (
+            <div
+              key={i}
+              style={{
+                background: "#fff",
+                padding: "20px 22px",
+                borderRadius: 4,
+                borderLeft: `2px solid ${GOLD}`,
+              }}
+            >
+              <div style={{ color: GOLD, display: "flex", alignItems: "center", gap: 10, fontSize: 13, letterSpacing: "0.2em", textTransform: "uppercase" }}>
+                {c.icon} {c.label}
               </div>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 22 }}>{row.title}</div>
-                <div style={{ fontSize: 20, color: "#475569", marginTop: 4 }}>{row.text}</div>
-              </div>
+              <div style={{ marginTop: 8, fontSize: 22, fontWeight: 600, color: INK }}>{c.value}</div>
             </div>
           ))}
         </div>
       </div>
-    </DiagonalFrame>
+
+      {/* Right: Disclaimer */}
+      <div style={{ position: "absolute", left: 800, top: 200, right: 90 }}>
+        <Eyebrow>For The Record</Eyebrow>
+        <div style={{ marginTop: 32 }}>
+          <Display size={88}>An important</Display>
+          <Display size={88} italic>
+            disclaimer<span style={{ color: GOLD }}>.</span>
+          </Display>
+        </div>
+
+        <div
+          style={{
+            marginTop: 44,
+            padding: "44px 52px",
+            background: "#fff",
+            borderRadius: 4,
+            position: "relative",
+            boxShadow: "0 24px 60px rgba(8,24,46,0.08)",
+          }}
+        >
+          <Quote
+            size={56}
+            style={{ position: "absolute", top: 24, left: 28, color: CREAM, transform: "scaleX(-1)" }}
+          />
+          <p
+            style={{
+              margin: 0,
+              fontFamily: SERIF,
+              fontSize: 26,
+              lineHeight: 1.5,
+              color: INK,
+              fontStyle: "italic",
+              position: "relative",
+            }}
+          >
+            Under Australian law, this call is recorded for quality and training. Today I won&rsquo;t ask you
+            to make changes, and I won&rsquo;t give you personal or general advice. We&rsquo;ll review where
+            you&rsquo;re currently tracking for retirement, walk through the three options for your
+            superannuation, and identify any improvements you&rsquo;d like help with. At the end, we&rsquo;ll
+            book a call with one of our FPA-approved advisers to share their recommendations.
+          </p>
+          <div style={{ marginTop: 28, height: 1, background: HAIRLINE }} />
+          <div
+            style={{
+              marginTop: 20,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              fontSize: 14,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: MUTED,
+            }}
+          >
+            <span>Recorded · Compliant · No Obligation</span>
+            <span style={{ color: GOLD, fontWeight: 600 }}>FPA Approved</span>
+          </div>
+        </div>
+      </div>
+
+      <BottomBar page={2} />
+    </Stage>
   );
 }
 
 /* ============================================================
-   Slide 3 — Why So Many People Choose Us
+   Slide 03 — Why Choose Us
    ============================================================ */
 export function Slide03() {
   return (
-    <DiagonalFrame>
-      <img src={chooseSeal} alt="" style={{ position: "absolute", right: 90, top: 230, width: 280, height: 280 }} />
-      <img src={googleReviews} alt="" style={{ position: "absolute", right: 60, top: 580, width: 240, height: "auto", borderRadius: 12 }} />
+    <Stage bg={PAPER}>
+      <TopBar pageLabel="02 · The Promise" />
 
-      <h1
+      <div style={{ position: "absolute", top: 200, left: 90, right: 90 }}>
+        <Eyebrow>Why So Many Choose Us</Eyebrow>
+        <div style={{ marginTop: 36 }}>
+          <Display size={120}>
+            A higher <span style={{ fontStyle: "italic", color: GOLD }}>standard</span>
+          </Display>
+          <Display size={120}>of care.</Display>
+        </div>
+      </div>
+
+      {/* Two-card editorial layout */}
+      <div
         style={{
           position: "absolute",
-          left: 380,
-          top: 320,
-          fontSize: 80,
-          color: "#fff",
-          fontWeight: 800,
-          letterSpacing: "-0.02em",
-          lineHeight: 1.05,
-          margin: 0,
+          top: 600,
+          left: 90,
+          right: 90,
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 40,
         }}
       >
-        Why So Many People <span style={{ color: ACCENT }}>Choose Us</span>
-        <br />
-        To Help
-      </h1>
-
-      {[
-        {
-          title: "Our Matching Process",
-          accent: "GUARANTEE!",
-          body:
-            "We understand how important your financial future is and how tricky it can be to find the right advisor. That's why our GUARANTEE ensures that every financial advisor on our approved list is 100% FPA-accredited, fully vetted by us, and has undergone our strict qualification process.",
-          cta: "Check List",
-          left: 380,
-        },
-        {
-          title: "Our Service is 100% FREE—And",
-          accent: "We Mean FREE!",
-          body:
-            "You might be wondering, \"How on earth can they offer their services for free?\" And we don't blame you for asking! When we link you up with one of our accredited, licensed advisors, we charge them a linking fee whether you choose to accept their advice or not.",
-          cta: "Read More",
-          left: 1010,
-        },
-      ].map((card, i) => (
-        <div
-          key={i}
-          style={{
-            position: "absolute",
-            top: 600,
-            left: card.left,
-            width: 560,
-            height: 440,
-            borderRadius: 22,
-            padding: "32px 36px",
-            background: "linear-gradient(160deg, #06173a 0%, #0a2a5c 100%)",
-            color: "#fff",
-            boxShadow: "0 20px 50px rgba(0,0,0,0.35)",
-            overflow: "hidden",
-          }}
-        >
-          <div style={{ display: "flex", gap: 4, marginBottom: 16 }}>
-            {Array.from({ length: 5 }).map((_, j) => (
-              <Star key={j} size={18} fill={ACCENT} color={ACCENT} />
-            ))}
-          </div>
-          <div style={{ fontSize: 26, fontWeight: 700 }}>{card.title}</div>
-          <div style={{ fontSize: 26, fontWeight: 700, color: ACCENT, marginBottom: 14 }}>{card.accent}</div>
-          <p style={{ fontSize: 17, lineHeight: 1.55, color: "rgba(255,255,255,0.85)", margin: 0 }}>{card.body}</p>
+        {[
+          {
+            num: "01",
+            kicker: "The Matching Guarantee",
+            title: "Vetted, accredited, hand-picked.",
+            body:
+              "Every adviser on our approved list is 100% FPA-accredited, fully vetted, and has passed our strict qualification process — so you only meet professionals worth your time.",
+          },
+          {
+            num: "02",
+            kicker: "Genuinely Free",
+            title: "No fee, no catch — really.",
+            body:
+              "Advisory firms pay us a linking fee when we connect you, whether you proceed with their advice or not. You pay nothing out-of-pocket for the consultation, ever.",
+          },
+        ].map((c, i) => (
           <div
+            key={i}
             style={{
-              position: "absolute",
-              left: 36,
-              bottom: 28,
-              background: ACCENT,
-              color: "#06173a",
-              fontWeight: 700,
-              padding: "10px 22px",
-              borderRadius: 999,
-              fontSize: 16,
+              background: "#fff",
+              padding: "44px 48px",
+              borderRadius: 4,
+              boxShadow: "0 24px 60px rgba(8,24,46,0.08)",
+              position: "relative",
+              minHeight: 360,
             }}
           >
-            {card.cta}
+            <div
+              style={{
+                position: "absolute",
+                top: 36,
+                right: 44,
+                fontFamily: SERIF,
+                fontSize: 96,
+                lineHeight: 1,
+                color: CREAM,
+                fontStyle: "italic",
+              }}
+            >
+              {c.num}
+            </div>
+            <div style={{ color: GOLD, fontSize: 14, letterSpacing: "0.3em", textTransform: "uppercase", fontWeight: 600 }}>
+              {c.kicker}
+            </div>
+            <div style={{ fontFamily: SERIF, fontSize: 44, lineHeight: 1.1, color: INK, marginTop: 18, maxWidth: 560 }}>
+              {c.title}
+            </div>
+            <div style={{ height: 1, background: HAIRLINE, margin: "24px 0" }} />
+            <p style={{ margin: 0, fontSize: 19, lineHeight: 1.6, color: GRAPHITE }}>{c.body}</p>
           </div>
-        </div>
-      ))}
-    </DiagonalFrame>
+        ))}
+      </div>
+
+      {/* Reviews badge bottom-right */}
+      <div
+        style={{
+          position: "absolute",
+          right: 100,
+          top: 230,
+          display: "flex",
+          alignItems: "center",
+          gap: 18,
+          background: "#fff",
+          padding: "14px 22px",
+          borderRadius: 999,
+          boxShadow: "0 12px 30px rgba(8,24,46,0.08)",
+        }}
+      >
+        <img src={googleReviews} alt="Google reviews" style={{ height: 44, width: "auto" }} />
+      </div>
+
+      <BottomBar page={3} />
+    </Stage>
   );
 }
 
 /* ============================================================
-   Slides 4, 5, 6 — Options (shared layout)
+   Slides 4 / 5 / 6 — Options
    ============================================================ */
 function OptionSlide({
-  optionLabel,
-  titleHighlight,
-  titleRest,
-  left,
+  page,
+  optionNumber,
+  optionTitle,
+  subtitle,
+  visual,
   bullets,
   showShareReport = false,
 }: {
-  optionLabel: string;
-  titleHighlight: string;
-  titleRest: string;
-  left: React.ReactNode;
-  bullets: { type: "pro" | "con"; highlight: string; text: string }[];
+  page: number;
+  optionNumber: string;
+  optionTitle: React.ReactNode;
+  subtitle: string;
+  visual: React.ReactNode;
+  bullets: { type: "pro" | "con"; text: string }[];
   showShareReport?: boolean;
 }) {
   return (
-    <DiagonalFrame>
-      {/* Left column content */}
-      <div style={{ position: "absolute", left: 200, top: 240, width: 760, height: 780 }}>{left}</div>
+    <Stage bg={PAPER}>
+      <TopBar pageLabel={`Option ${optionNumber}`} />
 
-      {/* Right column text */}
-      <div style={{ position: "absolute", right: 110, top: 230, width: 920 }}>
-        <div style={{ color: "#fff", fontSize: 52, fontWeight: 800 }}>{optionLabel}</div>
-        <h2 style={{ color: ACCENT, fontSize: 70, fontWeight: 800, lineHeight: 1.05, margin: "16px 0 0", letterSpacing: "-0.02em" }}>
-          {titleHighlight}
-          <span style={{ color: "#fff" }}> {titleRest}</span>
-        </h2>
+      {/* Visual left */}
+      <div
+        style={{
+          position: "absolute",
+          left: 90,
+          top: 180,
+          width: 800,
+          height: 780,
+          borderRadius: 4,
+          overflow: "hidden",
+          background: "#fff",
+          boxShadow: "0 40px 100px rgba(8,24,46,0.15)",
+        }}
+      >
+        {visual}
+        <div
+          style={{
+            position: "absolute",
+            top: -1,
+            left: -1,
+            width: 120,
+            height: 120,
+            borderTop: `3px solid ${GOLD}`,
+            borderLeft: `3px solid ${GOLD}`,
+          }}
+        />
+      </div>
 
-        <ul style={{ listStyle: "none", padding: 0, margin: "36px 0 0", display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Text right */}
+      <div style={{ position: "absolute", left: 960, top: 200, right: 90 }}>
+        <div
+          style={{
+            fontFamily: SERIF,
+            fontStyle: "italic",
+            fontSize: 64,
+            color: GOLD,
+            lineHeight: 1,
+          }}
+        >
+          Option {optionNumber}
+        </div>
+        <div style={{ marginTop: 18 }}>
+          <Display size={84}>{optionTitle}</Display>
+        </div>
+        <p style={{ marginTop: 22, fontSize: 22, color: MUTED, maxWidth: 800, lineHeight: 1.5 }}>{subtitle}</p>
+
+        <div style={{ height: 1, background: HAIRLINE, margin: "40px 0 32px" }} />
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
           {bullets.map((b, i) => (
-            <li key={i} style={{ display: "flex", gap: 16, alignItems: "flex-start", color: "#fff", fontSize: 24, lineHeight: 1.35 }}>
+            <div key={i} style={{ display: "flex", gap: 22, alignItems: "flex-start" }}>
               <div
                 style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 8,
-                  background: b.type === "pro" ? "#10b981" : "#ef4444",
+                  width: 32,
+                  height: 32,
+                  borderRadius: 999,
+                  background: b.type === "pro" ? SAGE : RUST,
                   display: "grid",
                   placeItems: "center",
                   flexShrink: 0,
-                  marginTop: 4,
+                  marginTop: 6,
                 }}
               >
-                {b.type === "pro" ? <Check color="#fff" size={20} /> : <XIcon color="#fff" size={20} />}
+                {b.type === "pro" ? <Check color="#fff" size={18} strokeWidth={3} /> : <XIcon color="#fff" size={18} strokeWidth={3} />}
               </div>
-              <div>
-                <span style={{ color: ACCENT, fontWeight: 600 }}>{b.highlight}</span>{" "}
-                <span>{b.text}</span>
+              <div style={{ fontSize: 22, lineHeight: 1.45, color: INK, maxWidth: 780 }}>
+                <span
+                  style={{
+                    fontSize: 12,
+                    letterSpacing: "0.25em",
+                    textTransform: "uppercase",
+                    color: b.type === "pro" ? SAGE : RUST,
+                    fontWeight: 700,
+                    marginRight: 12,
+                  }}
+                >
+                  {b.type === "pro" ? "Pro" : "Con"}
+                </span>
+                {b.text}
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
 
       {showShareReport && (
@@ -437,51 +668,48 @@ function OptionSlide({
           style={{
             position: "absolute",
             right: 90,
-            bottom: 60,
-            background: "#fff",
-            color: TEXT_DARK,
-            padding: "14px 36px",
-            borderRadius: 10,
-            fontSize: 22,
+            bottom: 110,
+            background: NAVY,
+            color: "#fff",
+            padding: "18px 36px",
+            borderRadius: 4,
+            fontSize: 18,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
             fontWeight: 600,
-            boxShadow: "0 6px 18px rgba(0,0,0,0.2)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 14,
+            boxShadow: "0 16px 40px rgba(8,24,46,0.3)",
           }}
         >
-          Share Report
+          Share Report <ArrowUpRight size={20} />
         </div>
       )}
-    </DiagonalFrame>
+
+      <BottomBar page={page} />
+    </Stage>
   );
 }
 
 export function Slide04() {
   return (
     <OptionSlide
-      optionLabel="Option 1:"
-      titleHighlight="INDUSTRY/RETAIL"
-      titleRest="SUPER FUNDS"
-      left={
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            borderRadius: 32,
-            background: "#fff",
-            boxShadow: "0 30px 70px rgba(0,0,0,0.2)",
-            display: "grid",
-            placeItems: "center",
-            overflow: "hidden",
-          }}
-        >
-          <img src={industryLogos} alt="Industry funds" style={{ width: "92%", height: "92%", objectFit: "contain" }} />
+      page={4}
+      optionNumber="I"
+      optionTitle={<>Industry &amp; Retail<br/><span style={{ fontStyle: "italic", color: GOLD }}>Super Funds</span></>}
+      subtitle="The default for most Australians — low-cost, hands-off, with limited control."
+      visual={
+        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", padding: 60 }}>
+          <img src={industryLogos} alt="Industry funds" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
         </div>
       }
       bullets={[
-        { type: "pro", highlight: "Industry retail fund members can choose from a variety of investment options,", text: "including balanced, growth, conservative, High Growth funds etc" },
-        { type: "pro", highlight: "Typically have lower setup and maintenance costs.", text: "" },
-        { type: "pro", highlight: "Industry retail funds require less time and effort", text: "from members, allowing them to focus on other priorities" },
-        { type: "con", highlight: "Typically see lower returns", text: "over the long run compared to some actively managed funds or SMSFs." },
-        { type: "con", highlight: "Not as much control", text: "over the investments" },
+        { type: "pro", text: "Members can choose from a variety of investment options — balanced, growth, conservative, high-growth and more." },
+        { type: "pro", text: "Typically lower setup and maintenance costs." },
+        { type: "pro", text: "Requires less time and effort, freeing you up to focus on other priorities." },
+        { type: "con", text: "Tend to deliver lower long-term returns than some actively managed funds or SMSFs." },
+        { type: "con", text: "Limited control over how your money is actually invested." },
       ]}
     />
   );
@@ -490,28 +718,17 @@ export function Slide04() {
 export function Slide05() {
   return (
     <OptionSlide
-      optionLabel="Option 2:"
-      titleHighlight="SELF MANAGED"
-      titleRest="SUPER FUND"
-      left={
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            borderRadius: 18,
-            overflow: "hidden",
-            boxShadow: "0 30px 70px rgba(0,0,0,0.25)",
-          }}
-        >
-          <img src={handsDesk} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        </div>
-      }
+      page={5}
+      optionNumber="II"
+      optionTitle={<>Self Managed<br/><span style={{ fontStyle: "italic", color: GOLD }}>Super Fund</span></>}
+      subtitle="Maximum control and flexibility — for those who have the time, expertise, and appetite for it."
+      visual={<img src={handsDesk} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
       bullets={[
-        { type: "pro", highlight: "SMSF members have greater control", text: "over their investment choices." },
-        { type: "pro", highlight: "They can diversify their portfolio by investing in various assets, including property,", text: "shares, and collectibles." },
-        { type: "pro", highlight: "When done correctly", text: "can see higher returns than an industry/retail fund." },
-        { type: "con", highlight: "Setting up and maintaining an SMSF can be expensive,", text: "and extremely time consuming." },
-        { type: "con", highlight: "Running an SMSF demands considerable time", text: "and effort from the trustees." },
+        { type: "pro", text: "Trustees have greater control over investment choices." },
+        { type: "pro", text: "Diversify into a wide range of assets — property, shares, collectibles." },
+        { type: "pro", text: "When run well, can outperform an industry or retail fund." },
+        { type: "con", text: "Setting up and maintaining an SMSF can be expensive and extremely time-consuming." },
+        { type: "con", text: "Demands ongoing time, attention, and trustee responsibility." },
       ]}
     />
   );
@@ -520,380 +737,441 @@ export function Slide05() {
 export function Slide06() {
   return (
     <OptionSlide
-      optionLabel="Option 3:"
-      titleHighlight="ACTIVELY MANAGED"
-      titleRest="SUPER FUNDS"
+      page={6}
+      optionNumber="III"
+      optionTitle={<>Actively Managed<br/><span style={{ fontStyle: "italic", color: GOLD }}>Super Funds</span></>}
+      subtitle="Professional management, broad investment universe, and a licensed adviser walking alongside you."
       showShareReport
-      left={
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            borderRadius: 32,
-            background: "#fff",
-            boxShadow: "0 30px 70px rgba(0,0,0,0.2)",
-            display: "grid",
-            placeItems: "center",
-            overflow: "hidden",
-          }}
-        >
-          <img src={activelyManagedCard} alt="Actively managed platforms" style={{ width: "94%", height: "94%", objectFit: "contain" }} />
+      visual={
+        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", padding: 60 }}>
+          <img src={activelyManagedCard} alt="Actively managed platforms" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
         </div>
       }
       bullets={[
-        { type: "pro", highlight: "Access to a licensed Financial Advisor", text: "helps ensure you are on the right track for a healthy retirement." },
-        { type: "pro", highlight: "1000's of investment options", text: "help to spread risk and potentially increase returns." },
-        { type: "pro", highlight: "Actively managed funds generally target annual returns between 9% and 14%,", text: "backed by professional investment management." },
-        { type: "con", highlight: "Generally have a set-up cost and sometimes higher fees", text: "due to being actively managed." },
-        { type: "con", highlight: "Performance dependent on fund managers.", text: "" },
+        { type: "pro", text: "Access to a licensed Financial Adviser keeping you on track for a healthy retirement." },
+        { type: "pro", text: "Thousands of investment options to spread risk and pursue stronger returns." },
+        { type: "pro", text: "Generally target annual returns between 9% and 14%, backed by professional management." },
+        { type: "con", text: "Typically a set-up cost, and sometimes higher fees, due to being actively managed." },
+        { type: "con", text: "Performance depends on the skill of the fund managers." },
       ]}
     />
   );
 }
 
 /* ============================================================
-   Slide 7 — Fees And Costs For Advice
+   Slide 07 — Fees
    ============================================================ */
 export function Slide07() {
   return (
-    <DiagonalFrame>
-      <h1 style={{ position: "absolute", left: 200, top: 290, fontSize: 56, color: NAVY, fontWeight: 700, margin: 0 }}>
-        Fees And Costs For Advice
-      </h1>
+    <Stage bg={PAPER}>
+      <TopBar pageLabel="03 · Fees" />
 
-      {/* Fee philosophy card */}
-      <div
-        style={{
-          position: "absolute",
-          left: 200,
-          top: 410,
-          width: 820,
-          padding: "36px 42px",
-          borderRadius: 22,
-          background: "linear-gradient(140deg, #06173a, #1656b8)",
-          color: "#fff",
-          boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
-        }}
-      >
-        <div style={{ fontSize: 32, fontWeight: 700, display: "flex", alignItems: "center", gap: 12 }}>
-          <DollarSign size={32} /> Fee Philosophy
+      <div style={{ position: "absolute", top: 190, left: 90, right: 90 }}>
+        <Eyebrow>Fees &amp; Costs For Advice</Eyebrow>
+        <div style={{ marginTop: 32, display: "flex", alignItems: "baseline", gap: 32 }}>
+          <Display size={110}>Fair pricing,</Display>
         </div>
-        <div style={{ fontSize: 20, opacity: 0.85, marginTop: 4 }}>Fair pricing for quality advice</div>
-        <p style={{ fontSize: 20, lineHeight: 1.55, marginTop: 22 }}>
-          Financial advice should be accessible, transparent, and valuable. The fee structure is designed to
-          ensure you get meaningful return on your investment in advisory services.
+        <Display size={110} italic>
+          <span style={{ color: GOLD }}>transparent</span> structure.
+        </Display>
+      </div>
+
+      {/* Philosophy column */}
+      <div style={{ position: "absolute", top: 600, left: 90, width: 760 }}>
+        <div style={{ color: GOLD, fontSize: 13, letterSpacing: "0.3em", textTransform: "uppercase", fontWeight: 700 }}>
+          Our Philosophy
+        </div>
+        <p style={{ marginTop: 18, fontFamily: SERIF, fontSize: 28, lineHeight: 1.45, color: INK, fontStyle: "italic" }}>
+          Financial advice should be accessible, transparent, and genuinely valuable. Our fee structure is designed so
+          you get a meaningful return on your investment in advice.
         </p>
+        <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 14 }}>
+          {[
+            { icon: <ShieldCheck size={18} />, text: "No conflicts — advisers don’t take commissions from product issuers." },
+            { icon: <UserCheck size={18} />, text: "Annual opt-in keeps you in control of ongoing services." },
+          ].map((r, i) => (
+            <div key={i} style={{ display: "flex", gap: 14, alignItems: "center", fontSize: 19, color: GRAPHITE }}>
+              <span style={{ color: GOLD }}>{r.icon}</span>
+              {r.text}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Fee table right */}
+      <div style={{ position: "absolute", top: 600, right: 90, width: 880 }}>
         {[
-          { icon: <ShieldCheck size={22} />, text: "No conflicts of interest — your adviser doesn't receive commissions from product issuers" },
-          { icon: <UserCheck size={22} />, text: "Annual opt-in process gives you control over ongoing services" },
-        ].map((r, i) => (
-          <div key={i} style={{ marginTop: 14, padding: "16px 20px", background: "rgba(255,255,255,0.1)", borderRadius: 12, display: "flex", alignItems: "center", gap: 14, fontSize: 18 }}>
-            <div style={{ color: ACCENT }}>{r.icon}</div>
-            {r.text}
+          {
+            label: "One-Time Setup",
+            tag: "Initial Advice Fee",
+            pct: "3.3 – 4.4%",
+            sub: "Paid from super, based on portfolio complexity",
+          },
+          {
+            label: "Ongoing (Optional)",
+            tag: "Annual Management",
+            pct: "1.1 – 2.2%",
+            sub: "For ongoing portfolio management and advice",
+          },
+          {
+            label: "Out-of-Pocket",
+            tag: "Initial Consultation",
+            pct: "Nil",
+            sub: "We are paid by the advisory firm — you pay nothing",
+            highlight: true,
+          },
+        ].map((row, i) => (
+          <div
+            key={i}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "220px 1fr 200px",
+              alignItems: "center",
+              padding: "30px 0",
+              borderTop: i === 0 ? `1px solid ${INK}` : `1px solid ${HAIRLINE}`,
+              borderBottom: i === 2 ? `1px solid ${INK}` : "none",
+            }}
+          >
+            <div style={{ fontSize: 13, letterSpacing: "0.28em", textTransform: "uppercase", color: row.highlight ? GOLD : MUTED, fontWeight: 700 }}>
+              {row.label}
+            </div>
+            <div>
+              <div style={{ fontFamily: SERIF, fontSize: 30, color: INK }}>{row.tag}</div>
+              <div style={{ fontSize: 16, color: MUTED, marginTop: 4 }}>{row.sub}</div>
+            </div>
+            <div
+              style={{
+                fontFamily: SERIF,
+                fontSize: 48,
+                fontWeight: 500,
+                textAlign: "right",
+                color: row.highlight ? GOLD : INK,
+              }}
+            >
+              {row.pct}
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Setup fee card */}
-      <FeeCard
-        top={410}
-        accentColor="#f59e0b"
-        accentBg="#fef3c7"
-        icon={<DollarSign size={26} color="#b45309" />}
-        title="One-Time Setup Fees"
-        tag="From Super"
-        pct="3.3% - 4.4%"
-        feeTitle="Initial Advice Fee"
-        feeSub="One-time setup fee based on portfolio complexity and requirements"
-      />
-      <FeeCard
-        top={710}
-        accentColor="#3b82f6"
-        accentBg="#dbeafe"
-        icon={<Clock size={26} color="#1d4ed8" />}
-        title="Optional Ongoing Fees"
-        titleExtra="(Optional)"
-        tag="From Super"
-        pct="1.1% - 2.2%"
-        feeTitle="Annual Management Fee"
-        feeSub="For ongoing portfolio management and advice"
-      />
-
-      {/* No out-of-pocket strip */}
-      <div
-        style={{
-          position: "absolute",
-          left: 200,
-          bottom: 80,
-          right: 110,
-          padding: "28px 36px",
-          background: "#fff",
-          borderRadius: 18,
-          boxShadow: "0 12px 35px rgba(0,0,0,0.12)",
-        }}
-      >
-        <div style={{ fontSize: 26, fontWeight: 700, color: NAVY, display: "flex", alignItems: "center", gap: 12 }}>
-          <DollarSign color="#10b981" size={28} /> No Out-of-Pocket Cost
-        </div>
-        <p style={{ fontSize: 19, color: "#475569", margin: "10px 0 0", lineHeight: 1.5 }}>
-          Our consultation service has no out-of-pocket cost to you. We are paid by the advisory firm whether
-          you choose to take their advice or not. Making sure that we are truly working in your best interest.
-        </p>
-      </div>
-    </DiagonalFrame>
-  );
-}
-
-function FeeCard({
-  top,
-  accentColor,
-  accentBg,
-  icon,
-  title,
-  titleExtra,
-  tag,
-  pct,
-  feeTitle,
-  feeSub,
-}: {
-  top: number;
-  accentColor: string;
-  accentBg: string;
-  icon: React.ReactNode;
-  title: string;
-  titleExtra?: string;
-  tag: string;
-  pct: string;
-  feeTitle: string;
-  feeSub: string;
-}) {
-  return (
-    <div
-      style={{
-        position: "absolute",
-        right: 110,
-        top,
-        width: 720,
-        background: "#fff",
-        borderRadius: 18,
-        boxShadow: "0 14px 40px rgba(0,0,0,0.15)",
-        overflow: "hidden",
-      }}
-    >
-      <div style={{ background: accentBg, padding: "18px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 24, fontWeight: 700, color: TEXT_DARK }}>
-          <div style={{ width: 44, height: 44, borderRadius: 10, background: "#fff", display: "grid", placeItems: "center" }}>
-            {icon}
-          </div>
-          {title}
-          {titleExtra && <span style={{ fontSize: 18, color: "#64748b", fontWeight: 500 }}>{titleExtra}</span>}
-        </div>
-        <div style={{ background: "#fff", padding: "6px 18px", borderRadius: 999, fontSize: 16, fontWeight: 600, color: TEXT_DARK }}>{tag}</div>
-      </div>
-      <div style={{ padding: "20px 28px", display: "flex", alignItems: "center", gap: 18 }}>
-        <div style={{ background: accentBg, color: accentColor, padding: "8px 18px", borderRadius: 999, fontWeight: 700, fontSize: 18 }}>
-          {pct}
-        </div>
-        <div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: TEXT_DARK }}>{feeTitle}</div>
-          <div style={{ fontSize: 16, color: "#64748b" }}>{feeSub}</div>
-        </div>
-      </div>
-    </div>
+      <BottomBar page={7} />
+    </Stage>
   );
 }
 
 /* ============================================================
-   Slide 8 — Stefano Duro IFA Award (full-bleed image)
+   Slide 08 — Stefano Duro feature
    ============================================================ */
 export function Slide08() {
   return (
-    <div style={{ width: 1920, height: 1080, position: "relative", overflow: "hidden", background: "#000" }}>
-      <img src={stefanoAward} alt="Stefano Duro — IFA Excellence Awards 2025" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-      <div
-        style={{
-          position: "absolute",
-          right: 70,
-          bottom: 70,
-          background: "#fff",
-          padding: "16px 44px",
-          borderRadius: 12,
-          fontSize: 24,
-          fontWeight: 600,
-          color: TEXT_DARK,
-          boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-        }}
-      >
-        Book A Time
+    <Stage bg={NAVY_INK} ink="#fff">
+      {/* Full-bleed image left */}
+      <div style={{ position: "absolute", left: 0, top: 0, width: 1100, height: 1080 }}>
+        <img src={stefanoAward} alt="Stefano Duro" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(90deg, rgba(8,24,46,0) 50%, rgba(8,24,46,0.95) 100%)",
+          }}
+        />
       </div>
-    </div>
+
+      <TopBar light pageLabel="04 · Recognition" />
+
+      {/* Right editorial */}
+      <div style={{ position: "absolute", left: 1080, top: 240, right: 90 }}>
+        <Eyebrow light>IFA Excellence Awards 2025</Eyebrow>
+        <div style={{ marginTop: 36 }}>
+          <Display size={100} light>
+            Stefano
+          </Display>
+          <Display size={100} light italic>
+            <span style={{ color: GOLD_SOFT }}>Duro</span>
+          </Display>
+        </div>
+        <div style={{ marginTop: 24, fontSize: 26, color: "rgba(255,255,255,0.7)", fontStyle: "italic", fontFamily: SERIF }}>
+          Official Judge — Independent Financial Adviser of the Year, 2025
+        </div>
+
+        <div style={{ height: 1, background: "rgba(255,255,255,0.18)", margin: "44px 0" }} />
+
+        <p style={{ fontSize: 22, lineHeight: 1.6, color: "rgba(255,255,255,0.82)", maxWidth: 700 }}>
+          Recognised by the industry’s peak body as a leading voice in independent financial advice — and a
+          trusted set of eyes on the practices we recommend to our clients.
+        </p>
+
+        <div
+          style={{
+            marginTop: 56,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 16,
+            background: GOLD,
+            color: NAVY_INK,
+            padding: "20px 36px",
+            borderRadius: 4,
+            fontSize: 18,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            fontWeight: 700,
+          }}
+        >
+          <CalendarCheck size={20} /> Book A Time
+        </div>
+      </div>
+
+      <BottomBar light page={8} />
+    </Stage>
   );
 }
 
 /* ============================================================
-   Slides 9-13 — Was Everything Explained To You Clearly?
+   Slides 9–13 — Was Everything Explained Clearly?
    ============================================================ */
-const CLIPBOARD_ITEMS = [
-  "The difference between the 3 options",
-  "What the next steps are with the advisor's SOA",
-  "What the fees are and how they must be included in the SOA",
-  "If you are able to be shown better alternatives, are you open to change?",
+const CLARITY = [
+  { n: "I",   t: "The difference between the three options" },
+  { n: "II",  t: "What the next steps are with the adviser’s SOA" },
+  { n: "III", t: "What the fees are and how they appear in the SOA" },
+  { n: "IV",  t: "If we can show better alternatives — are you open to change?" },
 ];
 
 export function SlideClipboards() {
   return (
-    <HeaderFrame>
-      <h1
-        style={{
-          position: "absolute",
-          top: 290,
-          left: 0,
-          right: 0,
-          textAlign: "center",
-          fontSize: 64,
-          fontWeight: 600,
-          color: TEXT_DARK,
-          margin: 0,
-        }}
-      >
-        Was <span style={{ color: ACCENT_BLUE }}>Everything Explained</span> To You Clearly?
-      </h1>
+    <Stage bg={PAPER}>
+      <TopBar pageLabel="05 · Confirmation" />
+
+      <div style={{ position: "absolute", top: 200, left: 90, right: 90 }}>
+        <Eyebrow>A Quick Check-In</Eyebrow>
+        <div style={{ marginTop: 32 }}>
+          <Display size={108}>Was everything</Display>
+          <Display size={108} italic>
+            explained <span style={{ color: GOLD }}>clearly?</span>
+          </Display>
+        </div>
+      </div>
 
       <div
         style={{
           position: "absolute",
-          top: 480,
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "center",
-          gap: 80,
-          padding: "0 140px",
+          top: 640,
+          left: 90,
+          right: 90,
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: 28,
         }}
       >
-        {CLIPBOARD_ITEMS.map((text, i) => (
-          <div key={i} style={{ width: 320, position: "relative" }}>
+        {CLARITY.map((c, i) => (
+          <div
+            key={i}
+            style={{
+              background: "#fff",
+              borderRadius: 4,
+              padding: "40px 32px 44px",
+              minHeight: 280,
+              boxShadow: "0 24px 60px rgba(8,24,46,0.08)",
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+          >
             <div
               style={{
-                position: "absolute",
-                top: -38,
-                left: "50%",
-                transform: "translateX(-50%)",
-                zIndex: 5,
+                fontFamily: SERIF,
+                fontStyle: "italic",
+                fontSize: 56,
+                color: GOLD,
+                lineHeight: 1,
               }}
             >
-              <BadgeCheck />
+              {c.n}
             </div>
-            <div
-              style={{
-                background: NAVY_DEEP,
-                height: 70,
-                borderTopLeftRadius: 16,
-                borderTopRightRadius: 16,
-              }}
-            />
-            <div
-              style={{
-                background: "#fff",
-                minHeight: 340,
-                borderBottomLeftRadius: 16,
-                borderBottomRightRadius: 16,
-                padding: "40px 28px",
-                display: "grid",
-                placeItems: "center",
-                textAlign: "center",
-                fontSize: 26,
-                lineHeight: 1.3,
-                color: TEXT_DARK,
-                boxShadow: "0 16px 40px rgba(0,0,0,0.12)",
-              }}
-            >
-              {text}
+            <div style={{ fontSize: 22, lineHeight: 1.4, color: INK, marginTop: 28 }}>{c.t}</div>
+            <div style={{ marginTop: 32, display: "flex", alignItems: "center", gap: 10, color: SAGE, fontSize: 13, letterSpacing: "0.28em", textTransform: "uppercase", fontWeight: 700 }}>
+              <Check size={16} strokeWidth={3} /> Confirmed
             </div>
           </div>
         ))}
       </div>
-    </HeaderFrame>
-  );
-}
 
-function BadgeCheck() {
-  return (
-    <div
-      style={{
-        width: 72,
-        height: 72,
-        background: "#22c55e",
-        clipPath:
-          "polygon(50% 0%, 65% 8%, 80% 5%, 88% 18%, 100% 25%, 96% 40%, 100% 55%, 88% 65%, 85% 80%, 70% 85%, 60% 100%, 45% 92%, 30% 100%, 22% 85%, 8% 80%, 5% 65%, 0% 50%, 8% 35%, 5% 20%, 22% 15%)",
-        display: "grid",
-        placeItems: "center",
-        boxShadow: "0 6px 16px rgba(34,197,94,0.4)",
-      }}
-    >
-      <Check color="#fff" size={36} strokeWidth={4} />
-    </div>
+      <BottomBar page={9} />
+    </Stage>
   );
 }
 
 /* ============================================================
-   Slide 14 — Review Completed!
+   Slide 14 — Review Completed
    ============================================================ */
 export function Slide14() {
   return (
-    <HeaderFrame>
-      <div style={{ position: "absolute", top: 300, left: 0, right: 0, textAlign: "center" }}>
-        <h1 style={{ fontSize: 84, fontWeight: 700, color: TEXT_DARK, margin: 0 }}>Review Completed!</h1>
-        <div
-          style={{
-            width: 200,
-            height: 200,
-            margin: "70px auto 0",
-            borderRadius: 36,
-            background: "linear-gradient(160deg, #34d399, #10b981)",
-            display: "grid",
-            placeItems: "center",
-            boxShadow: "0 20px 50px rgba(16,185,129,0.4)",
-          }}
-        >
-          <Check color="#fff" size={120} strokeWidth={3} />
+    <Stage bg={PAPER}>
+      <TopBar pageLabel="06 · Next Step" />
+
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          padding: "0 200px",
+        }}
+      >
+        <Eyebrow>Review Completed</Eyebrow>
+        <div style={{ marginTop: 36 }}>
+          <Display size={150}>
+            Let&rsquo;s book
+          </Display>
+          <Display size={150} italic>
+            your <span style={{ color: GOLD }}>adviser</span>.
+          </Display>
         </div>
+
+        <p style={{ marginTop: 44, fontSize: 26, color: GRAPHITE, maxWidth: 880, lineHeight: 1.5 }}>
+          A licensed adviser will walk you through the recommendations, answer every question, and put
+          together a written Statement of Advice tailored to you.
+        </p>
+
         <div
           style={{
-            marginTop: 80,
+            marginTop: 60,
             display: "inline-flex",
             alignItems: "center",
-            gap: 14,
-            background: ACCENT_BLUE,
+            gap: 16,
+            background: NAVY,
             color: "#fff",
-            padding: "20px 44px",
-            borderRadius: 12,
-            fontSize: 32,
-            fontWeight: 600,
-            boxShadow: "0 14px 35px rgba(30,144,255,0.4)",
+            padding: "22px 44px",
+            borderRadius: 4,
+            fontSize: 18,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            fontWeight: 700,
+            boxShadow: "0 20px 50px rgba(8,24,46,0.25)",
           }}
         >
-          <CalendarCheck size={36} /> Book A Time for Advisor
+          <CalendarCheck size={22} /> Book A Time For Advice
         </div>
       </div>
-    </HeaderFrame>
+
+      <BottomBar page={14} />
+    </Stage>
   );
 }
 
 /* ============================================================
-   Slide 15 — Setting Up Your Adviser Meeting (full bleed)
+   Slide 15 — Setting Up Your Adviser Meeting (document checklist)
    ============================================================ */
 export function Slide15() {
+  const items = [
+    { icon: <FileText size={22} />, t: "Most recent superannuation statement" },
+    { icon: <TrendingUp size={22} />, t: "Current investment balance screenshot" },
+    { icon: <Briefcase size={22} />, t: "Employment & income summary" },
+    { icon: <Users size={22} />, t: "Spouse / partner details (if applicable)" },
+    { icon: <Building2 size={22} />, t: "Any existing insurance documentation" },
+    { icon: <Sparkles size={22} />, t: "Goals & questions for your adviser" },
+  ];
   return (
-    <div style={{ width: 1920, height: 1080, position: "relative", overflow: "hidden", background: "#fff" }}>
-      <img src={setupMeeting} alt="Setting up your adviser meeting" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-    </div>
+    <Stage bg={PAPER}>
+      <TopBar pageLabel="07 · Preparation" />
+
+      <div style={{ position: "absolute", top: 200, left: 90, width: 820 }}>
+        <Eyebrow>Setting Up Your Meeting</Eyebrow>
+        <div style={{ marginTop: 32 }}>
+          <Display size={96}>What to</Display>
+          <Display size={96} italic>
+            bring <span style={{ color: GOLD }}>along.</span>
+          </Display>
+        </div>
+        <p style={{ marginTop: 32, fontSize: 22, color: GRAPHITE, lineHeight: 1.55, maxWidth: 700 }}>
+          A short checklist to make your adviser meeting as productive as possible. Don&rsquo;t worry if you&rsquo;re
+          missing something — we&rsquo;ll help you track it down.
+        </p>
+
+        <div
+          style={{
+            marginTop: 48,
+            padding: "28px 36px",
+            background: "#fff",
+            borderLeft: `3px solid ${GOLD}`,
+            borderRadius: 4,
+          }}
+        >
+          <div style={{ fontSize: 13, letterSpacing: "0.3em", textTransform: "uppercase", color: GOLD, fontWeight: 700 }}>
+            Reminder
+          </div>
+          <div style={{ marginTop: 10, fontFamily: SERIF, fontSize: 26, color: INK, fontStyle: "italic", lineHeight: 1.4 }}>
+            Everything you share is confidential, secure, and used only to prepare your Statement of Advice.
+          </div>
+        </div>
+      </div>
+
+      {/* Checklist right */}
+      <div
+        style={{
+          position: "absolute",
+          top: 200,
+          right: 90,
+          width: 880,
+          background: "#fff",
+          borderRadius: 4,
+          padding: "20px 0",
+          boxShadow: "0 30px 80px rgba(8,24,46,0.1)",
+        }}
+      >
+        <div style={{ padding: "20px 44px 24px", borderBottom: `1px solid ${HAIRLINE}` }}>
+          <div style={{ fontSize: 13, letterSpacing: "0.3em", textTransform: "uppercase", color: MUTED, fontWeight: 600 }}>
+            Pre-Meeting Checklist
+          </div>
+          <div style={{ marginTop: 8, fontFamily: SERIF, fontSize: 36, color: INK }}>
+            Six things, ten minutes.
+          </div>
+        </div>
+        {items.map((it, i) => (
+          <div
+            key={i}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 24,
+              padding: "22px 44px",
+              borderBottom: i < items.length - 1 ? `1px solid ${HAIRLINE}` : "none",
+            }}
+          >
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 4,
+                border: `1.5px solid ${INK}`,
+                display: "grid",
+                placeItems: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Check size={18} color={INK} strokeWidth={3} />
+            </div>
+            <div style={{ color: GOLD, display: "flex", alignItems: "center", justifyContent: "center", width: 44 }}>
+              {it.icon}
+            </div>
+            <div style={{ fontSize: 22, color: INK, lineHeight: 1.3 }}>{it.t}</div>
+            <div style={{ marginLeft: "auto", fontFamily: SERIF, fontStyle: "italic", color: MUTED, fontSize: 22 }}>
+              {String(i + 1).padStart(2, "0")}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <BottomBar page={15} />
+    </Stage>
   );
 }
 
 /* ============================================================
-   Slide map — 15 entries, with the "Everything Explained"
-   slide repeated 9-13 to preserve the original index mapping.
+   Map — preserve 15-slide indexing (9–13 share clipboard slide)
    ============================================================ */
 export const SLIDES: React.ComponentType[] = [
   Slide01,
