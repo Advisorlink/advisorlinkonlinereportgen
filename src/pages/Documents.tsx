@@ -133,6 +133,24 @@ export default function Documents() {
     );
   };
 
+  const handleDeleteGroup = async (group: ClientGroup) => {
+    const count = group.items.length;
+    if (!confirm(
+      `Delete the entire document package for ${group.name}?\n\nThis will permanently remove ${count} file${count > 1 ? "s" : ""}. This action cannot be undone.`
+    )) return;
+    const paths = group.items.map((d) => d.file_path);
+    const ids = group.items.map((d) => d.id);
+    await supabase.storage.from("client-documents").remove(paths);
+    const { error } = await supabase.from("client_documents").delete().in("id", ids);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Deleted ${count} file${count > 1 ? "s" : ""} for ${group.name}`);
+    setDocs((prev) => prev.filter((d) => !ids.includes(d.id)));
+    setOpenClient(null);
+  };
+
   const handleRename = async (doc: ClientDocument, newName: string) => {
     const trimmed = newName.trim();
     if (!trimmed || trimmed === doc.file_name) return;
