@@ -594,7 +594,7 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
           <strong className="text-navy">Illustration only:</strong>{" "}
           It is very common to see at least an additional <strong>2.5%</strong> increase in net return with the right advice.
           The comparison figures below show what an extra 2.5% per year could mean for your balance at retirement,
-          keeping the same risk profile and contribution pattern. This is not a guarantee of future performance.
+          keeping the same risk profile and contribution pattern. Past performance is not indicative of future performance.
         </p>
       </div>
 
