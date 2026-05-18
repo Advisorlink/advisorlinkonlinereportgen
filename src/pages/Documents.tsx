@@ -285,7 +285,12 @@ export default function Documents() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {groups.map((g) => (
-              <ClientCard key={g.key} group={g} onOpen={() => setOpenClient(g)} />
+              <ClientCard
+                key={g.key}
+                group={g}
+                onOpen={() => setOpenClient(g)}
+                onDelete={() => handleDeleteGroup(g)}
+              />
             ))}
           </div>
         )}
