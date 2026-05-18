@@ -83,28 +83,8 @@ export default function Admin() {
   };
 
   const downloadReportPdf = async (r: ReportRow) => {
-    if (r.pdf_path) {
-      setPdfBusyId(r.id);
-      try {
-        const { data, error } = await supabase.storage
-          .from("client-reports")
-          .download(r.pdf_path);
-        if (error) throw error;
-        const url = URL.createObjectURL(data);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${r.client_name.trim()} Performance Report.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        toast.success("PDF downloaded");
-        setPdfBusyId(null);
-        return;
-      } catch (e) {
-        console.error("Stored PDF download failed, regenerating:", e);
-      }
-    }
+    // Always regenerate from saved inputs so every report (including older ones)
+    // uses the current report design rather than the PDF that was stored at creation time.
     setPdfBusyId(r.id);
     setPdfStageInputs(resolveInputs(r));
     try {
@@ -237,13 +217,9 @@ export default function Admin() {
     try {
       const shouldAttachPdf = selectedTemplate !== "referral";
       let pdfBlob: Blob | null = null;
-      if (shouldAttachPdf && r.pdf_path) {
-        const { data, error } = await supabase.storage
-          .from("client-reports")
-          .download(r.pdf_path);
-        if (!error && data) pdfBlob = data;
-      }
-      if (shouldAttachPdf && !pdfBlob) {
+      // Always regenerate the PDF from saved inputs so emailed reports use the
+      // current design rather than the (potentially out-of-date) stored PDF.
+      if (shouldAttachPdf) {
         setPdfStageInputs(resolveInputs(r));
         await new Promise(requestAnimationFrame);
         await new Promise(requestAnimationFrame);
