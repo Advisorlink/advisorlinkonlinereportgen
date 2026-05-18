@@ -568,7 +568,7 @@ function OptionSlide({
 }: {
   page: number;
   optionNumber: string;
-  optionTitle: string;
+  optionTitle: React.ReactNode;
   subtitle: string;
   visual: React.ReactNode;
   bullets: { type: "pro" | "con"; text: string }[];
