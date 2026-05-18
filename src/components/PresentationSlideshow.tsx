@@ -158,18 +158,17 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
         </div>
       </div>
 
-      {/* Slide area */}
+      {/* Slide area — fixed 16:9 stage with scaled React slide */}
       <div
-        className={`relative flex-1 flex items-center justify-center cursor-pointer select-none ${isFullscreen ? "w-full h-full" : "min-h-[300px]"}`}
+        className={`relative flex-1 flex items-center justify-center cursor-pointer select-none bg-black ${isFullscreen ? "w-full h-full" : "min-h-[300px] aspect-video"}`}
         onClick={handleClick}
       >
-        <img
-          src={SLIDE_URLS[current]}
-          alt={`Slide ${current + 1}`}
-          className={isFullscreen ? "w-full h-full object-contain" : "max-w-full max-h-full object-contain"}
-          draggable={false}
-        />
-
+        <SlideStage>
+          {(() => {
+            const SlideComponent = SLIDES[current];
+            return SlideComponent ? <SlideComponent /> : null;
+          })()}
+        </SlideStage>
         {/* Left arrow */}
         {current > 0 && (
           <button
