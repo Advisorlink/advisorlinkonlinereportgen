@@ -217,13 +217,9 @@ export default function Admin() {
     try {
       const shouldAttachPdf = selectedTemplate !== "referral";
       let pdfBlob: Blob | null = null;
-      if (shouldAttachPdf && r.pdf_path) {
-        const { data, error } = await supabase.storage
-          .from("client-reports")
-          .download(r.pdf_path);
-        if (!error && data) pdfBlob = data;
-      }
-      if (shouldAttachPdf && !pdfBlob) {
+      // Always regenerate the PDF from saved inputs so emailed reports use the
+      // current design rather than the (potentially out-of-date) stored PDF.
+      if (shouldAttachPdf) {
         setPdfStageInputs(resolveInputs(r));
         await new Promise(requestAnimationFrame);
         await new Promise(requestAnimationFrame);
