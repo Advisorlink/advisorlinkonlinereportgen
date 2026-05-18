@@ -55,7 +55,7 @@ export function buildReportEmailHtml(
   <tr><td class="hero" style="padding:40px 32px;background:linear-gradient(135deg, ${navy} 0%, ${brandBlueDark} 60%, ${brandBlue} 100%);">
     <p style="margin:0 0 8px;font-size:11px;font-weight:bold;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.75);">Your Free Super Performance Report</p>
     <p class="hero-title" style="margin:0;font-size:28px;font-weight:800;color:#ffffff;line-height:36px;letter-spacing:-0.5px;">Hi ${safeName}, your report is ready 🎉</p>
-    <p style="margin:14px 0 0;font-size:15px;color:rgba(255,255,255,0.85);line-height:23px;">A clear, side-by-side look at how your super is tracking — and what a few smart tweaks could mean for you at retirement.</p>
+    <p style="margin:14px 0 0;font-size:15px;color:rgba(255,255,255,0.85);line-height:23px;">A simple look at what an extra 2.5% on your current return could mean for you by retirement.</p>
   </td></tr>
 
   <!-- BODY INTRO -->
@@ -64,7 +64,7 @@ export function buildReportEmailHtml(
       Thanks for taking the time to request your free performance report. We've put it together personally for you and it's <strong style="color:${darkText};">attached to this email</strong> as a PDF.
     </p>
     <p style="margin:0;font-size:16px;color:${bodyText};line-height:26px;">
-      Have a flick through whenever suits you. There's no jargon — just the numbers and the comparison laid out plainly.
+      Just a heads up, this isn't a comparison against other funds. It simply shows what an <strong style="color:${darkText};">extra 2.5%</strong> on your current return could potentially look like, so you can see if there may be room to get a bit more out of your super.
     </p>
   </td></tr>
 
@@ -85,10 +85,10 @@ export function buildReportEmailHtml(
       <tr><td style="padding:24px;">
         <p style="margin:0 0 10px;font-size:13px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:${brandBlueDark};">We're here to help</p>
         <p style="margin:0 0 12px;font-size:15px;color:${bodyText};line-height:24px;">
-          Once you've had a read, if there's <strong style="color:${darkText};">anything that concerns you</strong> or you'd just like a bit more information, please feel free to reach out — we're more than happy to walk you through it.
+          Once you've had a read, if there's <strong style="color:${darkText};">anything that concerns you</strong> or you'd just like a bit more information, please feel free to reach out. We're more than happy to walk you through it.
         </p>
         <p style="margin:0;font-size:15px;color:${bodyText};line-height:24px;">
-          We'll also <strong style="color:${darkText};">check in with you in a couple of days</strong> to see if you had any questions and to let you know about a <strong style="color:${darkText};">free review</strong> with a fully licensed financial advisor at no extra cost — completely optional, only if you'd like it.
+          We'll also <strong style="color:${darkText};">check in with you in a couple of days</strong> to see if you had any questions and to let you know about a <strong style="color:${darkText};">free review</strong> with a fully licensed financial advisor at no extra cost. Completely optional, only if you'd like it.
         </p>
       </td></tr>
     </table>
