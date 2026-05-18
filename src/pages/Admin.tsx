@@ -235,7 +235,7 @@ export default function Admin() {
     closeEmailDialog();
     setSendBusyId(r.id);
     try {
-      const shouldAttachPdf = !emailDialog.isHtml;
+      const shouldAttachPdf = selectedTemplate !== "referral";
       let pdfBlob: Blob | null = null;
       if (shouldAttachPdf && r.pdf_path) {
         const { data, error } = await supabase.storage
