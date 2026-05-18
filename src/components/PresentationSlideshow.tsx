@@ -2,9 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Circle, Maximize, Minimize, Pause, Play, X } from "lucide-react";
-
-const TOTAL_SLIDES = 15;
-const SLIDE_URLS = Array.from({ length: TOTAL_SLIDES }, (_, i) => `/slides/slide-${String(i + 1).padStart(2, "0")}.jpg`);
+import { SLIDES, TOTAL_SLIDES } from "@/components/slides/slides";
+import { SlideStage } from "@/components/slides/SlideStage";
 
 interface Props {
   clientName: string;
@@ -23,13 +22,7 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Preload all slide images immediately
-  useEffect(() => {
-    SLIDE_URLS.forEach((url) => {
-      const img = new Image();
-      img.src = url;
-    });
-  }, []);
+  // Slides are React components — nothing to preload.
 
   const prev = useCallback(() => setCurrent((c) => Math.max(0, c - 1)), []);
   const next = useCallback(() => setCurrent((c) => Math.min(TOTAL_SLIDES - 1, c + 1)), []);
@@ -165,18 +158,17 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
         </div>
       </div>
 
-      {/* Slide area */}
+      {/* Slide area — fixed 16:9 stage with scaled React slide */}
       <div
-        className={`relative flex-1 flex items-center justify-center cursor-pointer select-none ${isFullscreen ? "w-full h-full" : "min-h-[300px]"}`}
+        className={`relative flex-1 flex items-center justify-center cursor-pointer select-none bg-black ${isFullscreen ? "w-full h-full" : "min-h-[300px] aspect-video"}`}
         onClick={handleClick}
       >
-        <img
-          src={SLIDE_URLS[current]}
-          alt={`Slide ${current + 1}`}
-          className={isFullscreen ? "w-full h-full object-contain" : "max-w-full max-h-full object-contain"}
-          draggable={false}
-        />
-
+        <SlideStage>
+          {(() => {
+            const SlideComponent = SLIDES[current];
+            return SlideComponent ? <SlideComponent /> : null;
+          })()}
+        </SlideStage>
         {/* Left arrow */}
         {current > 0 && (
           <button
