@@ -507,14 +507,14 @@ export function ESignPdfEditor({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="max-h-[68vh] overflow-auto rounded-xl border border-border bg-muted/40 p-4">
-          <div className="flex min-w-max flex-col items-center gap-5">
+        <div className="max-h-[68vh] overflow-y-auto overflow-x-hidden rounded-xl border border-border bg-muted/40 p-4">
+          <div className="flex w-full min-w-0 flex-col items-center gap-5">
             {pages.map((page, pageIndex) => (
               <div
                 key={page.pageNumber}
                 data-pdf-page
-                className="relative overflow-hidden rounded-sm bg-card shadow-elevated"
-                style={{ width: page.width, height: page.height }}
+                className="relative overflow-hidden rounded-sm bg-card shadow-elevated w-full"
+                style={{ maxWidth: page.width, aspectRatio: `${page.width} / ${page.height}` }}
                 onClick={(event) => handlePageClick(event, pageIndex)}
                 onPointerMove={handlePointerMove}
                 onPointerUp={() => setDragState(null)}
