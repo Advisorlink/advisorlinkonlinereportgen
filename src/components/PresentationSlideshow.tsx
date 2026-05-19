@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Circle, Maximize, Minimize, Pause, Play, X } from "lucide-react";
-import { SLIDES, TOTAL_SLIDES } from "@/components/slides/slides";
-import { SlideStage } from "@/components/slides/SlideStage";
+
+const TOTAL_SLIDES = 15;
+const SLIDE_SRCS = Array.from({ length: TOTAL_SLIDES }, (_, i) => `/slides/slide-${String(i + 1).padStart(2, "0")}.jpg`);
 
 interface Props {
   clientName: string;
