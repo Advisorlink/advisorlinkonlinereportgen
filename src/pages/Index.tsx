@@ -24,7 +24,7 @@ import {
 export default function Index() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { inputs, setInputs } = useClientInputs();
+  const { inputs, setInputs, lookup } = useClientInputs();
   const summary = useMemo(() => buildSummary(inputs), [inputs]);
   const fileRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
