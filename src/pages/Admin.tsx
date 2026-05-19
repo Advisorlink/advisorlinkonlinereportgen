@@ -570,6 +570,50 @@ export default function Admin() {
           </div>
         );
       })()}
+
+      {/* ---- Full screen read-only viewer ---- */}
+      {viewReportData && (() => {
+        const summary = buildSummary(resolveInputs(viewReportData));
+        return (
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto">
+            <div ref={viewStageRef} className="min-h-screen bg-neutral-200 py-6">
+              <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur border-b border-border/60 mb-4">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-cyan" />
+                  <span className="font-semibold text-sm">{viewReportData.client_name} — Report</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8"
+                    onClick={() => {
+                      const el = viewStageRef.current;
+                      if (document.fullscreenElement) document.exitFullscreen?.();
+                      else el?.requestFullscreen?.().catch(() => {});
+                    }}
+                  >
+                    <Maximize2 className="w-3.5 h-3.5 mr-1.5" /> Fullscreen
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-8" onClick={closeViewReport}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="report-preview mx-auto" style={{ width: 794 }}>
+                <CoverPage s={summary} />
+                <WhoWeArePage s={summary} />
+                <SnapshotPage s={summary} />
+                <ProjectionPage s={summary} />
+                <FundsPage s={summary} />
+                <IncomePage s={summary} />
+                <ImprovementSummaryPage s={summary} />
+                <WhatsNextPage s={summary} />
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </CRMLayout>
   );
 }
