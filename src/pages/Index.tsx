@@ -24,7 +24,7 @@ import {
 export default function Index() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { inputs, setInputs } = useClientInputs();
+  const { inputs, setInputs, lookup } = useClientInputs();
   const summary = useMemo(() => buildSummary(inputs), [inputs]);
   const fileRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
@@ -174,6 +174,7 @@ export default function Index() {
         client_name: inputs.clientName.trim() || "Unnamed client",
         inputs: JSON.parse(JSON.stringify(inputs)),
         summary: JSON.parse(JSON.stringify(summary)),
+        research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
         pdf_path: pdfPath,
       } as never),
     ]);
@@ -201,6 +202,7 @@ export default function Index() {
         client_name: inputs.clientName.trim() || "Unnamed client",
         inputs: JSON.parse(JSON.stringify(inputs)),
         summary: JSON.parse(JSON.stringify(summary)),
+        research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
         pdf_path: pdfPath,
       } as never),
     ]);

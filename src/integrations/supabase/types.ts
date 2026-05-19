@@ -962,6 +962,7 @@ export type Database = {
           id: string
           inputs: Json
           pdf_path: string | null
+          research: Json | null
           summary: Json | null
           user_id: string
         }
@@ -972,6 +973,7 @@ export type Database = {
           id?: string
           inputs: Json
           pdf_path?: string | null
+          research?: Json | null
           summary?: Json | null
           user_id: string
         }
@@ -982,6 +984,7 @@ export type Database = {
           id?: string
           inputs?: Json
           pdf_path?: string | null
+          research?: Json | null
           summary?: Json | null
           user_id?: string
         }
