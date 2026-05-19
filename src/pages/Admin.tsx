@@ -291,6 +291,15 @@ export default function Admin() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      // Mark report as emailed
+      const sentAt = new Date().toISOString();
+      const { error: upErr } = await supabase
+        .from("reports")
+        .update({ email_sent_at: sentAt } as never)
+        .eq("id", r.id);
+      if (!upErr) {
+        setReports(prev => prev.map(x => x.id === r.id ? { ...x, email_sent_at: sentAt } : x));
+      }
       toast.success(shouldAttachPdf ? `Email sent to ${emailDialog.to} with PDF attached` : `Gift card email sent to ${emailDialog.to}`);
     } catch (e) {
       console.error("Send email failed:", e);
