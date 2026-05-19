@@ -575,7 +575,7 @@ export default function Admin() {
       {viewReportData && (() => {
         const summary = buildSummary(resolveInputs(viewReportData));
         return (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto">
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-auto">
             <div ref={viewStageRef} className="min-h-screen bg-neutral-200 py-6">
               <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur border-b border-border/60 mb-4">
                 <div className="flex items-center gap-2">
@@ -600,7 +600,7 @@ export default function Admin() {
                   </Button>
                 </div>
               </div>
-              <div className="report-preview mx-auto" style={{ width: 794 }}>
+              <div className="mx-auto px-4 pb-10" style={{ width: "fit-content", maxWidth: "100%" }}>
                 <CoverPage s={summary} />
                 <WhoWeArePage s={summary} />
                 <SnapshotPage s={summary} />
