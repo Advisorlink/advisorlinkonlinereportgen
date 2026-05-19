@@ -1,0 +1,1 @@
+CREATE POLICY "Owner updates reports" ON public.reports FOR UPDATE USING (auth.uid() = (SELECT owner_user_id FROM public.app_config WHERE id = 1));
