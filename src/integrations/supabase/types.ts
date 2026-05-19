@@ -959,6 +959,7 @@ export type Database = {
           client_name: string
           created_at: string
           email: string | null
+          email_sent_at: string | null
           id: string
           inputs: Json
           pdf_path: string | null
@@ -970,6 +971,7 @@ export type Database = {
           client_name: string
           created_at?: string
           email?: string | null
+          email_sent_at?: string | null
           id?: string
           inputs: Json
           pdf_path?: string | null
@@ -981,6 +983,7 @@ export type Database = {
           client_name?: string
           created_at?: string
           email?: string | null
+          email_sent_at?: string | null
           id?: string
           inputs?: Json
           pdf_path?: string | null
