@@ -174,6 +174,7 @@ export default function Index() {
         client_name: inputs.clientName.trim() || "Unnamed client",
         inputs: JSON.parse(JSON.stringify(inputs)),
         summary: JSON.parse(JSON.stringify(summary)),
+        research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
         pdf_path: pdfPath,
       } as never),
     ]);
