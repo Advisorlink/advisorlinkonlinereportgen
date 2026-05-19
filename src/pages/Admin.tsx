@@ -27,6 +27,7 @@ interface ReportRow {
   summary: Record<string, unknown> | null;
   created_at: string;
   pdf_path: string | null;
+  email_sent_at: string | null;
 }
 
 export default function Admin() {
@@ -41,16 +42,34 @@ export default function Admin() {
   const [pdfBusyId, setPdfBusyId] = useState<string | null>(null);
   const pdfStageRef = useRef<HTMLDivElement>(null);
   const [pdfStageInputs, setPdfStageInputs] = useState<ClientInputs | null>(null);
+  const [viewReportData, setViewReportData] = useState<ReportRow | null>(null);
+  const viewStageRef = useRef<HTMLDivElement>(null);
 
   const resolveInputs = (r: ReportRow): ClientInputs => {
     const saved = (r.inputs && typeof r.inputs === "object" ? r.inputs : {}) as Partial<ClientInputs>;
     return { ...DEFAULT_INPUTS, ...saved, clientName: saved.clientName || r.client_name } as ClientInputs;
   };
 
-  const viewReport = (r: ReportRow) => {
+  const editReport = (r: ReportRow) => {
     setInputs(resolveInputs(r));
     toast.success(`Loaded ${r.client_name}`);
     nav("/");
+  };
+
+  const openViewReport = (r: ReportRow) => {
+    setViewReportData(r);
+    // Try to enter fullscreen on the modal container after it mounts
+    setTimeout(() => {
+      const el = viewStageRef.current;
+      if (el && !document.fullscreenElement) {
+        el.requestFullscreen?.().catch(() => {});
+      }
+    }, 100);
+  };
+
+  const closeViewReport = () => {
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    setViewReportData(null);
   };
 
   useEffect(() => {
