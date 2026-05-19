@@ -600,7 +600,7 @@ export default function Admin() {
                   </Button>
                 </div>
               </div>
-              <div className="report-preview mx-auto" style={{ width: 794 }}>
+              <div className="mx-auto px-4 pb-10" style={{ width: "fit-content", maxWidth: "100%" }}>
                 <CoverPage s={summary} />
                 <WhoWeArePage s={summary} />
                 <SnapshotPage s={summary} />
