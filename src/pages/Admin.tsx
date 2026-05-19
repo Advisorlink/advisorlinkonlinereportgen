@@ -411,6 +411,14 @@ export default function Admin() {
                         <span className="text-xs truncate">{r.email}</span>
                       </div>
                     )}
+                    {r.email_sent_at && (
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold shrink-0"
+                        title={`Sent ${new Date(r.email_sent_at).toLocaleString("en-AU")}`}
+                      >
+                        <CheckCircle2 className="w-3 h-3" /> Email sent
+                      </span>
+                    )}
                   </div>
 
                   {/* Actions */}
@@ -418,23 +426,31 @@ export default function Admin() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-9 px-3.5 text-xs font-medium border-border/60 hover:bg-secondary/80 shadow-sm"
-                      onClick={() => viewReport(r)}
+                      className="h-9 px-3 text-xs font-medium border-border/60 hover:bg-secondary/80 shadow-sm"
+                      onClick={() => openViewReport(r)}
                     >
                       <Eye className="w-3.5 h-3.5 mr-1.5" /> View
                     </Button>
                     <Button
                       size="sm"
-                      className="h-9 px-3.5 text-xs font-medium bg-navy text-white hover:bg-navy/90 shadow-sm"
+                      variant="outline"
+                      className="h-9 px-3 text-xs font-medium border-border/60 hover:bg-secondary/80 shadow-sm"
+                      onClick={() => editReport(r)}
+                    >
+                      <Pencil className="w-3.5 h-3.5 mr-1.5" /> Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-9 px-3 text-xs font-medium bg-navy text-white hover:bg-navy/90 shadow-sm"
                       onClick={() => downloadReportPdf(r)}
                       disabled={pdfBusyId === r.id}
                     >
                       <Download className="w-3.5 h-3.5 mr-1.5" />
-                      {pdfBusyId === r.id ? "Exporting…" : "PDF"}
+                      {pdfBusyId === r.id ? "…" : "PDF"}
                     </Button>
                     <Button
                       size="sm"
-                      className="h-9 px-3.5 text-xs font-medium bg-cyan text-white hover:bg-cyan/90 shadow-sm"
+                      className="h-9 px-3 text-xs font-medium bg-cyan text-white hover:bg-cyan/90 shadow-sm"
                       onClick={() => openEmailDialog(r)}
                       disabled={sendBusyId === r.id}
                     >
