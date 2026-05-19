@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Trash2, RefreshCw, Search, Eye, Download, Send, X, FileText, Calendar, Mail } from "lucide-react";
+import { Trash2, RefreshCw, Search, Eye, Pencil, Download, Send, X, FileText, Calendar, Mail, CheckCircle2, Maximize2 } from "lucide-react";
 import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { buildReferralEmailHtml } from "@/lib/referral-email-template";
 import { buildReportEmailHtml } from "@/lib/report-email-template";
@@ -27,6 +27,7 @@ interface ReportRow {
   summary: Record<string, unknown> | null;
   created_at: string;
   pdf_path: string | null;
+  email_sent_at: string | null;
 }
 
 export default function Admin() {
@@ -41,16 +42,34 @@ export default function Admin() {
   const [pdfBusyId, setPdfBusyId] = useState<string | null>(null);
   const pdfStageRef = useRef<HTMLDivElement>(null);
   const [pdfStageInputs, setPdfStageInputs] = useState<ClientInputs | null>(null);
+  const [viewReportData, setViewReportData] = useState<ReportRow | null>(null);
+  const viewStageRef = useRef<HTMLDivElement>(null);
 
   const resolveInputs = (r: ReportRow): ClientInputs => {
     const saved = (r.inputs && typeof r.inputs === "object" ? r.inputs : {}) as Partial<ClientInputs>;
     return { ...DEFAULT_INPUTS, ...saved, clientName: saved.clientName || r.client_name } as ClientInputs;
   };
 
-  const viewReport = (r: ReportRow) => {
+  const editReport = (r: ReportRow) => {
     setInputs(resolveInputs(r));
     toast.success(`Loaded ${r.client_name}`);
     nav("/");
+  };
+
+  const openViewReport = (r: ReportRow) => {
+    setViewReportData(r);
+    // Try to enter fullscreen on the modal container after it mounts
+    setTimeout(() => {
+      const el = viewStageRef.current;
+      if (el && !document.fullscreenElement) {
+        el.requestFullscreen?.().catch(() => {});
+      }
+    }, 100);
+  };
+
+  const closeViewReport = () => {
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    setViewReportData(null);
   };
 
   useEffect(() => {
@@ -272,6 +291,15 @@ export default function Admin() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      // Mark report as emailed
+      const sentAt = new Date().toISOString();
+      const { error: upErr } = await supabase
+        .from("reports")
+        .update({ email_sent_at: sentAt } as never)
+        .eq("id", r.id);
+      if (!upErr) {
+        setReports(prev => prev.map(x => x.id === r.id ? { ...x, email_sent_at: sentAt } : x));
+      }
       toast.success(shouldAttachPdf ? `Email sent to ${emailDialog.to} with PDF attached` : `Gift card email sent to ${emailDialog.to}`);
     } catch (e) {
       console.error("Send email failed:", e);
@@ -383,6 +411,14 @@ export default function Admin() {
                         <span className="text-xs truncate">{r.email}</span>
                       </div>
                     )}
+                    {r.email_sent_at && (
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold shrink-0"
+                        title={`Sent ${new Date(r.email_sent_at).toLocaleString("en-AU")}`}
+                      >
+                        <CheckCircle2 className="w-3 h-3" /> Email sent
+                      </span>
+                    )}
                   </div>
 
                   {/* Actions */}
@@ -390,23 +426,31 @@ export default function Admin() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-9 px-3.5 text-xs font-medium border-border/60 hover:bg-secondary/80 shadow-sm"
-                      onClick={() => viewReport(r)}
+                      className="h-9 px-3 text-xs font-medium border-border/60 hover:bg-secondary/80 shadow-sm"
+                      onClick={() => openViewReport(r)}
                     >
                       <Eye className="w-3.5 h-3.5 mr-1.5" /> View
                     </Button>
                     <Button
                       size="sm"
-                      className="h-9 px-3.5 text-xs font-medium bg-navy text-white hover:bg-navy/90 shadow-sm"
+                      variant="outline"
+                      className="h-9 px-3 text-xs font-medium border-border/60 hover:bg-secondary/80 shadow-sm"
+                      onClick={() => editReport(r)}
+                    >
+                      <Pencil className="w-3.5 h-3.5 mr-1.5" /> Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-9 px-3 text-xs font-medium bg-navy text-white hover:bg-navy/90 shadow-sm"
                       onClick={() => downloadReportPdf(r)}
                       disabled={pdfBusyId === r.id}
                     >
                       <Download className="w-3.5 h-3.5 mr-1.5" />
-                      {pdfBusyId === r.id ? "Exporting…" : "PDF"}
+                      {pdfBusyId === r.id ? "…" : "PDF"}
                     </Button>
                     <Button
                       size="sm"
-                      className="h-9 px-3.5 text-xs font-medium bg-cyan text-white hover:bg-cyan/90 shadow-sm"
+                      className="h-9 px-3 text-xs font-medium bg-cyan text-white hover:bg-cyan/90 shadow-sm"
                       onClick={() => openEmailDialog(r)}
                       disabled={sendBusyId === r.id}
                     >
@@ -522,6 +566,50 @@ export default function Admin() {
               <IncomePage s={summary} />
               <ImprovementSummaryPage s={summary} />
               <WhatsNextPage s={summary} />
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ---- Full screen read-only viewer ---- */}
+      {viewReportData && (() => {
+        const summary = buildSummary(resolveInputs(viewReportData));
+        return (
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto">
+            <div ref={viewStageRef} className="min-h-screen bg-neutral-200 py-6">
+              <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur border-b border-border/60 mb-4">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-cyan" />
+                  <span className="font-semibold text-sm">{viewReportData.client_name} — Report</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8"
+                    onClick={() => {
+                      const el = viewStageRef.current;
+                      if (document.fullscreenElement) document.exitFullscreen?.();
+                      else el?.requestFullscreen?.().catch(() => {});
+                    }}
+                  >
+                    <Maximize2 className="w-3.5 h-3.5 mr-1.5" /> Fullscreen
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-8" onClick={closeViewReport}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="report-preview mx-auto" style={{ width: 794 }}>
+                <CoverPage s={summary} />
+                <WhoWeArePage s={summary} />
+                <SnapshotPage s={summary} />
+                <ProjectionPage s={summary} />
+                <FundsPage s={summary} />
+                <IncomePage s={summary} />
+                <ImprovementSummaryPage s={summary} />
+                <WhatsNextPage s={summary} />
+              </div>
             </div>
           </div>
         );
