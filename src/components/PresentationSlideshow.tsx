@@ -3,8 +3,23 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Circle, Maximize, Minimize, Pause, Play, X } from "lucide-react";
 
-const TOTAL_SLIDES = 15;
-const SLIDE_SRCS = Array.from({ length: TOTAL_SLIDES }, (_, i) => `/slides/slide-${String(i + 1).padStart(2, "0")}.jpg`);
+const TOTAL_SLIDES = 14;
+const SLIDE_SRCS = [
+  "/slides/slide-01.jpg",
+  "/slides/slide-02.jpg",
+  "/slides/slide-03.jpg",
+  "/slides/slide-04.jpg",
+  "/slides/slide-05.jpg",
+  "/slides/slide-06.jpg",
+  "/slides/slide-07.jpg",
+  "/slides/slide-09.jpg",
+  "/slides/slide-10.jpg",
+  "/slides/slide-11.jpg",
+  "/slides/slide-12.jpg",
+  "/slides/slide-13.jpg",
+  "/slides/slide-14.jpg",
+  "/slides/slide-15.jpg",
+];
 
 interface Props {
   clientName: string;
