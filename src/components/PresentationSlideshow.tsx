@@ -164,12 +164,23 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
         className={`relative flex-1 flex items-center justify-center cursor-pointer select-none bg-black ${isFullscreen ? "w-full h-full" : "min-h-[300px] aspect-video"}`}
         onClick={handleClick}
       >
-        <SlideStage>
-          {(() => {
-            const SlideComponent = SLIDES[current];
-            return SlideComponent ? <SlideComponent /> : null;
-          })()}
-        </SlideStage>
+        {SLIDE_SRCS.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt={`Slide ${i + 1}`}
+            draggable={false}
+            loading="eager"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-contain"
+            style={{
+              opacity: i === current ? 1 : 0,
+              visibility: i === current ? "visible" : "hidden",
+              transition: "opacity 120ms linear",
+              willChange: "opacity",
+            }}
+          />
+        ))}
         {/* Left arrow */}
         {current > 0 && (
           <button
