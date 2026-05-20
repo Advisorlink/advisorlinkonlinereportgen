@@ -390,8 +390,7 @@ export default function Index() {
           <aside className="no-print min-h-0 lg:overflow-y-auto lg:pr-2 pb-2 lg:pb-6">
             <ClientForm value={inputs} onChange={setInputs} />
             <p className="mt-3 text-[11px] text-muted-foreground">
-              Tip: edits update the report instantly. Use <strong>Upload XLSX</strong> to load a saved
-              Client Data sheet, then download the PDF when you're happy.
+              Tip: edits update the report instantly. Click <strong>Save</strong> to add or update the client report, and use <strong>Download PDF</strong> only when you need a copy.
             </p>
           </aside>
           <section ref={reportRef} className="report-preview min-h-0 space-y-0 lg:overflow-y-auto pb-6">
