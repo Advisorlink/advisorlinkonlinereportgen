@@ -28,6 +28,10 @@ interface ReportRow {
   created_at: string;
   pdf_path: string | null;
   email_sent_at: string | null;
+  report_email_sent_at?: string | null;
+  followup_email_sent_at?: string | null;
+  referral_email_sent_at?: string | null;
+  presentation_completed_at?: string | null;
 }
 
 export default function Admin() {
