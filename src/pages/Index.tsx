@@ -336,12 +336,12 @@ export default function Index() {
               <>
                 <Button
                   size="sm"
-                  onClick={saveEdits}
+                  onClick={saveReport}
                   disabled={saving}
                   className="h-9 px-2.5 sm:px-3 bg-emerald-600 text-white hover:bg-emerald-700 border-0 shadow-md"
                 >
                   <Save className="w-4 h-4 sm:mr-1.5" />
-                  <span className="hidden sm:inline">{saving ? "Saving…" : "Save Edits"}</span>
+                   <span className="hidden sm:inline">{saving ? "Saving…" : "Save"}</span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -353,6 +353,18 @@ export default function Index() {
                   <X className="w-4 h-4" />
                 </Button>
               </>
+            )}
+            {!editingReportId && (
+              <Button
+                size="sm"
+                onClick={saveReport}
+                disabled={saving}
+                className="h-9 px-2.5 sm:px-3 bg-emerald-600 text-white hover:bg-emerald-700 border-0 shadow-md"
+              >
+                <Save className="w-4 h-4 sm:mr-1.5" />
+                <span className="hidden sm:inline">{saving ? "Saving…" : "Save"}</span>
+                <span className="sm:hidden">Save</span>
+              </Button>
             )}
             <Button size="sm" onClick={exportPDF} disabled={exporting} className="h-9 px-2.5 sm:px-3 gradient-accent text-white border-0 shadow-md shadow-cyan/20 hover:shadow-cyan/30 transition-all">
               {exporting ? "Exporting…" : (
