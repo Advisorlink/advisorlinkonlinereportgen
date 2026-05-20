@@ -429,22 +429,38 @@ export default function Admin() {
                     </div>
                   </div>
 
-                  {/* Client Email */}
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {/* Client Email + Status Pills */}
+                  <div className="flex flex-col gap-1.5 flex-1 min-w-0">
                     {r.email && (
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Mail className="w-3.5 h-3.5 shrink-0" />
                         <span className="text-xs truncate">{r.email}</span>
                       </div>
                     )}
-                    {r.email_sent_at && (
-                      <span
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold shrink-0"
-                        title={`Sent ${new Date(r.email_sent_at).toLocaleString("en-AU")}`}
-                      >
-                        <CheckCircle2 className="w-3 h-3" /> Email sent
-                      </span>
-                    )}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {([
+                        { label: "Report", at: r.report_email_sent_at ?? r.email_sent_at },
+                        { label: "Follow-up", at: r.followup_email_sent_at },
+                        { label: "Referral", at: r.referral_email_sent_at },
+                        { label: "Presentation", at: r.presentation_completed_at },
+                      ] as const).map(p => {
+                        const done = !!p.at;
+                        return (
+                          <span
+                            key={p.label}
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border transition-colors ${
+                              done
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : "bg-muted/40 text-muted-foreground/60 border-border/40"
+                            }`}
+                            title={done ? `${p.label} • ${new Date(p.at as string).toLocaleString("en-AU")}` : `${p.label} not yet`}
+                          >
+                            <CheckCircle2 className={`w-3 h-3 ${done ? "" : "opacity-30"}`} />
+                            {p.label}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Actions */}
