@@ -218,25 +218,28 @@ export default function Index() {
     if (!user || !pendingExport.current) return;
     const { pdfPath } = pendingExport.current;
     const clientEmail = (inputs.clientEmail ?? "").trim() || null;
+    const reportPayload = {
+      email: clientEmail,
+      client_name: inputs.clientName.trim() || "Unnamed client",
+      inputs: JSON.parse(JSON.stringify(inputs)),
+      summary: JSON.parse(JSON.stringify(summary)),
+      research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
+      pdf_path: pdfPath,
+    };
 
-    await Promise.all([
-      supabase.from("activity_log").insert({
-        user_id: user.id, email: user.email, event_type: "report_generated",
-        details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath, workflow: false },
-      }),
-      supabase.from("reports").insert({
-        user_id: user.id,
-        email: clientEmail,
-        client_name: inputs.clientName.trim() || "Unnamed client",
-        inputs: JSON.parse(JSON.stringify(inputs)),
-        summary: JSON.parse(JSON.stringify(summary)),
-        research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
-        pdf_path: pdfPath,
-      } as never),
-    ]);
+    const saved = editingReportId
+      ? await supabase.from("reports").update(reportPayload as never).eq("id", editingReportId).select("id").single()
+      : await supabase.from("reports").insert({ ...reportPayload, user_id: user.id } as never).select("id").single();
+    if (saved.error) throw saved.error;
+    const savedId = (saved.data as { id?: string } | null)?.id;
+    if (savedId) setEditingReportId(savedId);
+    await supabase.from("activity_log").insert({
+      user_id: user.id, email: user.email, event_type: editingReportId ? "report_updated" : "report_generated",
+      details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath, workflow: false, report_id: savedId },
+    });
 
     pendingExport.current = null;
-    toast.success("Client added to reports list");
+    toast.success(editingReportId ? "Client report updated" : "Client added to reports list");
   };
 
   /** Full workflow: save to client list + push to GHL */
@@ -245,23 +248,26 @@ export default function Index() {
     if (!user || !pendingExport.current) return;
     const { ghlBlob, fileName, pdfPath } = pendingExport.current;
     const clientEmail = (inputs.clientEmail ?? "").trim() || null;
+    const reportPayload = {
+      email: clientEmail,
+      client_name: inputs.clientName.trim() || "Unnamed client",
+      inputs: JSON.parse(JSON.stringify(inputs)),
+      summary: JSON.parse(JSON.stringify(summary)),
+      research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
+      pdf_path: pdfPath,
+    };
 
-    // Log + insert report row
-    await Promise.all([
-      supabase.from("activity_log").insert({
-        user_id: user.id, email: user.email, event_type: "report_generated",
-        details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath, workflow: true },
-      }),
-      supabase.from("reports").insert({
-        user_id: user.id,
-        email: clientEmail,
-        client_name: inputs.clientName.trim() || "Unnamed client",
-        inputs: JSON.parse(JSON.stringify(inputs)),
-        summary: JSON.parse(JSON.stringify(summary)),
-        research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
-        pdf_path: pdfPath,
-      } as never),
-    ]);
+    // Log + create/update report row
+    const saved = editingReportId
+      ? await supabase.from("reports").update(reportPayload as never).eq("id", editingReportId).select("id").single()
+      : await supabase.from("reports").insert({ ...reportPayload, user_id: user.id } as never).select("id").single();
+    if (saved.error) throw saved.error;
+    const savedId = (saved.data as { id?: string } | null)?.id;
+    if (savedId) setEditingReportId(savedId);
+    await supabase.from("activity_log").insert({
+      user_id: user.id, email: user.email, event_type: editingReportId ? "report_updated" : "report_generated",
+      details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath, workflow: true, report_id: savedId },
+    });
 
     // Push to Go High Level
     if (clientEmail) {
