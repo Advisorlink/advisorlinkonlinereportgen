@@ -25,6 +25,8 @@ interface Ctx {
     text: string,
     onApply: (r: Record<string, unknown>) => void,
   ) => Promise<void>;
+  editingReportId: string | null;
+  setEditingReportId: (id: string | null) => void;
 }
 
 const ClientInputsCtx = createContext<Ctx | null>(null);
