@@ -24,12 +24,42 @@ import {
 export default function Index() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { inputs, setInputs, lookup } = useClientInputs();
+  const { inputs, setInputs, lookup, editingReportId, setEditingReportId } = useClientInputs();
   const summary = useMemo(() => buildSummary(inputs), [inputs]);
   const fileRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
+
+  const saveEdits = async () => {
+    if (!editingReportId) return;
+    setSaving(true);
+    try {
+      const clientEmail = (inputs.clientEmail ?? "").trim() || null;
+      const { error } = await supabase
+        .from("reports")
+        .update({
+          client_name: inputs.clientName.trim() || "Unnamed client",
+          email: clientEmail,
+          inputs: JSON.parse(JSON.stringify(inputs)),
+          summary: JSON.parse(JSON.stringify(summary)),
+        } as never)
+        .eq("id", editingReportId);
+      if (error) throw error;
+      toast.success("Report updated", { description: "Your edits have been saved to the client's report." });
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not save edits", { description: e instanceof Error ? e.message : "Unknown error" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const exitEditing = () => {
+    setEditingReportId(null);
+    toast.info("Stopped editing existing report");
+  };
 
   // We store generated PDF artifacts here so the dialog callbacks can use them
   const pendingExport = useRef<{
