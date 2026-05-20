@@ -312,14 +312,19 @@ export default function Admin() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      // Mark report as emailed
+      // Mark report as emailed (legacy column + per-template column)
       const sentAt = new Date().toISOString();
+      const templateField =
+        selectedTemplate === "follow-up" ? "followup_email_sent_at"
+        : selectedTemplate === "referral" ? "referral_email_sent_at"
+        : "report_email_sent_at";
+      const updatePayload: Record<string, string> = { email_sent_at: sentAt, [templateField]: sentAt };
       const { error: upErr } = await supabase
         .from("reports")
-        .update({ email_sent_at: sentAt } as never)
+        .update(updatePayload as never)
         .eq("id", r.id);
       if (!upErr) {
-        setReports(prev => prev.map(x => x.id === r.id ? { ...x, email_sent_at: sentAt } : x));
+        setReports(prev => prev.map(x => x.id === r.id ? { ...x, email_sent_at: sentAt, [templateField]: sentAt } : x));
       }
       toast.success(shouldAttachPdf ? `Email sent to ${emailDialog.to} with PDF attached` : `Gift card email sent to ${emailDialog.to}`);
     } catch (e) {
