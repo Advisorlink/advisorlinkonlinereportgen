@@ -90,7 +90,24 @@ export default function Admin() {
       .select("*")
       .order("created_at", { ascending: false })
       .limit(500);
-    setReports((r as ReportRow[]) || []);
+    const rows = (r as ReportRow[]) || [];
+    // Fetch presentation completion from meetings table
+    const ids = rows.map(x => x.id);
+    let presentationMap: Record<string, string> = {};
+    if (ids.length) {
+      const { data: m } = await supabase
+        .from("meetings")
+        .select("report_id, ended_at")
+        .in("report_id", ids)
+        .not("ended_at", "is", null);
+      for (const row of (m as { report_id: string; ended_at: string }[] | null) || []) {
+        const prev = presentationMap[row.report_id];
+        if (!prev || new Date(row.ended_at) > new Date(prev)) {
+          presentationMap[row.report_id] = row.ended_at;
+        }
+      }
+    }
+    setReports(rows.map(x => ({ ...x, presentation_completed_at: presentationMap[x.id] ?? null })));
     setBusy(false);
   };
 
