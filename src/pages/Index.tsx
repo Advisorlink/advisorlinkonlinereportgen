@@ -32,25 +32,51 @@ export default function Index() {
   const [saving, setSaving] = useState(false);
   const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
 
-  const saveEdits = async () => {
-    if (!editingReportId) return;
+  const saveReport = async () => {
+    if (!user) {
+      toast.error("Please sign in before saving reports");
+      return;
+    }
     setSaving(true);
     try {
       const clientEmail = (inputs.clientEmail ?? "").trim() || null;
-      const { error } = await supabase
-        .from("reports")
-        .update({
-          client_name: inputs.clientName.trim() || "Unnamed client",
-          email: clientEmail,
-          inputs: JSON.parse(JSON.stringify(inputs)),
-          summary: JSON.parse(JSON.stringify(summary)),
-        } as never)
-        .eq("id", editingReportId);
+      const reportPayload = {
+        client_name: inputs.clientName.trim() || "Unnamed client",
+        email: clientEmail,
+        inputs: JSON.parse(JSON.stringify(inputs)),
+        summary: JSON.parse(JSON.stringify(summary)),
+        research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
+      };
+      const result = editingReportId
+        ? await supabase
+            .from("reports")
+            .update(reportPayload as never)
+            .eq("id", editingReportId)
+            .select("id")
+            .single()
+        : await supabase
+            .from("reports")
+            .insert({ ...reportPayload, user_id: user.id } as never)
+            .select("id")
+            .single();
+      const { data, error } = result;
       if (error) throw error;
-      toast.success("Report updated", { description: "Your edits have been saved to the client's report." });
+      const savedId = (data as { id?: string } | null)?.id;
+      if (savedId) setEditingReportId(savedId);
+      await supabase.from("activity_log").insert({
+        user_id: user.id,
+        email: user.email,
+        event_type: editingReportId ? "report_updated" : "report_saved",
+        details: { client: reportPayload.client_name, client_email: clientEmail, report_id: savedId },
+      });
+      toast.success(editingReportId ? "Report updated" : "Client report saved", {
+        description: editingReportId
+          ? "Your edits have been saved to the client's existing report."
+          : "This client is now in your Client Reports list.",
+      });
     } catch (e) {
       console.error(e);
-      toast.error("Could not save edits", { description: e instanceof Error ? e.message : "Unknown error" });
+      toast.error("Could not save report", { description: e instanceof Error ? e.message : "Unknown error" });
     } finally {
       setSaving(false);
     }
