@@ -39,7 +39,7 @@ export default function Admin() {
   const [searchParams, setSearchParams] = useSearchParams();
   const clientFilter = searchParams.get("client") || "";
   const { profile, loading } = useAuth();
-  const { setInputs } = useClientInputs();
+  const { setInputs, setEditingReportId } = useClientInputs();
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportSearch, setReportSearch] = useState(clientFilter);
   const [busy, setBusy] = useState(false);
