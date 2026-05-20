@@ -335,6 +335,7 @@ export default function Admin() {
       });
     } finally {
       setSendBusyId(null);
+      setPdfStageInputs(null);
     }
   };
 
@@ -593,7 +594,7 @@ export default function Admin() {
         return (
           <div
             aria-hidden
-            style={{ position: "fixed", left: -100000, top: 0, width: 794, pointerEvents: "none" }}
+            style={{ position: "fixed", left: -900, top: 0, width: 794, pointerEvents: "none" }}
           >
             <div ref={pdfStageRef} className="bg-white">
               <CoverPage s={summary} />

@@ -32,25 +32,51 @@ export default function Index() {
   const [saving, setSaving] = useState(false);
   const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
 
-  const saveEdits = async () => {
-    if (!editingReportId) return;
+  const saveReport = async () => {
+    if (!user) {
+      toast.error("Please sign in before saving reports");
+      return;
+    }
     setSaving(true);
     try {
       const clientEmail = (inputs.clientEmail ?? "").trim() || null;
-      const { error } = await supabase
-        .from("reports")
-        .update({
-          client_name: inputs.clientName.trim() || "Unnamed client",
-          email: clientEmail,
-          inputs: JSON.parse(JSON.stringify(inputs)),
-          summary: JSON.parse(JSON.stringify(summary)),
-        } as never)
-        .eq("id", editingReportId);
+      const reportPayload = {
+        client_name: inputs.clientName.trim() || "Unnamed client",
+        email: clientEmail,
+        inputs: JSON.parse(JSON.stringify(inputs)),
+        summary: JSON.parse(JSON.stringify(summary)),
+        research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
+      };
+      const result = editingReportId
+        ? await supabase
+            .from("reports")
+            .update(reportPayload as never)
+            .eq("id", editingReportId)
+            .select("id")
+            .single()
+        : await supabase
+            .from("reports")
+            .insert({ ...reportPayload, user_id: user.id } as never)
+            .select("id")
+            .single();
+      const { data, error } = result;
       if (error) throw error;
-      toast.success("Report updated", { description: "Your edits have been saved to the client's report." });
+      const savedId = (data as { id?: string } | null)?.id;
+      if (savedId) setEditingReportId(savedId);
+      await supabase.from("activity_log").insert({
+        user_id: user.id,
+        email: user.email,
+        event_type: editingReportId ? "report_updated" : "report_saved",
+        details: { client: reportPayload.client_name, client_email: clientEmail, report_id: savedId },
+      });
+      toast.success(editingReportId ? "Report updated" : "Client report saved", {
+        description: editingReportId
+          ? "Your edits have been saved to the client's existing report."
+          : "This client is now in your Client Reports list.",
+      });
     } catch (e) {
       console.error(e);
-      toast.error("Could not save edits", { description: e instanceof Error ? e.message : "Unknown error" });
+      toast.error("Could not save report", { description: e instanceof Error ? e.message : "Unknown error" });
     } finally {
       setSaving(false);
     }
@@ -192,25 +218,28 @@ export default function Index() {
     if (!user || !pendingExport.current) return;
     const { pdfPath } = pendingExport.current;
     const clientEmail = (inputs.clientEmail ?? "").trim() || null;
+    const reportPayload = {
+      email: clientEmail,
+      client_name: inputs.clientName.trim() || "Unnamed client",
+      inputs: JSON.parse(JSON.stringify(inputs)),
+      summary: JSON.parse(JSON.stringify(summary)),
+      research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
+      pdf_path: pdfPath,
+    };
 
-    await Promise.all([
-      supabase.from("activity_log").insert({
-        user_id: user.id, email: user.email, event_type: "report_generated",
-        details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath, workflow: false },
-      }),
-      supabase.from("reports").insert({
-        user_id: user.id,
-        email: clientEmail,
-        client_name: inputs.clientName.trim() || "Unnamed client",
-        inputs: JSON.parse(JSON.stringify(inputs)),
-        summary: JSON.parse(JSON.stringify(summary)),
-        research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
-        pdf_path: pdfPath,
-      } as never),
-    ]);
+    const saved = editingReportId
+      ? await supabase.from("reports").update(reportPayload as never).eq("id", editingReportId).select("id").single()
+      : await supabase.from("reports").insert({ ...reportPayload, user_id: user.id } as never).select("id").single();
+    if (saved.error) throw saved.error;
+    const savedId = (saved.data as { id?: string } | null)?.id;
+    if (savedId) setEditingReportId(savedId);
+    await supabase.from("activity_log").insert({
+      user_id: user.id, email: user.email, event_type: editingReportId ? "report_updated" : "report_generated",
+      details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath, workflow: false, report_id: savedId },
+    });
 
     pendingExport.current = null;
-    toast.success("Client added to reports list");
+    toast.success(editingReportId ? "Client report updated" : "Client added to reports list");
   };
 
   /** Full workflow: save to client list + push to GHL */
@@ -219,23 +248,26 @@ export default function Index() {
     if (!user || !pendingExport.current) return;
     const { ghlBlob, fileName, pdfPath } = pendingExport.current;
     const clientEmail = (inputs.clientEmail ?? "").trim() || null;
+    const reportPayload = {
+      email: clientEmail,
+      client_name: inputs.clientName.trim() || "Unnamed client",
+      inputs: JSON.parse(JSON.stringify(inputs)),
+      summary: JSON.parse(JSON.stringify(summary)),
+      research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
+      pdf_path: pdfPath,
+    };
 
-    // Log + insert report row
-    await Promise.all([
-      supabase.from("activity_log").insert({
-        user_id: user.id, email: user.email, event_type: "report_generated",
-        details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath, workflow: true },
-      }),
-      supabase.from("reports").insert({
-        user_id: user.id,
-        email: clientEmail,
-        client_name: inputs.clientName.trim() || "Unnamed client",
-        inputs: JSON.parse(JSON.stringify(inputs)),
-        summary: JSON.parse(JSON.stringify(summary)),
-        research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
-        pdf_path: pdfPath,
-      } as never),
-    ]);
+    // Log + create/update report row
+    const saved = editingReportId
+      ? await supabase.from("reports").update(reportPayload as never).eq("id", editingReportId).select("id").single()
+      : await supabase.from("reports").insert({ ...reportPayload, user_id: user.id } as never).select("id").single();
+    if (saved.error) throw saved.error;
+    const savedId = (saved.data as { id?: string } | null)?.id;
+    if (savedId) setEditingReportId(savedId);
+    await supabase.from("activity_log").insert({
+      user_id: user.id, email: user.email, event_type: editingReportId ? "report_updated" : "report_generated",
+      details: { client: inputs.clientName, client_email: clientEmail, pdf_path: pdfPath, workflow: true, report_id: savedId },
+    });
 
     // Push to Go High Level
     if (clientEmail) {
@@ -310,12 +342,12 @@ export default function Index() {
               <>
                 <Button
                   size="sm"
-                  onClick={saveEdits}
+                  onClick={saveReport}
                   disabled={saving}
                   className="h-9 px-2.5 sm:px-3 bg-emerald-600 text-white hover:bg-emerald-700 border-0 shadow-md"
                 >
                   <Save className="w-4 h-4 sm:mr-1.5" />
-                  <span className="hidden sm:inline">{saving ? "Saving…" : "Save Edits"}</span>
+                   <span className="hidden sm:inline">{saving ? "Saving…" : "Save"}</span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -327,6 +359,18 @@ export default function Index() {
                   <X className="w-4 h-4" />
                 </Button>
               </>
+            )}
+            {!editingReportId && (
+              <Button
+                size="sm"
+                onClick={saveReport}
+                disabled={saving}
+                className="h-9 px-2.5 sm:px-3 bg-emerald-600 text-white hover:bg-emerald-700 border-0 shadow-md"
+              >
+                <Save className="w-4 h-4 sm:mr-1.5" />
+                <span className="hidden sm:inline">{saving ? "Saving…" : "Save"}</span>
+                <span className="sm:hidden">Save</span>
+              </Button>
             )}
             <Button size="sm" onClick={exportPDF} disabled={exporting} className="h-9 px-2.5 sm:px-3 gradient-accent text-white border-0 shadow-md shadow-cyan/20 hover:shadow-cyan/30 transition-all">
               {exporting ? "Exporting…" : (
@@ -346,8 +390,7 @@ export default function Index() {
           <aside className="no-print min-h-0 lg:overflow-y-auto lg:pr-2 pb-2 lg:pb-6">
             <ClientForm value={inputs} onChange={setInputs} />
             <p className="mt-3 text-[11px] text-muted-foreground">
-              Tip: edits update the report instantly. Use <strong>Upload XLSX</strong> to load a saved
-              Client Data sheet, then download the PDF when you're happy.
+              Tip: edits update the report instantly. Click <strong>Save</strong> to add or update the client report, and use <strong>Download PDF</strong> only when you need a copy.
             </p>
           </aside>
           <section ref={reportRef} className="report-preview min-h-0 space-y-0 lg:overflow-y-auto pb-6">
