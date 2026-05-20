@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 const STORAGE_KEY = "advisor-link:client-inputs:v1";
 const LOOKUP_KEY = "advisor-link:lookup-state:v1";
+const EDITING_KEY = "advisor-link:editing-report-id:v1";
 
 export interface LookupState {
   text: string;
