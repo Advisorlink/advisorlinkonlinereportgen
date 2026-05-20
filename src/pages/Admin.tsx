@@ -443,23 +443,18 @@ export default function Admin() {
                         { label: "Follow-up", at: r.followup_email_sent_at },
                         { label: "Referral", at: r.referral_email_sent_at },
                         { label: "Presentation", at: r.presentation_completed_at },
-                      ] as const).map(p => {
-                        const done = !!p.at;
-                        return (
+                      ] as const)
+                        .filter(p => !!p.at)
+                        .map(p => (
                           <span
                             key={p.label}
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border transition-colors ${
-                              done
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                : "bg-muted/40 text-muted-foreground/60 border-border/40"
-                            }`}
-                            title={done ? `${p.label} • ${new Date(p.at as string).toLocaleString("en-AU")}` : `${p.label} not yet`}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200 transition-colors"
+                            title={`${p.label} • ${new Date(p.at as string).toLocaleString("en-AU")}`}
                           >
-                            <CheckCircle2 className={`w-3 h-3 ${done ? "" : "opacity-30"}`} />
+                            <CheckCircle2 className="w-3 h-3" />
                             {p.label}
                           </span>
-                        );
-                      })}
+                        ))}
                     </div>
                   </div>
 
