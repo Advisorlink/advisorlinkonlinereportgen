@@ -594,7 +594,7 @@ export default function Admin() {
         return (
           <div
             aria-hidden
-            style={{ position: "fixed", left: 0, top: 0, width: 794, opacity: 0, pointerEvents: "none", zIndex: -1 }}
+            style={{ position: "fixed", left: -900, top: 0, width: 794, pointerEvents: "none" }}
           >
             <div ref={pdfStageRef} className="bg-white">
               <CoverPage s={summary} />
