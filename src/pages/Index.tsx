@@ -306,6 +306,28 @@ export default function Index() {
               <span className="hidden sm:inline">Upload XLSX</span>
               <span className="sm:hidden">Upload</span>
             </Button>
+            {editingReportId && (
+              <>
+                <Button
+                  size="sm"
+                  onClick={saveEdits}
+                  disabled={saving}
+                  className="h-9 px-2.5 sm:px-3 bg-emerald-600 text-white hover:bg-emerald-700 border-0 shadow-md"
+                >
+                  <Save className="w-4 h-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">{saving ? "Saving…" : "Save Edits"}</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                  onClick={exitEditing}
+                  title="Stop editing existing report"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </>
+            )}
             <Button size="sm" onClick={exportPDF} disabled={exporting} className="h-9 px-2.5 sm:px-3 gradient-accent text-white border-0 shadow-md shadow-cyan/20 hover:shadow-cyan/30 transition-all">
               {exporting ? "Exporting…" : (
                 <>
