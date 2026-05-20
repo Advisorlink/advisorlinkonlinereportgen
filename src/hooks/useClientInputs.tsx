@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 const STORAGE_KEY = "advisor-link:client-inputs:v1";
 const LOOKUP_KEY = "advisor-link:lookup-state:v1";
+const EDITING_KEY = "advisor-link:editing-report-id:v1";
 
 export interface LookupState {
   text: string;
@@ -25,6 +26,8 @@ interface Ctx {
     text: string,
     onApply: (r: Record<string, unknown>) => void,
   ) => Promise<void>;
+  editingReportId: string | null;
+  setEditingReportId: (id: string | null) => void;
 }
 
 const ClientInputsCtx = createContext<Ctx | null>(null);
@@ -111,9 +114,21 @@ export function ClientInputsProvider({ children }: { children: ReactNode }) {
     return promise;
   };
 
+  const [editingReportId, setEditingReportIdState] = useState<string | null>(() => {
+    try { return localStorage.getItem(EDITING_KEY); } catch { return null; }
+  });
+  const setEditingReportId = (id: string | null) => {
+    setEditingReportIdState(id);
+    try {
+      if (id) localStorage.setItem(EDITING_KEY, id);
+      else localStorage.removeItem(EDITING_KEY);
+    } catch { /* ignore */ }
+  };
+
   const reset = () => {
     setInputsState(DEFAULT_INPUTS);
     setLookupState(DEFAULT_LOOKUP);
+    setEditingReportId(null);
     try {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(LOOKUP_KEY);
@@ -121,7 +136,7 @@ export function ClientInputsProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ClientInputsCtx.Provider value={{ inputs, setInputs, reset, lookup, setLookup, lookupLoading, runLookup }}>
+    <ClientInputsCtx.Provider value={{ inputs, setInputs, reset, lookup, setLookup, lookupLoading, runLookup, editingReportId, setEditingReportId }}>
       {children}
     </ClientInputsCtx.Provider>
   );

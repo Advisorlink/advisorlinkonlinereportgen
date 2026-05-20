@@ -8,7 +8,7 @@ import { importFromFile } from "@/lib/xlsx-import";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { supabase } from "@/integrations/supabase/client";
-import { Maximize2, FileText } from "lucide-react";
+import { Maximize2, FileText, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { CRMLayout } from "@/components/CRMLayout";
 import {
@@ -24,12 +24,42 @@ import {
 export default function Index() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { inputs, setInputs, lookup } = useClientInputs();
+  const { inputs, setInputs, lookup, editingReportId, setEditingReportId } = useClientInputs();
   const summary = useMemo(() => buildSummary(inputs), [inputs]);
   const fileRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
+
+  const saveEdits = async () => {
+    if (!editingReportId) return;
+    setSaving(true);
+    try {
+      const clientEmail = (inputs.clientEmail ?? "").trim() || null;
+      const { error } = await supabase
+        .from("reports")
+        .update({
+          client_name: inputs.clientName.trim() || "Unnamed client",
+          email: clientEmail,
+          inputs: JSON.parse(JSON.stringify(inputs)),
+          summary: JSON.parse(JSON.stringify(summary)),
+        } as never)
+        .eq("id", editingReportId);
+      if (error) throw error;
+      toast.success("Report updated", { description: "Your edits have been saved to the client's report." });
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not save edits", { description: e instanceof Error ? e.message : "Unknown error" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const exitEditing = () => {
+    setEditingReportId(null);
+    toast.info("Stopped editing existing report");
+  };
 
   // We store generated PDF artifacts here so the dialog callbacks can use them
   const pendingExport = useRef<{
@@ -276,6 +306,28 @@ export default function Index() {
               <span className="hidden sm:inline">Upload XLSX</span>
               <span className="sm:hidden">Upload</span>
             </Button>
+            {editingReportId && (
+              <>
+                <Button
+                  size="sm"
+                  onClick={saveEdits}
+                  disabled={saving}
+                  className="h-9 px-2.5 sm:px-3 bg-emerald-600 text-white hover:bg-emerald-700 border-0 shadow-md"
+                >
+                  <Save className="w-4 h-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">{saving ? "Saving…" : "Save Edits"}</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                  onClick={exitEditing}
+                  title="Stop editing existing report"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </>
+            )}
             <Button size="sm" onClick={exportPDF} disabled={exporting} className="h-9 px-2.5 sm:px-3 gradient-accent text-white border-0 shadow-md shadow-cyan/20 hover:shadow-cyan/30 transition-all">
               {exporting ? "Exporting…" : (
                 <>

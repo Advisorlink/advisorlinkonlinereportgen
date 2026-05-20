@@ -39,7 +39,7 @@ export default function Admin() {
   const [searchParams, setSearchParams] = useSearchParams();
   const clientFilter = searchParams.get("client") || "";
   const { profile, loading } = useAuth();
-  const { setInputs } = useClientInputs();
+  const { setInputs, setEditingReportId } = useClientInputs();
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportSearch, setReportSearch] = useState(clientFilter);
   const [busy, setBusy] = useState(false);
@@ -56,7 +56,8 @@ export default function Admin() {
 
   const editReport = (r: ReportRow) => {
     setInputs(resolveInputs(r));
-    toast.success(`Loaded ${r.client_name}`);
+    setEditingReportId(r.id);
+    toast.success(`Editing ${r.client_name}`, { description: "Make your changes and click Save." });
     nav("/");
   };
 
