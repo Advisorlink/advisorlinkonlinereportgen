@@ -960,9 +960,12 @@ export type Database = {
           created_at: string
           email: string | null
           email_sent_at: string | null
+          followup_email_sent_at: string | null
           id: string
           inputs: Json
           pdf_path: string | null
+          referral_email_sent_at: string | null
+          report_email_sent_at: string | null
           research: Json | null
           summary: Json | null
           user_id: string
@@ -972,9 +975,12 @@ export type Database = {
           created_at?: string
           email?: string | null
           email_sent_at?: string | null
+          followup_email_sent_at?: string | null
           id?: string
           inputs: Json
           pdf_path?: string | null
+          referral_email_sent_at?: string | null
+          report_email_sent_at?: string | null
           research?: Json | null
           summary?: Json | null
           user_id: string
@@ -984,9 +990,12 @@ export type Database = {
           created_at?: string
           email?: string | null
           email_sent_at?: string | null
+          followup_email_sent_at?: string | null
           id?: string
           inputs?: Json
           pdf_path?: string | null
+          referral_email_sent_at?: string | null
+          report_email_sent_at?: string | null
           research?: Json | null
           summary?: Json | null
           user_id?: string
