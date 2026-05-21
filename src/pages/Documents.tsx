@@ -249,7 +249,11 @@ export default function Documents() {
             </Button>
           </div>
         </div>
-        <SendUploadLinkDialog open={sendOpen} onOpenChange={setSendOpen} />
+        <SendUploadLinkDialog
+          open={sendOpen}
+          onOpenChange={(o) => { setSendOpen(o); if (!o) setSendPrefill(null); }}
+          prefill={sendPrefill}
+        />
 
         {/* Stats strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
