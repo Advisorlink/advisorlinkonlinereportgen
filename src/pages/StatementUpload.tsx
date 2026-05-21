@@ -251,7 +251,7 @@ export default function StatementUpload() {
     {
       type: "camera" as const,
       label: "Take photos",
-      description: "Use your camera — capture as many pages as you like in one go",
+      description: "Use your camera, capture as many pages as you like in one go",
       icon: Camera,
       onClick: () => setStage("camera"),
     },
@@ -273,7 +273,7 @@ export default function StatementUpload() {
 
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-[hsl(215_60%_12%)]">
-      {/* Header — AdvisorLink */}
+      {/* Header, AdvisorLink */}
       <header className="relative overflow-hidden bg-[hsl(215_60%_10%)] text-white">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[hsl(192_90%_50%)]/25 blur-3xl" />
         <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[hsl(192_90%_60%)]/15 blur-3xl" />
@@ -332,25 +332,25 @@ export default function StatementUpload() {
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
                     <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
-                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Member number not required</span> — feel free to leave it off or block it out, we don't need it to prepare.</span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Member number not required</span>, feel free to leave it off or block it out, we don't need it to prepare.</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
                     <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
-                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Cross out anything personal</span> you'd rather we don't see — addresses, account numbers, tax file numbers — your choice.</span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Cross out anything personal</span> you'd rather we don't see, addresses, account numbers, tax file numbers, your choice.</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
                     <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
-                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">A photo or screenshot is perfect</span> — no need for a fancy scan. We just need to see your current balance and provider.</span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">A photo or screenshot is perfect</span>, no need for a fancy scan. We just need to see your current balance and provider.</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
                     <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
-                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Encrypted end-to-end</span> — your file goes straight to your adviser and no one else.</span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Encrypted end-to-end</span>, your file goes straight to your adviser and no one else.</span>
                 </li>
               </ul>
             </div>
@@ -382,7 +382,7 @@ export default function StatementUpload() {
                 Send through your most recent statement
               </h1>
               <p className="mx-auto mt-3 max-w-md text-[14px] text-[hsl(215_60%_12%)]/65">
-                Feel free to just take photos or screenshots — and block out any personal information you'd prefer to keep private. We'll handle the rest.
+                Feel free to just take photos or screenshots, and block out any personal information you'd prefer to keep private. We'll handle the rest.
               </p>
             </div>
 

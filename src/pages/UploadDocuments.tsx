@@ -22,7 +22,7 @@ const REPRESENTATIVES = [
 ];
 
 // Four design variants for the user to A/B test the look & feel.
-// Only colour, surface, font feel and button radius change — the flow is identical.
+// Only colour, surface, font feel and button radius change, the flow is identical.
 type VariantConfig = {
   label: string;
   page: string;       // page background
@@ -334,7 +334,7 @@ export default function UploadDocuments() {
   const handleLicenseCapture = async () => {
     if (busy || !cameraReady) return;
     setBusy(true);
-    const label = licenseSide === "front" ? "Licence — Front" : "Licence — Back";
+    const label = licenseSide === "front" ? "Licence, Front" : "Licence, Back";
     const item = await captureCropped(label, "license");
     if (!item) {
       setBusy(false);
@@ -344,7 +344,7 @@ export default function UploadDocuments() {
     addCaptured(item);
     if (licenseSide === "front") {
       setLicenseSide("back");
-      showCaptureBanner("Front saved — now capture the back");
+      showCaptureBanner("Front saved, now capture the back");
       setBusy(false);
     } else {
       showCaptureBanner("Back saved");
@@ -448,7 +448,7 @@ export default function UploadDocuments() {
     >
       {/* ============ VARIANT-SPECIFIC HEADER ============ */}
       {variant === 1 && (
-        // AdvisorLink — product feel, dark navy bar with cyan rule
+        // AdvisorLink, product feel, dark navy bar with cyan rule
         <header className="relative overflow-hidden bg-[hsl(215_60%_10%)] text-white">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[hsl(192_90%_50%)]/25 blur-3xl" />
           <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[hsl(192_90%_60%)]/15 blur-3xl" />
@@ -465,7 +465,7 @@ export default function UploadDocuments() {
       )}
 
       {variant === 2 && (
-        // Private Bank — editorial, hairline rules, centered crest
+        // Private Bank, editorial, hairline rules, centered crest
         <header className="bg-[hsl(var(--page-alt))]">
           <div className="mx-auto max-w-3xl px-5 pt-7">
             <div className="flex items-center justify-between gap-4 pb-5">
@@ -480,7 +480,7 @@ export default function UploadDocuments() {
       )}
 
       {variant === 3 && (
-        // Soft Modern — pill nav floating on tinted surface
+        // Soft Modern, pill nav floating on tinted surface
         <header className="bg-[hsl(var(--page-alt))] pt-5">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 rounded-2xl bg-white px-5 py-3 shadow-[0_4px_24px_-8px_rgba(15,23,42,0.08)] sm:mx-5 md:mx-auto">
             <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-8 w-auto" />
@@ -494,7 +494,7 @@ export default function UploadDocuments() {
       )}
 
       {variant === 4 && (
-        // Mono Lux — full bleed black, gold hairline, oversized typography
+        // Mono Lux, full bleed black, gold hairline, oversized typography
         <header className="bg-black text-white">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-6">
             <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-8 w-auto invert" />
@@ -506,7 +506,7 @@ export default function UploadDocuments() {
       )}
 
       {variant === 5 && (
-        // Warm Trust — illustrated peach band, rounded card
+        // Warm Trust, illustrated peach band, rounded card
         <header className="bg-[#f5e6d8]">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-5">
             <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-9 w-auto" />
@@ -526,7 +526,7 @@ export default function UploadDocuments() {
           <Lock className="h-3 w-3" /> Secure document upload for Pure Private Wealth
         </div>
 
-        {/* ============ CHOOSE — VARIANT-SPECIFIC LAYOUTS ============ */}
+        {/* ============ CHOOSE, VARIANT-SPECIFIC LAYOUTS ============ */}
         {stage === "choose" && (() => {
           const onPick = (t: DocType) => {
             if (t === "license") setStage("license_method");
@@ -534,7 +534,7 @@ export default function UploadDocuments() {
             else setStage("screenshot_pick");
           };
 
-          // V1 — AdvisorLink product cards with cyan accent
+          // V1, AdvisorLink product cards with cyan accent
           if (variant === 1) {
             return (
               <section className="page-enter">
@@ -566,12 +566,12 @@ export default function UploadDocuments() {
             );
           }
 
-          // V2 — Private Bank: editorial numbered list, no boxes
+          // V2, Private Bank: editorial numbered list, no boxes
           if (variant === 2) {
             return (
               <section className="page-enter">
                 <div className="mb-10">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[hsl(var(--ink))]/50">— A confidential transfer</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[hsl(var(--ink))]/50">,  A confidential transfer</p>
                   <h1 className="font-heading mt-4 text-[34px] font-bold leading-[1.05] tracking-tight text-[hsl(var(--ink))] sm:text-[44px]">
                     What document would<br />you like to upload?
                   </h1>
@@ -602,7 +602,7 @@ export default function UploadDocuments() {
             );
           }
 
-          // V3 — Soft Modern: compact row cards that fit on mobile
+          // V3, Soft Modern: compact row cards that fit on mobile
           if (variant === 3) {
             return (
               <section className="page-enter">
@@ -611,7 +611,7 @@ export default function UploadDocuments() {
                     What document would<br />you like to upload?
                   </h1>
                   <p className="mx-auto mt-2 max-w-md text-[13px] text-[hsl(var(--ink))]/60 sm:text-[14px]">
-                    Tap an option to get started — it only takes a minute.
+                    Tap an option to get started, it only takes a minute.
                   </p>
                 </div>
                 <div className="space-y-3">
@@ -636,7 +636,7 @@ export default function UploadDocuments() {
             );
           }
 
-          // V4 — Mono Lux: brutalist slab rows, oversized numerals
+          // V4, Mono Lux: brutalist slab rows, oversized numerals
           if (variant === 4) {
             return (
               <section className="page-enter">
@@ -667,7 +667,7 @@ export default function UploadDocuments() {
             );
           }
 
-          // V5 — Warm Trust: friendly pill cards
+          // V5, Warm Trust: friendly pill cards
           return (
             <section className="page-enter">
               <div className="mb-8 text-center">
@@ -675,7 +675,7 @@ export default function UploadDocuments() {
                   What would you like<br />to upload today?
                 </h1>
                 <p className="mx-auto mt-3 max-w-md text-[14px] text-[hsl(var(--ink))]/65">
-                  We'll guide you through it — quick, friendly, secure.
+                  We'll guide you through it, quick, friendly, secure.
                 </p>
               </div>
               <div className="space-y-4">
@@ -709,7 +709,7 @@ export default function UploadDocuments() {
           </button>
         )}
 
-        {/* ============ LICENSE — METHOD ============ */}
+        {/* ============ LICENSE, METHOD ============ */}
         {stage === "license_method" && (
           <MethodChoice
             title="Driver's Licence"
@@ -720,7 +720,7 @@ export default function UploadDocuments() {
           />
         )}
 
-        {/* ============ LICENSE — UPLOAD ============ */}
+        {/* ============ LICENSE, UPLOAD ============ */}
         {stage === "license_upload" && (
           <section className="page-enter rounded-md border border-[hsl(var(--ink))]/10 bg-white p-6">
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[hsl(var(--ink))]/55">
@@ -733,7 +733,7 @@ export default function UploadDocuments() {
               Choose a clear photo from your device. Make sure all details are readable.
             </p>
             <Button
-              onClick={() => triggerFilePick("license", licenseSide === "front" ? "Licence — Front" : "Licence — Back", false)}
+              onClick={() => triggerFilePick("license", licenseSide === "front" ? "Licence, Front" : "Licence, Back", false)}
               size="lg"
               className="mt-5 h-12 w-full rounded-sm bg-[hsl(var(--ink))] font-semibold text-white hover:bg-[hsl(215_60%_18%)]"
             >
@@ -748,7 +748,7 @@ export default function UploadDocuments() {
           </section>
         )}
 
-        {/* ============ STATEMENT — METHOD ============ */}
+        {/* ============ STATEMENT, METHOD ============ */}
         {stage === "statement_method" && (
           <MethodChoice
             title="Statement"
@@ -1106,7 +1106,7 @@ function FullscreenCamera({
       <div className="relative flex-1 overflow-hidden bg-black">
         <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />
 
-        {/* Capture confirmation banner — slides from TOP so it never covers the shutter */}
+        {/* Capture confirmation banner, slides from TOP so it never covers the shutter */}
         {banner && (
           <div className="pointer-events-none absolute inset-x-0 top-3 z-30 flex justify-center px-4">
             <div className="flex items-center gap-2 rounded-full bg-emerald-500/95 px-4 py-2 text-[13px] font-semibold text-white shadow-lg ring-1 ring-white/20 animate-in fade-in slide-in-from-top-2">
@@ -1117,7 +1117,7 @@ function FullscreenCamera({
         )}
 
 
-        {/* Helper text — above the frame for clear readability */}
+        {/* Helper text, above the frame for clear readability */}
         <div className="pointer-events-none absolute inset-x-0 top-6 z-20 flex flex-col items-center gap-3 px-6">
           <p className="max-w-[92%] rounded-lg bg-black/75 px-5 py-2.5 text-center text-[14px] font-semibold text-white shadow-lg backdrop-blur">
             {helper}
