@@ -249,7 +249,7 @@ export default function LicenseUpload() {
   }, [stopCamera]);
 
   useEffect(() => {
-    if (stage === "license_camera" || stage === "statement_camera") {
+    if (stage === "license_camera") {
       startCamera();
     } else {
       stopCamera();
