@@ -874,9 +874,15 @@ function ContactPanelContent({
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
             <User className="w-3 h-3" /> Contact Details
           </p>
-          <div>
-            <Label htmlFor="msg-name" className="text-[10px]">Full Name</Label>
-            <Input id="msg-name" value={form.full_name} onChange={(e) => setForm((p) => ({ ...p, full_name: e.target.value }))} className="mt-1 h-8 text-xs" />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label htmlFor="msg-first" className="text-[10px]">First Name</Label>
+              <Input id="msg-first" value={form.first_name} onChange={(e) => setForm((p) => ({ ...p, first_name: e.target.value, full_name: [e.target.value.trim(), p.last_name.trim()].filter(Boolean).join(" ") }))} className="mt-1 h-8 text-xs" />
+            </div>
+            <div>
+              <Label htmlFor="msg-last" className="text-[10px]">Last Name</Label>
+              <Input id="msg-last" value={form.last_name} onChange={(e) => setForm((p) => ({ ...p, last_name: e.target.value, full_name: [p.first_name.trim(), e.target.value.trim()].filter(Boolean).join(" ") }))} className="mt-1 h-8 text-xs" />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
