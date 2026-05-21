@@ -44,7 +44,18 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
   // Slides are React components — nothing to preload.
 
   const prev = useCallback(() => setCurrent((c) => Math.max(0, c - 1)), []);
-  const next = useCallback(() => setCurrent((c) => Math.min(TOTAL_SLIDES - 1, c + 1)), []);
+  const next = useCallback(() => {
+    setCurrent((c) => {
+      if (c >= TOTAL_SLIDES - 1) {
+        if (onFinish) {
+          if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+          onFinish();
+        }
+        return c;
+      }
+      return c + 1;
+    });
+  }, [onFinish]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
