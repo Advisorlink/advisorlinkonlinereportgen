@@ -114,10 +114,31 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
         state: d.state || "",
         had_review_before: d.had_review_before === true ? "yes" : d.had_review_before === false ? "no" : "",
       });
+      setProgress(Array.isArray(d.progress_stages) ? d.progress_stages : []);
       setOriginalStageId(deal.stage_id);
       fetchNotes(deal.id);
     }
   }, [deal]);
+
+  const toggleMilestone = async (key: string) => {
+    if (!deal) return;
+    const next = progress.includes(key)
+      ? progress.filter((k) => k !== key)
+      : [...progress, key];
+    setProgress(next);
+    setProgressSaving(key);
+    const { error } = await supabase
+      .from("pipeline_deals")
+      .update({ progress_stages: next } as any)
+      .eq("id", deal.id);
+    setProgressSaving(null);
+    if (error) {
+      toast({ title: "Couldn't update milestone", variant: "destructive" });
+      setProgress(progress);
+    } else {
+      onDealUpdated();
+    }
+  };
 
   const fetchNotes = useCallback(async (dealId: string) => {
     const { data } = await supabase
