@@ -128,6 +128,22 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
           )}
         </div>
       )}
+
+      {deal.progress_stages && deal.progress_stages.length > 0 && (
+        <div className="mt-2.5 pt-2.5 border-t border-border/30">
+          <div className="flex items-center gap-1.5">
+            <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 transition-all"
+                style={{ width: `${(deal.progress_stages.length / PROGRESS_TOTAL) * 100}%` }}
+              />
+            </div>
+            <span className="text-[10px] font-semibold text-muted-foreground tabular-nums">
+              {deal.progress_stages.length}/{PROGRESS_TOTAL}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
