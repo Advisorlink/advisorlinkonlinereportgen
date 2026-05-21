@@ -62,17 +62,35 @@ const stats = [
 ];
 
 export default function ESign() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [templateFile, setTemplateFile] = useState<File | null>(null);
   const [templateName, setTemplateName] = useState("");
+  const [prefillClient, setPrefillClient] = useState<{ name?: string; email?: string; phone?: string } | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setPrefillClient({
+        name: searchParams.get("name") || "",
+        email: searchParams.get("email") || "",
+        phone: searchParams.get("phone") || "",
+      });
+      setActiveSection("esign");
+      // Clear params so refresh/back doesn't re-trigger
+      const next = new URLSearchParams(searchParams);
+      ["new", "name", "email", "phone", "advisor"].forEach(k => next.delete(k));
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   if (activeSection === "esign") {
     return (
       <CRMLayout>
         <ESignNewRequest
-          onBack={() => { setActiveSection(null); setTemplateFile(null); setTemplateName(""); }}
+          onBack={() => { setActiveSection(null); setTemplateFile(null); setTemplateName(""); setPrefillClient(null); }}
           initialFile={templateFile}
           initialFileName={templateName}
+          prefillClient={prefillClient}
         />
       </CRMLayout>
     );
