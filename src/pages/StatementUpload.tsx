@@ -12,8 +12,7 @@ import {
   EyeOff, Check, ArrowRight, Sparkles,
 } from "lucide-react";
 import { z } from "zod";
-
-const LOGO_URL = "/advisor-link-logo.png";
+import logoSvg from "@/assets/logo.svg";
 
 const MAX_BYTES = 15 * 1024 * 1024;
 
