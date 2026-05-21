@@ -324,6 +324,24 @@ export default function Messages() {
     fetchConversations();
   };
 
+  const handleDeleteConv = async (convId: string) => {
+    if (!confirm("Delete this conversation and all its messages? This cannot be undone.")) return;
+    const { error: msgErr } = await supabase.from("sms_messages").delete().eq("conversation_id", convId);
+    if (msgErr) {
+      toast({ title: "Failed to delete messages", description: msgErr.message, variant: "destructive" });
+      return;
+    }
+    await supabase.from("sms_internal_notes").delete().eq("conversation_id", convId);
+    const { error: convErr } = await supabase.from("sms_conversations").delete().eq("id", convId);
+    if (convErr) {
+      toast({ title: "Failed to delete conversation", description: convErr.message, variant: "destructive" });
+      return;
+    }
+    if (activeConv?.id === convId) setActiveConv(null);
+    toast({ title: "Conversation deleted" });
+    fetchConversations();
+  };
+
   const handleReassign = async (userId: string) => {
     if (!activeConv) return;
     const newId = userId === "__unassigned" ? null : userId;
@@ -468,6 +486,7 @@ export default function Messages() {
                     <DropdownMenuItem onClick={() => handleCloseConv(activeConv.id)}>Close conversation</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleArchive(activeConv.id)}>Archive</DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteConv(activeConv.id)}>Delete conversation</DropdownMenuItem>
                     <DropdownMenuItem className="text-destructive">Block contact</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
