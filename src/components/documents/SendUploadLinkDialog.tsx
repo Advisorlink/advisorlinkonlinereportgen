@@ -57,12 +57,12 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Contact | null>(null);
   const [advisor, setAdvisor] = useState<AdvisorId>("pure-private-wealth");
-  const [uploadType, setUploadType] = useState<UploadType>("advisor");
+  const [uploadType, setUploadType] = useState<UploadType>("license_and_statement");
   const [channel, setChannel] = useState<SendChannel>("email");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
-  const [subject, setSubject] = useState(UPLOAD_TYPE_LABELS.advisor.subject);
+  const [subject, setSubject] = useState(UPLOAD_TYPE_LABELS.license_and_statement.subject);
   const [emailBody, setEmailBody] = useState("");
   const [smsBody, setSmsBody] = useState("");
   const [sending, setSending] = useState(false);
