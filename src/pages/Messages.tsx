@@ -758,7 +758,10 @@ function ContactPanelContent({
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    const sn = splitName(c.full_name || "");
     setForm({
+      first_name: c.first_name || sn.first,
+      last_name: c.last_name || sn.last,
       full_name: c.full_name || "",
       phone: c.phone || "",
       email: c.email || "",
