@@ -217,7 +217,7 @@ export default function Messages() {
       const { data, error } = await supabase.functions.invoke("sms-send", {
         body: {
           to: activeConv.sms_contacts.phone,
-          body: messageText,
+          body: mergeContactFields(messageText, activeConv),
           mediaUrls: pendingMedia.map(m => m.url),
           contactId: activeConv.contact_id,
           conversationId: activeConv.id,
