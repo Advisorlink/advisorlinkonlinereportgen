@@ -25,6 +25,7 @@ import ReferralLanding from "./pages/ReferralLanding.tsx";
 import MeetingJoin from "./pages/MeetingJoin.tsx";
 import UploadDocuments from "./pages/UploadDocuments.tsx";
 import StatementUpload from "./pages/StatementUpload.tsx";
+import LicenseUpload from "./pages/LicenseUpload.tsx";
 import Documents from "./pages/Documents.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -58,6 +59,7 @@ const App = () => (
                 <Route path="/esign/sign" element={<ESignPublic />} />
                 <Route path="/upload" element={<UploadDocuments />} />
                 <Route path="/upload-statement" element={<StatementUpload />} />
+                <Route path="/upload-license" element={<LicenseUpload />} />
                 <Route path="/documents" element={<ProtectedApp><Documents /></ProtectedApp>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
