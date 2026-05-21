@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Circle, Maximize, Minimize, Pause, Play, X } from "lucide-react";
 
-const TOTAL_SLIDES = 14;
 const SLIDE_SRCS = [
   "/slides/slide-01.jpg",
   "/slides/slide-02.jpg",
@@ -19,7 +18,10 @@ const SLIDE_SRCS = [
   "/slides/slide-13.jpg",
   "/slides/slide-14.jpg",
   "/slides/slide-15.jpg",
+  "/slides/slide-16.jpg",
+  "/slides/slide-17.jpg",
 ];
+const TOTAL_SLIDES = SLIDE_SRCS.length;
 
 interface Props {
   clientName: string;
