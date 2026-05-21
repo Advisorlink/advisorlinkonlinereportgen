@@ -1118,15 +1118,16 @@ function FullscreenCamera({
 
 
         {/* Helper text, above the frame for clear readability */}
-        <div className="pointer-events-none absolute inset-x-0 top-6 z-20 flex flex-col items-center gap-3 px-6">
-          <p className="max-w-[92%] rounded-lg bg-black/75 px-5 py-2.5 text-center text-[14px] font-semibold text-white shadow-lg backdrop-blur">
-            {helper}
-          </p>
+        <div className="pointer-events-none absolute inset-x-0 top-6 z-20 flex flex-col items-center gap-2 px-6">
           {isLicense && (
-            <div className="rounded-xl bg-[hsl(192_90%_45%)] px-6 py-3 text-center text-[22px] font-extrabold uppercase tracking-[0.18em] text-white shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] ring-2 ring-white/30">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/55 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.32em] text-white backdrop-blur">
+              <span className="h-1 w-1 rounded-full bg-[hsl(192_90%_55%)]" />
               {instruction}
             </div>
           )}
+          <p className="max-w-[92%] rounded-md bg-black/60 px-4 py-2 text-center text-[12.5px] font-medium text-white/90 backdrop-blur">
+            {helper}
+          </p>
         </div>
 
 
