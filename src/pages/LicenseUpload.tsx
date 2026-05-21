@@ -105,7 +105,7 @@ const detailsSchema = z.object({
   representative: z.string().trim().min(1, "Please select your consultant"),
 });
 
-type DocType = "license" | "statement" | "screenshot";
+type DocType = "license";
 
 type CapturedFile = {
   id: string;
@@ -117,26 +117,16 @@ type CapturedFile = {
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
-const DOC_OPTIONS: { type: DocType; label: string; description: string; icon: typeof IdCard }[] = [
-  { type: "license", label: "Driver's Licence", description: "Front and back of your licence", icon: IdCard },
-  { type: "statement", label: "Statement", description: "Super or bank statement (PDF or photo)", icon: FileText },
-  { type: "screenshot", label: "Screenshot", description: "An image from your phone or computer", icon: ImageIcon },
-];
-
 type Stage =
-  | "choose"
   | "license_method"
   | "license_camera"
   | "license_upload"
-  | "statement_method"
-  | "statement_camera"
-  | "screenshot_pick"
   | "review"
   | "details"
   | "done";
 
-export default function UploadDocuments() {
-  const [stage, setStage] = useState<Stage>("choose");
+export default function LicenseUpload() {
+  const [stage, setStage] = useState<Stage>("license_method");
   const [captured, setCaptured] = useState<CapturedFile[]>([]);
   const [client, setClient] = useState({ fullName: "", email: "", representative: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
