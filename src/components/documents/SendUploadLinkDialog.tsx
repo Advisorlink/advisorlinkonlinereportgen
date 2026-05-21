@@ -231,10 +231,10 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
 
         <div className="space-y-1.5">
           <Label className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> What are you sending?</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {(Object.keys(UPLOAD_TYPE_LABELS) as UploadType[]).map((key) => {
               const meta = UPLOAD_TYPE_LABELS[key];
-              const Icon = key === "advisor" ? FileText : Receipt;
+              const Icon = key === "statement_only" ? Receipt : key === "license_only" ? IdCard : FileText;
               const active = uploadType === key;
               return (
                 <button
