@@ -91,6 +91,8 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
   const [notes, setNotes] = useState<DealNote[]>([]);
   const [newNote, setNewNote] = useState("");
   const [addingNote, setAddingNote] = useState(false);
+  const [progress, setProgress] = useState<string[]>([]);
+  const [progressSaving, setProgressSaving] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
