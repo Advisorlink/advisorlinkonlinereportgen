@@ -57,6 +57,7 @@ const App = () => (
                 <Route path="/meeting/join" element={<MeetingJoin />} />
                 <Route path="/esign/sign" element={<ESignPublic />} />
                 <Route path="/upload" element={<UploadDocuments />} />
+                <Route path="/upload-statement" element={<StatementUpload />} />
                 <Route path="/documents" element={<ProtectedApp><Documents /></ProtectedApp>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
