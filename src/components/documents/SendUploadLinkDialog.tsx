@@ -13,7 +13,7 @@ import { Mail, MessageSquare, Search, Send, Copy, Check, Link2, Briefcase, FileT
 const UPLOAD_URLS = {
   license_and_statement: "https://report.advisorlinkonline.com.au/upload",
   statement_only: "https://report.advisorlinkonline.com.au/upload-statement",
-  license_only: "https://report.advisorlinkonline.com.au/upload",
+  license_only: "https://report.advisorlinkonline.com.au/upload-license",
 } as const;
 
 type UploadType = keyof typeof UPLOAD_URLS;
