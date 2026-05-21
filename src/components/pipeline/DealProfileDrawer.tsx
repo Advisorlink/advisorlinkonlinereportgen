@@ -313,7 +313,46 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
             )}
           </div>
 
-          {/* Contact details */}
+          {/* Process progress milestones */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+                <ListChecks className="w-3.5 h-3.5" /> Process Progress
+              </h3>
+              <span className="text-[11px] text-muted-foreground">
+                {progress.length}/{PROGRESS_MILESTONES.length}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {PROGRESS_MILESTONES.map((m) => {
+                const done = progress.includes(m.key);
+                const busy = progressSaving === m.key;
+                return (
+                  <button
+                    key={m.key}
+                    type="button"
+                    onClick={() => toggleMilestone(m.key)}
+                    disabled={busy}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all disabled:opacity-60 ${
+                      done
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20"
+                        : "bg-muted/40 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    {busy ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : done ? (
+                      <Check className="w-3 h-3" />
+                    ) : (
+                      <div className="w-3 h-3 rounded-full border border-current opacity-40" />
+                    )}
+                    {m.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="space-y-3">
             <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
               <User className="w-3.5 h-3.5" /> Contact Details
