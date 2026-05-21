@@ -14,7 +14,10 @@ type Deal = {
   position: number;
   created_at: string;
   updated_at: string;
+  progress_stages?: string[] | null;
 };
+
+const PROGRESS_TOTAL = 8;
 
 interface PipelineDealCardProps {
   deal: Deal;
