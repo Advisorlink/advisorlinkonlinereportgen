@@ -311,7 +311,7 @@ export default function LicenseUpload() {
                 </div>
 
                 <section className="rounded-2xl bg-white p-5 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] ring-1 ring-[hsl(222_47%_18%)]/5">
-                  <h2 className="font-heading text-base font-bold">How would you like to add your licence?</h2>
+                  <h2 className="font-heading text-base font-bold">How would you like to add your Photo ID?</h2>
                   <p className="mt-1 text-[13px] text-[hsl(222_47%_18%)]/60">
                     Take a photo using your camera — the frame helps you line up the front and back — or upload existing photos.
                   </p>
