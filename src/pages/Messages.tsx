@@ -685,7 +685,68 @@ function ContactPanelContent({
   const c = conversation.sms_contacts;
   const cf = (c.custom_fields || {}) as Record<string, any>;
   const initials = (c.full_name || "?").split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
-  const balance = cf.super_balance != null ? Number(cf.super_balance) : null;
+
+  const [form, setForm] = useState({
+    full_name: c.full_name || "",
+    phone: c.phone || "",
+    email: c.email || "",
+    lead_source: c.lead_source || "",
+    notes: c.notes || "",
+    age: (cf.age as string) || "",
+    state: (cf.state as string) || "",
+    super_fund_name: (cf.super_fund_name as string) || "",
+    super_balance: cf.super_balance != null ? String(cf.super_balance) : "",
+    had_review_before:
+      cf.had_review_before === true ? "yes" : cf.had_review_before === false ? "no" : "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setForm({
+      full_name: c.full_name || "",
+      phone: c.phone || "",
+      email: c.email || "",
+      lead_source: c.lead_source || "",
+      notes: c.notes || "",
+      age: (cf.age as string) || "",
+      state: (cf.state as string) || "",
+      super_fund_name: (cf.super_fund_name as string) || "",
+      super_balance: cf.super_balance != null ? String(cf.super_balance) : "",
+      had_review_before:
+        cf.had_review_before === true ? "yes" : cf.had_review_before === false ? "no" : "",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversation.contact_id]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const newCustom: Record<string, any> = {
+      ...cf,
+      age: form.age.trim() || null,
+      state: form.state.trim() || null,
+      super_fund_name: form.super_fund_name.trim() || null,
+      super_balance: form.super_balance ? Number(form.super_balance) : null,
+      had_review_before:
+        form.had_review_before === "yes" ? true : form.had_review_before === "no" ? false : null,
+    };
+    const { error } = await supabase
+      .from("sms_contacts")
+      .update({
+        full_name: form.full_name.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim() || null,
+        lead_source: form.lead_source.trim() || null,
+        notes: form.notes.trim() || null,
+        custom_fields: newCustom,
+      })
+      .eq("id", c.id);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Failed to save", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Contact updated" });
+    }
+  };
 
   return (
     <>
@@ -712,8 +773,8 @@ function ContactPanelContent({
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="font-bold text-white text-base truncate">{c.full_name}</h4>
-            <p className="text-[11px] text-white/60 truncate mt-0.5">{c.phone}</p>
+            <h4 className="font-bold text-white text-base truncate">{form.full_name || "Unnamed"}</h4>
+            <p className="text-[11px] text-white/60 truncate mt-0.5">{form.phone}</p>
             <div className="flex flex-wrap gap-1 mt-1.5">
               {c.lead_status && (
                 <Badge className="text-[9px] px-1.5 py-0 h-4 bg-white/10 text-white/90 border-white/10 hover:bg-white/15">
@@ -745,35 +806,74 @@ function ContactPanelContent({
           </Select>
         </div>
 
-        <div>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 flex items-center gap-1.5">
+        <div className="space-y-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
             <User className="w-3 h-3" /> Contact Details
           </p>
-          <div className="space-y-2 bg-muted/30 rounded-xl p-3">
-            <DetailRow icon={<Phone className="w-3.5 h-3.5" />} label="Phone" value={c.phone} />
-            {c.email && <DetailRow icon={<Mail className="w-3.5 h-3.5" />} label="Email" value={c.email} />}
-            {cf.age && <DetailRow icon={<Calendar className="w-3.5 h-3.5" />} label="Age" value={String(cf.age)} />}
-            {cf.state && <DetailRow icon={<MapPin className="w-3.5 h-3.5" />} label="State" value={String(cf.state)} />}
-            {c.lead_source && <DetailRow icon={<Tag className="w-3.5 h-3.5" />} label="Source" value={c.lead_source} />}
+          <div>
+            <Label htmlFor="msg-name" className="text-[10px]">Full Name</Label>
+            <Input id="msg-name" value={form.full_name} onChange={(e) => setForm((p) => ({ ...p, full_name: e.target.value }))} className="mt-1 h-8 text-xs" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label htmlFor="msg-phone" className="text-[10px] flex items-center gap-1"><Phone className="w-3 h-3" /> Phone</Label>
+              <Input id="msg-phone" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} className="mt-1 h-8 text-xs" />
+            </div>
+            <div>
+              <Label htmlFor="msg-email" className="text-[10px] flex items-center gap-1"><Mail className="w-3 h-3" /> Email</Label>
+              <Input id="msg-email" type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} className="mt-1 h-8 text-xs" />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <Label htmlFor="msg-age" className="text-[10px]">Age</Label>
+              <Input id="msg-age" value={form.age} onChange={(e) => setForm((p) => ({ ...p, age: e.target.value }))} className="mt-1 h-8 text-xs" />
+            </div>
+            <div>
+              <Label htmlFor="msg-state" className="text-[10px]">State</Label>
+              <Input id="msg-state" value={form.state} onChange={(e) => setForm((p) => ({ ...p, state: e.target.value }))} className="mt-1 h-8 text-xs" placeholder="NSW" />
+            </div>
+            <div>
+              <Label htmlFor="msg-source" className="text-[10px]">Source</Label>
+              <Input id="msg-source" value={form.lead_source} onChange={(e) => setForm((p) => ({ ...p, lead_source: e.target.value }))} className="mt-1 h-8 text-xs" />
+            </div>
           </div>
         </div>
 
-        {(cf.super_fund_name || balance != null || cf.had_review_before != null) && (
+        <div className="space-y-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+            <Landmark className="w-3 h-3" /> Superannuation
+          </p>
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 flex items-center gap-1.5">
-              <Landmark className="w-3 h-3" /> Superannuation
-            </p>
-            <div className="space-y-2 bg-muted/30 rounded-xl p-3">
-              {cf.super_fund_name && <DetailRow icon={<Landmark className="w-3.5 h-3.5" />} label="Fund" value={String(cf.super_fund_name)} />}
-              {balance != null && (
-                <DetailRow icon={<span className="text-xs">$</span>} label="Balance" value={`$${balance.toLocaleString()}`} />
-              )}
-              {cf.had_review_before != null && (
-                <DetailRow icon={<Check className="w-3.5 h-3.5" />} label="Reviewed before" value={cf.had_review_before ? "Yes" : "No"} />
-              )}
+            <Label htmlFor="msg-fund" className="text-[10px]">Super Fund</Label>
+            <Input id="msg-fund" value={form.super_fund_name} onChange={(e) => setForm((p) => ({ ...p, super_fund_name: e.target.value }))} className="mt-1 h-8 text-xs" placeholder="AustralianSuper…" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label htmlFor="msg-balance" className="text-[10px]">Balance ($)</Label>
+              <Input id="msg-balance" type="number" value={form.super_balance} onChange={(e) => setForm((p) => ({ ...p, super_balance: e.target.value }))} className="mt-1 h-8 text-xs" />
+            </div>
+            <div>
+              <Label htmlFor="msg-review" className="text-[10px]">Reviewed Before?</Label>
+              <Select value={form.had_review_before} onValueChange={(v) => setForm((p) => ({ ...p, had_review_before: v }))}>
+                <SelectTrigger className="mt-1 h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="yes">Yes</SelectItem>
+                  <SelectItem value="no">No</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        )}
+        </div>
+
+        <div>
+          <Label htmlFor="msg-notes" className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Notes</Label>
+          <Textarea id="msg-notes" value={form.notes} onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))} className="mt-1.5 text-xs resize-none" rows={3} />
+        </div>
+
+        <Button onClick={handleSave} disabled={saving} className="w-full gradient-accent text-white border-0">
+          {saving ? "Saving…" : "Save Changes"}
+        </Button>
 
         {c.tags && c.tags.length > 0 && (
           <div>
@@ -783,13 +883,6 @@ function ContactPanelContent({
                 <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>
               ))}
             </div>
-          </div>
-        )}
-
-        {c.notes && (
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Notes</p>
-            <p className="text-xs text-muted-foreground bg-muted/30 rounded-xl p-3 whitespace-pre-wrap">{c.notes}</p>
           </div>
         )}
 
@@ -804,27 +897,15 @@ function ContactPanelContent({
 
         <ReportStartForm
           prefill={{
-            clientName: c.full_name,
-            clientEmail: c.email || "",
-            clientPhone: c.phone,
-            age: cf.age as string | undefined,
-            superFundName: (cf.super_fund_name as string) || null,
-            superBalance: cf.super_balance as string | number | null,
+            clientName: form.full_name,
+            clientEmail: form.email || "",
+            clientPhone: form.phone,
+            age: form.age || undefined,
+            superFundName: form.super_fund_name || null,
+            superBalance: form.super_balance || null,
           }}
         />
       </div>
     </>
-  );
-}
-
-function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-muted-foreground">{icon}</span>
-      <div>
-        <p className="text-[10px] text-muted-foreground uppercase">{label}</p>
-        <p className="text-xs text-foreground">{value}</p>
-      </div>
-    </div>
   );
 }
