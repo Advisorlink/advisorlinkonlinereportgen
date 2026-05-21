@@ -320,7 +320,16 @@ export default function Presentations() {
             onTogglePauseShare={togglePauseScreenShare}
             onClose={() => { setShowSlideshow(false); setPausedSlide(null); }}
             onShareReport={handleShareReport}
-            onFinish={() => { setShowSlideshow(false); setPausedSlide(null); navigate("/documents?send=1"); }}
+            onFinish={() => {
+              setShowSlideshow(false);
+              setPausedSlide(null);
+              const cName = activeMeeting?.client_name || "";
+              const cEmail = selectedReport?.email || reports.find(r => r.client_name === cName)?.email || "";
+              const params = new URLSearchParams({ send: "1" });
+              if (cName) params.set("name", cName);
+              if (cEmail) params.set("email", cEmail);
+              navigate(`/documents?${params.toString()}`);
+            }}
             initialSlide={pausedSlide ?? 0}
           />
         )}

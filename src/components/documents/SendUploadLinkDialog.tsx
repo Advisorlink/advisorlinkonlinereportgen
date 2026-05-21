@@ -23,7 +23,7 @@ type SendChannel = "email" | "sms" | "both";
 
 type Contact = { id: string; name: string; email: string | null; phone: string | null; source: string };
 
-export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: boolean; onOpenChange: (o: boolean) => void; prefill?: { name?: string; email?: string; phone?: string } | null }) {
   const navigate = useNavigate();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
@@ -63,6 +63,18 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
       setContacts(Array.from(map.values()));
     })();
   }, [open]);
+
+  // Prefill from the client we're currently presenting to
+  useEffect(() => {
+    if (!open || !prefill) return;
+    if (prefill.name) setName(prefill.name);
+    if (prefill.email) setEmail(prefill.email);
+    if (prefill.phone) setPhone(prefill.phone);
+    setSelected(null);
+    setSearch("");
+    if (!prefill.email && prefill.phone) setChannel("sms");
+    else if (prefill.email && !prefill.phone) setChannel("email");
+  }, [open, prefill]);
 
   useEffect(() => {
     const greeting = name ? `Hi ${name.split(" ")[0]},` : "Hi,";

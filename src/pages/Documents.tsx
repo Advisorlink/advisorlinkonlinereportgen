@@ -90,6 +90,15 @@ export default function Documents() {
     if (typeof window === "undefined") return false;
     return new URLSearchParams(window.location.search).get("send") === "1";
   });
+  const [sendPrefill, setSendPrefill] = useState<{ name?: string; email?: string; phone?: string } | null>(() => {
+    if (typeof window === "undefined") return null;
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("send") !== "1") return null;
+    const name = p.get("name") || undefined;
+    const email = p.get("email") || undefined;
+    const phone = p.get("phone") || undefined;
+    return name || email || phone ? { name, email, phone } : null;
+  });
   const [drivePicker, setDrivePicker] = useState<{ docIds: string[] } | null>(null);
 
   const load = async () => {
@@ -240,7 +249,11 @@ export default function Documents() {
             </Button>
           </div>
         </div>
-        <SendUploadLinkDialog open={sendOpen} onOpenChange={setSendOpen} />
+        <SendUploadLinkDialog
+          open={sendOpen}
+          onOpenChange={(o) => { setSendOpen(o); if (!o) setSendPrefill(null); }}
+          prefill={sendPrefill}
+        />
 
         {/* Stats strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
