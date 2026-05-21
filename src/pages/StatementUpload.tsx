@@ -308,6 +308,70 @@ export default function StatementUpload() {
               Your statement has been sent securely to your adviser at AdvisorLink Online. You'll hear from us shortly.
             </p>
           </section>
+        ) : stage === "welcome" ? (
+          <section className="page-enter">
+            <div className="mb-6 text-center">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(192_90%_50%)]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[hsl(192_90%_30%)]">
+                <Sparkles className="h-3 w-3" /> Welcome
+              </span>
+              <h1 className="font-heading mt-3 text-[28px] font-bold leading-tight tracking-tight sm:text-[34px]">
+                Welcome to AdvisorLink Online secure document upload
+              </h1>
+              <p className="mx-auto mt-3 max-w-md text-[14px] leading-relaxed text-[hsl(215_60%_12%)]/65">
+                Please send through your most recent statement before our meeting so we can prepare properly and make sure everything runs smoothly on the day.
+              </p>
+            </div>
+
+            <div className="overflow-hidden rounded-2xl border border-[hsl(215_60%_12%)]/10 bg-white shadow-[0_4px_24px_-12px_rgba(15,23,42,0.12)]">
+              <div className="border-b border-[hsl(215_60%_12%)]/10 bg-gradient-to-r from-[hsl(215_60%_10%)] to-[hsl(215_60%_18%)] px-6 py-4 text-white">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[hsl(192_90%_65%)]">A few quick notes</p>
+                <p className="mt-1 font-heading text-[15px] font-semibold">Your privacy is in your hands</p>
+              </div>
+              <ul className="space-y-4 px-6 py-6 text-[13.5px] leading-relaxed text-[hsl(215_60%_12%)]/80">
+                <li className="flex gap-3">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
+                    <Check className="h-3 w-3" strokeWidth={3} />
+                  </span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Member number not required</span> — feel free to leave it off or block it out, we don't need it to prepare.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
+                    <Check className="h-3 w-3" strokeWidth={3} />
+                  </span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Cross out anything personal</span> you'd rather we don't see — addresses, account numbers, tax file numbers — your choice.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
+                    <Check className="h-3 w-3" strokeWidth={3} />
+                  </span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">A photo or screenshot is perfect</span> — no need for a fancy scan. We just need to see your current balance and provider.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
+                    <Check className="h-3 w-3" strokeWidth={3} />
+                  </span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Encrypted end-to-end</span> — your file goes straight to your adviser and no one else.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-5 grid grid-cols-3 gap-2 rounded-xl border border-[hsl(215_60%_12%)]/10 bg-white p-3 text-center text-[10px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/60">
+              <div className="flex flex-col items-center gap-1"><ShieldCheck className="h-4 w-4 text-[hsl(192_90%_35%)]" /> Encrypted</div>
+              <div className="flex flex-col items-center gap-1"><EyeOff className="h-4 w-4 text-[hsl(192_90%_35%)]" /> Private</div>
+              <div className="flex flex-col items-center gap-1"><Shield className="h-4 w-4 text-[hsl(192_90%_35%)]" /> Adviser-only</div>
+            </div>
+
+            <Button
+              onClick={() => setStage("intro")}
+              size="lg"
+              className="mt-6 h-14 w-full rounded-xl bg-gradient-to-r from-[hsl(215_60%_12%)] to-[hsl(215_60%_22%)] text-[15px] font-bold tracking-wide text-white shadow-[0_12px_28px_-12px_hsl(215_60%_12%/0.55)] hover:from-[hsl(215_60%_10%)] hover:to-[hsl(215_60%_20%)]"
+            >
+              Begin <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <p className="mt-3 text-center text-[11px] text-[hsl(215_60%_12%)]/45">
+              Takes about a minute · TLS 1.3 · AES-256 at rest
+            </p>
+          </section>
         ) : (
           <>
             <div className="mb-6 text-center">
