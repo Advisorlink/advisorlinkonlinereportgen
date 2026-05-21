@@ -274,13 +274,13 @@ export default function Admin() {
         const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
         const canvases = await Promise.all(
           pages.map(p => html2canvas(p, {
-            scale: 3, backgroundColor: "#ffffff", useCORS: true, imageTimeout: 0, logging: false,
+            scale: 2, backgroundColor: "#ffffff", useCORS: true, imageTimeout: 0, logging: false,
             windowWidth: p.scrollWidth, windowHeight: p.scrollHeight,
           } as Parameters<typeof html2canvas>[1]))
         );
         for (let i = 0; i < canvases.length; i++) {
           if (i > 0) pdf.addPage();
-          pdf.addImage(canvases[i].toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "SLOW");
+          pdf.addImage(canvases[i].toDataURL("image/jpeg", 0.85), "JPEG", 0, 0, 210, 297, undefined, "FAST");
         }
         pdfBlob = pdf.output("blob");
         setPdfStageInputs(null);
