@@ -23,7 +23,7 @@ type SendChannel = "email" | "sms" | "both";
 
 type Contact = { id: string; name: string; email: string | null; phone: string | null; source: string };
 
-export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: boolean; onOpenChange: (o: boolean) => void; prefill?: { name?: string; email?: string; phone?: string } | null }) {
   const navigate = useNavigate();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
