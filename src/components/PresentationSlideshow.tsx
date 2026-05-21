@@ -17,9 +17,9 @@ const SLIDE_SRCS = [
   "/slides/slide-12.jpg",
   "/slides/slide-13.jpg",
   "/slides/slide-14.jpg",
-  "/slides/slide-15.jpg",
   "/slides/slide-16.jpg",
   "/slides/slide-17.jpg",
+
 ];
 const TOTAL_SLIDES = SLIDE_SRCS.length;
 
