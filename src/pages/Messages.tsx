@@ -283,9 +283,18 @@ export default function Messages() {
 
   const handleNewChat = async () => {
     if (!newChatPhone.trim() || !user) return;
+    const nameParts = (newChatName || "").trim().split(/\s+/);
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
     const { data: contact } = await supabase
       .from("sms_contacts")
-      .insert({ user_id: user.id, full_name: newChatName || newChatPhone, phone: newChatPhone })
+      .insert({
+        user_id: user.id,
+        full_name: newChatName || newChatPhone,
+        first_name: firstName || null,
+        last_name: lastName || null,
+        phone: newChatPhone,
+      })
       .select("id")
       .single();
     if (contact) {
