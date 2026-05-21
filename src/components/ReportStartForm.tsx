@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,10 @@ export interface ReportStartPrefill {
   age?: string | number | null;
   superFundName?: string | null;
   superBalance?: string | number | null;
+  state?: string | null;
+  hadReviewBefore?: string | null;
+  notes?: string | null;
+  leadSource?: string | null;
 }
 
 type OptionRow = { name: string; allocationPct: string };
@@ -33,7 +37,7 @@ const num = (v: string | number | null | undefined, fb = 0) => {
 
 export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const navigate = useNavigate();
-  const { setInputs } = useClientInputs();
+  const { setInputs, setLookup } = useClientInputs();
 
   const [annualIncome, setAnnualIncome] = useState("");
   const [superFundName, setSuperFundName] = useState(prefill.superFundName ?? "");
@@ -56,6 +60,21 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const [desiredIncomeFrequency, setDesiredIncomeFrequency] = useState<IncomeFrequency>("Weekly");
 
   const [submitting, setSubmitting] = useState(false);
+
+  // Re-sync local fields when prefill changes (e.g. switching contacts)
+  useEffect(() => {
+    if (prefill.age != null && prefill.age !== "") setAge(String(prefill.age));
+    if (prefill.superFundName) setSuperFundName(prefill.superFundName);
+    if (prefill.superBalance != null && prefill.superBalance !== "") setSuperBalance(String(prefill.superBalance));
+    // Seed the fund-lookup search box so the user can run it immediately
+    if (prefill.superFundName) {
+      setLookup((prev) => ({
+        ...prev,
+        text: prev.text || `${prefill.superFundName} ${primaryOption}`.trim(),
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefill.clientName, prefill.superFundName, prefill.superBalance, prefill.age]);
 
   const handleSimulate = () => {
     setAge("42");
