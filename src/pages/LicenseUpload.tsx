@@ -244,7 +244,7 @@ export default function LicenseUpload() {
     } catch (err) {
       console.error(err);
       toast.error("Camera unavailable", { description: "Please use 'Upload photo' instead." });
-      setStage((s) => (s === "license_camera" ? "license_method" : s === "statement_camera" ? "statement_method" : s));
+      setStage((s) => (s === "license_camera" ? "license_method" : s));
     }
   }, [stopCamera]);
 
