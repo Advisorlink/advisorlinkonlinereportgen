@@ -16,6 +16,8 @@ import {
 
 export interface ReportStartPrefill {
   clientName?: string;
+  clientFirstName?: string;
+  clientLastName?: string;
   clientEmail?: string;
   clientPhone?: string;
   age?: string | number | null;
