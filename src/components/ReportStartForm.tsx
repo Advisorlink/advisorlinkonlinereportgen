@@ -107,7 +107,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     if (!text) return;
     setLookup((prev) => (prev.text === text ? prev : { ...prev, text }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [superFundName, primaryOption, age, superBalance, annualIncome, options, prefill.state, prefill.clientName]);
+  }, [superFundName, primaryOption, age, superBalance, annualIncome, options, prefill.state, prefill.clientName, firstName, lastName]);
 
   const handleSimulate = () => {
     setAge("42");
