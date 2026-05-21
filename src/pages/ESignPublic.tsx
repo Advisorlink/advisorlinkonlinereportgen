@@ -2,9 +2,68 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { PDFDocument, rgb } from "pdf-lib";
+import * as pdfjsLib from "pdfjs-dist";
+import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, FileText, Loader2, AlertCircle, PenTool, ShieldCheck, Eraser } from "lucide-react";
 import { toast } from "sonner";
+
+(pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
+
+function InlinePdfViewer({ url }: { url: string }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const render = async () => {
+      const wrap = wrapRef.current;
+      if (!wrap) return;
+      setLoading(true);
+      wrap.innerHTML = "";
+      try {
+        const buf = await fetch(url).then((r) => r.arrayBuffer());
+        if (cancelled) return;
+        const pdf = await (pdfjsLib as any).getDocument({ data: new Uint8Array(buf) }).promise;
+        const containerWidth = wrap.clientWidth || 600;
+        for (let i = 1; i <= pdf.numPages; i++) {
+          if (cancelled) return;
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 1 });
+          const scale = containerWidth / viewport.width;
+          const scaled = page.getViewport({ scale: scale * (window.devicePixelRatio || 1) });
+          const canvas = document.createElement("canvas");
+          canvas.width = scaled.width;
+          canvas.height = scaled.height;
+          canvas.style.width = "100%";
+          canvas.style.height = "auto";
+          canvas.style.display = "block";
+          canvas.style.marginBottom = i < pdf.numPages ? "8px" : "0";
+          wrap.appendChild(canvas);
+          const ctx = canvas.getContext("2d")!;
+          await page.render({ canvasContext: ctx, viewport: scaled }).promise;
+        }
+      } catch (e) {
+        console.error("PDF render error:", e);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    render();
+    return () => { cancelled = true; };
+  }, [url]);
+
+  return (
+    <div style={{ background: "#f1f5f9", padding: 12, maxHeight: "70vh", overflowY: "auto" }}>
+      {loading && (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#0ea5e9" }} />
+        </div>
+      )}
+      <div ref={wrapRef} />
+    </div>
+  );
+}
 
 interface ESignDoc {
   id: string;
