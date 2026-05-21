@@ -41,7 +41,16 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Slides are React components — nothing to preload.
+  // Preload + decode all slide images up-front so the first pass doesn't flash
+  // (decoding on-demand causes a brief blank frame that the WebRTC stream picks up).
+  useEffect(() => {
+    SLIDE_SRCS.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+      // decode() forces the browser to fully decode the image into memory now
+      if (img.decode) img.decode().catch(() => {});
+    });
+  }, []);
 
   const prev = useCallback(() => setCurrent((c) => Math.max(0, c - 1)), []);
   const next = useCallback(() => {
