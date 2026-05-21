@@ -31,10 +31,10 @@ const detailsSchema = z.object({
   email: z.string().trim().email("Please enter a valid email").max(255),
 });
 
-type Stage = "intro" | "camera" | "review";
+type Stage = "welcome" | "intro" | "camera" | "review";
 
 export default function StatementUpload() {
-  const [stage, setStage] = useState<Stage>("intro");
+  const [stage, setStage] = useState<Stage>("welcome");
   const [captured, setCaptured] = useState<CapturedFile[]>([]);
   const [client, setClient] = useState({ fullName: "", email: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
