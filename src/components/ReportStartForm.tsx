@@ -41,6 +41,16 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const navigate = useNavigate();
   const { setInputs, setLookup } = useClientInputs();
 
+  const splitName = (full?: string) => {
+    const t = (full || "").trim();
+    if (!t) return { first: "", last: "" };
+    const parts = t.split(/\s+/);
+    return { first: parts[0], last: parts.slice(1).join(" ") };
+  };
+  const _init = splitName(prefill.clientName);
+  const [firstName, setFirstName] = useState(prefill.clientFirstName ?? _init.first);
+  const [lastName, setLastName] = useState(prefill.clientLastName ?? _init.last);
+
   const [annualIncome, setAnnualIncome] = useState("");
   const [superFundName, setSuperFundName] = useState(prefill.superFundName ?? "");
   const [superBalance, setSuperBalance] = useState(
