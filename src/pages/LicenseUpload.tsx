@@ -431,7 +431,7 @@ export default function LicenseUpload() {
                 <label className="mt-4 flex cursor-pointer items-start gap-2 text-[12px] text-[hsl(222_47%_18%)]/70">
                   <Checkbox checked={consent} onCheckedChange={(v) => setConsent(v === true)} className="mt-0.5" />
                   <span>
-                    I consent to Pure Private Wealth receiving and storing my licence securely for the purpose of providing advice.
+                    I consent to Pure Private Wealth receiving and storing my Photo ID securely for the purpose of providing advice.
                   </span>
                 </label>
 
