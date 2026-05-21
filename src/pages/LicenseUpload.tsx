@@ -324,7 +324,7 @@ export default function LicenseUpload() {
   const handleLicenseCapture = async () => {
     if (busy || !cameraReady) return;
     setBusy(true);
-    const label = licenseSide === "front" ? "Licence — Front" : "Licence — Back";
+    const label = licenseSide === "front" ? "FRONT OF ID" : "BACK OF ID";
     const item = await captureCropped(label, "license");
     if (!item) {
       setBusy(false);
@@ -824,10 +824,10 @@ function FullscreenCamera({
 }) {
   const isLicense = mode === "license";
   const instruction = isLicense
-    ? (licenseSide === "front" ? "Front of licence" : "Back of licence")
+    ? (licenseSide === "front" ? "FRONT OF ID" : "BACK OF ID")
     : "Statement";
   const helper = isLicense
-    ? "Place your licence inside the frame. Make sure all details are clear."
+    ? "Place your photo ID inside the frame. Make sure all details are clear."
     : "Place each page inside the frame. Tap the shutter to save.";
   const sideLabel = isLicense
     ? (licenseSide === "front" ? "Step 1 of 2" : "Step 2 of 2")
