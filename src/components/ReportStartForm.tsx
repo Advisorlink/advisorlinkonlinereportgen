@@ -97,7 +97,8 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     if (superBalance.trim()) parts.push(`Super balance: $${superBalance.trim()}`);
     if (prefill.state) parts.push(`State: ${prefill.state}`);
     if (annualIncome.trim()) parts.push(`Annual income: $${annualIncome.trim()}`);
-    if (prefill.clientName) parts.push(`Client: ${prefill.clientName}`);
+    const composedName = [firstName.trim(), lastName.trim()].filter(Boolean).join(" ") || prefill.clientName || "";
+    if (composedName) parts.push(`Client: ${composedName}`);
     const extraOpts = options
       .filter((o) => o.name.trim())
       .map((o) => `${o.name.trim()}${o.allocationPct ? ` (${o.allocationPct}%)` : ""}`);
