@@ -306,7 +306,7 @@ export default function StatementUpload() {
           <section className="page-enter">
             <div className="mb-6 text-center">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(192_90%_50%)]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[hsl(192_90%_30%)]">
-                <Sparkles className="h-3 w-3" /> Welcome
+                Welcome
               </span>
               <h1 className="font-heading mt-3 text-[28px] font-bold leading-tight tracking-tight sm:text-[34px]">
                 Welcome to AdvisorLink Online secure document upload
