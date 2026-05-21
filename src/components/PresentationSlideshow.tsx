@@ -205,8 +205,6 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
             style={{
               opacity: i === current ? 1 : 0,
               visibility: i === current ? "visible" : "hidden",
-              transition: "opacity 120ms linear",
-              willChange: "opacity",
             }}
           />
         ))}
