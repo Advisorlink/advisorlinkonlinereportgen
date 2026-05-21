@@ -494,198 +494,30 @@ export default function LicenseUpload() {
           <Lock className="h-3 w-3" /> Secure document upload for Pure Private Wealth
         </div>
 
-        {/* ============ CHOOSE — VARIANT-SPECIFIC LAYOUTS ============ */}
-        {stage === "choose" && (() => {
-          const onPick = (t: DocType) => {
-            if (t === "license") setStage("license_method");
-            else if (t === "statement") setStage("statement_method");
-            else setStage("screenshot_pick");
-          };
-
-          // V1 — AdvisorLink product cards with cyan accent
-          if (variant === 1) {
-            return (
-              <section className="page-enter">
-                <div className="mb-8 text-center">
-                  <span className="inline-block rounded-full bg-[hsl(192_90%_50%)]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[hsl(192_90%_35%)]">Step 1 · Choose document</span>
-                  <h1 className="font-heading mt-3 text-[28px] font-bold leading-tight tracking-tight text-[hsl(var(--ink))] sm:text-[34px]">
-                    What document would you like to upload?
-                  </h1>
-                </div>
-                <div className="grid gap-3">
-                  {DOC_OPTIONS.map((opt) => {
-                    const Icon = opt.icon;
-                    return (
-                      <button key={opt.type} onClick={() => onPick(opt.type)}
-                        className="group flex items-center gap-4 rounded-xl border border-[hsl(var(--ink))]/10 bg-white px-5 py-5 text-left transition-all hover:-translate-y-0.5 hover:border-[hsl(192_90%_50%)]/40 hover:shadow-[0_12px_32px_-12px_hsl(192_90%_50%/0.4)]">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[hsl(215_60%_12%)] to-[hsl(215_60%_22%)] text-[hsl(192_90%_55%)] shadow-[0_4px_16px_-4px_hsl(215_60%_12%/0.4)]">
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[15px] font-semibold text-[hsl(var(--ink))]">{opt.label}</p>
-                          <p className="mt-0.5 text-[12px] text-[hsl(var(--ink))]/60">{opt.description}</p>
-                        </div>
-                        <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/30 transition-transform group-hover:translate-x-0.5 group-hover:text-[hsl(192_90%_45%)]" />
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          }
-
-          // V2 — Private Bank: editorial numbered list, no boxes
-          if (variant === 2) {
-            return (
-              <section className="page-enter">
-                <div className="mb-10">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[hsl(var(--ink))]/50">— A confidential transfer</p>
-                  <h1 className="font-heading mt-4 text-[34px] font-bold leading-[1.05] tracking-tight text-[hsl(var(--ink))] sm:text-[44px]">
-                    What document would<br />you like to upload?
-                  </h1>
-                  <p className="mt-3 max-w-md text-[13px] italic text-[hsl(var(--ink))]/60">
-                    Select one of the three options below to begin a secure submission to your adviser.
-                  </p>
-                </div>
-                <ul className="border-t border-[hsl(var(--ink))]/20">
-                  {DOC_OPTIONS.map((opt, i) => {
-                    const Icon = opt.icon;
-                    return (
-                      <li key={opt.type} className="border-b border-[hsl(var(--ink))]/15">
-                        <button onClick={() => onPick(opt.type)}
-                          className="group flex w-full items-center gap-6 py-6 text-left transition-colors hover:bg-[hsl(var(--ink))]/[0.03]">
-                          <span className="font-heading w-10 text-[22px] font-light tabular-nums text-[hsl(var(--ink))]/40">0{i + 1}</span>
-                          <Icon className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/55" />
-                          <div className="min-w-0 flex-1">
-                            <p className="font-heading text-[20px] font-semibold tracking-tight text-[hsl(var(--ink))]">{opt.label}</p>
-                            <p className="mt-0.5 text-[12px] italic text-[hsl(var(--ink))]/55">{opt.description}</p>
-                          </div>
-                          <ArrowRight className="h-4 w-4 shrink-0 text-[hsl(var(--ink))]/30 transition-transform group-hover:translate-x-1 group-hover:text-[hsl(var(--ink))]" />
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
-            );
-          }
-
-          // V3 — Soft Modern: compact row cards that fit on mobile
-          if (variant === 3) {
-            return (
-              <section className="page-enter">
-                <div className="mb-6 text-center sm:mb-8">
-                  <h1 className="font-heading text-[26px] font-bold leading-tight tracking-tight text-[hsl(var(--ink))] sm:text-[34px]">
-                    What document would<br />you like to upload?
-                  </h1>
-                  <p className="mx-auto mt-2 max-w-md text-[13px] text-[hsl(var(--ink))]/60 sm:text-[14px]">
-                    Tap an option to get started — it only takes a minute.
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  {DOC_OPTIONS.map((opt) => {
-                    const Icon = opt.icon;
-                    return (
-                      <button key={opt.type} onClick={() => onPick(opt.type)}
-                        className="group flex w-full items-center gap-4 rounded-2xl bg-white px-4 py-4 text-left shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] ring-1 ring-[hsl(var(--ink))]/5 transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-12px_rgba(15,23,42,0.18)] hover:ring-[hsl(221_83%_53%)]/30">
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[hsl(221_83%_92%)] to-[hsl(221_83%_85%)] text-[hsl(221_83%_45%)] transition-transform group-hover:scale-105">
-                          <Icon className="h-7 w-7" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[15px] font-bold text-[hsl(var(--ink))]">{opt.label}</p>
-                          <p className="mt-0.5 text-[12px] leading-snug text-[hsl(var(--ink))]/55">{opt.description}</p>
-                        </div>
-                        <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/30 transition-all group-hover:translate-x-0.5 group-hover:text-[hsl(221_83%_53%)]" />
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          }
-
-          // V4 — Mono Lux: brutalist slab rows, oversized numerals
-          if (variant === 4) {
-            return (
-              <section className="page-enter">
-                <div className="mb-12">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.6em] text-[hsl(45_85%_60%)]">// Begin Submission</p>
-                  <h1 className="font-heading mt-5 text-[42px] font-black uppercase leading-[0.9] tracking-tight text-white sm:text-[60px]">
-                    Choose<br /><span className="text-[hsl(45_85%_60%)]">Document.</span>
-                  </h1>
-                </div>
-                <div>
-                  {DOC_OPTIONS.map((opt, i) => {
-                    const Icon = opt.icon;
-                    return (
-                      <button key={opt.type} onClick={() => onPick(opt.type)}
-                        className="group flex w-full items-center gap-6 border-t border-white/15 py-6 text-left transition-colors last:border-b hover:bg-white/[0.04]">
-                        <span className="font-heading w-12 text-[28px] font-black tabular-nums text-[hsl(45_85%_60%)]">.0{i + 1}</span>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-heading text-[22px] font-bold uppercase tracking-tight text-white">{opt.label}</p>
-                          <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-white/45">{opt.description}</p>
-                        </div>
-                        <Icon className="h-6 w-6 shrink-0 text-white/40 transition-colors group-hover:text-[hsl(45_85%_60%)]" />
-                        <ArrowRight className="h-5 w-5 shrink-0 text-white/40 transition-transform group-hover:translate-x-1 group-hover:text-[hsl(45_85%_60%)]" />
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          }
-
-          // V5 — Warm Trust: friendly pill cards
-          return (
-            <section className="page-enter">
-              <div className="mb-8 text-center">
-                <h1 className="font-heading text-[30px] font-bold leading-tight tracking-tight text-[hsl(var(--ink))] sm:text-[38px]">
-                  What would you like<br />to upload today?
-                </h1>
-                <p className="mx-auto mt-3 max-w-md text-[14px] text-[hsl(var(--ink))]/65">
-                  We'll guide you through it — quick, friendly, secure.
-                </p>
-              </div>
-              <div className="space-y-4">
-                {DOC_OPTIONS.map((opt) => {
-                  const Icon = opt.icon;
-                  return (
-                    <button key={opt.type} onClick={() => onPick(opt.type)}
-                      className="group flex w-full items-center gap-4 rounded-full border-2 border-[hsl(20_30%_18%)]/8 bg-white py-3 pl-3 pr-6 text-left transition-all hover:border-[hsl(16_72%_46%)] hover:shadow-[0_8px_24px_-8px_hsl(16_72%_46%/0.4)]">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[hsl(16_72%_46%)]/10 text-[hsl(16_72%_46%)] group-hover:bg-[hsl(16_72%_46%)] group-hover:text-white">
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[16px] font-bold text-[hsl(var(--ink))]">{opt.label}</p>
-                        <p className="text-[12px] text-[hsl(var(--ink))]/60">{opt.description}</p>
-                      </div>
-                      <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/30 group-hover:text-[hsl(16_72%_46%)]" />
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })()}
-
-        {captured.length > 0 && stage === "choose" && (
-          <button
-            onClick={() => setStage("review")}
-            className={`mt-6 w-full ${v.btnRadius} border border-[hsl(var(--ink))]/15 bg-white py-3 text-[12px] font-semibold uppercase tracking-wider text-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))] hover:text-[hsl(var(--page-alt))]`}
-          >
-            View {captured.length} uploaded · Continue →
-          </button>
-        )}
-
         {/* ============ LICENSE — METHOD ============ */}
         {stage === "license_method" && (
-          <MethodChoice
-            title="Driver's Licence"
-            subtitle="We'll capture the front and back. Choose how you'd like to add the photos."
-            onCamera={() => { setLicenseSide("front"); setStage("license_camera"); }}
-            onUpload={() => { setLicenseSide("front"); setStage("license_upload"); }}
-            onBack={() => setStage("choose")}
-          />
+          <section className="page-enter rounded-md border border-[hsl(var(--ink))]/10 bg-white p-6">
+            <h2 className="font-heading text-xl font-bold text-[hsl(var(--ink))]">Photo ID</h2>
+            <p className="mt-1 text-[13px] text-[hsl(var(--ink))]/65">We'll capture the front and back. Choose how you'd like to add the photos.</p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <button
+                onClick={() => { setLicenseSide("front"); setStage("license_camera"); }}
+                className="group flex flex-col items-center gap-2 rounded-md bg-white p-6 text-center shadow-[0_4px_14px_rgba(15,23,42,0.08)] ring-1 ring-[hsl(var(--ink))]/5 transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,23,42,0.12)]"
+              >
+                <Camera className="h-7 w-7 text-[hsl(var(--ink))]" />
+                <p className="text-[14px] font-semibold text-[hsl(var(--ink))]">Take photo</p>
+                <p className="text-[11px] text-[hsl(var(--ink))]/55">Use your camera</p>
+              </button>
+              <button
+                onClick={() => { setLicenseSide("front"); setStage("license_upload"); }}
+                className="group flex flex-col items-center gap-2 rounded-md bg-white p-6 text-center shadow-[0_4px_14px_rgba(15,23,42,0.08)] ring-1 ring-[hsl(var(--ink))]/5 transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,23,42,0.12)]"
+              >
+                <Upload className="h-7 w-7 text-[hsl(var(--ink))]" />
+                <p className="text-[14px] font-semibold text-[hsl(var(--ink))]">Upload photo</p>
+                <p className="text-[11px] text-[hsl(var(--ink))]/55">From your device</p>
+              </button>
+            </div>
+          </section>
         )}
 
         {/* ============ LICENSE — UPLOAD ============ */}
@@ -695,13 +527,13 @@ export default function LicenseUpload() {
               {licenseSide === "front" ? "Step 1 of 2" : "Step 2 of 2"}
             </p>
             <h2 className="mt-1 font-heading text-xl font-bold text-[hsl(var(--ink))]">
-              Upload {licenseSide} of licence
+              Upload {licenseSide === "front" ? "FRONT OF ID" : "BACK OF ID"}
             </h2>
             <p className="mt-1 text-[13px] text-[hsl(var(--ink))]/65">
               Choose a clear photo from your device. Make sure all details are readable.
             </p>
             <Button
-              onClick={() => triggerFilePick("license", licenseSide === "front" ? "Licence — Front" : "Licence — Back", false)}
+              onClick={() => triggerFilePick("license", licenseSide === "front" ? "FRONT OF ID" : "BACK OF ID", false)}
               size="lg"
               className="mt-5 h-12 w-full rounded-sm bg-[hsl(var(--ink))] font-semibold text-white hover:bg-[hsl(215_60%_18%)]"
             >
@@ -716,40 +548,6 @@ export default function LicenseUpload() {
           </section>
         )}
 
-        {/* ============ STATEMENT — METHOD ============ */}
-        {stage === "statement_method" && (
-          <MethodChoice
-            title="Statement"
-            subtitle="Take a photo or upload a PDF / image of your statement."
-            onCamera={() => { setStatementCount(0); setStage("statement_camera"); }}
-            onUpload={() => triggerFilePick("statement", "Statement", false)}
-            onBack={() => setStage("choose")}
-            uploadLabel="Upload file (PDF or image)"
-          />
-        )}
-
-        {/* ============ SCREENSHOT ============ */}
-        {stage === "screenshot_pick" && (
-          <section className="page-enter rounded-md border border-[hsl(var(--ink))]/10 bg-white p-6">
-            <h2 className="font-heading text-xl font-bold text-[hsl(var(--ink))]">Upload a screenshot</h2>
-            <p className="mt-1 text-[13px] text-[hsl(var(--ink))]/65">
-              Choose an image from your device.
-            </p>
-            <Button
-              onClick={() => triggerFilePick("screenshot", "Screenshot", false)}
-              size="lg"
-              className="mt-5 h-12 w-full rounded-sm bg-[hsl(var(--ink))] font-semibold text-white hover:bg-[hsl(215_60%_18%)]"
-            >
-              <ImageIcon className="mr-2 h-4 w-4" /> Choose screenshot
-            </Button>
-            <button
-              onClick={() => setStage("choose")}
-              className="mt-3 w-full text-center text-[12px] text-[hsl(var(--ink))]/55 hover:text-[hsl(var(--ink))]"
-            >
-              ← Back
-            </button>
-          </section>
-        )}
 
         {/* ============ REVIEW ============ */}
         {stage === "review" && (
