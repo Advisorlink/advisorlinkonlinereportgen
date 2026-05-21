@@ -424,15 +424,8 @@ export default function ESignPublic() {
             </div>
           </div>
 
-          {/* PDF Preview - shown automatically */}
-          {pdfUrl && (
-            <iframe
-              src={`${pdfUrl}#toolbar=0&navpanes=0`}
-              className="w-full border-0"
-              style={{ height: "70vh", minHeight: "400px" }}
-              title="Document Preview"
-            />
-          )}
+          {/* PDF Preview - rendered inline so it shows immediately on all devices */}
+          {pdfUrl && <InlinePdfViewer url={pdfUrl} />}
         </div>
 
         {/* Signature Area */}
