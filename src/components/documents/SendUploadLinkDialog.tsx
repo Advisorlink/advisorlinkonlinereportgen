@@ -8,27 +8,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Mail, MessageSquare, Search, Send, Copy, Check, Link2, Briefcase, FileText, Receipt } from "lucide-react";
+import { Mail, MessageSquare, Search, Send, Copy, Check, Link2, Briefcase, FileText, Receipt, IdCard } from "lucide-react";
 
 const UPLOAD_URLS = {
-  advisor: "https://report.advisorlinkonline.com.au/upload",
-  statement: "https://report.advisorlinkonline.com.au/upload-statement",
+  license_and_statement: "https://report.advisorlinkonline.com.au/upload",
+  statement_only: "https://report.advisorlinkonline.com.au/upload-statement",
+  license_only: "https://report.advisorlinkonline.com.au/upload",
 } as const;
 
 type UploadType = keyof typeof UPLOAD_URLS;
 
 const UPLOAD_TYPE_LABELS: Record<UploadType, { label: string; description: string; subject: string; blurb: string }> = {
-  advisor: {
-    label: "ID & Super Statement",
+  license_and_statement: {
+    label: "License & Statement",
     description: "Photo ID + super statement upload",
-    subject: "Please upload your ID and super statement",
-    blurb: "Please use the secure link below to upload your photo ID and super statement. It only takes a couple of minutes and your information is encrypted.",
+    subject: "Please upload your license and statement",
+    blurb: "Please use the secure link below to upload your driver's license and statement. It only takes a couple of minutes and your information is encrypted.",
   },
-  statement: {
+  statement_only: {
     label: "Statement Only",
     description: "Screenshot, photo, or PDF of a statement",
     subject: "Please send through your statement",
     blurb: "Please use the secure link below to send through your statement — you can upload a screenshot, a photo, or a PDF. It only takes a minute and your information is encrypted.",
+  },
+  license_only: {
+    label: "License Only",
+    description: "Driver's license / photo ID upload",
+    subject: "Please upload your driver's license",
+    blurb: "Please use the secure link below to upload a clear photo of your driver's license. It only takes a minute and your information is encrypted.",
   },
 };
 
@@ -36,6 +43,7 @@ const ADVISORS = [
   { id: "pure-private-wealth", name: "Pure Private Wealth" },
   { id: "my-advice-hub", name: "My Advice Hub" },
   { id: "inheritance-financial", name: "Inheritance Financial" },
+  { id: "advisor-link-online", name: "Advisor Link Online" },
 ] as const;
 
 type AdvisorId = typeof ADVISORS[number]["id"];
@@ -49,12 +57,12 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Contact | null>(null);
   const [advisor, setAdvisor] = useState<AdvisorId>("pure-private-wealth");
-  const [uploadType, setUploadType] = useState<UploadType>("advisor");
+  const [uploadType, setUploadType] = useState<UploadType>("license_and_statement");
   const [channel, setChannel] = useState<SendChannel>("email");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
-  const [subject, setSubject] = useState(UPLOAD_TYPE_LABELS.advisor.subject);
+  const [subject, setSubject] = useState(UPLOAD_TYPE_LABELS.license_and_statement.subject);
   const [emailBody, setEmailBody] = useState("");
   const [smsBody, setSmsBody] = useState("");
   const [sending, setSending] = useState(false);
@@ -223,10 +231,10 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
 
         <div className="space-y-1.5">
           <Label className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> What are you sending?</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {(Object.keys(UPLOAD_TYPE_LABELS) as UploadType[]).map((key) => {
               const meta = UPLOAD_TYPE_LABELS[key];
-              const Icon = key === "advisor" ? FileText : Receipt;
+              const Icon = key === "statement_only" ? Receipt : key === "license_only" ? IdCard : FileText;
               const active = uploadType === key;
               return (
                 <button
