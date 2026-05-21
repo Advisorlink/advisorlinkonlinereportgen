@@ -22,7 +22,7 @@ const REPRESENTATIVES = [
 ];
 
 // Four design variants for the user to A/B test the look & feel.
-// Only colour, surface, font feel and button radius change — the flow is identical.
+// Only colour, surface, font feel and button radius change, the flow is identical.
 type VariantConfig = {
   label: string;
   page: string;       // page background
@@ -334,7 +334,7 @@ export default function LicenseUpload() {
     addCaptured(item);
     if (licenseSide === "front") {
       setLicenseSide("back");
-      showCaptureBanner("Front saved — now capture the back");
+      showCaptureBanner("Front saved, now capture the back");
       setBusy(false);
     } else {
       showCaptureBanner("Back saved");
@@ -416,7 +416,7 @@ export default function LicenseUpload() {
     >
       {/* ============ VARIANT-SPECIFIC HEADER ============ */}
       {variant === 1 && (
-        // AdvisorLink — product feel, dark navy bar with cyan rule
+        // AdvisorLink, product feel, dark navy bar with cyan rule
         <header className="relative overflow-hidden bg-[hsl(215_60%_10%)] text-white">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[hsl(192_90%_50%)]/25 blur-3xl" />
           <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[hsl(192_90%_60%)]/15 blur-3xl" />
@@ -433,7 +433,7 @@ export default function LicenseUpload() {
       )}
 
       {variant === 2 && (
-        // Private Bank — editorial, hairline rules, centered crest
+        // Private Bank, editorial, hairline rules, centered crest
         <header className="bg-[hsl(var(--page-alt))]">
           <div className="mx-auto max-w-3xl px-5 pt-7">
             <div className="flex items-center justify-between gap-4 pb-5">
@@ -448,7 +448,7 @@ export default function LicenseUpload() {
       )}
 
       {variant === 3 && (
-        // Soft Modern — pill nav floating on tinted surface
+        // Soft Modern, pill nav floating on tinted surface
         <header className="bg-[hsl(var(--page-alt))] pt-5">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 rounded-2xl bg-white px-5 py-3 shadow-[0_4px_24px_-8px_rgba(15,23,42,0.08)] sm:mx-5 md:mx-auto">
             <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-8 w-auto" />
@@ -462,7 +462,7 @@ export default function LicenseUpload() {
       )}
 
       {variant === 4 && (
-        // Mono Lux — full bleed black, gold hairline, oversized typography
+        // Mono Lux, full bleed black, gold hairline, oversized typography
         <header className="bg-black text-white">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-6">
             <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-8 w-auto invert" />
@@ -474,7 +474,7 @@ export default function LicenseUpload() {
       )}
 
       {variant === 5 && (
-        // Warm Trust — illustrated peach band, rounded card
+        // Warm Trust, illustrated peach band, rounded card
         <header className="bg-[#f5e6d8]">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-5">
             <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-9 w-auto" />
@@ -494,7 +494,7 @@ export default function LicenseUpload() {
           <Lock className="h-3 w-3" /> Secure document upload for Pure Private Wealth
         </div>
 
-        {/* ============ LICENSE — METHOD ============ */}
+        {/* ============ LICENSE, METHOD ============ */}
         {stage === "license_method" && (
           <section className="page-enter rounded-md border border-[hsl(var(--ink))]/10 bg-white p-6">
             <h2 className="font-heading text-xl font-bold text-[hsl(var(--ink))]">Photo ID</h2>
@@ -520,7 +520,7 @@ export default function LicenseUpload() {
           </section>
         )}
 
-        {/* ============ LICENSE — UPLOAD ============ */}
+        {/* ============ LICENSE, UPLOAD ============ */}
         {stage === "license_upload" && (
           <section className="page-enter rounded-md border border-[hsl(var(--ink))]/10 bg-white p-6">
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[hsl(var(--ink))]/55">
@@ -859,7 +859,7 @@ function FullscreenCamera({
       <div className="relative flex-1 overflow-hidden bg-black">
         <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />
 
-        {/* Capture confirmation banner — slides from TOP so it never covers the shutter */}
+        {/* Capture confirmation banner, slides from TOP so it never covers the shutter */}
         {banner && (
           <div className="pointer-events-none absolute inset-x-0 top-3 z-30 flex justify-center px-4">
             <div className="flex items-center gap-2 rounded-full bg-emerald-500/95 px-4 py-2 text-[13px] font-semibold text-white shadow-lg ring-1 ring-white/20 animate-in fade-in slide-in-from-top-2">
@@ -870,16 +870,17 @@ function FullscreenCamera({
         )}
 
 
-        {/* Helper text + big side label — above the frame */}
-        <div className="pointer-events-none absolute inset-x-0 top-6 z-20 flex flex-col items-center gap-3 px-6">
-          <p className="max-w-[92%] rounded-lg bg-black/75 px-5 py-2.5 text-center text-[14px] font-semibold text-white shadow-lg backdrop-blur">
-            {helper}
-          </p>
+        {/* Helper text + side label, above the frame */}
+        <div className="pointer-events-none absolute inset-x-0 top-6 z-20 flex flex-col items-center gap-2 px-6">
           {isLicense && (
-            <div className="rounded-xl bg-[hsl(192_90%_45%)] px-6 py-3 text-center text-[22px] font-extrabold uppercase tracking-[0.18em] text-white shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] ring-2 ring-white/30">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/55 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.32em] text-white backdrop-blur">
+              <span className="h-1 w-1 rounded-full bg-[hsl(192_90%_55%)]" />
               {instruction}
             </div>
           )}
+          <p className="max-w-[92%] rounded-md bg-black/60 px-4 py-2 text-center text-[12.5px] font-medium text-white/90 backdrop-blur">
+            {helper}
+          </p>
         </div>
 
 

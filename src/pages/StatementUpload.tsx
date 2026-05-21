@@ -12,8 +12,7 @@ import {
   EyeOff, Check, ArrowRight, Sparkles,
 } from "lucide-react";
 import { z } from "zod";
-
-const LOGO_URL = "/advisor-link-logo.png";
+import logoSvg from "@/assets/logo.svg";
 
 const MAX_BYTES = 15 * 1024 * 1024;
 
@@ -251,7 +250,7 @@ export default function StatementUpload() {
     {
       type: "camera" as const,
       label: "Take photos",
-      description: "Use your camera — capture as many pages as you like in one go",
+      description: "Use your camera, capture as many pages as you like in one go",
       icon: Camera,
       onClick: () => setStage("camera"),
     },
@@ -273,19 +272,13 @@ export default function StatementUpload() {
 
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-[hsl(215_60%_12%)]">
-      {/* Header — AdvisorLink */}
+      {/* Header, AdvisorLink */}
       <header className="relative overflow-hidden bg-[hsl(215_60%_10%)] text-white">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[hsl(192_90%_50%)]/25 blur-3xl" />
         <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[hsl(192_90%_60%)]/15 blur-3xl" />
         <div className="relative mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-5">
-          <div className="flex items-center gap-2.5">
-            <span className="block h-11 w-11 overflow-hidden rounded-md">
-              <img src={LOGO_URL} alt="" className="h-11 w-auto max-w-none -translate-x-[2px] object-left object-cover" style={{ clipPath: "inset(0 65% 0 0)" }} />
-            </span>
-            <span className="flex flex-col leading-none">
-              <span className="font-heading text-[17px] font-extrabold tracking-tight text-white">Advisor<span className="font-light">Link</span></span>
-              <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.28em] text-[hsl(192_90%_65%)]">Online</span>
-            </span>
+          <div className="flex items-center">
+            <img src={logoSvg} alt="AdvisorLink Online" className="h-8 w-auto brightness-0 invert" />
           </div>
           <div className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/15 backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-[hsl(192_90%_55%)] shadow-[0_0_12px_2px_hsl(192_90%_55%)]" />
@@ -332,25 +325,25 @@ export default function StatementUpload() {
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
                     <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
-                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Member number not required</span> — feel free to leave it off or block it out, we don't need it to prepare.</span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Member number not required</span>, feel free to leave it off or block it out, we don't need it to prepare.</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
                     <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
-                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Cross out anything personal</span> you'd rather we don't see — addresses, account numbers, tax file numbers — your choice.</span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Cross out anything personal</span> you'd rather we don't see, addresses, account numbers, tax file numbers, your choice.</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
                     <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
-                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">A photo or screenshot is perfect</span> — no need for a fancy scan. We just need to see your current balance and provider.</span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">All we need</span> is your current balance, the investments you're in, your fund, and any insurances.</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
                     <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
-                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Encrypted end-to-end</span> — your file goes straight to your adviser and no one else.</span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Encrypted end-to-end</span>. It comes straight to us, not through anyone else.</span>
                 </li>
               </ul>
             </div>
@@ -382,7 +375,7 @@ export default function StatementUpload() {
                 Send through your most recent statement
               </h1>
               <p className="mx-auto mt-3 max-w-md text-[14px] text-[hsl(215_60%_12%)]/65">
-                Feel free to just take photos or screenshots — and block out any personal information you'd prefer to keep private. We'll handle the rest.
+                Feel free to just take photos or screenshots, and block out any personal information you'd prefer to keep private. We'll handle the rest.
               </p>
             </div>
 
