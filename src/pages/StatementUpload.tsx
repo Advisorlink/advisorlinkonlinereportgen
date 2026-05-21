@@ -278,7 +278,15 @@ export default function StatementUpload() {
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[hsl(192_90%_50%)]/25 blur-3xl" />
         <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[hsl(192_90%_60%)]/15 blur-3xl" />
         <div className="relative mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-5">
-          <img src={LOGO_URL} alt="AdvisorLink Online" className="h-10 w-auto invert" />
+          <div className="flex items-center gap-2.5">
+            <span className="block h-11 w-11 overflow-hidden rounded-md">
+              <img src={LOGO_URL} alt="" className="h-11 w-auto max-w-none -translate-x-[2px] object-left object-cover" style={{ clipPath: "inset(0 65% 0 0)" }} />
+            </span>
+            <span className="flex flex-col leading-none">
+              <span className="font-heading text-[17px] font-extrabold tracking-tight text-white">Advisor<span className="font-light">Link</span></span>
+              <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.28em] text-[hsl(192_90%_65%)]">Online</span>
+            </span>
+          </div>
           <div className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/15 backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-[hsl(192_90%_55%)] shadow-[0_0_12px_2px_hsl(192_90%_55%)]" />
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Secure Upload</span>
