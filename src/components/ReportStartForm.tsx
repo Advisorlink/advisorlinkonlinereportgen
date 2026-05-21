@@ -37,7 +37,7 @@ const num = (v: string | number | null | undefined, fb = 0) => {
 
 export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const navigate = useNavigate();
-  const { setInputs } = useClientInputs();
+  const { setInputs, setLookup } = useClientInputs();
 
   const [annualIncome, setAnnualIncome] = useState("");
   const [superFundName, setSuperFundName] = useState(prefill.superFundName ?? "");
