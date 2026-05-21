@@ -285,6 +285,7 @@ export default function Admin() {
         }
         pdfBlob = pdf.output("blob");
         setPdfStageInputs(null);
+        toast.loading(`Sending email to ${emailDialog.to}...`, { id: toastId });
       }
 
       let pdfBase64: string | undefined;
