@@ -158,7 +158,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
 
     const next: ClientInputs = {
       ...DEFAULT_INPUTS,
-      clientName: prefill.clientName || DEFAULT_INPUTS.clientName,
+      clientName: [firstName.trim(), lastName.trim()].filter(Boolean).join(" ") || prefill.clientName || DEFAULT_INPUTS.clientName,
       clientEmail: prefill.clientEmail || "",
       clientPhone: prefill.clientPhone || "",
       age: num(age, DEFAULT_INPUTS.age),
