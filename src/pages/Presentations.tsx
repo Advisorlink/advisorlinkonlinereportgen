@@ -320,6 +320,7 @@ export default function Presentations() {
             onTogglePauseShare={togglePauseScreenShare}
             onClose={() => { setShowSlideshow(false); setPausedSlide(null); }}
             onShareReport={handleShareReport}
+            onFinish={() => { setShowSlideshow(false); setPausedSlide(null); navigate("/documents?send=1"); }}
             initialSlide={pausedSlide ?? 0}
           />
         )}

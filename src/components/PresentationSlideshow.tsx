@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Circle, Maximize, Minimize, Pause, Play, X } from "lucide-react";
 
-const TOTAL_SLIDES = 14;
 const SLIDE_SRCS = [
   "/slides/slide-01.jpg",
   "/slides/slide-02.jpg",
@@ -19,7 +18,10 @@ const SLIDE_SRCS = [
   "/slides/slide-13.jpg",
   "/slides/slide-14.jpg",
   "/slides/slide-15.jpg",
+  "/slides/slide-16.jpg",
+  "/slides/slide-17.jpg",
 ];
+const TOTAL_SLIDES = SLIDE_SRCS.length;
 
 interface Props {
   clientName: string;
@@ -30,10 +32,11 @@ interface Props {
   onTogglePauseShare?: () => void;
   onClose: () => void;
   onShareReport?: (currentSlide: number) => void;
+  onFinish?: () => void;
   initialSlide?: number;
 }
 
-export function PresentationSlideshow({ clientName, meetingId, clientConnected, clientCount = 0, screenSharePaused, onTogglePauseShare, onClose, onShareReport, initialSlide = 0 }: Props) {
+export function PresentationSlideshow({ clientName, meetingId, clientConnected, clientCount = 0, screenSharePaused, onTogglePauseShare, onClose, onShareReport, onFinish, initialSlide = 0 }: Props) {
   const [current, setCurrent] = useState(initialSlide);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,7 +44,18 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
   // Slides are React components — nothing to preload.
 
   const prev = useCallback(() => setCurrent((c) => Math.max(0, c - 1)), []);
-  const next = useCallback(() => setCurrent((c) => Math.min(TOTAL_SLIDES - 1, c + 1)), []);
+  const next = useCallback(() => {
+    setCurrent((c) => {
+      if (c >= TOTAL_SLIDES - 1) {
+        if (onFinish) {
+          if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+          onFinish();
+        }
+        return c;
+      }
+      return c + 1;
+    });
+  }, [onFinish]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -207,7 +221,7 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
         )}
 
         {/* Right arrow */}
-        {current < TOTAL_SLIDES - 1 && (
+        {(current < TOTAL_SLIDES - 1 || onFinish) && (
           <button
             onClick={(e) => { e.stopPropagation(); next(); }}
             className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition"
