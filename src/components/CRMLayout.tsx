@@ -1,9 +1,29 @@
+import { useEffect, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MeetingHostDock } from "@/components/MeetingHostDock";
-import { Menu } from "lucide-react";
+import { Menu, Maximize2, Minimize2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function CRMLayout({ children }: { children: React.ReactNode }) {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch { /* noop */ }
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -13,6 +33,15 @@ export function CRMLayout({ children }: { children: React.ReactNode }) {
             <SidebarTrigger className="text-foreground/70 hover:text-foreground transition-colors">
               <Menu className="w-5 h-5" />
             </SidebarTrigger>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={toggleFullscreen}
+              className="h-8 w-8 text-foreground/70 hover:text-foreground"
+              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </Button>
           </header>
           <MeetingHostDock />
           <main className="flex-1 overflow-auto bg-background page-enter">

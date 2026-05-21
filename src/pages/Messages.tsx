@@ -217,7 +217,7 @@ export default function Messages() {
       const { data, error } = await supabase.functions.invoke("sms-send", {
         body: {
           to: activeConv.sms_contacts.phone,
-          body: messageText,
+          body: mergeContactFields(messageText, activeConv),
           mediaUrls: pendingMedia.map(m => m.url),
           contactId: activeConv.contact_id,
           conversationId: activeConv.id,
@@ -237,20 +237,48 @@ export default function Messages() {
     setSending(false);
   };
 
+  const mergeContactFields = (body: string, conv: Conversation | null): string => {
+    if (!conv) return body;
+    const c = conv.sms_contacts;
+    const cf = (c.custom_fields || {}) as Record<string, unknown>;
+    const val = (v: unknown) => (v === null || v === undefined ? "" : String(v));
+    const reviewVal =
+      cf.had_review_before === true ? "Yes" : cf.had_review_before === false ? "No" : "";
+    return body
+      .replace(/\{\{first_name\}\}/g, c.first_name || c.full_name.split(" ")[0] || "")
+      .replace(/\{\{last_name\}\}/g, c.last_name || "")
+      .replace(/\{\{full_name\}\}/g, c.full_name || "")
+      .replace(/\{\{phone\}\}/g, c.phone || "")
+      .replace(/\{\{email\}\}/g, c.email || "")
+      .replace(/\{\{age\}\}/g, val(cf.age))
+      .replace(/\{\{state\}\}/g, val(cf.state))
+      .replace(/\{\{super_fund_name\}\}/g, val(cf.super_fund_name))
+      .replace(/\{\{super_balance\}\}/g, val(cf.super_balance))
+      .replace(/\{\{had_review_before\}\}/g, reviewVal)
+      .replace(/\{\{lead_source\}\}/g, c.lead_source || "");
+  };
+
   const handleInsertTemplate = (template: Template) => {
-    // Replace merge fields with contact data if available
-    let body = template.body;
-    if (activeConv) {
-      const c = activeConv.sms_contacts;
-      body = body
-        .replace(/\{\{first_name\}\}/g, c.first_name || c.full_name.split(" ")[0] || "")
-        .replace(/\{\{last_name\}\}/g, c.last_name || "")
-        .replace(/\{\{full_name\}\}/g, c.full_name || "")
-        .replace(/\{\{phone\}\}/g, c.phone || "")
-        .replace(/\{\{email\}\}/g, c.email || "");
-    }
-    setMessageText(body);
+    setMessageText(mergeContactFields(template.body, activeConv));
     setShowTemplates(false);
+  };
+
+  const MERGE_TAGS: { key: string; label: string }[] = [
+    { key: "{{first_name}}", label: "First Name" },
+    { key: "{{full_name}}", label: "Full Name" },
+    { key: "{{phone}}", label: "Phone" },
+    { key: "{{email}}", label: "Email" },
+    { key: "{{age}}", label: "Age" },
+    { key: "{{state}}", label: "State" },
+    { key: "{{super_fund_name}}", label: "Super Fund" },
+    { key: "{{super_balance}}", label: "Super Balance" },
+    { key: "{{had_review_before}}", label: "Had Review Before" },
+    { key: "{{lead_source}}", label: "Lead Source" },
+  ];
+  const [showMergeTags, setShowMergeTags] = useState(false);
+  const insertMergeTag = (key: string) => {
+    setMessageText((prev) => prev + key);
+    setShowMergeTags(false);
   };
 
   const handleNewChat = async () => {
@@ -574,11 +602,31 @@ export default function Messages() {
                     <Textarea
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
-                      placeholder="Type a message…"
-                      className="min-h-[56px] max-h-40 resize-none border-0 bg-transparent px-4 py-3 pr-28 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+                      placeholder="Type a message…  Tip: use {{first_name}}, {{super_fund_name}}, etc."
+                      className="min-h-[120px] max-h-[360px] resize-y border-0 bg-transparent px-4 py-3 pr-28 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 leading-relaxed"
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                     />
                     <div className="absolute right-2 bottom-2 flex items-center gap-1">
+                      <Popover open={showMergeTags} onOpenChange={setShowMergeTags}>
+                        <PopoverTrigger asChild>
+                          <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" title="Insert merge tag">
+                            <Tag className="w-4 h-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-1" align="end">
+                          <p className="px-2 py-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">Insert merge tag</p>
+                          {MERGE_TAGS.map((t) => (
+                            <button
+                              key={t.key}
+                              onClick={() => insertMergeTag(t.key)}
+                              className="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-muted flex items-center justify-between gap-2"
+                            >
+                              <span className="text-foreground">{t.label}</span>
+                              <code className="text-[10px] text-muted-foreground">{t.key}</code>
+                            </button>
+                          ))}
+                        </PopoverContent>
+                      </Popover>
                       <Button size="icon" variant="ghost" disabled={uploadingMedia} className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => fileInputRef.current?.click()} title="Attach image or document">
                         <Paperclip className={`w-4 h-4 ${uploadingMedia ? "animate-pulse" : ""}`} />
                       </Button>
