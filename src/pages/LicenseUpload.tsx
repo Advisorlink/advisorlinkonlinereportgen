@@ -339,7 +339,7 @@ export default function LicenseUpload() {
 
             {stage === "review" && (
               <section className="rounded-2xl bg-white p-5 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] ring-1 ring-[hsl(222_47%_18%)]/5">
-                <h2 className="font-heading text-base font-bold">Your licence photos</h2>
+                <h2 className="font-heading text-base font-bold">Your Photo ID photos</h2>
                 <p className="mt-1 text-[13px] text-[hsl(222_47%_18%)]/60">
                   {captured.length} of 2 captured. Add the other side, retake any, or continue.
                 </p>
@@ -350,7 +350,7 @@ export default function LicenseUpload() {
                     return (
                       <div key={side} className="rounded-xl bg-[#f4f6fb] p-3 ring-1 ring-[hsl(222_47%_18%)]/5">
                         <p className="text-[11px] font-bold uppercase tracking-wider text-[hsl(222_47%_18%)]/55">
-                          {side === "front" ? "Front" : "Back"}
+                          {side === "front" ? "FRONT OF ID" : "BACK OF ID"}
                         </p>
                         {item ? (
                           <>
