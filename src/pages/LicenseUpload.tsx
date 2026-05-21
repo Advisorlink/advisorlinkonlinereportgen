@@ -448,7 +448,7 @@ export default function LicenseUpload() {
                   size="lg"
                   className="mt-5 h-12 w-full rounded-xl bg-[hsl(221_83%_53%)] font-semibold text-white hover:bg-[hsl(221_83%_45%)]"
                 >
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Upload className="mr-2 h-4 w-4" /> Send licence securely</>}
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Upload className="mr-2 h-4 w-4" /> Send Photo ID securely</>}
                 </Button>
               </section>
             )}
