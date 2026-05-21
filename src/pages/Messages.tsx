@@ -788,10 +788,15 @@ function ContactPanelContent({
       had_review_before:
         form.had_review_before === "yes" ? true : form.had_review_before === "no" ? false : null,
     };
+    const first = form.first_name.trim();
+    const last = form.last_name.trim();
+    const derivedFull = [first, last].filter(Boolean).join(" ") || form.full_name.trim();
     const { error } = await supabase
       .from("sms_contacts")
       .update({
-        full_name: form.full_name.trim(),
+        first_name: first || null,
+        last_name: last || null,
+        full_name: derivedFull,
         phone: form.phone.trim(),
         email: form.email.trim() || null,
         lead_source: form.lead_source.trim() || null,
