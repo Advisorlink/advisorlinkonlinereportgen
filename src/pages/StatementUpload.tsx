@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import {
   Shield, Lock, Camera, Upload, CheckCircle2, FileText,
   Image as ImageIcon, ChevronRight, Loader2, X, ShieldCheck,
-  EyeOff, Check,
+  EyeOff, Check, ArrowRight, Sparkles,
 } from "lucide-react";
 import { z } from "zod";
 
