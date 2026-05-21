@@ -8,9 +8,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Mail, MessageSquare, Search, Send, Copy, Check, Link2, Briefcase } from "lucide-react";
+import { Mail, MessageSquare, Search, Send, Copy, Check, Link2, Briefcase, FileText, Receipt } from "lucide-react";
 
-const UPLOAD_URL = "https://report.advisorlinkonline.com.au/upload";
+const UPLOAD_URLS = {
+  advisor: "https://report.advisorlinkonline.com.au/upload",
+  statement: "https://report.advisorlinkonline.com.au/upload-statement",
+} as const;
+
+type UploadType = keyof typeof UPLOAD_URLS;
+
+const UPLOAD_TYPE_LABELS: Record<UploadType, { label: string; description: string; subject: string; blurb: string }> = {
+  advisor: {
+    label: "ID & Super Statement",
+    description: "Photo ID + super statement upload",
+    subject: "Please upload your ID and super statement",
+    blurb: "Please use the secure link below to upload your photo ID and super statement. It only takes a couple of minutes and your information is encrypted.",
+  },
+  statement: {
+    label: "Statement Only",
+    description: "Screenshot, photo, or PDF of a statement",
+    subject: "Please send through your statement",
+    blurb: "Please use the secure link below to send through your statement — you can upload a screenshot, a photo, or a PDF. It only takes a minute and your information is encrypted.",
+  },
+};
 
 const ADVISORS = [
   { id: "pure-private-wealth", name: "Pure Private Wealth" },
@@ -29,11 +49,12 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Contact | null>(null);
   const [advisor, setAdvisor] = useState<AdvisorId>("pure-private-wealth");
+  const [uploadType, setUploadType] = useState<UploadType>("advisor");
   const [channel, setChannel] = useState<SendChannel>("email");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
-  const [subject, setSubject] = useState("Please upload your documents securely");
+  const [subject, setSubject] = useState(UPLOAD_TYPE_LABELS.advisor.subject);
   const [emailBody, setEmailBody] = useState("");
   const [smsBody, setSmsBody] = useState("");
   const [sending, setSending] = useState(false);
@@ -78,9 +99,13 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
 
   useEffect(() => {
     const greeting = name ? `Hi ${name.split(" ")[0]},` : "Hi,";
-    setEmailBody(`${greeting}\n\nPlease use the secure link below to upload your photo ID and super statement. It only takes a couple of minutes and your information is encrypted.\n\n${UPLOAD_URL}\n\nThanks,\n${advisorName}`);
-    setSmsBody(`${greeting} Please upload your documents securely here: ${UPLOAD_URL} — ${advisorName}`);
-  }, [name, advisorName]);
+    const url = UPLOAD_URLS[uploadType];
+    const meta = UPLOAD_TYPE_LABELS[uploadType];
+    setSubject(meta.subject);
+    setEmailBody(`${greeting}\n\n${meta.blurb}\n\n${url}\n\nThanks,\n${advisorName}`);
+    setSmsBody(`${greeting} ${meta.blurb.replace(/Please use the secure link below to /, "").replace(/\.$/, "")} here: ${url} — ${advisorName}`);
+  }, [name, advisorName, uploadType]);
+
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -102,7 +127,7 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
   };
 
   const copyLink = async () => {
-    await navigator.clipboard.writeText(UPLOAD_URL);
+    await navigator.clipboard.writeText(UPLOAD_URLS[uploadType]);
     setCopied(true);
     toast.success("Link copied");
     setTimeout(() => setCopied(false), 2000);
@@ -196,8 +221,33 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
           <DialogDescription>Pick a client, choose your advisor brand, and send the secure document upload link.</DialogDescription>
         </DialogHeader>
 
+        <div className="space-y-1.5">
+          <Label className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> What are you sending?</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {(Object.keys(UPLOAD_TYPE_LABELS) as UploadType[]).map((key) => {
+              const meta = UPLOAD_TYPE_LABELS[key];
+              const Icon = key === "advisor" ? FileText : Receipt;
+              const active = uploadType === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setUploadType(key)}
+                  className={`text-left rounded-lg border p-3 transition-all ${active ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "hover:border-primary/40 hover:bg-accent/50"}`}
+                >
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Icon className={`w-4 h-4 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                    {meta.label}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">{meta.description}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="rounded-lg border bg-muted/40 p-3 flex items-center gap-2">
-          <code className="flex-1 text-xs sm:text-sm truncate">{UPLOAD_URL}</code>
+          <code className="flex-1 text-xs sm:text-sm truncate">{UPLOAD_URLS[uploadType]}</code>
           <Button size="sm" variant="outline" onClick={copyLink} className="gap-1.5 shrink-0">
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
             {copied ? "Copied" : "Copy"}
