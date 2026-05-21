@@ -602,11 +602,31 @@ export default function Messages() {
                     <Textarea
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
-                      placeholder="Type a message…"
-                      className="min-h-[56px] max-h-40 resize-none border-0 bg-transparent px-4 py-3 pr-28 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+                      placeholder="Type a message…  Tip: use {{first_name}}, {{super_fund_name}}, etc."
+                      className="min-h-[120px] max-h-[360px] resize-y border-0 bg-transparent px-4 py-3 pr-28 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 leading-relaxed"
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                     />
                     <div className="absolute right-2 bottom-2 flex items-center gap-1">
+                      <Popover open={showMergeTags} onOpenChange={setShowMergeTags}>
+                        <PopoverTrigger asChild>
+                          <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" title="Insert merge tag">
+                            <Tag className="w-4 h-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-1" align="end">
+                          <p className="px-2 py-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">Insert merge tag</p>
+                          {MERGE_TAGS.map((t) => (
+                            <button
+                              key={t.key}
+                              onClick={() => insertMergeTag(t.key)}
+                              className="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-muted flex items-center justify-between gap-2"
+                            >
+                              <span className="text-foreground">{t.label}</span>
+                              <code className="text-[10px] text-muted-foreground">{t.key}</code>
+                            </button>
+                          ))}
+                        </PopoverContent>
+                      </Popover>
                       <Button size="icon" variant="ghost" disabled={uploadingMedia} className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => fileInputRef.current?.click()} title="Attach image or document">
                         <Paperclip className={`w-4 h-4 ${uploadingMedia ? "animate-pulse" : ""}`} />
                       </Button>
