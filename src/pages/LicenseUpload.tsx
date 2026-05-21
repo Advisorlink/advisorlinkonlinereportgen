@@ -188,7 +188,7 @@ export default function LicenseUpload() {
       el.setAttribute("accept", "image/*");
       el.setAttribute("capture", "environment");
     } else {
-      el.setAttribute("accept", docType === "statement" ? "image/*,application/pdf" : "image/*");
+      el.setAttribute("accept", "image/*");
       el.removeAttribute("capture");
     }
     el.click();
