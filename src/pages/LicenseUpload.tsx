@@ -345,28 +345,6 @@ export default function LicenseUpload() {
     }
   };
 
-  const handleStatementCapture = async () => {
-    if (busy || !cameraReady) return;
-    setBusy(true);
-    const label = `Statement ${statementCount + 1}`;
-    const item = await captureCropped(label, "statement");
-    if (!item) {
-      setBusy(false);
-      return toast.error("Couldn't capture image, try again");
-    }
-    triggerFlash();
-    addCaptured(item);
-    setStatementCount((n) => n + 1);
-    showCaptureBanner(`Page ${statementCount + 1} saved`);
-    setBusy(false);
-  };
-
-  const finishStatementCapture = () => {
-    stopCamera();
-    setStatementCount(0);
-    setStage("review");
-  };
-
   // ===== Submit =====
   const handleSubmit = async () => {
     const result = detailsSchema.safeParse(client);
