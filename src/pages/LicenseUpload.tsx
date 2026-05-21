@@ -360,7 +360,7 @@ export default function LicenseUpload() {
     }
     if (captured.length === 0) {
       toast.error("Please add at least one document");
-      setStage("choose");
+      setStage("license_method");
       return;
     }
     setErrors({});
