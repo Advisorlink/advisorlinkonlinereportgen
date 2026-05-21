@@ -10,10 +10,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Mail, MessageSquare, Search, Send, Copy, Check, Link2, Briefcase, FileText, Receipt, IdCard } from "lucide-react";
 
+const UPLOAD_PATHS = {
+  license_and_statement: "/upload",
+  statement_only: "/upload-statement",
+  license_only: "/upload-license",
+} as const;
+
+const origin = typeof window !== "undefined" ? window.location.origin : "https://report.advisorlinkonline.com.au";
+
 const UPLOAD_URLS = {
-  license_and_statement: "https://report.advisorlinkonline.com.au/upload",
-  statement_only: "https://report.advisorlinkonline.com.au/upload-statement",
-  license_only: "https://report.advisorlinkonline.com.au/upload-license",
+  license_and_statement: `${origin}${UPLOAD_PATHS.license_and_statement}`,
+  statement_only: `${origin}${UPLOAD_PATHS.statement_only}`,
+  license_only: `${origin}${UPLOAD_PATHS.license_only}`,
 } as const;
 
 type UploadType = keyof typeof UPLOAD_URLS;
