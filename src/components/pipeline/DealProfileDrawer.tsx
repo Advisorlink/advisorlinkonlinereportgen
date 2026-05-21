@@ -15,7 +15,19 @@ import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, DollarSign, Tag, StickyNote,
   MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark, ArrowLeft,
+  ListChecks, Check,
 } from "lucide-react";
+
+const PROGRESS_MILESTONES: { key: string; label: string }[] = [
+  { key: "email_sent", label: "Email sent" },
+  { key: "report_generated", label: "Report generated" },
+  { key: "report_sent", label: "Report sent" },
+  { key: "presentation_booked", label: "Presentation booked" },
+  { key: "presentation_completed", label: "Presentation completed" },
+  { key: "atc_tpa_sent", label: "ATC & TPA sent" },
+  { key: "documents_received", label: "Statement / Licence received" },
+  { key: "booked_stefano", label: "Booked with Stefano" },
+];
 import { useNavigate } from "react-router-dom";
 import { ReportStartForm } from "@/components/ReportStartForm";
 
