@@ -279,7 +279,7 @@ export default function StatementUpload() {
         <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[hsl(192_90%_60%)]/15 blur-3xl" />
         <div className="relative mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-5">
           <div className="flex items-center">
-            <img src={logoSvg} alt="AdvisorLink Online" className="h-8 w-auto brightness-0 invert" />
+            <img src={BRAND_LOGO} alt="AdvisorLink Online" className="h-10 w-auto" />
           </div>
           <div className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/15 backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-[hsl(192_90%_55%)] shadow-[0_0_12px_2px_hsl(192_90%_55%)]" />
