@@ -221,8 +221,33 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
           <DialogDescription>Pick a client, choose your advisor brand, and send the secure document upload link.</DialogDescription>
         </DialogHeader>
 
+        <div className="space-y-1.5">
+          <Label className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> What are you sending?</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {(Object.keys(UPLOAD_TYPE_LABELS) as UploadType[]).map((key) => {
+              const meta = UPLOAD_TYPE_LABELS[key];
+              const Icon = key === "advisor" ? FileText : Receipt;
+              const active = uploadType === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setUploadType(key)}
+                  className={`text-left rounded-lg border p-3 transition-all ${active ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "hover:border-primary/40 hover:bg-accent/50"}`}
+                >
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Icon className={`w-4 h-4 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                    {meta.label}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">{meta.description}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="rounded-lg border bg-muted/40 p-3 flex items-center gap-2">
-          <code className="flex-1 text-xs sm:text-sm truncate">{UPLOAD_URL}</code>
+          <code className="flex-1 text-xs sm:text-sm truncate">{UPLOAD_URLS[uploadType]}</code>
           <Button size="sm" variant="outline" onClick={copyLink} className="gap-1.5 shrink-0">
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
             {copied ? "Copied" : "Copy"}
