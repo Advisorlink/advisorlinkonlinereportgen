@@ -287,10 +287,10 @@ export default function LicenseUpload() {
               <>
                 <div className="mb-6 text-center">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(221_83%_53%)]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[hsl(221_83%_45%)]">
-                    <IdCard className="h-3 w-3" /> Driver's Licence
+                    <IdCard className="h-3 w-3" /> Photo ID
                   </span>
                   <h1 className="font-heading mt-3 text-[26px] font-bold leading-tight tracking-tight sm:text-[34px]">
-                    Capture your licence
+                    Capture your Photo ID
                   </h1>
                   <p className="mx-auto mt-3 max-w-md text-[13px] text-[hsl(222_47%_18%)]/60 sm:text-[14px]">
                     We'll capture the front and back in one quick sequence. Make sure all details are clear.
