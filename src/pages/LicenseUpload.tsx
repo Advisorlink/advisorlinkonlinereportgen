@@ -278,7 +278,7 @@ export default function LicenseUpload() {
             </div>
             <h1 className="font-heading text-2xl font-bold">Thanks, {client.fullName.split(" ")[0]}!</h1>
             <p className="mt-2 text-[14px] text-[hsl(222_47%_18%)]/65">
-              Your licence has been sent securely to Pure Private Wealth. You'll hear from your adviser shortly.
+              Your Photo ID has been sent securely to Pure Private Wealth. You'll hear from your adviser shortly.
             </p>
           </section>
         ) : (
