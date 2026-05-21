@@ -99,9 +99,13 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
 
   useEffect(() => {
     const greeting = name ? `Hi ${name.split(" ")[0]},` : "Hi,";
-    setEmailBody(`${greeting}\n\nPlease use the secure link below to upload your photo ID and super statement. It only takes a couple of minutes and your information is encrypted.\n\n${UPLOAD_URL}\n\nThanks,\n${advisorName}`);
-    setSmsBody(`${greeting} Please upload your documents securely here: ${UPLOAD_URL} — ${advisorName}`);
-  }, [name, advisorName]);
+    const url = UPLOAD_URLS[uploadType];
+    const meta = UPLOAD_TYPE_LABELS[uploadType];
+    setSubject(meta.subject);
+    setEmailBody(`${greeting}\n\n${meta.blurb}\n\n${url}\n\nThanks,\n${advisorName}`);
+    setSmsBody(`${greeting} ${meta.blurb.replace(/Please use the secure link below to /, "").replace(/\.$/, "")} here: ${url} — ${advisorName}`);
+  }, [name, advisorName, uploadType]);
+
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
