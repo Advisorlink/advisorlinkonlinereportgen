@@ -870,22 +870,21 @@ function FullscreenCamera({
         )}
 
 
-        {/* Helper text + side label, above the frame */}
-        <div className="pointer-events-none absolute inset-x-0 top-6 z-20 flex flex-col items-center gap-2 px-6">
-          {isLicense && (
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/55 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.32em] text-white backdrop-blur">
-              <span className="h-1 w-1 rounded-full bg-[hsl(192_90%_55%)]" />
-              {instruction}
-            </div>
-          )}
+        {/* Helper text above the frame */}
+        <div className="pointer-events-none absolute inset-x-0 top-6 z-20 flex justify-center px-6">
           <p className="max-w-[92%] rounded-md bg-black/60 px-4 py-2 text-center text-[12.5px] font-medium text-white/90 backdrop-blur">
             {helper}
           </p>
         </div>
 
-
-        {/* Overlay frame */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        {/* Overlay frame with label directly above */}
+        <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-4">
+          {isLicense && (
+            <div className="inline-flex items-center gap-2.5 rounded-lg border border-white/30 bg-black/70 px-6 py-2.5 text-lg font-bold uppercase tracking-wider text-white backdrop-blur shadow-lg">
+              <span className="h-2 w-2 rounded-full bg-[hsl(192_90%_55%)] shadow-[0_0_8px_hsl(192_90%_55%)]" />
+              {instruction}
+            </div>
+          )}
           <div
             ref={overlayRef}
             className={`relative ${overlayClass} rounded-xl border-2 border-white/95 shadow-[0_0_0_9999px_rgba(0,0,0,0.62)]`}
