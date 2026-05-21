@@ -733,9 +733,9 @@ export default function LicenseUpload() {
       <input ref={fileInputRef} type="file" className="hidden" onChange={onHiddenFileChange} />
 
       {/* ============ FULLSCREEN CAMERA OVERLAY ============ */}
-      {(stage === "license_camera" || stage === "statement_camera") && (
+      {stage === "license_camera" && (
         <FullscreenCamera
-          mode={stage === "license_camera" ? "license" : "statement"}
+          mode="license"
           licenseSide={licenseSide}
           ready={cameraReady}
           videoRef={videoRef}
@@ -743,30 +743,17 @@ export default function LicenseUpload() {
           flash={flash}
           busy={busy}
           banner={captureBanner}
-          capturedCount={
-            stage === "license_camera"
-              ? captured.filter((c) => c.docType === "license").length
-              : statementCount
-          }
-          onCapture={stage === "license_camera" ? handleLicenseCapture : handleStatementCapture}
-          onFinish={
-            stage === "statement_camera"
-              ? finishStatementCapture
-              : () => {
-                  stopCamera();
-                  setLicenseSide("front");
-                  setStage(captured.length > 0 ? "review" : "license_method");
-                }
-          }
+          capturedCount={captured.filter((c) => c.docType === "license").length}
+          onCapture={handleLicenseCapture}
+          onFinish={() => {
+            stopCamera();
+            setLicenseSide("front");
+            setStage(captured.length > 0 ? "review" : "license_method");
+          }}
           onCancel={() => {
             stopCamera();
-            if (stage === "license_camera") {
-              setLicenseSide("front");
-              setStage("license_method");
-            } else {
-              setStatementCount(0);
-              setStage("statement_method");
-            }
+            setLicenseSide("front");
+            setStage("license_method");
           }}
         />
       )}
