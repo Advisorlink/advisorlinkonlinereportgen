@@ -70,12 +70,26 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   }, [prefill.clientName, prefill.superFundName, prefill.superBalance, prefill.age]);
 
   // Keep the fund-lookup search box in sync with the form so the user can
-  // just hit Search without retyping.
+  // just hit Search without retyping. Include all context the lookup might use:
+  // super fund + investment option, age, super balance, state, income, etc.
   useEffect(() => {
-    const text = `${superFundName} ${primaryOption}`.trim();
+    const parts: string[] = [];
+    if (superFundName.trim()) parts.push(`Super fund: ${superFundName.trim()}`);
+    if (primaryOption.trim()) parts.push(`Investment option: ${primaryOption.trim()}`);
+    if (age.trim()) parts.push(`Age: ${age.trim()}`);
+    if (superBalance.trim()) parts.push(`Super balance: $${superBalance.trim()}`);
+    if (prefill.state) parts.push(`State: ${prefill.state}`);
+    if (annualIncome.trim()) parts.push(`Annual income: $${annualIncome.trim()}`);
+    if (prefill.clientName) parts.push(`Client: ${prefill.clientName}`);
+    const extraOpts = options
+      .filter((o) => o.name.trim())
+      .map((o) => `${o.name.trim()}${o.allocationPct ? ` (${o.allocationPct}%)` : ""}`);
+    if (extraOpts.length) parts.push(`Additional options: ${extraOpts.join(", ")}`);
+    const text = parts.join(" | ");
+    if (!text) return;
     setLookup((prev) => (prev.text === text ? prev : { ...prev, text }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [superFundName, primaryOption]);
+  }, [superFundName, primaryOption, age, superBalance, annualIncome, options, prefill.state, prefill.clientName]);
 
   const handleSimulate = () => {
     setAge("42");
