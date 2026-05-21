@@ -118,7 +118,7 @@ type CapturedFile = {
 const MAX_BYTES = 10 * 1024 * 1024;
 
 const DOC_OPTIONS: { type: DocType; label: string; description: string; icon: typeof IdCard }[] = [
-  { type: "license", label: "Driver's Licence", description: "Front and back of your licence", icon: IdCard },
+  { type: "license", label: "Photo ID", description: "Front and back of your photo ID", icon: IdCard },
   { type: "statement", label: "Statement", description: "Super or bank statement (PDF or photo)", icon: FileText },
   { type: "screenshot", label: "Screenshot", description: "An image from your phone or computer", icon: ImageIcon },
 ];
