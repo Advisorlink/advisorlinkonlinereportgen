@@ -977,6 +977,8 @@ function ContactPanelContent({
         <ReportStartForm
           prefill={{
             clientName: [form.first_name.trim(), form.last_name.trim()].filter(Boolean).join(" ") || form.full_name,
+            clientFirstName: form.first_name || undefined,
+            clientLastName: form.last_name || undefined,
             clientEmail: form.email || "",
             clientPhone: form.phone,
             age: form.age || undefined,

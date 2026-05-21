@@ -16,6 +16,8 @@ import {
 
 export interface ReportStartPrefill {
   clientName?: string;
+  clientFirstName?: string;
+  clientLastName?: string;
   clientEmail?: string;
   clientPhone?: string;
   age?: string | number | null;
@@ -38,6 +40,16 @@ const num = (v: string | number | null | undefined, fb = 0) => {
 export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const navigate = useNavigate();
   const { setInputs, setLookup } = useClientInputs();
+
+  const splitName = (full?: string) => {
+    const t = (full || "").trim();
+    if (!t) return { first: "", last: "" };
+    const parts = t.split(/\s+/);
+    return { first: parts[0], last: parts.slice(1).join(" ") };
+  };
+  const _init = splitName(prefill.clientName);
+  const [firstName, setFirstName] = useState(prefill.clientFirstName ?? _init.first);
+  const [lastName, setLastName] = useState(prefill.clientLastName ?? _init.last);
 
   const [annualIncome, setAnnualIncome] = useState("");
   const [superFundName, setSuperFundName] = useState(prefill.superFundName ?? "");
@@ -66,8 +78,13 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     if (prefill.age != null && prefill.age !== "") setAge(String(prefill.age));
     if (prefill.superFundName) setSuperFundName(prefill.superFundName);
     if (prefill.superBalance != null && prefill.superBalance !== "") setSuperBalance(String(prefill.superBalance));
+    const s = splitName(prefill.clientName);
+    const nextFirst = prefill.clientFirstName ?? s.first;
+    const nextLast = prefill.clientLastName ?? s.last;
+    if (nextFirst) setFirstName(nextFirst);
+    if (nextLast) setLastName(nextLast);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prefill.clientName, prefill.superFundName, prefill.superBalance, prefill.age]);
+  }, [prefill.clientName, prefill.clientFirstName, prefill.clientLastName, prefill.superFundName, prefill.superBalance, prefill.age]);
 
   // Keep the fund-lookup search box in sync with the form so the user can
   // just hit Search without retyping. Include all context the lookup might use:
@@ -80,7 +97,8 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     if (superBalance.trim()) parts.push(`Super balance: $${superBalance.trim()}`);
     if (prefill.state) parts.push(`State: ${prefill.state}`);
     if (annualIncome.trim()) parts.push(`Annual income: $${annualIncome.trim()}`);
-    if (prefill.clientName) parts.push(`Client: ${prefill.clientName}`);
+    const composedName = [firstName.trim(), lastName.trim()].filter(Boolean).join(" ") || prefill.clientName || "";
+    if (composedName) parts.push(`Client: ${composedName}`);
     const extraOpts = options
       .filter((o) => o.name.trim())
       .map((o) => `${o.name.trim()}${o.allocationPct ? ` (${o.allocationPct}%)` : ""}`);
@@ -89,7 +107,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     if (!text) return;
     setLookup((prev) => (prev.text === text ? prev : { ...prev, text }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [superFundName, primaryOption, age, superBalance, annualIncome, options, prefill.state, prefill.clientName]);
+  }, [superFundName, primaryOption, age, superBalance, annualIncome, options, prefill.state, prefill.clientName, firstName, lastName]);
 
   const handleSimulate = () => {
     setAge("42");
@@ -140,7 +158,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
 
     const next: ClientInputs = {
       ...DEFAULT_INPUTS,
-      clientName: prefill.clientName || DEFAULT_INPUTS.clientName,
+      clientName: [firstName.trim(), lastName.trim()].filter(Boolean).join(" ") || prefill.clientName || DEFAULT_INPUTS.clientName,
       clientEmail: prefill.clientEmail || "",
       clientPhone: prefill.clientPhone || "",
       age: num(age, DEFAULT_INPUTS.age),
@@ -195,6 +213,14 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
       <div className="p-5 space-y-5">
         {/* About them */}
         <Section icon={<Cake className="w-3.5 h-3.5" />} title="About them">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="First name">
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" />
+            </Field>
+            <Field label="Last name">
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" />
+            </Field>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Current age">
               <Input value={age} onChange={(e) => setAge(e.target.value)} placeholder="42" inputMode="numeric" />
