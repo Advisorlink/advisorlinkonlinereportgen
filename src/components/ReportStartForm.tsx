@@ -66,15 +66,16 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     if (prefill.age != null && prefill.age !== "") setAge(String(prefill.age));
     if (prefill.superFundName) setSuperFundName(prefill.superFundName);
     if (prefill.superBalance != null && prefill.superBalance !== "") setSuperBalance(String(prefill.superBalance));
-    // Seed the fund-lookup search box so the user can run it immediately
-    if (prefill.superFundName) {
-      setLookup((prev) => ({
-        ...prev,
-        text: prev.text || `${prefill.superFundName} ${primaryOption}`.trim(),
-      }));
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefill.clientName, prefill.superFundName, prefill.superBalance, prefill.age]);
+
+  // Keep the fund-lookup search box in sync with the form so the user can
+  // just hit Search without retyping.
+  useEffect(() => {
+    const text = `${superFundName} ${primaryOption}`.trim();
+    setLookup((prev) => (prev.text === text ? prev : { ...prev, text }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [superFundName, primaryOption]);
 
   const handleSimulate = () => {
     setAge("42");
