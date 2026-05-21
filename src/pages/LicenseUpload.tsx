@@ -209,7 +209,7 @@ export default function LicenseUpload() {
       return;
     }
     if (!consent) return toast.error("Please accept the privacy consent to continue");
-    if (captured.length === 0) return toast.error("Please add at least the front of your licence");
+    if (captured.length === 0) return toast.error("Please add at least the front of your Photo ID");
 
     setErrors({});
     setSubmitting(true);
