@@ -63,11 +63,11 @@ const VARIANTS: Record<1 | 2 | 3 | 4 | 5, VariantConfig> = {
   },
   3: {
     label: "Soft Modern",
-    page: "bg-[#f4f6fb]",
-    ink: "222 47% 18%",
-    accent: "221 83% 53%",
+    page: "bg-[#f1e8d8]",
+    ink: "0 0% 8%",
+    accent: "14 65% 58%",
     surface: "bg-white",
-    border: "border-[hsl(222_47%_18%)]/8",
+    border: "border-[hsl(0_0%_8%)]/8",
     radius: "rounded-2xl",
     btnRadius: "rounded-xl",
     heading: "font-sans",
@@ -443,7 +443,7 @@ export default function UploadDocuments() {
         ["--ink" as never]: v.ink,
         ["--accent" as never]: v.accent,
         ["--page-alt" as never]:
-          variant === 4 ? "0 0% 8%" : variant === 3 ? "220 30% 96%" : variant === 5 ? "30 40% 94%" : variant === 2 ? "44 33% 95%" : "210 30% 97%",
+          variant === 4 ? "0 0% 8%" : variant === 3 ? "38 50% 92%" : variant === 5 ? "30 40% 94%" : variant === 2 ? "44 33% 95%" : "210 30% 97%",
       } as React.CSSProperties}
     >
       {/* ============ VARIANT-SPECIFIC HEADER ============ */}
@@ -484,7 +484,7 @@ export default function UploadDocuments() {
         <header className="bg-[hsl(var(--page-alt))] pt-5">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 rounded-2xl bg-white px-5 py-3 shadow-[0_4px_24px_-8px_rgba(15,23,42,0.08)] sm:mx-5 md:mx-auto">
             <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-8 w-auto" />
-            <div className="flex items-center gap-2 rounded-full bg-[hsl(221_83%_53%)]/8 px-3 py-1 text-[hsl(221_83%_45%)]">
+            <div className="flex items-center gap-2 rounded-full bg-[hsl(14_65%_58%)]/8 px-3 py-1 text-[hsl(14_60%_42%)]">
               <ArrowRight className="h-3 w-3" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">Sharing with</span>
             </div>
@@ -619,15 +619,15 @@ export default function UploadDocuments() {
                     const Icon = opt.icon;
                     return (
                       <button key={opt.type} onClick={() => onPick(opt.type)}
-                        className="group flex w-full items-center gap-4 rounded-2xl bg-white px-4 py-4 text-left shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] ring-1 ring-[hsl(var(--ink))]/5 transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-12px_rgba(15,23,42,0.18)] hover:ring-[hsl(221_83%_53%)]/30">
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[hsl(221_83%_92%)] to-[hsl(221_83%_85%)] text-[hsl(221_83%_45%)] transition-transform group-hover:scale-105">
+                        className="group flex w-full items-center gap-4 rounded-2xl bg-white px-4 py-4 text-left shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] ring-1 ring-[hsl(var(--ink))]/5 transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-12px_rgba(15,23,42,0.18)] hover:ring-[hsl(14_65%_58%)]/30">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[hsl(22_70%_92%)] to-[hsl(18_70%_86%)] text-[hsl(14_60%_42%)] transition-transform group-hover:scale-105">
                           <Icon className="h-7 w-7" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-[15px] font-bold text-[hsl(var(--ink))]">{opt.label}</p>
                           <p className="mt-0.5 text-[12px] leading-snug text-[hsl(var(--ink))]/55">{opt.description}</p>
                         </div>
-                        <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/30 transition-all group-hover:translate-x-0.5 group-hover:text-[hsl(221_83%_53%)]" />
+                        <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--ink))]/30 transition-all group-hover:translate-x-0.5 group-hover:text-[hsl(14_65%_58%)]" />
                       </button>
                     );
                   })}
