@@ -236,7 +236,7 @@ export default function LicenseUpload() {
           file_size: item.file.size,
           mime_type: item.file.type,
           consent_given: true,
-          notes: `Licence — ${item.side === "front" ? "Front" : "Back"}`,
+          notes: `Photo ID — ${item.side === "front" ? "Front" : "Back"}`,
         });
         if (dbErr) throw dbErr;
         count += 1;
