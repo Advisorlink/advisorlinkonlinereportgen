@@ -21,6 +21,10 @@ export interface ReportStartPrefill {
   age?: string | number | null;
   superFundName?: string | null;
   superBalance?: string | number | null;
+  state?: string | null;
+  hadReviewBefore?: string | null;
+  notes?: string | null;
+  leadSource?: string | null;
 }
 
 type OptionRow = { name: string; allocationPct: string };
