@@ -1,23 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Mail, MessageSquare, Search, Send, Copy, Check, Link2 } from "lucide-react";
+import { Mail, MessageSquare, Search, Send, Copy, Check, Link2, Briefcase } from "lucide-react";
 
 const UPLOAD_URL = "https://report.advisorlinkonline.com.au/upload";
+
+const ADVISORS = [
+  { id: "pure-private-wealth", name: "Pure Private Wealth" },
+  { id: "my-advice-hub", name: "My Advice Hub" },
+  { id: "inheritance-financial", name: "Inheritance Financial" },
+] as const;
+
+type AdvisorId = typeof ADVISORS[number]["id"];
+type SendChannel = "email" | "sms" | "both";
 
 type Contact = { id: string; name: string; email: string | null; phone: string | null; source: string };
 
 export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  const navigate = useNavigate();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Contact | null>(null);
-  const [tab, setTab] = useState<"email" | "sms">("email");
+  const [advisor, setAdvisor] = useState<AdvisorId>("pure-private-wealth");
+  const [channel, setChannel] = useState<SendChannel>("email");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
@@ -26,6 +38,11 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
   const [smsBody, setSmsBody] = useState("");
   const [sending, setSending] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const advisorName = useMemo(
+    () => ADVISORS.find(a => a.id === advisor)?.name || "",
+    [advisor]
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -49,9 +66,9 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
 
   useEffect(() => {
     const greeting = name ? `Hi ${name.split(" ")[0]},` : "Hi,";
-    setEmailBody(`${greeting}\n\nPlease use the secure link below to upload your photo ID and super statement. It only takes a couple of minutes and your information is encrypted.\n\n${UPLOAD_URL}\n\nThanks,\nAdvisor Link Online`);
-    setSmsBody(`${greeting} Please upload your documents securely here: ${UPLOAD_URL}`);
-  }, [name]);
+    setEmailBody(`${greeting}\n\nPlease use the secure link below to upload your photo ID and super statement. It only takes a couple of minutes and your information is encrypted.\n\n${UPLOAD_URL}\n\nThanks,\n${advisorName}`);
+    setSmsBody(`${greeting} Please upload your documents securely here: ${UPLOAD_URL} — ${advisorName}`);
+  }, [name, advisorName]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -68,8 +85,8 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
     setName(c.name || "");
     setEmail(c.email || "");
     setPhone(c.phone || "");
-    if (!c.email && c.phone) setTab("sms");
-    if (c.email && !c.phone) setTab("email");
+    if (!c.email && c.phone) setChannel("sms");
+    else if (c.email && !c.phone) setChannel("email");
   };
 
   const copyLink = async () => {
@@ -79,55 +96,81 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const sendEmail = async () => {
-    if (!email) return toast.error("Enter an email address");
-    setSending(true);
-    try {
-      const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      const html = emailBody
-        .split("\n")
-        .map(line => {
-          if (line.trim() === "") return "<br>";
-          const safe = escape(line).replace(
-            /(https?:\/\/[^\s]+)/g,
-            '<a href="$1" style="color:#0891b2;text-decoration:underline">$1</a>'
-          );
-          return `<p style="margin:0 0 8px 0">${safe}</p>`;
-        })
-        .join("\n");
-      const { data, error } = await supabase.functions.invoke("send-report-email", {
-        body: {
-          recipientEmail: email,
-          clientName: name,
-          customSubject: subject,
-          customBody: html,
-          isHtml: true,
-        },
-      });
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-      toast.success(`Email sent to ${email}`);
-      onOpenChange(false);
-    } catch (e: any) {
-      toast.error(`Could not send email: ${e.message || e}`);
-    } finally {
-      setSending(false);
-    }
+  const sendEmailNow = async () => {
+    const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const html = emailBody
+      .split("\n")
+      .map(line => {
+        if (line.trim() === "") return "<br>";
+        const safe = escape(line).replace(
+          /(https?:\/\/[^\s]+)/g,
+          '<a href="$1" style="color:#0891b2;text-decoration:underline">$1</a>'
+        );
+        return `<p style="margin:0 0 8px 0">${safe}</p>`;
+      })
+      .join("\n");
+    const { data, error } = await supabase.functions.invoke("send-report-email", {
+      body: {
+        recipientEmail: email,
+        clientName: name,
+        customSubject: subject,
+        customBody: html,
+        isHtml: true,
+      },
+    });
+    if (error) throw error;
+    if ((data as any)?.error) throw new Error((data as any).error);
   };
 
-  const sendSMS = async () => {
-    if (!phone) return toast.error("Enter a phone number");
+  const sendSmsNow = async () => {
+    const { data, error } = await supabase.functions.invoke("sms-send", {
+      body: { to: phone, body: smsBody },
+    });
+    if (error) throw error;
+    if ((data as any)?.error) throw new Error((data as any).error);
+  };
+
+  const handleSend = async () => {
+    if ((channel === "email" || channel === "both") && !email) return toast.error("Enter an email address");
+    if ((channel === "sms" || channel === "both") && !phone) return toast.error("Enter a phone number");
+    if (!name.trim()) return toast.error("Enter a client name");
+
     setSending(true);
     try {
-      const { data, error } = await supabase.functions.invoke("sms-send", {
-        body: { to: phone, body: smsBody },
-      });
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-      toast.success("SMS sent");
+      const tasks: Promise<void>[] = [];
+      if (channel === "email" || channel === "both") tasks.push(sendEmailNow());
+      if (channel === "sms" || channel === "both") tasks.push(sendSmsNow());
+      await Promise.all(tasks);
+
+      // Best-effort: update pipeline deal note that link was sent
+      if (selected?.source === "Pipeline") {
+        const stamp = new Date().toISOString();
+        await supabase
+          .from("pipeline_deals")
+          .update({ notes: `Upload link sent ${stamp} via ${channel} — advisor: ${advisorName}` } as any)
+          .eq("id", selected.id);
+      }
+
+      toast.success(
+        channel === "both"
+          ? `Email & SMS sent to ${name}`
+          : channel === "email"
+          ? `Email sent to ${email}`
+          : `SMS sent to ${phone}`
+      );
       onOpenChange(false);
+
+      // Auto-open E-Sign new request with this client prefilled
+      const params = new URLSearchParams({
+        new: "1",
+        name,
+        email,
+        phone,
+        advisor,
+      });
+      navigate(`/esign?${params.toString()}`);
     } catch (e: any) {
-      toast.error(`Could not send SMS: ${e.message || e}`);
+      toast.error(`Could not send: ${e.message || e}`);
     } finally {
       setSending(false);
     }
@@ -138,7 +181,7 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><Link2 className="w-5 h-5 text-primary" /> Send upload link</DialogTitle>
-          <DialogDescription>Pick a client and send them the secure document upload link via email or SMS.</DialogDescription>
+          <DialogDescription>Pick a client, choose your advisor brand, and send the secure document upload link.</DialogDescription>
         </DialogHeader>
 
         <div className="rounded-lg border bg-muted/40 p-3 flex items-center gap-2">
@@ -147,6 +190,31 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
             {copied ? "Copied" : "Copy"}
           </Button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5"><Briefcase className="w-3.5 h-3.5" /> Choose advisor</Label>
+            <Select value={advisor} onValueChange={(v) => setAdvisor(v as AdvisorId)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {ADVISORS.map(a => (
+                  <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Send via</Label>
+            <Select value={channel} onValueChange={(v) => setChannel(v as SendChannel)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="email">Email only</SelectItem>
+                <SelectItem value="sms">Text message only</SelectItem>
+                <SelectItem value="both">Both email & text</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -188,36 +256,44 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
           </div>
         </div>
 
-        <Tabs value={tab} onValueChange={v => setTab(v as any)}>
-          <TabsList className="grid grid-cols-2">
-            <TabsTrigger value="email" className="gap-2"><Mail className="w-4 h-4" /> Email</TabsTrigger>
-            <TabsTrigger value="sms" className="gap-2"><MessageSquare className="w-4 h-4" /> SMS</TabsTrigger>
-          </TabsList>
-          <TabsContent value="email" className="space-y-3 pt-3">
+        {(channel === "email" || channel === "both") && (
+          <div className="space-y-3 rounded-lg border p-3">
+            <div className="flex items-center gap-2 text-sm font-medium"><Mail className="w-4 h-4 text-primary" /> Email</div>
             <div className="space-y-1.5">
               <Label htmlFor="ul-subject">Subject</Label>
               <Input id="ul-subject" value={subject} onChange={e => setSubject(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="ul-body">Message</Label>
-              <Textarea id="ul-body" rows={7} value={emailBody} onChange={e => setEmailBody(e.target.value)} />
+              <Textarea id="ul-body" rows={6} value={emailBody} onChange={e => setEmailBody(e.target.value)} />
             </div>
-            <Button onClick={sendEmail} disabled={sending} className="w-full gap-2">
-              <Send className="w-4 h-4" /> {sending ? "Sending..." : "Send email"}
-            </Button>
-            <p className="text-xs text-muted-foreground text-center">Sent directly from your AdvisorLink inbox with your signature.</p>
-          </TabsContent>
-          <TabsContent value="sms" className="space-y-3 pt-3">
+          </div>
+        )}
+
+        {(channel === "sms" || channel === "both") && (
+          <div className="space-y-3 rounded-lg border p-3">
+            <div className="flex items-center gap-2 text-sm font-medium"><MessageSquare className="w-4 h-4 text-primary" /> Text message</div>
             <div className="space-y-1.5">
               <Label htmlFor="ul-sms">Message</Label>
-              <Textarea id="ul-sms" rows={4} value={smsBody} onChange={e => setSmsBody(e.target.value)} />
+              <Textarea id="ul-sms" rows={3} value={smsBody} onChange={e => setSmsBody(e.target.value)} />
               <p className="text-xs text-muted-foreground">{smsBody.length} characters</p>
             </div>
-            <Button onClick={sendSMS} disabled={sending} className="w-full gap-2">
-              <Send className="w-4 h-4" /> {sending ? "Sending..." : "Send SMS"}
-            </Button>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
+
+        <Button onClick={handleSend} disabled={sending} className="w-full gap-2">
+          <Send className="w-4 h-4" />
+          {sending
+            ? "Sending..."
+            : channel === "both"
+            ? "Send email & text"
+            : channel === "email"
+            ? "Send email"
+            : "Send text message"}
+        </Button>
+        <p className="text-xs text-muted-foreground text-center">
+          After sending, you'll be taken to E-Sign with this client ready to go under <span className="font-medium">{advisorName}</span>.
+        </p>
       </DialogContent>
     </Dialog>
   );

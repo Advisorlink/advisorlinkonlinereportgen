@@ -18,13 +18,17 @@ interface ReportRow {
 
 type Step = "upload" | "select-client" | "fill-details" | "edit-pdf" | "confirm-send";
 
-export function ESignNewRequest({ onBack, initialFile, initialFileName }: {
+export function ESignNewRequest({ onBack, initialFile, initialFileName, prefillClient }: {
   onBack: () => void;
   initialFile?: File | null;
   initialFileName?: string;
+  prefillClient?: { name?: string; email?: string; phone?: string } | null;
 }) {
   const { user } = useAuth();
-  const [step, setStep] = useState<Step>(initialFile ? "select-client" : "upload");
+  const hasPrefill = !!(prefillClient && (prefillClient.name || prefillClient.email || prefillClient.phone));
+  const [step, setStep] = useState<Step>(
+    hasPrefill ? "upload" : initialFile ? "select-client" : "upload"
+  );
   const [file, setFile] = useState<File | null>(initialFile || null);
   const [editedFile, setEditedFile] = useState<File | null>(null);
   const [esignFields, setEsignFields] = useState<ESignField[]>([]);
@@ -34,12 +38,12 @@ export function ESignNewRequest({ onBack, initialFile, initialFileName }: {
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [search, setSearch] = useState("");
   const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
-  const [isGuest, setIsGuest] = useState(false);
+  const [isGuest, setIsGuest] = useState(hasPrefill);
 
   // Client details (editable)
-  const [clientName, setClientName] = useState("");
-  const [clientEmail, setClientEmail] = useState("");
-  const [clientPhone, setClientPhone] = useState("");
+  const [clientName, setClientName] = useState(prefillClient?.name || "");
+  const [clientEmail, setClientEmail] = useState(prefillClient?.email || "");
+  const [clientPhone, setClientPhone] = useState(prefillClient?.phone || "");
   const [clientDob, setClientDob] = useState("");
   const [clientAddress, setClientAddress] = useState("");
 
