@@ -480,7 +480,7 @@ export default function LicenseUpload() {
                 {licenseSide === "front" ? "Step 1 of 2" : "Step 2 of 2"}
               </p>
               <p className="font-heading text-[15px] font-semibold">
-                {licenseSide === "front" ? "Front of licence" : "Back of licence"}
+                {licenseSide === "front" ? "FRONT OF ID" : "BACK OF ID"}
               </p>
             </div>
             <div className="w-9" />
@@ -500,7 +500,7 @@ export default function LicenseUpload() {
 
             <div className="pointer-events-none absolute inset-x-0 top-10 z-20 flex justify-center px-6">
               <p className="max-w-[92%] rounded-lg bg-black/75 px-5 py-2.5 text-center text-[15px] font-semibold text-white shadow-lg backdrop-blur">
-                Place your licence inside the frame. Make sure all details are clear.
+                Place your Photo ID inside the frame. Make sure all details are clear.
               </p>
             </div>
 
