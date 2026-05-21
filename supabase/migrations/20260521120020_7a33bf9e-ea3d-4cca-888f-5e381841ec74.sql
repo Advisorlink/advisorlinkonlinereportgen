@@ -1,0 +1,1 @@
+ALTER TABLE public.pipeline_deals ADD COLUMN IF NOT EXISTS progress_stages text[] NOT NULL DEFAULT '{}'::text[];

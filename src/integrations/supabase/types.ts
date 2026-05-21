@@ -715,6 +715,7 @@ export type Database = {
           lost_reason_note: string | null
           notes: string | null
           position: number
+          progress_stages: string[]
           source: string | null
           stage_id: string
           state: string | null
@@ -737,6 +738,7 @@ export type Database = {
           lost_reason_note?: string | null
           notes?: string | null
           position?: number
+          progress_stages?: string[]
           source?: string | null
           stage_id: string
           state?: string | null
@@ -759,6 +761,7 @@ export type Database = {
           lost_reason_note?: string | null
           notes?: string | null
           position?: number
+          progress_stages?: string[]
           source?: string | null
           stage_id?: string
           state?: string | null

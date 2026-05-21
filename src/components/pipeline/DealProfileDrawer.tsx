@@ -15,7 +15,19 @@ import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, DollarSign, Tag, StickyNote,
   MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark, ArrowLeft,
+  ListChecks, Check,
 } from "lucide-react";
+
+const PROGRESS_MILESTONES: { key: string; label: string }[] = [
+  { key: "email_sent", label: "Email sent" },
+  { key: "report_generated", label: "Report generated" },
+  { key: "report_sent", label: "Report sent" },
+  { key: "presentation_booked", label: "Presentation booked" },
+  { key: "presentation_completed", label: "Presentation completed" },
+  { key: "atc_tpa_sent", label: "ATC & TPA sent" },
+  { key: "documents_received", label: "Statement / Licence received" },
+  { key: "booked_stefano", label: "Booked with Stefano" },
+];
 import { useNavigate } from "react-router-dom";
 import { ReportStartForm } from "@/components/ReportStartForm";
 
@@ -39,6 +51,7 @@ type Deal = {
   super_balance?: number | null;
   state?: string | null;
   had_review_before?: boolean | null;
+  progress_stages?: string[] | null;
 };
 type DealNote = {
   id: string;
@@ -78,6 +91,8 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
   const [notes, setNotes] = useState<DealNote[]>([]);
   const [newNote, setNewNote] = useState("");
   const [addingNote, setAddingNote] = useState(false);
+  const [progress, setProgress] = useState<string[]>([]);
+  const [progressSaving, setProgressSaving] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -99,10 +114,31 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
         state: d.state || "",
         had_review_before: d.had_review_before === true ? "yes" : d.had_review_before === false ? "no" : "",
       });
+      setProgress(Array.isArray(d.progress_stages) ? d.progress_stages : []);
       setOriginalStageId(deal.stage_id);
       fetchNotes(deal.id);
     }
   }, [deal]);
+
+  const toggleMilestone = async (key: string) => {
+    if (!deal) return;
+    const next = progress.includes(key)
+      ? progress.filter((k) => k !== key)
+      : [...progress, key];
+    setProgress(next);
+    setProgressSaving(key);
+    const { error } = await supabase
+      .from("pipeline_deals")
+      .update({ progress_stages: next } as any)
+      .eq("id", deal.id);
+    setProgressSaving(null);
+    if (error) {
+      toast({ title: "Couldn't update milestone", variant: "destructive" });
+      setProgress(progress);
+    } else {
+      onDealUpdated();
+    }
+  };
 
   const fetchNotes = useCallback(async (dealId: string) => {
     const { data } = await supabase
@@ -277,7 +313,46 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
             )}
           </div>
 
-          {/* Contact details */}
+          {/* Process progress milestones */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+                <ListChecks className="w-3.5 h-3.5" /> Process Progress
+              </h3>
+              <span className="text-[11px] text-muted-foreground">
+                {progress.length}/{PROGRESS_MILESTONES.length}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {PROGRESS_MILESTONES.map((m) => {
+                const done = progress.includes(m.key);
+                const busy = progressSaving === m.key;
+                return (
+                  <button
+                    key={m.key}
+                    type="button"
+                    onClick={() => toggleMilestone(m.key)}
+                    disabled={busy}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all disabled:opacity-60 ${
+                      done
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20"
+                        : "bg-muted/40 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    {busy ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : done ? (
+                      <Check className="w-3 h-3" />
+                    ) : (
+                      <div className="w-3 h-3 rounded-full border border-current opacity-40" />
+                    )}
+                    {m.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="space-y-3">
             <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
               <User className="w-3.5 h-3.5" /> Contact Details
