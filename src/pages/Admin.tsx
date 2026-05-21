@@ -449,9 +449,10 @@ export default function Admin() {
                     )}
                     <div className="flex flex-wrap items-center gap-1.5">
                       {([
-                        { label: "Report", at: r.report_email_sent_at ?? r.email_sent_at },
-                        { label: "Follow-up", at: r.followup_email_sent_at },
-                        { label: "Referral", at: r.referral_email_sent_at },
+                        { label: "Report Generated", at: r.pdf_path ? r.created_at : null },
+                        { label: "Report Sent", at: r.report_email_sent_at ?? r.email_sent_at },
+                        { label: "Follow-up Sent", at: r.followup_email_sent_at },
+                        { label: "Referral Sent", at: r.referral_email_sent_at },
                         { label: "Presentation", at: r.presentation_completed_at },
                       ] as const)
                         .filter(p => !!p.at)
