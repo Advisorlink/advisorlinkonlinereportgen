@@ -62,16 +62,16 @@ const VARIANTS: Record<1 | 2 | 3 | 4 | 5, VariantConfig> = {
     vibe: "Ivory · navy · editorial",
   },
   3: {
-    label: "Soft Modern",
-    page: "bg-[#f1e8d8]",
-    ink: "0 0% 8%",
-    accent: "14 65% 58%",
-    surface: "bg-white",
-    border: "border-[hsl(0_0%_8%)]/8",
-    radius: "rounded-2xl",
-    btnRadius: "rounded-xl",
-    heading: "font-sans",
-    vibe: "Rounded · airy · blue accent",
+    label: "Pure Private Wealth",
+    page: "bg-[#f4ede1]",
+    ink: "24 18% 12%",
+    accent: "14 32% 42%",
+    surface: "bg-[#fbf7ef]",
+    border: "border-[hsl(24_18%_12%)]/10",
+    radius: "rounded-xl",
+    btnRadius: "rounded-lg",
+    heading: "font-heading",
+    vibe: "Bone · charcoal · muted clay",
   },
   4: {
     label: "Mono Lux",
@@ -411,7 +411,7 @@ export default function LicenseUpload() {
         ["--ink" as never]: v.ink,
         ["--accent" as never]: v.accent,
         ["--page-alt" as never]:
-          variant === 4 ? "0 0% 8%" : variant === 3 ? "38 50% 92%" : variant === 5 ? "30 40% 94%" : variant === 2 ? "44 33% 95%" : "210 30% 97%",
+          variant === 4 ? "0 0% 8%" : variant === 3 ? "36 28% 90%" : variant === 5 ? "30 40% 94%" : variant === 2 ? "44 33% 95%" : "210 30% 97%",
       } as React.CSSProperties}
     >
       {/* ============ VARIANT-SPECIFIC HEADER ============ */}
