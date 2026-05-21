@@ -411,7 +411,7 @@ export default function LicenseUpload() {
         ["--ink" as never]: v.ink,
         ["--accent" as never]: v.accent,
         ["--page-alt" as never]:
-          variant === 4 ? "0 0% 8%" : variant === 3 ? "38 50% 92%" : variant === 5 ? "30 40% 94%" : variant === 2 ? "44 33% 95%" : "210 30% 97%",
+          variant === 4 ? "0 0% 8%" : variant === 3 ? "36 28% 90%" : variant === 5 ? "30 40% 94%" : variant === 2 ? "44 33% 95%" : "210 30% 97%",
       } as React.CSSProperties}
     >
       {/* ============ VARIANT-SPECIFIC HEADER ============ */}
