@@ -329,10 +329,16 @@ export default function Admin() {
       if (!upErr) {
         setReports(prev => prev.map(x => x.id === r.id ? { ...x, email_sent_at: sentAt, [templateField]: sentAt } : x));
       }
-      toast.success(shouldAttachPdf ? `Email sent to ${emailDialog.to} with PDF attached` : `Gift card email sent to ${emailDialog.to}`);
+      toast.success(
+        shouldAttachPdf
+          ? `✓ Email sent to ${emailDialog.to} with PDF attached`
+          : `✓ Gift card email sent to ${emailDialog.to}`,
+        { id: toastId, duration: 5000 }
+      );
     } catch (e) {
       console.error("Send email failed:", e);
       toast.error("Failed to send email", {
+        id: toastId,
         description: e instanceof Error ? e.message : "Unknown error",
       });
     } finally {
