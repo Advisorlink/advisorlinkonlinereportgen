@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 import logoSvg from "@/assets/logo.svg";
+const BRAND_LOGO = "/logo-email.png";
 
 const MAX_BYTES = 15 * 1024 * 1024;
 
@@ -278,7 +279,7 @@ export default function StatementUpload() {
         <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[hsl(192_90%_60%)]/15 blur-3xl" />
         <div className="relative mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-5">
           <div className="flex items-center">
-            <img src={logoSvg} alt="AdvisorLink Online" className="h-8 w-auto brightness-0 invert" />
+            <img src={BRAND_LOGO} alt="AdvisorLink Online" className="h-10 w-auto" />
           </div>
           <div className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/15 backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-[hsl(192_90%_55%)] shadow-[0_0_12px_2px_hsl(192_90%_55%)]" />
@@ -298,7 +299,7 @@ export default function StatementUpload() {
             </div>
             <h1 className="font-heading text-2xl font-bold">Thanks, {client.fullName.split(" ")[0]}!</h1>
             <p className="mt-2 text-[14px] text-[hsl(215_60%_12%)]/65">
-              Your statement has been sent securely to your adviser at AdvisorLink Online. You'll hear from us shortly.
+              Your statement has been sent securely. It comes straight to us. You'll hear from us shortly.
             </p>
           </section>
         ) : stage === "welcome" ? (
@@ -351,7 +352,7 @@ export default function StatementUpload() {
             <div className="mt-5 grid grid-cols-3 gap-2 rounded-xl border border-[hsl(215_60%_12%)]/10 bg-white p-3 text-center text-[10px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/60">
               <div className="flex flex-col items-center gap-1"><ShieldCheck className="h-4 w-4 text-[hsl(192_90%_35%)]" /> Encrypted</div>
               <div className="flex flex-col items-center gap-1"><EyeOff className="h-4 w-4 text-[hsl(192_90%_35%)]" /> Private</div>
-              <div className="flex flex-col items-center gap-1"><Shield className="h-4 w-4 text-[hsl(192_90%_35%)]" /> Adviser-only</div>
+              <div className="flex flex-col items-center gap-1"><Shield className="h-4 w-4 text-[hsl(192_90%_35%)]" /> Direct to us</div>
             </div>
 
             <Button
@@ -382,7 +383,7 @@ export default function StatementUpload() {
             <div className="mb-6 grid grid-cols-3 gap-2 rounded-xl border border-[hsl(215_60%_12%)]/10 bg-white p-3 text-center text-[10px] font-semibold uppercase tracking-wider text-[hsl(215_60%_12%)]/60">
               <div className="flex flex-col items-center gap-1"><ShieldCheck className="h-4 w-4 text-[hsl(192_90%_35%)]" /> Encrypted</div>
               <div className="flex flex-col items-center gap-1"><EyeOff className="h-4 w-4 text-[hsl(192_90%_35%)]" /> Private</div>
-              <div className="flex flex-col items-center gap-1"><Shield className="h-4 w-4 text-[hsl(192_90%_35%)]" /> Adviser-only</div>
+              <div className="flex flex-col items-center gap-1"><Shield className="h-4 w-4 text-[hsl(192_90%_35%)]" /> Direct to us</div>
             </div>
 
             <div className="space-y-3">
@@ -463,7 +464,7 @@ export default function StatementUpload() {
 
                 <label className="mt-4 flex cursor-pointer items-start gap-2 text-[12px] text-[hsl(215_60%_12%)]/70">
                   <Checkbox checked={consent} onCheckedChange={(v) => setConsent(v === true)} className="mt-0.5" />
-                  <span>I consent to AdvisorLink Online receiving and storing this statement securely for the purpose of providing advice.</span>
+                  <span>I consent to AdvisorLink Online receiving and storing this statement securely for the purpose of preparing for our meeting.</span>
                 </label>
 
                 {submitting && (
