@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 import logoSvg from "@/assets/logo.svg";
+const BRAND_LOGO = "/logo-email.png";
 
 const MAX_BYTES = 15 * 1024 * 1024;
 
