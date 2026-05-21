@@ -337,13 +337,13 @@ export default function StatementUpload() {
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
                     <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
-                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">A photo or screenshot is perfect</span>, no need for a fancy scan. We just need to see your current balance and provider.</span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">All we need</span> is your current balance, the investments you're in, your fund, and any insurances.</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[hsl(192_90%_50%)]/15 text-[hsl(192_90%_30%)]">
                     <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
-                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Encrypted end-to-end</span>, your file goes straight to your adviser and no one else.</span>
+                  <span><span className="font-semibold text-[hsl(215_60%_12%)]">Encrypted end-to-end</span>. It comes straight to us, not through anyone else.</span>
                 </li>
               </ul>
             </div>
