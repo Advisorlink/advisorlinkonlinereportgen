@@ -64,6 +64,18 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
     })();
   }, [open]);
 
+  // Prefill from the client we're currently presenting to
+  useEffect(() => {
+    if (!open || !prefill) return;
+    if (prefill.name) setName(prefill.name);
+    if (prefill.email) setEmail(prefill.email);
+    if (prefill.phone) setPhone(prefill.phone);
+    setSelected(null);
+    setSearch("");
+    if (!prefill.email && prefill.phone) setChannel("sms");
+    else if (prefill.email && !prefill.phone) setChannel("email");
+  }, [open, prefill]);
+
   useEffect(() => {
     const greeting = name ? `Hi ${name.split(" ")[0]},` : "Hi,";
     setEmailBody(`${greeting}\n\nPlease use the secure link below to upload your photo ID and super statement. It only takes a couple of minutes and your information is encrypted.\n\n${UPLOAD_URL}\n\nThanks,\n${advisorName}`);
