@@ -1071,10 +1071,10 @@ function FullscreenCamera({
 }) {
   const isLicense = mode === "license";
   const instruction = isLicense
-    ? (licenseSide === "front" ? "Front of licence" : "Back of licence")
+    ? (licenseSide === "front" ? "FRONT OF ID" : "BACK OF ID")
     : "Statement";
   const helper = isLicense
-    ? "Place your licence inside the frame. Make sure all details are clear."
+    ? "Place your photo ID inside the frame. Make sure all details are clear."
     : "Place each page inside the frame. Tap the shutter to save.";
   const sideLabel = isLicense
     ? (licenseSide === "front" ? "Step 1 of 2" : "Step 2 of 2")
@@ -1098,7 +1098,6 @@ function FullscreenCamera({
         </button>
         <div className="text-center">
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/60">{sideLabel}</p>
-          <p className="font-heading text-[15px] font-semibold">{instruction}</p>
         </div>
         <div className="w-9" />
       </div>
@@ -1119,11 +1118,17 @@ function FullscreenCamera({
 
 
         {/* Helper text — above the frame for clear readability */}
-        <div className="pointer-events-none absolute inset-x-0 top-10 z-20 flex justify-center px-6">
-          <p className="max-w-[92%] rounded-lg bg-black/75 px-5 py-2.5 text-center text-[15px] font-semibold text-white shadow-lg backdrop-blur">
+        <div className="pointer-events-none absolute inset-x-0 top-6 z-20 flex flex-col items-center gap-3 px-6">
+          <p className="max-w-[92%] rounded-lg bg-black/75 px-5 py-2.5 text-center text-[14px] font-semibold text-white shadow-lg backdrop-blur">
             {helper}
           </p>
+          {isLicense && (
+            <div className="rounded-xl bg-[hsl(192_90%_45%)] px-6 py-3 text-center text-[22px] font-extrabold uppercase tracking-[0.18em] text-white shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] ring-2 ring-white/30">
+              {instruction}
+            </div>
+          )}
         </div>
+
 
         {/* Overlay frame */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
