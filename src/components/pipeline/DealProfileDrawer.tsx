@@ -51,6 +51,7 @@ type Deal = {
   super_balance?: number | null;
   state?: string | null;
   had_review_before?: boolean | null;
+  progress_stages?: string[] | null;
 };
 type DealNote = {
   id: string;
