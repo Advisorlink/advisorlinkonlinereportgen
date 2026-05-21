@@ -72,7 +72,7 @@ export function SendUploadLinkDialog({ open, onOpenChange }: { open: boolean; on
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return contacts.slice(0, 20);
+    if (!q) return [] as Contact[];
     return contacts.filter(c =>
       c.name?.toLowerCase().includes(q) ||
       c.email?.toLowerCase().includes(q) ||
