@@ -255,6 +255,7 @@ export default function Admin() {
     if (!r) return;
     closeEmailDialog();
     setSendBusyId(r.id);
+    const toastId = toast.loading(`Preparing email for ${emailDialog.to}...`);
     try {
       const shouldAttachPdf = selectedTemplate !== "referral";
       let pdfBlob: Blob | null = null;
