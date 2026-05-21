@@ -86,7 +86,10 @@ export default function Documents() {
   const [search, setSearch] = useState("");
   const [openClient, setOpenClient] = useState<ClientGroup | null>(null);
   const [preview, setPreview] = useState<{ doc: ClientDocument; url: string } | null>(null);
-  const [sendOpen, setSendOpen] = useState(false);
+  const [sendOpen, setSendOpen] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return new URLSearchParams(window.location.search).get("send") === "1";
+  });
   const [drivePicker, setDrivePicker] = useState<{ docIds: string[] } | null>(null);
 
   const load = async () => {
