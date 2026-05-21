@@ -127,7 +127,7 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
   };
 
   const copyLink = async () => {
-    await navigator.clipboard.writeText(UPLOAD_URL);
+    await navigator.clipboard.writeText(UPLOAD_URLS[uploadType]);
     setCopied(true);
     toast.success("Link copied");
     setTimeout(() => setCopied(false), 2000);
