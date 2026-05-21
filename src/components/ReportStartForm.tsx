@@ -61,6 +61,21 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
 
   const [submitting, setSubmitting] = useState(false);
 
+  // Re-sync local fields when prefill changes (e.g. switching contacts)
+  useEffect(() => {
+    if (prefill.age != null && prefill.age !== "") setAge(String(prefill.age));
+    if (prefill.superFundName) setSuperFundName(prefill.superFundName);
+    if (prefill.superBalance != null && prefill.superBalance !== "") setSuperBalance(String(prefill.superBalance));
+    // Seed the fund-lookup search box so the user can run it immediately
+    if (prefill.superFundName) {
+      setLookup((prev) => ({
+        ...prev,
+        text: prev.text || `${prefill.superFundName} ${primaryOption}`.trim(),
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefill.clientName, prefill.superFundName, prefill.superBalance, prefill.age]);
+
   const handleSimulate = () => {
     setAge("42");
     setRetirementAge("67");
