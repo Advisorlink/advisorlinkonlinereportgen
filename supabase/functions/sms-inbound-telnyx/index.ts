@@ -167,6 +167,19 @@ Deno.serve(async (req) => {
 
     await supabase.from("sms_contacts").update({ last_message_at: new Date().toISOString() }).eq("id", contact.id);
 
+    try {
+      await supabase.functions.invoke("send-push", {
+        body: {
+          user_id: ownerId,
+          title: `SMS from ${contact.full_name || from}`,
+          body: body.slice(0, 140) || "(media message)",
+          data: { route: "/sms-hub" },
+        },
+      });
+    } catch (e) {
+      console.error("send-push invoke failed", e);
+    }
+
     return new Response(JSON.stringify({ ok: true }), { status: 200 });
   } catch (err) {
     console.error("sms-inbound-telnyx error:", err);

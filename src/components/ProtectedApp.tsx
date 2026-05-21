@@ -5,9 +5,11 @@ import { isHostAllowed } from "@/lib/security";
 import { ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 export function ProtectedApp({ children }: { children: ReactNode }) {
   const { user, profile, loading, authError, refreshProfile } = useAuth();
+  usePushNotifications();
 
   // Domain lock — refuse to render on unauthorized hosts
   if (!isHostAllowed()) {

@@ -135,6 +135,20 @@ Deno.serve(async (req) => {
     // Update contact
     await supabase.from("sms_contacts").update({ last_message_at: new Date().toISOString() }).eq("id", contact.id);
 
+    // Fire push notification to the owner's devices (no-op if FCM not configured)
+    try {
+      await supabase.functions.invoke("send-push", {
+        body: {
+          user_id: ownerId,
+          title: `SMS from ${contact.full_name || from}`,
+          body: body.slice(0, 140) || "(media message)",
+          data: { route: "/sms-hub" },
+        },
+      });
+    } catch (e) {
+      console.error("send-push invoke failed", e);
+    }
+
     // Return empty TwiML response
     return new Response("<Response></Response>", { headers: { "Content-Type": "text/xml" } });
   } catch (err) {
