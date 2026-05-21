@@ -209,7 +209,7 @@ export default function LicenseUpload() {
       return;
     }
     if (!consent) return toast.error("Please accept the privacy consent to continue");
-    if (captured.length === 0) return toast.error("Please add at least the front of your licence");
+    if (captured.length === 0) return toast.error("Please add at least the front of your Photo ID");
 
     setErrors({});
     setSubmitting(true);
@@ -236,7 +236,7 @@ export default function LicenseUpload() {
           file_size: item.file.size,
           mime_type: item.file.type,
           consent_given: true,
-          notes: `Licence — ${item.side === "front" ? "Front" : "Back"}`,
+          notes: `Photo ID — ${item.side === "front" ? "Front" : "Back"}`,
         });
         if (dbErr) throw dbErr;
         count += 1;
@@ -268,7 +268,7 @@ export default function LicenseUpload() {
         <input ref={fileInputRef} type="file" className="hidden" onChange={onFile} />
 
         <div className="mb-6 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-[hsl(222_47%_18%)]/55">
-          <Lock className="h-3 w-3" /> Secure licence upload for Pure Private Wealth
+          <Lock className="h-3 w-3" /> Secure Photo ID upload for Pure Private Wealth
         </div>
 
         {stage === "done" ? (
@@ -278,7 +278,7 @@ export default function LicenseUpload() {
             </div>
             <h1 className="font-heading text-2xl font-bold">Thanks, {client.fullName.split(" ")[0]}!</h1>
             <p className="mt-2 text-[14px] text-[hsl(222_47%_18%)]/65">
-              Your licence has been sent securely to Pure Private Wealth. You'll hear from your adviser shortly.
+              Your Photo ID has been sent securely to Pure Private Wealth. You'll hear from your adviser shortly.
             </p>
           </section>
         ) : (
@@ -287,10 +287,10 @@ export default function LicenseUpload() {
               <>
                 <div className="mb-6 text-center">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(221_83%_53%)]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[hsl(221_83%_45%)]">
-                    <IdCard className="h-3 w-3" /> Driver's Licence
+                    <IdCard className="h-3 w-3" /> Photo ID
                   </span>
                   <h1 className="font-heading mt-3 text-[26px] font-bold leading-tight tracking-tight sm:text-[34px]">
-                    Capture your licence
+                    Capture your Photo ID
                   </h1>
                   <p className="mx-auto mt-3 max-w-md text-[13px] text-[hsl(222_47%_18%)]/60 sm:text-[14px]">
                     We'll capture the front and back in one quick sequence. Make sure all details are clear.
@@ -311,7 +311,7 @@ export default function LicenseUpload() {
                 </div>
 
                 <section className="rounded-2xl bg-white p-5 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] ring-1 ring-[hsl(222_47%_18%)]/5">
-                  <h2 className="font-heading text-base font-bold">How would you like to add your licence?</h2>
+                  <h2 className="font-heading text-base font-bold">How would you like to add your Photo ID?</h2>
                   <p className="mt-1 text-[13px] text-[hsl(222_47%_18%)]/60">
                     Take a photo using your camera — the frame helps you line up the front and back — or upload existing photos.
                   </p>
@@ -339,7 +339,7 @@ export default function LicenseUpload() {
 
             {stage === "review" && (
               <section className="rounded-2xl bg-white p-5 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] ring-1 ring-[hsl(222_47%_18%)]/5">
-                <h2 className="font-heading text-base font-bold">Your licence photos</h2>
+                <h2 className="font-heading text-base font-bold">Your Photo ID photos</h2>
                 <p className="mt-1 text-[13px] text-[hsl(222_47%_18%)]/60">
                   {captured.length} of 2 captured. Add the other side, retake any, or continue.
                 </p>
@@ -350,7 +350,7 @@ export default function LicenseUpload() {
                     return (
                       <div key={side} className="rounded-xl bg-[#f4f6fb] p-3 ring-1 ring-[hsl(222_47%_18%)]/5">
                         <p className="text-[11px] font-bold uppercase tracking-wider text-[hsl(222_47%_18%)]/55">
-                          {side === "front" ? "Front" : "Back"}
+                          {side === "front" ? "FRONT OF ID" : "BACK OF ID"}
                         </p>
                         {item ? (
                           <>
@@ -431,7 +431,7 @@ export default function LicenseUpload() {
                 <label className="mt-4 flex cursor-pointer items-start gap-2 text-[12px] text-[hsl(222_47%_18%)]/70">
                   <Checkbox checked={consent} onCheckedChange={(v) => setConsent(v === true)} className="mt-0.5" />
                   <span>
-                    I consent to Pure Private Wealth receiving and storing my licence securely for the purpose of providing advice.
+                    I consent to Pure Private Wealth receiving and storing my Photo ID securely for the purpose of providing advice.
                   </span>
                 </label>
 
@@ -448,7 +448,7 @@ export default function LicenseUpload() {
                   size="lg"
                   className="mt-5 h-12 w-full rounded-xl bg-[hsl(221_83%_53%)] font-semibold text-white hover:bg-[hsl(221_83%_45%)]"
                 >
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Upload className="mr-2 h-4 w-4" /> Send licence securely</>}
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Upload className="mr-2 h-4 w-4" /> Send Photo ID securely</>}
                 </Button>
               </section>
             )}
@@ -480,7 +480,7 @@ export default function LicenseUpload() {
                 {licenseSide === "front" ? "Step 1 of 2" : "Step 2 of 2"}
               </p>
               <p className="font-heading text-[15px] font-semibold">
-                {licenseSide === "front" ? "Front of licence" : "Back of licence"}
+                {licenseSide === "front" ? "FRONT OF ID" : "BACK OF ID"}
               </p>
             </div>
             <div className="w-9" />
@@ -500,7 +500,7 @@ export default function LicenseUpload() {
 
             <div className="pointer-events-none absolute inset-x-0 top-10 z-20 flex justify-center px-6">
               <p className="max-w-[92%] rounded-lg bg-black/75 px-5 py-2.5 text-center text-[15px] font-semibold text-white shadow-lg backdrop-blur">
-                Place your licence inside the frame. Make sure all details are clear.
+                Place your Photo ID inside the frame. Make sure all details are clear.
               </p>
             </div>
 

@@ -28,10 +28,10 @@ type UploadType = keyof typeof UPLOAD_URLS;
 
 const UPLOAD_TYPE_LABELS: Record<UploadType, { label: string; description: string; subject: string; blurb: string }> = {
   license_and_statement: {
-    label: "License & Statement",
+    label: "Photo ID & Statement",
     description: "Photo ID + super statement upload",
-    subject: "Please upload your license and statement",
-    blurb: "Please use the secure link below to upload your driver's license and statement. It only takes a couple of minutes and your information is encrypted.",
+    subject: "Please upload your Photo ID and statement",
+    blurb: "Please use the secure link below to upload your Photo ID and statement. It only takes a couple of minutes and your information is encrypted.",
   },
   statement_only: {
     label: "Statement Only",
@@ -40,10 +40,10 @@ const UPLOAD_TYPE_LABELS: Record<UploadType, { label: string; description: strin
     blurb: "Please use the secure link below to send through your statement — you can upload a screenshot, a photo, or a PDF. It only takes a minute and your information is encrypted.",
   },
   license_only: {
-    label: "License Only",
-    description: "Driver's license / photo ID upload",
-    subject: "Please upload your driver's license",
-    blurb: "Please use the secure link below to upload a clear photo of your driver's license. It only takes a minute and your information is encrypted.",
+    label: "Photo ID Only",
+    description: "Photo ID upload",
+    subject: "Please upload your Photo ID",
+    blurb: "Please use the secure link below to upload a clear photo of your Photo ID (front and back). It only takes a minute and your information is encrypted.",
   },
 };
 
