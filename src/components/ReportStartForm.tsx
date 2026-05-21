@@ -214,6 +214,14 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
         {/* About them */}
         <Section icon={<Cake className="w-3.5 h-3.5" />} title="About them">
           <div className="grid grid-cols-2 gap-3">
+            <Field label="First name">
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" />
+            </Field>
+            <Field label="Last name">
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <Field label="Current age">
               <Input value={age} onChange={(e) => setAge(e.target.value)} placeholder="42" inputMode="numeric" />
             </Field>
