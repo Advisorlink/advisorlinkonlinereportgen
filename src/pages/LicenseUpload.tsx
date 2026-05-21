@@ -268,7 +268,7 @@ export default function LicenseUpload() {
         <input ref={fileInputRef} type="file" className="hidden" onChange={onFile} />
 
         <div className="mb-6 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-[hsl(222_47%_18%)]/55">
-          <Lock className="h-3 w-3" /> Secure licence upload for Pure Private Wealth
+          <Lock className="h-3 w-3" /> Secure Photo ID upload for Pure Private Wealth
         </div>
 
         {stage === "done" ? (
