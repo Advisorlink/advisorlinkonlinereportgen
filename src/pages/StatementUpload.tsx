@@ -293,13 +293,13 @@ export default function StatementUpload() {
         <input ref={fileInputRef} type="file" className="hidden" onChange={onFileChange} />
 
         {done ? (
-          <section className="rounded-2xl border border-emerald-200 bg-white p-8 text-center shadow-sm">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
-              <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+          <section className="rounded-2xl border border-[hsl(215_60%_12%)]/10 bg-white p-8 text-center shadow-sm">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(215_60%_12%)]/8">
+              <CheckCircle2 className="h-8 w-8 text-[hsl(215_60%_12%)]" />
             </div>
-            <h1 className="font-heading text-2xl font-bold">Thanks, {client.fullName.split(" ")[0]}!</h1>
-            <p className="mt-2 text-[14px] text-[hsl(215_60%_12%)]/65">
-              Your statement has been sent securely. It comes straight to us. You'll hear from us shortly.
+            <h1 className="font-heading text-2xl font-bold text-[hsl(215_60%_12%)]">Thank you, {client.fullName.split(" ")[0]}</h1>
+            <p className="mt-3 text-[14px] text-[hsl(215_60%_12%)]/65">
+              Your statement has been uploaded successfully and delivered straight to us. We'll look forward to speaking to you soon.
             </p>
           </section>
         ) : stage === "welcome" ? (
