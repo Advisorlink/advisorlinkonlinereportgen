@@ -486,6 +486,7 @@ export default function Messages() {
                     <DropdownMenuItem onClick={() => handleCloseConv(activeConv.id)}>Close conversation</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleArchive(activeConv.id)}>Archive</DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteConv(activeConv.id)}>Delete conversation</DropdownMenuItem>
                     <DropdownMenuItem className="text-destructive">Block contact</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
