@@ -585,10 +585,10 @@ export default function LicenseUpload() {
                 ))}
               </div>
               <button
-                onClick={() => setStage("choose")}
+                onClick={() => setStage("license_method")}
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-sm border border-dashed border-[hsl(var(--ink))]/25 bg-white py-3 text-[13px] font-semibold text-[hsl(var(--ink))] hover:border-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))]/[0.03]"
               >
-                <Plus className="h-4 w-4" /> Add another document
+                <Plus className="h-4 w-4" /> Retake photos
               </button>
             </div>
             <Button
