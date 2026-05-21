@@ -734,7 +734,15 @@ function ContactPanelContent({
   const cf = (c.custom_fields || {}) as Record<string, any>;
   const initials = (c.full_name || "?").split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
+  const splitName = (full: string) => {
+    const parts = (full || "").trim().split(/\s+/);
+    return { first: parts[0] || "", last: parts.slice(1).join(" ") };
+  };
+  const _init = splitName(c.full_name || "");
+
   const [form, setForm] = useState({
+    first_name: c.first_name || _init.first,
+    last_name: c.last_name || _init.last,
     full_name: c.full_name || "",
     phone: c.phone || "",
     email: c.email || "",
