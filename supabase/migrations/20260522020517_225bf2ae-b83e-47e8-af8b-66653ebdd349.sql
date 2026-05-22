@@ -1,0 +1,1 @@
+DELETE FROM public.pipeline_deals WHERE stage_id IN ('e25de917-0375-4c8b-81af-0f6c2169abd5','d7c2eef8-c8e4-4deb-999b-480846e62b2d');
