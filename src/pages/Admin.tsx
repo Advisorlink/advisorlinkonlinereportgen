@@ -13,6 +13,7 @@ import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { buildReferralEmailHtml } from "@/lib/referral-email-template";
 import { buildReportEmailHtml } from "@/lib/report-email-template";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
+import { moveDealToReportSent } from "@/lib/pipeline-auto";
 import {
   CoverPage, WhoWeArePage, SnapshotPage, FundsPage,
   ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage,
@@ -341,6 +342,15 @@ export default function Admin() {
         .eq("id", r.id);
       if (!upErr) {
         setReports(prev => prev.map(x => x.id === r.id ? { ...x, email_sent_at: sentAt, [templateField]: sentAt } : x));
+      }
+      // When the main report email is sent, move the client into the "Report Sent" pipeline stage
+      if (templateField === "report_email_sent_at") {
+        const inputs = (r.inputs || {}) as Record<string, unknown>;
+        moveDealToReportSent({
+          clientName: r.client_name,
+          clientEmail: r.email || (inputs.clientEmail as string | undefined) || null,
+          clientPhone: (inputs.clientPhone as string | undefined) || null,
+        });
       }
       toast.success(
         shouldAttachPdf
