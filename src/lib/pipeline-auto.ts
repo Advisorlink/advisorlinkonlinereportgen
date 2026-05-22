@@ -68,6 +68,12 @@ export async function moveDealToStage(stageName: string, opts: {
       } as never);
     }
   } catch (e) {
-    console.error("moveDealToReportGenerated failed", e);
+    console.error("moveDealToStage failed", e);
   }
 }
+
+export const moveDealToReportGenerated = (opts: Parameters<typeof moveDealToStage>[1]) =>
+  moveDealToStage("Report Generated", opts);
+
+export const moveDealToReportSent = (opts: Parameters<typeof moveDealToStage>[1]) =>
+  moveDealToStage("Report Sent", opts);
