@@ -423,17 +423,21 @@ export default function Admin() {
                       {r.client_name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-navy text-sm leading-tight truncate">
-                        {r.client_name}
+                      <p className="font-semibold text-navy text-sm leading-tight truncate flex items-center gap-1.5">
+                        <span className="truncate">{r.client_name}</span>
+                        {(Date.now() - new Date(r.created_at).getTime()) < 24 * 60 * 60 * 1000 && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-cyan text-white shrink-0">
+                            New
+                          </span>
+                        )}
                       </p>
                       <div className="flex items-center gap-1.5 mt-1">
                         <Calendar className="w-3 h-3 text-muted-foreground/60" />
-                        <span className="text-[11px] text-muted-foreground">
-                          {new Date(r.created_at).toLocaleDateString("en-AU", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
+                        <span
+                          className="text-[11px] text-muted-foreground"
+                          title={new Date(r.created_at).toLocaleString("en-AU")}
+                        >
+                          {formatRelativeTime(r.created_at)}
                         </span>
                       </div>
                     </div>
