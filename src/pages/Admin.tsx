@@ -13,6 +13,7 @@ import { buildSummary, type ClientInputs } from "@/lib/calc";
 import { buildReferralEmailHtml } from "@/lib/referral-email-template";
 import { buildReportEmailHtml } from "@/lib/report-email-template";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
+import { moveDealToReportSent } from "@/lib/pipeline-auto";
 import {
   CoverPage, WhoWeArePage, SnapshotPage, FundsPage,
   ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage,
