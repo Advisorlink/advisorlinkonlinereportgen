@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Mail, Phone, DollarSign, Trash2 } from "lucide-react";
+import { GripVertical, Mail, Phone, DollarSign, Trash2, MessageSquare } from "lucide-react";
 import { useRef } from "react";
 
 type Deal = {
@@ -116,7 +116,7 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
       </div>
 
       {(deal.client_email || deal.client_phone) && (
-        <div className="mt-2.5 pt-2.5 border-t border-border/30 space-y-1">
+        <div className="mt-2.5 pt-2.5 border-t border-border/30 space-y-1.5">
           {deal.client_email && (
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
               <Mail className="w-3 h-3 shrink-0" />
@@ -128,18 +128,48 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
               .replace(/\s+/g, "")
               .replace(/^\+61/, "0");
             return (
-              <a
-                href={`sip:${localNumber}`}
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary transition-colors"
-              >
+              <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
                 <Phone className="w-3.5 h-3.5 shrink-0" />
                 {localNumber}
-              </a>
+              </div>
             );
           })()}
+          <div className="flex items-center gap-1 pt-1">
+            {deal.client_phone && (
+              <a
+                href={`sip:${deal.client_phone.replace(/\s+/g, "").replace(/^\+61/, "0")}`}
+                onClick={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold hover:bg-emerald-500/20 transition-colors"
+                title="Call"
+              >
+                <Phone className="w-3 h-3" /> Call
+              </a>
+            )}
+            {deal.client_phone && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onClick?.(deal); }}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 text-[10px] font-semibold hover:bg-cyan-500/20 transition-colors"
+                title="Send SMS"
+              >
+                <MessageSquare className="w-3 h-3" /> SMS
+              </button>
+            )}
+            {deal.client_email && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onClick?.(deal); }}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 text-[10px] font-semibold hover:bg-indigo-500/20 transition-colors"
+                title="Send Email"
+              >
+                <Mail className="w-3 h-3" /> Email
+              </button>
+            )}
+          </div>
         </div>
       )}
+
 
       {deal.progress_stages && deal.progress_stages.length > 0 && (
         <div className="mt-2.5 pt-2.5 border-t border-border/30">

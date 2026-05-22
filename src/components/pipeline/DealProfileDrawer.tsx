@@ -228,10 +228,75 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
     if (deal) fetchNotes(deal.id);
   };
 
+  // Quick-send state
+  const [smsBody, setSmsBody] = useState("");
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [sendingSms, setSendingSms] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+
+  const sendQuickSms = async () => {
+    if (!form.client_phone.trim()) return toast({ title: "No phone number on file", variant: "destructive" });
+    if (!smsBody.trim()) return toast({ title: "Type a message first", variant: "destructive" });
+    setSendingSms(true);
+    const { data, error } = await supabase.functions.invoke("sms-send", {
+      body: { to: form.client_phone.trim(), body: smsBody.trim() },
+    });
+    setSendingSms(false);
+    if (error || (data as any)?.error) {
+      toast({ title: "SMS failed", description: error?.message || (data as any)?.error, variant: "destructive" });
+      return;
+    }
+    toast({ title: `SMS sent to ${form.client_name || form.client_phone}` });
+    if (deal) {
+      await supabase.from("pipeline_deal_notes").insert({
+        deal_id: deal.id,
+        content: `SMS sent: ${smsBody.trim()}`,
+      });
+      fetchNotes(deal.id);
+    }
+    setSmsBody("");
+  };
+
+  const sendQuickEmail = async () => {
+    if (!form.client_email.trim()) return toast({ title: "No email on file", variant: "destructive" });
+    if (!emailSubject.trim() || !emailBody.trim()) return toast({ title: "Subject and message required", variant: "destructive" });
+    setSendingEmail(true);
+    const html = emailBody
+      .split(/\n{2,}/)
+      .map((p) => `<p style="margin:0 0 12px 0">${p.replace(/\n/g, "<br/>")}</p>`)
+      .join("\n");
+    const { data, error } = await supabase.functions.invoke("send-report-email", {
+      body: {
+        recipientEmail: form.client_email.trim(),
+        clientName: form.client_name || "",
+        customSubject: emailSubject.trim(),
+        customBody: html,
+        isHtml: true,
+      },
+    });
+    setSendingEmail(false);
+    if (error || (data as any)?.error) {
+      toast({ title: "Email failed", description: error?.message || (data as any)?.error, variant: "destructive" });
+      return;
+    }
+    toast({ title: `Email sent to ${form.client_email}` });
+    if (deal) {
+      await supabase.from("pipeline_deal_notes").insert({
+        deal_id: deal.id,
+        content: `Email sent — ${emailSubject.trim()}`,
+      });
+      fetchNotes(deal.id);
+    }
+    setEmailSubject("");
+    setEmailBody("");
+  };
+
   const handleSendSMS = () => {
     onOpenChange(false);
     navigate("/sms");
   };
+
 
   const handleDelete = () => {
     if (!deal) return;
@@ -417,6 +482,53 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
               <Input id="prof-address" value={form.client_address} onChange={(e) => setForm((p) => ({ ...p, client_address: e.target.value }))} className="mt-1" />
             </div>
           </div>
+
+          {/* Quick Message - SMS & Email */}
+          <div className="space-y-3">
+            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+              <Send className="w-3.5 h-3.5" /> Quick Message
+            </h3>
+            <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs flex items-center gap-1"><MessageSquare className="w-3 h-3" /> SMS to {form.client_phone || "—"}</Label>
+                <span className="text-[10px] text-muted-foreground">{smsBody.length}/160</span>
+              </div>
+              <Textarea
+                value={smsBody}
+                onChange={(e) => setSmsBody(e.target.value)}
+                placeholder="Hi {name}, just following up…"
+                className="resize-none text-sm bg-background"
+                rows={2}
+                maxLength={320}
+              />
+              <Button size="sm" onClick={sendQuickSms} disabled={sendingSms || !form.client_phone || !smsBody.trim()} className="w-full gap-1.5">
+                {sendingSms ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                Send SMS
+              </Button>
+            </div>
+            <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+              <Label className="text-xs flex items-center gap-1"><Mail className="w-3 h-3" /> Email to {form.client_email || "—"}</Label>
+              <Input
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                placeholder="Subject"
+                className="text-sm bg-background"
+              />
+              <Textarea
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                placeholder="Write your message…"
+                className="resize-none text-sm bg-background"
+                rows={4}
+              />
+              <Button size="sm" onClick={sendQuickEmail} disabled={sendingEmail || !form.client_email || !emailSubject.trim() || !emailBody.trim()} className="w-full gap-1.5">
+                {sendingEmail ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
+                Send Email
+              </Button>
+            </div>
+          </div>
+
+
 
           {/* Superannuation */}
           <div className="space-y-3">
