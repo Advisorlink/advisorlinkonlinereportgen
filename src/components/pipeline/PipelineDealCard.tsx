@@ -120,12 +120,21 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
               {deal.client_email}
             </div>
           )}
-          {deal.client_phone && (
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <Phone className="w-3 h-3 shrink-0" />
-              {deal.client_phone}
-            </div>
-          )}
+          {deal.client_phone && (() => {
+            const localNumber = deal.client_phone
+              .replace(/\s+/g, "")
+              .replace(/^\+61/, "0");
+            return (
+              <a
+                href={`tel:${localNumber}`}
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                <Phone className="w-3.5 h-3.5 shrink-0" />
+                {localNumber}
+              </a>
+            );
+          })()}
         </div>
       )}
 
