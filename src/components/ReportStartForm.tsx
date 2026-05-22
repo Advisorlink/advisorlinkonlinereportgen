@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
-import type { ClientInputs, IncomeFrequency, InvestmentOption } from "@/lib/calc";
+import { buildSummary, type ClientInputs, type IncomeFrequency, type InvestmentOption } from "@/lib/calc";
 import { toast } from "sonner";
 import { celebrate } from "@/lib/celebration";
+import { useAuth } from "@/hooks/useAuth";
+import { saveClientReportSnapshot } from "@/lib/report-persistence";
 import {
   Sparkles, DollarSign, Landmark, Target, TrendingUp, Cake, PiggyBank,
   Plus, Trash2, Wand2, ArrowRight,
@@ -39,7 +41,8 @@ const num = (v: string | number | null | undefined, fb = 0) => {
 
 export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const navigate = useNavigate();
-  const { setInputs, setLookup } = useClientInputs();
+  const { user } = useAuth();
+  const { setInputs, setLookup, setEditingReportId } = useClientInputs();
 
   const splitName = (full?: string) => {
     const t = (full || "").trim();
