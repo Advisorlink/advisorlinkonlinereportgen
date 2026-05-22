@@ -229,8 +229,15 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
   };
 
   const handleSendSMS = () => {
+    const phone = (form.client_phone || "").trim();
+    if (!phone) {
+      toast({ title: "No phone on file", variant: "destructive" });
+      return;
+    }
     onOpenChange(false);
-    navigate("/sms");
+    const params = new URLSearchParams({ phone });
+    if (form.client_name) params.set("name", form.client_name);
+    navigate(`/messages?${params.toString()}`);
   };
 
   const handleSendEmail = () => {

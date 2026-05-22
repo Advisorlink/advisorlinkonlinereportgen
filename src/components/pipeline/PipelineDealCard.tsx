@@ -143,7 +143,14 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
                 </a>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
-                    onClick={(e) => { e.stopPropagation(); navigate("/sms"); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const phone = (deal.client_phone || "").trim();
+                      if (!phone) return;
+                      const params = new URLSearchParams({ phone });
+                      if (deal.client_name) params.set("name", deal.client_name);
+                      navigate(`/messages?${params.toString()}`);
+                    }}
                     onPointerDown={(e) => e.stopPropagation()}
                     className="w-7 h-7 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 hover:bg-cyan-500/20 flex items-center justify-center transition-colors ring-1 ring-cyan-500/20"
                     title="Send SMS"

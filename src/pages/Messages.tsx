@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -183,6 +184,61 @@ export default function Messages() {
   }, []);
 
   useEffect(() => { fetchConversations(); fetchSmsNumbers(); fetchTemplates(); fetchTeam(); }, [fetchConversations, fetchSmsNumbers, fetchTemplates, fetchTeam]);
+
+  // Deep-link: /messages?phone=...&name=... opens (or creates) a conversation
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkHandled = useRef(false);
+  useEffect(() => {
+    if (deepLinkHandled.current || loading || !user) return;
+    const phoneParam = searchParams.get("phone");
+    if (!phoneParam) return;
+    const nameParam = searchParams.get("name") || "";
+    deepLinkHandled.current = true;
+    (async () => {
+      const normalize = (p: string) => p.replace(/[^\d+]/g, "");
+      const target = normalize(phoneParam);
+      const existing = conversations.find(
+        (c) => normalize(c.sms_contacts?.phone || "") === target
+      );
+      if (existing) {
+        setActiveConv(existing);
+      } else {
+        const { data: existingContact } = await supabase
+          .from("sms_contacts")
+          .select("id")
+          .eq("phone", phoneParam)
+          .maybeSingle();
+        let contactId = existingContact?.id;
+        if (!contactId) {
+          const nameParts = nameParam.trim().split(/\s+/);
+          const { data: contact } = await supabase
+            .from("sms_contacts")
+            .insert({
+              user_id: user.id,
+              full_name: nameParam || phoneParam,
+              first_name: nameParts[0] || null,
+              last_name: nameParts.slice(1).join(" ") || null,
+              phone: phoneParam,
+            })
+            .select("id")
+            .single();
+          contactId = contact?.id;
+        }
+        if (contactId) {
+          const { data: conv } = await supabase
+            .from("sms_conversations")
+            .insert({ contact_id: contactId, user_id: user.id, status: "open" })
+            .select("*, sms_contacts(*)")
+            .single();
+          if (conv) {
+            setActiveConv(conv as unknown as Conversation);
+            fetchConversations();
+          }
+        }
+      }
+      setSearchParams({}, { replace: true });
+    })();
+  }, [loading, user, conversations, searchParams, setSearchParams, fetchConversations]);
 
   // Realtime subscriptions
   useEffect(() => {
