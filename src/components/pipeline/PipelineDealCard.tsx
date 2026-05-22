@@ -150,7 +150,7 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
             )}
             {deal.client_phone && (
               <button
-                onClick={(e) => { e.stopPropagation(); onClick?.(deal); }}
+                onClick={(e) => { e.stopPropagation(); navigate("/sms"); }}
                 onPointerDown={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 text-[10px] font-semibold hover:bg-cyan-500/20 transition-colors"
                 title="Send SMS"
@@ -159,18 +159,20 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
               </button>
             )}
             {deal.client_email && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onClick?.(deal); }}
+              <a
+                href={`mailto:${deal.client_email}`}
+                onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 text-[10px] font-semibold hover:bg-indigo-500/20 transition-colors"
                 title="Send Email"
               >
                 <Mail className="w-3 h-3" /> Email
-              </button>
+              </a>
             )}
           </div>
         </div>
       )}
+
 
 
       {deal.progress_stages && deal.progress_stages.length > 0 && (
