@@ -342,6 +342,15 @@ export default function Admin() {
       if (!upErr) {
         setReports(prev => prev.map(x => x.id === r.id ? { ...x, email_sent_at: sentAt, [templateField]: sentAt } : x));
       }
+      // When the main report email is sent, move the client into the "Report Sent" pipeline stage
+      if (templateField === "report_email_sent_at") {
+        const inputs = (r.inputs || {}) as Record<string, unknown>;
+        moveDealToReportSent({
+          clientName: r.client_name,
+          clientEmail: r.email || (inputs.clientEmail as string | undefined) || null,
+          clientPhone: (inputs.clientPhone as string | undefined) || null,
+        });
+      }
       toast.success(
         shouldAttachPdf
           ? `✓ Email sent to ${emailDialog.to} with PDF attached`
