@@ -527,44 +527,6 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
             </Button>
           </div>
 
-          {/* Notes timeline */}
-          <div className="space-y-3">
-            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
-              <StickyNote className="w-3.5 h-3.5" /> Activity Notes
-            </h3>
-            <div className="flex gap-2">
-              <Textarea
-                value={newNote}
-                onChange={(e) => setNewNote(e.target.value)}
-                placeholder="Add a note…"
-                className="resize-none text-sm"
-                rows={2}
-              />
-              <Button size="sm" onClick={handleAddNote} disabled={addingNote || !newNote.trim()} className="shrink-0 self-end">
-                {addingNote ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-              </Button>
-            </div>
-            {notes.length === 0 && (
-              <p className="text-xs text-muted-foreground/50 text-center py-3">No notes yet</p>
-            )}
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {notes.map((note) => (
-                <div key={note.id} className="group relative bg-muted/50 rounded-xl p-3 text-sm">
-                  <p className="text-foreground whitespace-pre-wrap">{note.content}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1.5">
-                    {new Date(note.created_at).toLocaleString("en-AU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <button
-                    onClick={() => handleDeleteNote(note.id)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Delete deal */}
           <div className="pt-4 border-t border-border/30">
             <Button variant="ghost" onClick={handleDelete} className="w-full text-destructive hover:bg-destructive/10 gap-1.5">
