@@ -278,7 +278,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                 <Field label="5-year net return %"><PctInput v={fund.grossReturn} on={n => updateFund(idx, "grossReturn", n)} /></Field>
                 <Field label="Admin fee - flat $"><NumInput v={fund.adminFeeFlat} on={n => updateFund(idx, "adminFeeFlat", n)} /></Field>
                 <Field label="Admin fee - %"><PctInput v={fund.adminFeePct} on={n => updateFund(idx, "adminFeePct", n)} /></Field>
-                <Field label="Investment risk profile"><Input value={fund.investmentRiskProfile || ""} onChange={e => updateFund(idx, "investmentRiskProfile", e.target.value)} /></Field>
+                <Field label="Investment risk profile"><Input value={inferRiskProfile(fund.growthAssetsPct || 0)} readOnly className="bg-muted" /></Field>
               </Group>
               <InvestmentOptionsSection
                 options={fund.investmentOptions ?? []}
