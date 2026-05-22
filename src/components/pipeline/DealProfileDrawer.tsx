@@ -290,45 +290,7 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
         </div>
 
         <div className="p-5 space-y-6">
-          {/* Notes timeline - moved to top */}
-          <div className="space-y-3">
-            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
-              <StickyNote className="w-3.5 h-3.5" /> Activity Notes
-            </h3>
-            <div className="flex gap-2">
-              <Textarea
-                value={newNote}
-                onChange={(e) => setNewNote(e.target.value)}
-                placeholder="Add a note…"
-                className="resize-none text-sm"
-                rows={2}
-              />
-              <Button size="sm" onClick={handleAddNote} disabled={addingNote || !newNote.trim()} className="shrink-0 self-end">
-                {addingNote ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-              </Button>
-            </div>
-            {notes.length === 0 && (
-              <p className="text-xs text-muted-foreground/50 text-center py-3">No notes yet</p>
-            )}
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {notes.map((note) => (
-                <div key={note.id} className="group relative bg-muted/50 rounded-xl p-3 text-sm">
-                  <p className="text-foreground whitespace-pre-wrap">{note.content}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1.5">
-                    {new Date(note.created_at).toLocaleString("en-AU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <button
-                    onClick={() => handleDeleteNote(note.id)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Stage selector */}
+          {/* Stage selector - top */}
           <div>
             <Label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Pipeline Stage</Label>
             <Select
@@ -336,7 +298,6 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
               onValueChange={async (v) => {
                 if (!deal || v === form.stage_id) return;
                 setForm((p) => ({ ...p, stage_id: v }));
-                // Shift others in target stage down so this card lands on top
                 const { data: targetDeals } = await supabase
                   .from("pipeline_deals")
                   .select("id, position")
@@ -383,45 +344,45 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
             </Select>
           </div>
 
-          {/* Process progress milestones */}
+          {/* Notes timeline - underneath stage */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
-                <ListChecks className="w-3.5 h-3.5" /> Process Progress
-              </h3>
-              <span className="text-[11px] text-muted-foreground">
-                {progress.length}/{PROGRESS_MILESTONES.length}
-              </span>
+            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+              <StickyNote className="w-3.5 h-3.5" /> Activity Notes
+            </h3>
+            <div className="flex gap-2">
+              <Textarea
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                placeholder="Add a note…"
+                className="resize-none text-sm"
+                rows={2}
+              />
+              <Button size="sm" onClick={handleAddNote} disabled={addingNote || !newNote.trim()} className="shrink-0 self-end">
+                {addingNote ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+              </Button>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {PROGRESS_MILESTONES.map((m) => {
-                const done = progress.includes(m.key);
-                const busy = progressSaving === m.key;
-                return (
+            {notes.length === 0 && (
+              <p className="text-xs text-muted-foreground/50 text-center py-3">No notes yet</p>
+            )}
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {notes.map((note) => (
+                <div key={note.id} className="group relative bg-muted/50 rounded-xl p-3 text-sm">
+                  <p className="text-foreground whitespace-pre-wrap">{note.content}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1.5">
+                    {new Date(note.created_at).toLocaleString("en-AU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  </p>
                   <button
-                    key={m.key}
-                    type="button"
-                    onClick={() => toggleMilestone(m.key)}
-                    disabled={busy}
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all disabled:opacity-60 ${
-                      done
-                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20"
-                        : "bg-muted/40 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
+                    onClick={() => handleDeleteNote(note.id)}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
                   >
-                    {busy ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : done ? (
-                      <Check className="w-3 h-3" />
-                    ) : (
-                      <div className="w-3 h-3 rounded-full border border-current opacity-40" />
-                    )}
-                    {m.label}
+                    <Trash2 className="w-3 h-3" />
                   </button>
-                );
-              })}
+                </div>
+              ))}
             </div>
           </div>
+
+
 
           <div className="space-y-3">
             <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
