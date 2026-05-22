@@ -107,20 +107,38 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-1">
-                {recentReports.map((r) => (
+                {recentReports.map((r) => {
+                  const ageMs = Date.now() - new Date(r.created_at).getTime();
+                  const isNew = ageMs < 24 * 60 * 60 * 1000;
+                  const mins = Math.floor(ageMs / 60000);
+                  const hours = Math.floor(mins / 60);
+                  const days = Math.floor(hours / 24);
+                  const rel = mins < 1 ? "Just now"
+                    : mins < 60 ? `${mins} min${mins === 1 ? "" : "s"} ago`
+                    : hours < 24 ? `${hours} hour${hours === 1 ? "" : "s"} ago`
+                    : `${days} day${days === 1 ? "" : "s"} ago`;
+                  return (
                   <div key={r.id} className="flex items-center justify-between py-3 px-3 -mx-3 rounded-xl hover:bg-muted/50 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center shrink-0">
                         <FileText className="w-4 h-4 text-cyan" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">{r.client_name}</p>
-                        <p className="text-[11px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</p>
+                        <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                          <span>{r.client_name}</span>
+                          {isNew && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-cyan text-white">
+                              New
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground" title={new Date(r.created_at).toLocaleString()}>{rel}</p>
                       </div>
                     </div>
                     <TrendingUp className="w-4 h-4 text-cyan" />
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
