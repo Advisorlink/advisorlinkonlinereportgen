@@ -186,14 +186,29 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
               )}
             </div>
           </Group>
-          <Group title="Personal">
+          <Group title="Contact details">
             <Field label="Client name"><Input value={value.clientName} onChange={e => set("clientName", e.target.value)} /></Field>
-           <Field label="Client's email"><Input type="email" placeholder="client@example.com" value={value.clientEmail ?? ""} onChange={e => set("clientEmail", e.target.value)} /></Field>
-           <Field label="Phone number"><Input type="tel" placeholder="0400 000 000" value={value.clientPhone ?? ""} onChange={e => set("clientPhone", e.target.value)} /></Field>
-            <Field label="Age"><NumInput v={value.age} on={n => set("age", n)} /></Field>
-            <Field label="Retirement age"><NumInput v={value.retirementAge} on={n => set("retirementAge", n)} /></Field>
-            <Field label="Annual income"><NumInput v={value.annualIncome} on={n => set("annualIncome", n)} /></Field>
-            <Field label="Target balance"><NumInput v={value.goalBalance} on={n => set("goalBalance", n)} /></Field>
+            <Field label="Client's email"><Input type="email" placeholder="client@example.com" value={value.clientEmail ?? ""} onChange={e => set("clientEmail", e.target.value)} /></Field>
+            <Field label="Phone number"><Input type="tel" placeholder="0400 000 000" value={value.clientPhone ?? ""} onChange={e => set("clientPhone", e.target.value)} /></Field>
+          </Group>
+          <Group title="Survey questions">
+            <Field label="1. Which super fund are you currently with?"><Input value={value.fundName} onChange={e => set("fundName", e.target.value)} /></Field>
+            <Field label="2. Rough gross annual income"><NumInput v={value.annualIncome} on={n => set("annualIncome", n)} /></Field>
+            <Field label="3. Roughly how much in super at the moment"><NumInput v={value.superBalance} on={n => set("superBalance", n)} /></Field>
+            <Field label="4. How much super would you like at retirement"><NumInput v={value.goalBalance} on={n => set("goalBalance", n)} /></Field>
+            <Field label="5. Investment option (default, mixed, unsure…)"><Input value={value.modelLabel} onChange={e => set("modelLabel", e.target.value)} /></Field>
+            <Field label="6. Age"><NumInput v={value.age} on={n => set("age", n)} /></Field>
+            <Field label="7. Age you'd like to retire"><NumInput v={value.retirementAge} on={n => set("retirementAge", n)} /></Field>
+            <Field label="8. Rough income wanted in retirement"><NumInput v={value.desiredIncomeAmount} on={n => set("desiredIncomeAmount", n)} /></Field>
+            <Field label="Income frequency">
+              <select
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                value={value.desiredIncomeFrequency}
+                onChange={e => set("desiredIncomeFrequency", e.target.value as IncomeFrequency)}
+              >
+                <option>Weekly</option><option>Monthly</option><option>Annually</option>
+              </select>
+            </Field>
           </Group>
           <Group title="Personal contributions">
             <Field label="Amount">
@@ -219,22 +234,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
               </select>
             </Field>
           </Group>
-          <Group title="Desired retirement income">
-            <Field label="Amount"><NumInput v={value.desiredIncomeAmount} on={n => set("desiredIncomeAmount", n)} /></Field>
-            <Field label="Frequency">
-              <select
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                value={value.desiredIncomeFrequency}
-                onChange={e => set("desiredIncomeFrequency", e.target.value as IncomeFrequency)}
-              >
-                <option>Weekly</option><option>Monthly</option><option>Annually</option>
-              </select>
-            </Field>
-          </Group>
-          <Group title="Existing super (Fund 1)">
-            <Field label="Fund name"><Input value={value.fundName} onChange={e => set("fundName", e.target.value)} /></Field>
-            <Field label="Investment option"><Input value={value.modelLabel} onChange={e => set("modelLabel", e.target.value)} /></Field>
-            <Field label="Super balance"><NumInput v={value.superBalance} on={n => set("superBalance", n)} /></Field>
+          <Group title="Fund details (Fund 1)">
             <Field label="Growth assets %"><PctInput v={value.growthAssetsPct} on={n => set("growthAssetsPct", n)} /></Field>
             <Field label="5-year net return %"><PctInput v={value.grossReturn} on={n => set("grossReturn", n)} /></Field>
             <Field label="Admin fee - flat $"><NumInput v={value.adminFeeFlat} on={n => set("adminFeeFlat", n)} /></Field>
