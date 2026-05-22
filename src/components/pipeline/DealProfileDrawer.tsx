@@ -517,6 +517,10 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
               age: form.age,
               superFundName: form.super_fund_name,
               superBalance: form.super_balance,
+              state: form.state,
+              hadReviewBefore: form.had_review_before || null,
+              notes: form.notes,
+              leadSource: form.source,
             }}
           />
 
