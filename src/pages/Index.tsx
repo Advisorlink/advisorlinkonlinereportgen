@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Maximize2, FileText, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { CRMLayout } from "@/components/CRMLayout";
+import { moveDealToReportGenerated } from "@/lib/pipeline-auto";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -68,6 +69,11 @@ export default function Index() {
         email: user.email,
         event_type: editingReportId ? "report_updated" : "report_saved",
         details: { client: reportPayload.client_name, client_email: clientEmail, report_id: savedId },
+      });
+      await moveDealToReportGenerated({
+        clientName: inputs.clientName,
+        clientEmail: clientEmail,
+        clientPhone: inputs.clientPhone,
       });
       toast.success(editingReportId ? "Report updated" : "Client report saved", {
         description: editingReportId
@@ -239,6 +245,11 @@ export default function Index() {
     });
 
     pendingExport.current = null;
+    await moveDealToReportGenerated({
+      clientName: inputs.clientName,
+      clientEmail: clientEmail,
+      clientPhone: inputs.clientPhone,
+    });
     toast.success(editingReportId ? "Client report updated" : "Client added to reports list");
   };
 
@@ -304,6 +315,11 @@ export default function Index() {
     }
 
     pendingExport.current = null;
+    await moveDealToReportGenerated({
+      clientName: inputs.clientName,
+      clientEmail: clientEmail,
+      clientPhone: inputs.clientPhone,
+    });
     toast.success("Workflow started & PDF exported");
   };
 

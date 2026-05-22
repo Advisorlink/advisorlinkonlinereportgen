@@ -91,7 +91,10 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
           {initials}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground truncate">{deal.client_name}</p>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <p className="text-sm font-semibold text-foreground truncate">{deal.client_name}</p>
+            <AgePill createdAt={deal.created_at} />
+          </div>
           {deal.value != null && deal.value > 0 && (
             <div className="flex items-center gap-1 mt-1">
               <DollarSign className="w-3 h-3 text-emerald-500" />
@@ -154,5 +157,37 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
         </div>
       )}
     </div>
+  );
+}
+
+function AgePill({ createdAt }: { createdAt: string }) {
+  const created = new Date(createdAt);
+  const days = Math.max(0, Math.floor((Date.now() - created.getTime()) / 86400000));
+
+  let label: string;
+  if (days === 0) label = "Today";
+  else if (days === 1) label = "1d";
+  else if (days < 7) label = `${days}d`;
+  else if (days < 30) label = `${Math.floor(days / 7)}w`;
+  else if (days < 365) label = `${Math.floor(days / 30)}mo`;
+  else label = `${Math.floor(days / 365)}y`;
+
+  // Color ramp: fresh -> stale
+  const tone =
+    days <= 1
+      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/30"
+      : days <= 7
+      ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 ring-1 ring-cyan-500/30"
+      : days <= 30
+      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/30"
+      : "bg-rose-500/15 text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/30";
+
+  return (
+    <span
+      title={created.toLocaleString()}
+      className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold leading-none whitespace-nowrap ${tone}`}
+    >
+      {label}
+    </span>
   );
 }
