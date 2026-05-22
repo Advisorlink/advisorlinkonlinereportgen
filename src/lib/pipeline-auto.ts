@@ -1,11 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Moves (or creates) a pipeline deal into the "Report Generated" stage
- * when a report is saved/generated for a client. Matches existing deals
- * by email or phone (case-insensitive, normalised).
+ * Moves (or creates) a pipeline deal into the given stage by name.
+ * Matches existing deals by email or phone (case-insensitive, normalised).
  */
-export async function moveDealToReportGenerated(opts: {
+export async function moveDealToStage(stageName: string, opts: {
   clientName: string;
   clientEmail?: string | null;
   clientPhone?: string | null;
@@ -15,11 +14,10 @@ export async function moveDealToReportGenerated(opts: {
     const email = (opts.clientEmail || "").trim().toLowerCase() || null;
     const phoneDigits = (opts.clientPhone || "").replace(/\D+/g, "");
 
-    // 1. Find the Report Generated stage
     const { data: stage } = await supabase
       .from("pipeline_stages")
       .select("id")
-      .eq("name", "Report Generated")
+      .eq("name", stageName)
       .maybeSingle();
     if (!stage?.id) return;
 
