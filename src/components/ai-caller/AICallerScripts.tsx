@@ -129,9 +129,14 @@ export function AICallerScripts() {
     "Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?"
   ]);
   const [questions, setQuestions] = useState<Question[]>(savedDraft.current?.questions ?? [
-    { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
-    { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
-    { id: crypto.randomUUID(), question: "Have you ever had your super review before?", fieldName: "had_review" },
+    { id: crypto.randomUUID(), question: "Which super fund are you currently with?", fieldName: "super_fund_name" },
+    { id: crypto.randomUUID(), question: "What's your rough gross annual income?", fieldName: "annual_income" },
+    { id: crypto.randomUUID(), question: "How much have you roughly got in super at the moment?", fieldName: "super_balance" },
+    { id: crypto.randomUUID(), question: "How much super would you like to have at retirement?", fieldName: "goal_balance" },
+    { id: crypto.randomUUID(), question: "Are you just in the default option, mixed, or unsure?", fieldName: "investment_option" },
+    { id: crypto.randomUUID(), question: "What's your age?", fieldName: "age" },
+    { id: crypto.randomUUID(), question: "What age would you like to retire?", fieldName: "retirement_age" },
+    { id: crypto.randomUUID(), question: "How much would you like as a rough retirement income?", fieldName: "desired_income" },
   ]);
   const [closingStatements, setClosingStatements] = useState<string[]>(savedDraft.current?.closingStatements ?? [
     "Thank you so much for your time today! We'll have one of our advisors reach out to you shortly to arrange your free review."
@@ -197,9 +202,14 @@ export function AICallerScripts() {
     setFirstMessage("G'day! My name is Sarah and I'm calling from Advisor Link. How are you today?");
     setFollowUpStatements(["Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?"]);
     setQuestions([
-      { id: crypto.randomUUID(), question: "What is your current super fund?", fieldName: "super_fund" },
-      { id: crypto.randomUUID(), question: "Do you know roughly what your super balance is?", fieldName: "super_balance" },
-      { id: crypto.randomUUID(), question: "Have you ever had your super reviewed before?", fieldName: "had_review" },
+      { id: crypto.randomUUID(), question: "Which super fund are you currently with?", fieldName: "super_fund_name" },
+      { id: crypto.randomUUID(), question: "What's your rough gross annual income?", fieldName: "annual_income" },
+      { id: crypto.randomUUID(), question: "How much have you roughly got in super at the moment?", fieldName: "super_balance" },
+      { id: crypto.randomUUID(), question: "How much super would you like to have at retirement?", fieldName: "goal_balance" },
+      { id: crypto.randomUUID(), question: "Are you just in the default option, mixed, or unsure?", fieldName: "investment_option" },
+      { id: crypto.randomUUID(), question: "What's your age?", fieldName: "age" },
+      { id: crypto.randomUUID(), question: "What age would you like to retire?", fieldName: "retirement_age" },
+      { id: crypto.randomUUID(), question: "How much would you like as a rough retirement income?", fieldName: "desired_income" },
     ]);
     setClosingStatements(["Thank you so much for your time today! We'll have one of our advisors reach out to you shortly to arrange your free review."]);
     setVoiceId("sarah");
