@@ -385,7 +385,7 @@ export function buildSummary(i: ClientInputs): ReportSummary {
   const exAdmin = existingAdminPct(i);
   const exReturn = existingReturnPct(i);
   const total = totalBalance(i);
-  const cmpReturn = comparisonReturnFor(profile);
+  const cmpReturn = exReturn + 0.025;
   const cmpAdmin = exAdmin;
 
   return {
