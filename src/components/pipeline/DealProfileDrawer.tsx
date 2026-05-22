@@ -228,73 +228,26 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
     if (deal) fetchNotes(deal.id);
   };
 
-  // Quick-send state
-  const [smsBody, setSmsBody] = useState("");
-  const [emailSubject, setEmailSubject] = useState("");
-  const [emailBody, setEmailBody] = useState("");
-  const [sendingSms, setSendingSms] = useState(false);
-  const [sendingEmail, setSendingEmail] = useState(false);
-
-  const sendQuickSms = async () => {
-    if (!form.client_phone.trim()) return toast({ title: "No phone number on file", variant: "destructive" });
-    if (!smsBody.trim()) return toast({ title: "Type a message first", variant: "destructive" });
-    setSendingSms(true);
-    const { data, error } = await supabase.functions.invoke("sms-send", {
-      body: { to: form.client_phone.trim(), body: smsBody.trim() },
-    });
-    setSendingSms(false);
-    if (error || (data as any)?.error) {
-      toast({ title: "SMS failed", description: error?.message || (data as any)?.error, variant: "destructive" });
-      return;
-    }
-    toast({ title: `SMS sent to ${form.client_name || form.client_phone}` });
-    if (deal) {
-      await supabase.from("pipeline_deal_notes").insert({
-        deal_id: deal.id,
-        content: `SMS sent: ${smsBody.trim()}`,
-      });
-      fetchNotes(deal.id);
-    }
-    setSmsBody("");
-  };
-
-  const sendQuickEmail = async () => {
-    if (!form.client_email.trim()) return toast({ title: "No email on file", variant: "destructive" });
-    if (!emailSubject.trim() || !emailBody.trim()) return toast({ title: "Subject and message required", variant: "destructive" });
-    setSendingEmail(true);
-    const html = emailBody
-      .split(/\n{2,}/)
-      .map((p) => `<p style="margin:0 0 12px 0">${p.replace(/\n/g, "<br/>")}</p>`)
-      .join("\n");
-    const { data, error } = await supabase.functions.invoke("send-report-email", {
-      body: {
-        recipientEmail: form.client_email.trim(),
-        clientName: form.client_name || "",
-        customSubject: emailSubject.trim(),
-        customBody: html,
-        isHtml: true,
-      },
-    });
-    setSendingEmail(false);
-    if (error || (data as any)?.error) {
-      toast({ title: "Email failed", description: error?.message || (data as any)?.error, variant: "destructive" });
-      return;
-    }
-    toast({ title: `Email sent to ${form.client_email}` });
-    if (deal) {
-      await supabase.from("pipeline_deal_notes").insert({
-        deal_id: deal.id,
-        content: `Email sent — ${emailSubject.trim()}`,
-      });
-      fetchNotes(deal.id);
-    }
-    setEmailSubject("");
-    setEmailBody("");
-  };
-
   const handleSendSMS = () => {
     onOpenChange(false);
     navigate("/sms");
+  };
+
+  const handleSendEmail = () => {
+    if (!form.client_email.trim()) {
+      toast({ title: "No email on file", variant: "destructive" });
+      return;
+    }
+    window.location.href = `mailto:${form.client_email.trim()}`;
+  };
+
+  const handleCall = () => {
+    if (!form.client_phone.trim()) {
+      toast({ title: "No phone number on file", variant: "destructive" });
+      return;
+    }
+    const num = form.client_phone.replace(/\s+/g, "").replace(/^\+61/, "0");
+    window.location.href = `sip:${num}`;
   };
 
 
