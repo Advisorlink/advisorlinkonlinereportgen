@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ClientInputs, IncomeFrequency, FundEntry, InvestmentOption } from "@/lib/calc";
-import { resolvedFundReturn, resolvedFundGrowth } from "@/lib/calc";
+import { resolvedFundReturn, resolvedFundGrowth, inferRiskProfile } from "@/lib/calc";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -242,7 +242,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
             <Field label="5-year net return %"><PctInput v={value.grossReturn} on={n => set("grossReturn", n)} /></Field>
             <Field label="Admin fee - flat $"><NumInput v={value.adminFeeFlat} on={n => set("adminFeeFlat", n)} /></Field>
             <Field label="Admin fee - %"><PctInput v={value.adminFeePct} on={n => set("adminFeePct", n)} /></Field>
-            <Field label="Investment risk profile"><Input value={value.investmentRiskProfile || ""} onChange={e => set("investmentRiskProfile", e.target.value)} /></Field>
+            <Field label="Investment risk profile"><Input value={inferRiskProfile(value.growthAssetsPct || 0)} readOnly className="bg-muted" /></Field>
           </Group>
           <InvestmentOptionsSection
             options={value.investmentOptions ?? []}
@@ -278,7 +278,7 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                 <Field label="5-year net return %"><PctInput v={fund.grossReturn} on={n => updateFund(idx, "grossReturn", n)} /></Field>
                 <Field label="Admin fee - flat $"><NumInput v={fund.adminFeeFlat} on={n => updateFund(idx, "adminFeeFlat", n)} /></Field>
                 <Field label="Admin fee - %"><PctInput v={fund.adminFeePct} on={n => updateFund(idx, "adminFeePct", n)} /></Field>
-                <Field label="Investment risk profile"><Input value={fund.investmentRiskProfile || ""} onChange={e => updateFund(idx, "investmentRiskProfile", e.target.value)} /></Field>
+                <Field label="Investment risk profile"><Input value={inferRiskProfile(fund.growthAssetsPct || 0)} readOnly className="bg-muted" /></Field>
               </Group>
               <InvestmentOptionsSection
                 options={fund.investmentOptions ?? []}
