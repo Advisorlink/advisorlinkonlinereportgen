@@ -70,6 +70,11 @@ export default function Index() {
         event_type: editingReportId ? "report_updated" : "report_saved",
         details: { client: reportPayload.client_name, client_email: clientEmail, report_id: savedId },
       });
+      await moveDealToReportGenerated({
+        clientName: inputs.clientName,
+        clientEmail: clientEmail,
+        clientPhone: inputs.clientPhone,
+      });
       toast.success(editingReportId ? "Report updated" : "Client report saved", {
         description: editingReportId
           ? "Your edits have been saved to the client's existing report."
