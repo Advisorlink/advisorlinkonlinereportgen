@@ -28,6 +28,7 @@ interface PipelineDealCardProps {
 }
 
 export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: PipelineDealCardProps) {
+  const navigate = useNavigate();
   const {
     attributes,
     listeners,
