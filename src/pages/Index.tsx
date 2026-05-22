@@ -12,6 +12,7 @@ import { Maximize2, FileText, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { CRMLayout } from "@/components/CRMLayout";
 import { moveDealToReportGenerated } from "@/lib/pipeline-auto";
+import { saveClientReportSnapshot } from "@/lib/report-persistence";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -41,34 +42,20 @@ export default function Index() {
     setSaving(true);
     try {
       const clientEmail = (inputs.clientEmail ?? "").trim() || null;
-      const reportPayload = {
-        client_name: inputs.clientName.trim() || "Unnamed client",
-        email: clientEmail,
-        inputs: JSON.parse(JSON.stringify(inputs)),
-        summary: JSON.parse(JSON.stringify(summary)),
-        research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
-      };
-      const result = editingReportId
-        ? await supabase
-            .from("reports")
-            .update(reportPayload as never)
-            .eq("id", editingReportId)
-            .select("id")
-            .single()
-        : await supabase
-            .from("reports")
-            .insert({ ...reportPayload, user_id: user.id } as never)
-            .select("id")
-            .single();
-      const { data, error } = result;
-      if (error) throw error;
-      const savedId = (data as { id?: string } | null)?.id;
+      const savedId = await saveClientReportSnapshot({
+        userId: user.id,
+        reportId: editingReportId,
+        inputs,
+        summary,
+        research: lookup?.result ?? null,
+        source: "Report Generator",
+      });
       if (savedId) setEditingReportId(savedId);
       await supabase.from("activity_log").insert({
         user_id: user.id,
         email: user.email,
         event_type: editingReportId ? "report_updated" : "report_saved",
-        details: { client: reportPayload.client_name, client_email: clientEmail, report_id: savedId },
+        details: { client: inputs.clientName.trim() || "Unnamed client", client_email: clientEmail, report_id: savedId },
       });
       await moveDealToReportGenerated({
         clientName: inputs.clientName,
@@ -224,20 +211,15 @@ export default function Index() {
     if (!user || !pendingExport.current) return;
     const { pdfPath } = pendingExport.current;
     const clientEmail = (inputs.clientEmail ?? "").trim() || null;
-    const reportPayload = {
-      email: clientEmail,
-      client_name: inputs.clientName.trim() || "Unnamed client",
-      inputs: JSON.parse(JSON.stringify(inputs)),
-      summary: JSON.parse(JSON.stringify(summary)),
-      research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
-      pdf_path: pdfPath,
-    };
-
-    const saved = editingReportId
-      ? await supabase.from("reports").update(reportPayload as never).eq("id", editingReportId).select("id").single()
-      : await supabase.from("reports").insert({ ...reportPayload, user_id: user.id } as never).select("id").single();
-    if (saved.error) throw saved.error;
-    const savedId = (saved.data as { id?: string } | null)?.id;
+    const savedId = await saveClientReportSnapshot({
+      userId: user.id,
+      reportId: editingReportId,
+      inputs,
+      summary,
+      research: lookup?.result ?? null,
+      pdfPath,
+      source: "Report Generator",
+    });
     if (savedId) setEditingReportId(savedId);
     await supabase.from("activity_log").insert({
       user_id: user.id, email: user.email, event_type: editingReportId ? "report_updated" : "report_generated",
@@ -259,21 +241,16 @@ export default function Index() {
     if (!user || !pendingExport.current) return;
     const { ghlBlob, fileName, pdfPath } = pendingExport.current;
     const clientEmail = (inputs.clientEmail ?? "").trim() || null;
-    const reportPayload = {
-      email: clientEmail,
-      client_name: inputs.clientName.trim() || "Unnamed client",
-      inputs: JSON.parse(JSON.stringify(inputs)),
-      summary: JSON.parse(JSON.stringify(summary)),
-      research: lookup?.result ? JSON.parse(JSON.stringify(lookup.result)) : null,
-      pdf_path: pdfPath,
-    };
-
     // Log + create/update report row
-    const saved = editingReportId
-      ? await supabase.from("reports").update(reportPayload as never).eq("id", editingReportId).select("id").single()
-      : await supabase.from("reports").insert({ ...reportPayload, user_id: user.id } as never).select("id").single();
-    if (saved.error) throw saved.error;
-    const savedId = (saved.data as { id?: string } | null)?.id;
+    const savedId = await saveClientReportSnapshot({
+      userId: user.id,
+      reportId: editingReportId,
+      inputs,
+      summary,
+      research: lookup?.result ?? null,
+      pdfPath,
+      source: "Report Generator",
+    });
     if (savedId) setEditingReportId(savedId);
     await supabase.from("activity_log").insert({
       user_id: user.id, email: user.email, event_type: editingReportId ? "report_updated" : "report_generated",

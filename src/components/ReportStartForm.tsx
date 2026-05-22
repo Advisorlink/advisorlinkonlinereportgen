@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
-import type { ClientInputs, IncomeFrequency, InvestmentOption } from "@/lib/calc";
+import { buildSummary, type ClientInputs, type IncomeFrequency, type InvestmentOption } from "@/lib/calc";
 import { toast } from "sonner";
 import { celebrate } from "@/lib/celebration";
+import { useAuth } from "@/hooks/useAuth";
+import { saveClientReportSnapshot } from "@/lib/report-persistence";
 import {
   Sparkles, DollarSign, Landmark, Target, TrendingUp, Cake, PiggyBank,
   Plus, Trash2, Wand2, ArrowRight,
@@ -39,7 +41,8 @@ const num = (v: string | number | null | undefined, fb = 0) => {
 
 export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const navigate = useNavigate();
-  const { setInputs, setLookup } = useClientInputs();
+  const { user } = useAuth();
+  const { setInputs, setLookup, setEditingReportId } = useClientInputs();
 
   const splitName = (full?: string) => {
     const t = (full || "").trim();
@@ -137,7 +140,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const removeOption = (i: number) =>
     setOptions((p) => p.filter((_, idx) => idx !== i));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!age || !annualIncome || !superFundName) {
       toast.error("Add at least age, income and super fund to continue.");
       return;
@@ -178,8 +181,30 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     };
 
     setInputs(next);
+    setEditingReportId(null);
     celebrate();
-    toast.success("🎉 Report inputs loaded — looking up fund details…");
+    if (user) {
+      try {
+        const savedId = await saveClientReportSnapshot({
+          userId: user.id,
+          inputs: next,
+          summary: buildSummary(next),
+          source: prefill.leadSource || "Report Generator",
+          notes: prefill.notes || null,
+          extraContactFields: {
+            state: prefill.state || null,
+            had_review_before: prefill.hadReviewBefore === "yes" ? true : prefill.hadReviewBefore === "no" ? false : null,
+          },
+        });
+        if (savedId) setEditingReportId(savedId);
+        toast.success("🎉 Report saved — opening the generator…");
+      } catch (e) {
+        console.error(e);
+        toast.error("Report loaded, but it could not be saved yet.");
+      }
+    } else {
+      toast.success("🎉 Report inputs loaded — looking up fund details…");
+    }
     setTimeout(() => navigate("/"), 850);
   };
 
