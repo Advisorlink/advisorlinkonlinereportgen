@@ -211,7 +211,8 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                 <option>Weekly</option><option>Monthly</option><option>Annually</option>
               </select>
             </Field>
-          </Group>
+            </div>
+          </div>
           <Group title="Personal contributions">
             <Field label="Amount">
               <NumInput v={value.personalContributionAmount ?? 0} on={n => set("personalContributionAmount", n)} />
