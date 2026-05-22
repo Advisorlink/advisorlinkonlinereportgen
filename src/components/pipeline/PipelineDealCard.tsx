@@ -2,6 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Mail, Phone, DollarSign, Trash2, MessageSquare } from "lucide-react";
 import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 type Deal = {
   id: string;
