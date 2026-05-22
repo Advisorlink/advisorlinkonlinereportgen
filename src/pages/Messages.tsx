@@ -688,7 +688,6 @@ export default function Messages() {
                       onChange={(e) => setMessageText(e.target.value)}
                       placeholder="Type a message…  Tip: use {{first_name}}, {{super_fund_name}}, etc."
                       className="min-h-[120px] max-h-[360px] resize-y border-0 bg-transparent px-4 py-3 pr-28 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 leading-relaxed"
-                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                     />
                     <div className="absolute right-2 bottom-2 flex items-center gap-1">
                       <Popover open={showMergeTags} onOpenChange={setShowMergeTags}>
