@@ -140,7 +140,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const removeOption = (i: number) =>
     setOptions((p) => p.filter((_, idx) => idx !== i));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!age || !annualIncome || !superFundName) {
       toast.error("Add at least age, income and super fund to continue.");
       return;
@@ -181,8 +181,30 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     };
 
     setInputs(next);
+    setEditingReportId(null);
     celebrate();
-    toast.success("🎉 Report inputs loaded — looking up fund details…");
+    if (user) {
+      try {
+        const savedId = await saveClientReportSnapshot({
+          userId: user.id,
+          inputs: next,
+          summary: buildSummary(next),
+          source: prefill.leadSource || "Report Generator",
+          notes: prefill.notes || null,
+          extraContactFields: {
+            state: prefill.state || null,
+            had_review_before: prefill.hadReviewBefore === "yes" ? true : prefill.hadReviewBefore === "no" ? false : null,
+          },
+        });
+        if (savedId) setEditingReportId(savedId);
+        toast.success("🎉 Report saved — opening the generator…");
+      } catch (e) {
+        console.error(e);
+        toast.error("Report loaded, but it could not be saved yet.");
+      }
+    } else {
+      toast.success("🎉 Report inputs loaded — looking up fund details…");
+    }
     setTimeout(() => navigate("/"), 850);
   };
 
