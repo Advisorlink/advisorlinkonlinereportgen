@@ -293,7 +293,42 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
           {/* Stage selector */}
           <div>
             <Label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Pipeline Stage</Label>
-            <Select value={form.stage_id} onValueChange={(v) => setForm((p) => ({ ...p, stage_id: v }))}>
+            <Select
+              value={form.stage_id}
+              onValueChange={async (v) => {
+                if (!deal || v === form.stage_id) return;
+                setForm((p) => ({ ...p, stage_id: v }));
+                // Shift others in target stage down so this card lands on top
+                const { data: targetDeals } = await supabase
+                  .from("pipeline_deals")
+                  .select("id, position")
+                  .eq("stage_id", v)
+                  .neq("id", deal.id);
+                if (targetDeals?.length) {
+                  await Promise.all(
+                    targetDeals.map((d) =>
+                      supabase.from("pipeline_deals").update({ position: (d.position ?? 0) + 1 }).eq("id", d.id)
+                    )
+                  );
+                }
+                const wasLost = stages.find((s) => s.id === originalStageId)?.name.toLowerCase() === "lost";
+                const nowLost = stages.find((s) => s.id === v)?.name.toLowerCase() === "lost";
+                const updates: any = { stage_id: v, position: 0 };
+                if (wasLost && !nowLost) {
+                  updates.lost_reason_id = null;
+                  updates.lost_reason_note = null;
+                }
+                const { error } = await supabase.from("pipeline_deals").update(updates).eq("id", deal.id);
+                if (error) {
+                  toast({ title: "Failed to move", variant: "destructive" });
+                  setForm((p) => ({ ...p, stage_id: originalStageId }));
+                  return;
+                }
+                setOriginalStageId(v);
+                onDealUpdated();
+                onOpenChange(false);
+              }}
+            >
               <SelectTrigger className="mt-1.5">
                 <SelectValue />
               </SelectTrigger>
@@ -308,9 +343,6 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
                 ))}
               </SelectContent>
             </Select>
-            {form.stage_id !== originalStageId && (
-              <p className="text-[11px] text-cyan-600 mt-1.5">Save to move card to top of new column.</p>
-            )}
           </div>
 
           {/* Process progress milestones */}
