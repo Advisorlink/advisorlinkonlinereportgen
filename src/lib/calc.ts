@@ -266,9 +266,9 @@ export function projectAccumulation(i: ClientInputs): YearRow[] {
   const wGrowth = weightedGrowthPct(i);
   const profile = inferRiskProfile(wGrowth);
   const total = totalBalance(i);
-  // Comparison return is simply +2.5% above what the client is currently on track for,
-  // using their existing risk profile. No more lookup table comparisons.
-  const cmpReturn = exReturn + 0.025;
+  // Comparison return is the tiered benchmark for the client's risk profile band,
+  // ensuring the comparison portfolio matches the client's growth/risk profile exactly.
+  const cmpReturn = comparisonReturnFor(profile);
   const cmpAdminPct = exAdmin;
   const cmpAnnualPct = 0;
   const cmpRate = cmpReturn - 0.025 - cmpAdminPct - cmpAnnualPct;
