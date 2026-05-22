@@ -485,7 +485,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
             <Row label="Fund name" value={i.fundName} />
             <Row label="Investment option" value={i.modelLabel} />
             <Row label="Growth assets" value={fmtPct(funds[0] ? resolvedFundGrowth(funds[0]) : i.growthAssetsPct, 0)} />
-            <Row label="Investment risk profile" value={i.investmentRiskProfile || s.riskProfile} />
+            <Row label="Investment risk profile" value={inferRiskProfile(funds[0] ? resolvedFundGrowth(funds[0]) : i.growthAssetsPct)} />
             <Row label="5-year net return" value={fmtPct(funds[0] ? resolvedFundReturn(funds[0]) : i.grossReturn)} />
             <Row label="Admin fee - flat" value={fmtMoney(i.adminFeeFlat)} />
             <Row label="Admin fee - % of balance" value={fmtPct(i.adminFeePct, 2)} />
