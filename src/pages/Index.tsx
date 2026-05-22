@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Maximize2, FileText, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { CRMLayout } from "@/components/CRMLayout";
+import { moveDealToReportGenerated } from "@/lib/pipeline-auto";
 import {
   AlertDialog,
   AlertDialogContent,
