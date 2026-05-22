@@ -191,7 +191,9 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
             <Field label="Client's email"><Input type="email" placeholder="client@example.com" value={value.clientEmail ?? ""} onChange={e => set("clientEmail", e.target.value)} /></Field>
             <Field label="Phone number"><Input type="tel" placeholder="0400 000 000" value={value.clientPhone ?? ""} onChange={e => set("clientPhone", e.target.value)} /></Field>
           </Group>
-          <Group title="Survey questions">
+          <div>
+            <div className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase mb-2">Survey questions</div>
+            <div className="grid grid-cols-1 gap-3">
             <Field label="1. Which super fund are you currently with?"><Input value={value.fundName} onChange={e => set("fundName", e.target.value)} /></Field>
             <Field label="2. Rough gross annual income"><NumInput v={value.annualIncome} on={n => set("annualIncome", n)} /></Field>
             <Field label="3. Roughly how much in super at the moment"><NumInput v={value.superBalance} on={n => set("superBalance", n)} /></Field>
@@ -209,7 +211,8 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
                 <option>Weekly</option><option>Monthly</option><option>Annually</option>
               </select>
             </Field>
-          </Group>
+            </div>
+          </div>
           <Group title="Personal contributions">
             <Field label="Amount">
               <NumInput v={value.personalContributionAmount ?? 0} on={n => set("personalContributionAmount", n)} />
