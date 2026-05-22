@@ -211,8 +211,8 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
       </div>
 
       <div className="p-5 space-y-5">
-        {/* About them */}
-        <Section icon={<Cake className="w-3.5 h-3.5" />} title="About them">
+        {/* Name */}
+        <Section icon={<Cake className="w-3.5 h-3.5" />} title="Client name">
           <div className="grid grid-cols-2 gap-3">
             <Field label="First name">
               <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" />
@@ -221,36 +221,54 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
               <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" />
             </Field>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Current age">
-              <Input value={age} onChange={(e) => setAge(e.target.value)} placeholder="42" inputMode="numeric" />
-            </Field>
-            <Field label="Retirement age">
-              <Input value={retirementAge} onChange={(e) => setRetirementAge(e.target.value)} placeholder="67" inputMode="numeric" />
-            </Field>
-          </div>
-          <Field label="Yearly income (before tax)" icon={<DollarSign className="w-3 h-3" />}>
-            <Input value={annualIncome} onChange={(e) => setAnnualIncome(e.target.value)} placeholder="85,000" inputMode="numeric" />
-          </Field>
         </Section>
 
-        {/* Super fund */}
-        <Section icon={<Landmark className="w-3.5 h-3.5" />} title="Their super fund">
-          <Field label="Super fund name">
+        {/* 8 survey questions in order */}
+        <Section icon={<Sparkles className="w-3.5 h-3.5" />} title="Survey questions">
+          <Field label="1. Which super fund are you currently with?" icon={<Landmark className="w-3 h-3" />}>
             <Input value={superFundName} onChange={(e) => setSuperFundName(e.target.value)} placeholder="AustralianSuper, Hostplus…" />
           </Field>
-          <Field label="Current balance ($)">
+          <Field label="2. What's your rough gross annual income?" icon={<DollarSign className="w-3 h-3" />}>
+            <Input value={annualIncome} onChange={(e) => setAnnualIncome(e.target.value)} placeholder="85,000" inputMode="numeric" />
+          </Field>
+          <Field label="3. How much have you roughly got in super at the moment?" icon={<PiggyBank className="w-3 h-3" />}>
             <Input value={superBalance} onChange={(e) => setSuperBalance(e.target.value)} placeholder="120,000" inputMode="numeric" />
           </Field>
-          <Field label="Primary investment option">
-            <Input value={primaryOption} onChange={(e) => setPrimaryOption(e.target.value)} placeholder="Growth (Default)" />
+          <Field label="4. How much super would you like to have at retirement?" icon={<Target className="w-3 h-3" />}>
+            <Input value={goalBalance} onChange={(e) => setGoalBalance(e.target.value)} placeholder="700,000" inputMode="numeric" />
           </Field>
+          <Field label="5. Are you just in the default option, mixed or unsure?">
+            <Input value={primaryOption} onChange={(e) => setPrimaryOption(e.target.value)} placeholder="Default / Mixed / Unsure" />
+          </Field>
+          <Field label="6. What's your age?">
+            <Input value={age} onChange={(e) => setAge(e.target.value)} placeholder="42" inputMode="numeric" />
+          </Field>
+          <Field label="7. What age would you like to retire?">
+            <Input value={retirementAge} onChange={(e) => setRetirementAge(e.target.value)} placeholder="67" inputMode="numeric" />
+          </Field>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="col-span-2">
+              <Field label="8. How much would you like as a rough income?" icon={<TrendingUp className="w-3 h-3" />}>
+                <Input value={desiredIncomeAmount} onChange={(e) => setDesiredIncomeAmount(e.target.value)} placeholder="1,000" inputMode="numeric" />
+              </Field>
+            </div>
+            <Field label="Per">
+              <Select value={desiredIncomeFrequency} onValueChange={(v) => setDesiredIncomeFrequency(v as IncomeFrequency)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Weekly">Week</SelectItem>
+                  <SelectItem value="Monthly">Month</SelectItem>
+                  <SelectItem value="Annually">Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
 
-          {/* Extra investment options */}
+          {/* Extra investment options (optional) */}
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between">
               <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Additional options
+                Additional investment options
               </Label>
               <Button type="button" size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={addOption}>
                 <Plus className="w-3 h-3" /> Add
@@ -316,30 +334,6 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
               </Field>
             </div>
           )}
-        </Section>
-
-        {/* Retirement goals */}
-        <Section icon={<Target className="w-3.5 h-3.5" />} title="Retirement goals">
-          <Field label="Desired balance at retirement ($)" icon={<TrendingUp className="w-3 h-3" />}>
-            <Input value={goalBalance} onChange={(e) => setGoalBalance(e.target.value)} placeholder="700,000" inputMode="numeric" />
-          </Field>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="col-span-2">
-              <Field label="Desired retirement income ($)">
-                <Input value={desiredIncomeAmount} onChange={(e) => setDesiredIncomeAmount(e.target.value)} placeholder="1,000" inputMode="numeric" />
-              </Field>
-            </div>
-            <Field label="Per">
-              <Select value={desiredIncomeFrequency} onValueChange={(v) => setDesiredIncomeFrequency(v as IncomeFrequency)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Weekly">Week</SelectItem>
-                  <SelectItem value="Monthly">Month</SelectItem>
-                  <SelectItem value="Annually">Year</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-          </div>
         </Section>
 
         <Button
