@@ -1,1 +1,10 @@
 project_id = "osqreiyssdhpplxtcxdv"
+
+[functions.register-device-token]
+verify_jwt = false
+
+[functions.twilio-sms]
+verify_jwt = false
+
+[functions.twilio-voice]
+verify_jwt = false
