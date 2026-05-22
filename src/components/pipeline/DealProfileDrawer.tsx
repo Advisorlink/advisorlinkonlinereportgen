@@ -483,6 +483,53 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
             </div>
           </div>
 
+          {/* Quick Message - SMS & Email */}
+          <div className="space-y-3">
+            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+              <Send className="w-3.5 h-3.5" /> Quick Message
+            </h3>
+            <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs flex items-center gap-1"><MessageSquare className="w-3 h-3" /> SMS to {form.client_phone || "—"}</Label>
+                <span className="text-[10px] text-muted-foreground">{smsBody.length}/160</span>
+              </div>
+              <Textarea
+                value={smsBody}
+                onChange={(e) => setSmsBody(e.target.value)}
+                placeholder="Hi {name}, just following up…"
+                className="resize-none text-sm bg-background"
+                rows={2}
+                maxLength={320}
+              />
+              <Button size="sm" onClick={sendQuickSms} disabled={sendingSms || !form.client_phone || !smsBody.trim()} className="w-full gap-1.5">
+                {sendingSms ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                Send SMS
+              </Button>
+            </div>
+            <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+              <Label className="text-xs flex items-center gap-1"><Mail className="w-3 h-3" /> Email to {form.client_email || "—"}</Label>
+              <Input
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                placeholder="Subject"
+                className="text-sm bg-background"
+              />
+              <Textarea
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                placeholder="Write your message…"
+                className="resize-none text-sm bg-background"
+                rows={4}
+              />
+              <Button size="sm" onClick={sendQuickEmail} disabled={sendingEmail || !form.client_email || !emailSubject.trim() || !emailBody.trim()} className="w-full gap-1.5">
+                {sendingEmail ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
+                Send Email
+              </Button>
+            </div>
+          </div>
+
+
+
           {/* Superannuation */}
           <div className="space-y-3">
             <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
