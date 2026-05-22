@@ -130,46 +130,55 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
               .replace(/\s+/g, "")
               .replace(/^\+61/, "0");
             return (
-              <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                <Phone className="w-3.5 h-3.5 shrink-0" />
-                {localNumber}
+              <div className="flex items-center justify-between gap-2">
+                <a
+                  href={`sip:${localNumber}`}
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  className="flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-emerald-600 transition-colors"
+                  title="Call"
+                >
+                  <Phone className="w-3.5 h-3.5 shrink-0" />
+                  {localNumber}
+                </a>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate("/sms"); }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="w-7 h-7 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 hover:bg-cyan-500/20 flex items-center justify-center transition-colors ring-1 ring-cyan-500/20"
+                    title="Send SMS"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                  </button>
+                  {deal.client_email && (
+                    <a
+                      href={`mailto:${deal.client_email}`}
+                      onClick={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      className="w-7 h-7 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/20 flex items-center justify-center transition-colors ring-1 ring-indigo-500/20"
+                      title="Send Email"
+                    >
+                      <Mail className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
               </div>
             );
           })()}
-          <div className="flex items-center gap-1 pt-1">
-            {deal.client_phone && (
-              <a
-                href={`sip:${deal.client_phone.replace(/\s+/g, "").replace(/^\+61/, "0")}`}
-                onClick={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold hover:bg-emerald-500/20 transition-colors"
-                title="Call"
-              >
-                <Phone className="w-3 h-3" /> Call
-              </a>
-            )}
-            {deal.client_phone && (
-              <button
-                onClick={(e) => { e.stopPropagation(); navigate("/sms"); }}
-                onPointerDown={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 text-[10px] font-semibold hover:bg-cyan-500/20 transition-colors"
-                title="Send SMS"
-              >
-                <MessageSquare className="w-3 h-3" /> SMS
-              </button>
-            )}
-            {deal.client_email && (
+          {!deal.client_phone && deal.client_email && (
+            <div className="flex items-center justify-end">
               <a
                 href={`mailto:${deal.client_email}`}
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 text-[10px] font-semibold hover:bg-indigo-500/20 transition-colors"
+                className="w-7 h-7 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/20 flex items-center justify-center transition-colors ring-1 ring-indigo-500/20"
                 title="Send Email"
               >
-                <Mail className="w-3 h-3" /> Email
+                <Mail className="w-3.5 h-3.5" />
               </a>
-            )}
-          </div>
+            </div>
+          )}
+
         </div>
       )}
 
