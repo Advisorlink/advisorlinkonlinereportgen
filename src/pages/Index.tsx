@@ -240,6 +240,11 @@ export default function Index() {
     });
 
     pendingExport.current = null;
+    await moveDealToReportGenerated({
+      clientName: inputs.clientName,
+      clientEmail: clientEmail,
+      clientPhone: inputs.clientPhone,
+    });
     toast.success(editingReportId ? "Client report updated" : "Client added to reports list");
   };
 
@@ -305,6 +310,11 @@ export default function Index() {
     }
 
     pendingExport.current = null;
+    await moveDealToReportGenerated({
+      clientName: inputs.clientName,
+      clientEmail: clientEmail,
+      clientPhone: inputs.clientPhone,
+    });
     toast.success("Workflow started & PDF exported");
   };
 
