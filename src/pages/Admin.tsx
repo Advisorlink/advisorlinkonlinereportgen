@@ -34,6 +34,19 @@ interface ReportRow {
   presentation_completed_at?: string | null;
 }
 
+function formatRelativeTime(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(ms / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins} min${mins === 1 ? "" : "s"} ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+  return new Date(iso).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+}
+
+
 export default function Admin() {
   const nav = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -423,17 +436,21 @@ export default function Admin() {
                       {r.client_name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-navy text-sm leading-tight truncate">
-                        {r.client_name}
+                      <p className="font-semibold text-navy text-sm leading-tight truncate flex items-center gap-1.5">
+                        <span className="truncate">{r.client_name}</span>
+                        {(Date.now() - new Date(r.created_at).getTime()) < 24 * 60 * 60 * 1000 && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-cyan text-white shrink-0">
+                            New
+                          </span>
+                        )}
                       </p>
                       <div className="flex items-center gap-1.5 mt-1">
                         <Calendar className="w-3 h-3 text-muted-foreground/60" />
-                        <span className="text-[11px] text-muted-foreground">
-                          {new Date(r.created_at).toLocaleDateString("en-AU", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
+                        <span
+                          className="text-[11px] text-muted-foreground"
+                          title={new Date(r.created_at).toLocaleString("en-AU")}
+                        >
+                          {formatRelativeTime(r.created_at)}
                         </span>
                       </div>
                     </div>
