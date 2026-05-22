@@ -126,7 +126,7 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
               .replace(/^\+61/, "0");
             return (
               <a
-                href={`tel:${localNumber}`}
+                href={`sip:${localNumber}`}
                 onClick={(e) => e.stopPropagation()}
                 className="flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary transition-colors"
               >
