@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useSoftphone } from "@/hooks/useSoftphone";
 import { Phone, PhoneOff, PhoneIncoming, Mic, MicOff, Pause, Play, Grid3x3, ChevronDown, ChevronUp, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,33 @@ export function SoftphoneDock() {
     return () => clearInterval(id);
   }, [active]);
 
+  useEffect(() => {
+    if (!incoming) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const previousTouchAction = document.body.style.touchAction;
+    const setViewportHeight = () => {
+      const height = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty("--softphone-mobile-vh", `${height}px`);
+    };
+
+    setViewportHeight();
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    window.visualViewport?.addEventListener("resize", setViewportHeight);
+    window.visualViewport?.addEventListener("scroll", setViewportHeight);
+    window.addEventListener("resize", setViewportHeight);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.body.style.touchAction = previousTouchAction;
+      document.documentElement.style.removeProperty("--softphone-mobile-vh");
+      window.visualViewport?.removeEventListener("resize", setViewportHeight);
+      window.visualViewport?.removeEventListener("scroll", setViewportHeight);
+      window.removeEventListener("resize", setViewportHeight);
+    };
+  }, [incoming]);
+
   if (!incoming && !active) return null;
 
   const callee = incoming
@@ -41,23 +69,20 @@ export function SoftphoneDock() {
       .join("")
       .toUpperCase();
 
-    return (
+    const incomingScreen = (
       <div
-        className="fixed inset-0 z-[100] flex flex-col items-center justify-between text-white overflow-hidden"
-        style={{
-          background:
-            "radial-gradient(120% 80% at 50% 0%, #1e3a8a 0%, #0b1733 55%, #050a1a 100%)",
-          paddingTop: "max(env(safe-area-inset-top), 2rem)",
-          paddingBottom: "max(env(safe-area-inset-bottom), 2.5rem)",
-        }}
+        className="softphone-incoming-screen fixed inset-0 z-[2147483647] flex flex-col items-center justify-between overflow-hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Incoming call"
       >
         {/* glow blobs */}
-        <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[520px] h-[520px] rounded-full bg-blue-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-indigo-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -top-32 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-cyan/20 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 left-1/2 h-[400px] w-[400px] -translate-x-1/2 rounded-full bg-navy/40 blur-3xl" />
 
         {/* Top: label */}
         <div className="relative z-10 w-full flex flex-col items-center gap-2 pt-6">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-blue-200/80">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-navy-foreground/80">
             <PhoneIncoming className="w-3.5 h-3.5 animate-pulse" />
             Incoming call
           </div>
@@ -69,7 +94,7 @@ export function SoftphoneDock() {
             <span className="absolute inset-0 rounded-full bg-blue-400/30 animate-ping" />
             <span className="absolute -inset-3 rounded-full border border-blue-300/20" />
             <span className="absolute -inset-6 rounded-full border border-blue-300/10" />
-            <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-indigo-700 flex items-center justify-center text-4xl font-semibold shadow-2xl shadow-blue-900/60 ring-4 ring-white/10">
+            <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-cyan to-primary flex items-center justify-center text-4xl font-semibold shadow-2xl shadow-primary/60 ring-4 ring-navy-foreground/10">
               {initials || <User className="w-12 h-12" />}
             </div>
           </div>
@@ -77,11 +102,11 @@ export function SoftphoneDock() {
             {callee?.title}
           </div>
           {callee?.sub && callee.sub !== callee.title && (
-            <div className="mt-2 text-sm text-blue-200/70 font-mono tabular-nums">
+            <div className="mt-2 text-sm text-navy-foreground/70 font-mono tabular-nums">
               {callee.sub}
             </div>
           )}
-          <div className="mt-1 text-xs text-blue-200/50">
+          <div className="mt-1 text-xs text-navy-foreground/50">
             calling {callerId || "your line"}
           </div>
         </div>
@@ -96,7 +121,7 @@ export function SoftphoneDock() {
             <span className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 active:scale-95 transition flex items-center justify-center shadow-lg shadow-red-900/50">
               <PhoneOff className="w-7 h-7" />
             </span>
-            <span className="text-xs text-blue-100/80">Decline</span>
+            <span className="text-xs text-navy-foreground/80">Decline</span>
           </button>
           <button
             onClick={answer}
@@ -107,11 +132,13 @@ export function SoftphoneDock() {
               <span className="absolute inset-0 rounded-full bg-emerald-400/40 animate-ping" />
               <Phone className="relative w-7 h-7" />
             </span>
-            <span className="text-xs text-blue-100/80">Answer</span>
+            <span className="text-xs text-navy-foreground/80">Answer</span>
           </button>
         </div>
       </div>
     );
+
+    return typeof document === "undefined" ? incomingScreen : createPortal(incomingScreen, document.body);
   }
 
   return (
