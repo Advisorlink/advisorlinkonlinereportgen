@@ -283,8 +283,11 @@ export default function MeetingJoin() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible" && meetingIdRef.current && status !== "ended") {
-        supabase.from("meetings").select("status").eq("meeting_id", meetingIdRef.current).single().then(({ data }) => {
-          if (data?.status === "ended") {
+        supabase.rpc("get_meeting_by_id", { _meeting_id: meetingIdRef.current }).then(({ data }) => {
+          const row = Array.isArray(data) ? data[0] : data;
+          const d = row as { status?: string } | null;
+          if (d?.status === "ended") {
+
             markMeetingEnded();
             return;
           }
