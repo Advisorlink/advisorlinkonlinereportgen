@@ -2,6 +2,8 @@ import { useEffect, useImperativeHandle, useRef, forwardRef, useState } from "re
 import * as pdfjsLib from "pdfjs-dist";
 // @ts-ignore - vite worker import
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+// @ts-ignore - vite asset import for sandbox bundle (needed for AcroForm JS calculations)
+import sandboxUrl from "pdfjs-dist/build/pdf.sandbox.min.mjs?url";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
@@ -18,9 +20,10 @@ interface Props {
 }
 
 export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
-  ({ src, scale = 1.3 }, ref) => {
+  ({ src, scale = 1.5 }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const pdfRef = useRef<pdfjsLib.PDFDocumentProxy | null>(null);
+    const scriptingRef = useRef<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -43,10 +46,32 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
           setError(null);
           container.innerHTML = "";
 
-          const loadingTask = pdfjsLib.getDocument({ url: src });
+          const loadingTask = pdfjsLib.getDocument({
+            url: src,
+            enableXfa: true,
+          });
           const pdf = await loadingTask.promise;
           if (cancelled) return;
           pdfRef.current = pdf;
+
+          // Set up scripting manager so AcroForm JavaScript calculations
+          // (BMI, totals, etc.) actually run as the user fills the form.
+          let scriptingManager: any = null;
+          try {
+            const SM = (pdfjsLib as any).PDFScriptingManager;
+            if (SM) {
+              scriptingManager = new SM({
+                sandboxBundleSrc: sandboxUrl,
+              });
+              scriptingManager.setDocument(pdf);
+              scriptingRef.current = scriptingManager;
+            }
+          } catch (e) {
+            console.warn("[PdfFormEditor] scripting disabled:", e);
+          }
+
+          const hasJSActions = await pdf.hasJSActions().catch(() => false);
+          const fieldObjects = await (pdf as any).getFieldObjects().catch(() => null);
 
           for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
             const page = await pdf.getPage(pageNum);
@@ -57,6 +82,7 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
               "relative mx-auto mb-4 bg-white shadow-md rounded overflow-hidden";
             pageWrap.style.width = `${viewport.width}px`;
             pageWrap.style.height = `${viewport.height}px`;
+            pageWrap.setAttribute("data-page-number", String(pageNum));
 
             const canvas = document.createElement("canvas");
             const dpr = window.devicePixelRatio || 1;
@@ -74,11 +100,7 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
             annotationDiv.style.inset = "0";
             annotationDiv.style.width = `${viewport.width}px`;
             annotationDiv.style.height = `${viewport.height}px`;
-            // Provide CSS variables pdf.js relies on for sizing form widgets
-            annotationDiv.style.setProperty(
-              "--scale-factor",
-              String(viewport.scale),
-            );
+            annotationDiv.style.setProperty("--scale-factor", String(viewport.scale));
             pageWrap.appendChild(annotationDiv);
 
             container.appendChild(pageWrap);
@@ -92,7 +114,6 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
 
             const annotations = await page.getAnnotations({ intent: "display" });
 
-            // Use AnnotationLayer (pdfjs v5 API)
             const annotationLayer = new (pdfjsLib as any).AnnotationLayer({
               div: annotationDiv,
               page,
@@ -119,10 +140,21 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
               },
               downloadManager: null,
               annotationStorage: pdf.annotationStorage,
-              enableScripting: false,
-              hasJSActions: false,
-              fieldObjects: null,
+              enableScripting: !!scriptingManager,
+              hasJSActions,
+              fieldObjects,
             });
+          }
+
+          // Start the scripting sandbox now that pages + widgets exist
+          if (scriptingManager) {
+            try {
+              await scriptingManager.dispatchWillPrint?.();
+            } catch {}
+            try {
+              // viewerEvent => sets up listeners against the document
+              await scriptingManager.dispatchDidOpen?.();
+            } catch {}
           }
 
           setLoading(false);
@@ -135,6 +167,8 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
 
       return () => {
         cancelled = true;
+        try { scriptingRef.current?.destroyPromise; } catch {}
+        scriptingRef.current = null;
         pdfRef.current?.destroy();
         pdfRef.current = null;
       };
@@ -152,7 +186,7 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
         )}
         <div
           ref={containerRef}
-          className="pdf-form-editor max-h-[80vh] overflow-y-auto bg-muted/30 p-4 rounded-lg"
+          className="pdf-form-editor max-h-[85vh] overflow-y-auto bg-muted/30 p-4 rounded-lg"
         />
         <style>{`
           .pdf-form-editor .annotationLayer { position: absolute; inset: 0; pointer-events: auto; transform-origin: 0 0; }
@@ -164,11 +198,24 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
             border: 1px solid rgba(0, 130, 255, 0.4);
             border-radius: 2px;
             box-sizing: border-box;
-            font: inherit;
-            padding: 0 2px;
+            font-family: inherit;
+            padding: 0 3px;
+            margin: 0;
             width: 100%;
             height: 100%;
             color: #000;
+            line-height: 1.1;
+            vertical-align: middle;
+            /* Don't clip the caret/glyphs at the top */
+            overflow: visible;
+          }
+          /* Auto-shrink font so text never gets clipped vertically */
+          .pdf-form-editor .annotationLayer .textWidgetAnnotation input {
+            font-size: calc(9px * var(--scale-factor, 1));
+          }
+          .pdf-form-editor .annotationLayer .textWidgetAnnotation textarea {
+            font-size: calc(9px * var(--scale-factor, 1));
+            resize: none;
           }
           .pdf-form-editor .annotationLayer .buttonWidgetAnnotation.checkBox input,
           .pdf-form-editor .annotationLayer .buttonWidgetAnnotation.radioButton input {
@@ -176,7 +223,10 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
           }
           .pdf-form-editor .annotationLayer .textWidgetAnnotation input:focus,
           .pdf-form-editor .annotationLayer .textWidgetAnnotation textarea:focus {
-            outline: 2px solid hsl(var(--primary)); background: rgba(0, 130, 255, 0.15);
+            outline: 2px solid hsl(var(--primary));
+            background: rgba(0, 130, 255, 0.15);
+            /* Let focused field grow slightly to show full text without clipping */
+            z-index: 10;
           }
         `}</style>
       </div>
