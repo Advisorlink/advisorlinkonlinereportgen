@@ -84,10 +84,11 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
             container.appendChild(pageWrap);
 
             await page.render({
+              canvas,
               canvasContext: ctx,
               viewport,
               annotationMode: pdfjsLib.AnnotationMode.ENABLE_FORMS,
-            }).promise;
+            } as any).promise;
 
             const annotations = await page.getAnnotations({ intent: "display" });
 
