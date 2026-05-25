@@ -32,7 +32,12 @@ export function SoftphoneDock() {
       : null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-[340px] rounded-2xl bg-card border border-border shadow-2xl shadow-black/40 overflow-hidden">
+    <div className={cn(
+      incoming
+        ? "fixed inset-0 z-50 flex items-center justify-center bg-background/95 p-4 backdrop-blur-md"
+        : "fixed bottom-6 right-6 z-50 w-[min(340px,calc(100vw-2rem))]",
+    )}>
+    <div className={cn("w-full rounded-2xl bg-card border border-border shadow-2xl shadow-black/40 overflow-hidden", incoming && "max-w-[420px]")}>
       <div className={cn("px-4 py-3 flex items-center gap-3 border-b border-border/60",
         incoming ? "bg-emerald-500/10" : active?.status === "in-progress" ? "bg-cyan/10" : "bg-amber-500/10",
       )}>
@@ -59,10 +64,10 @@ export function SoftphoneDock() {
         <div className="p-4 space-y-3">
           {incoming && (
             <div className="flex gap-2">
-              <Button onClick={reject} variant="destructive" className="flex-1">
+              <Button onClick={reject} variant="destructive" className="flex-1 h-14 text-base">
                 <PhoneOff className="w-4 h-4" /> Decline
               </Button>
-              <Button onClick={answer} className="flex-1 bg-emerald-500 text-white hover:bg-emerald-600">
+              <Button onClick={answer} className="flex-1 h-14 text-base bg-emerald-500 text-white hover:bg-emerald-600">
                 <Phone className="w-4 h-4" /> Answer
               </Button>
             </div>
@@ -104,6 +109,7 @@ export function SoftphoneDock() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }
