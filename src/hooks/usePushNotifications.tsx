@@ -27,11 +27,26 @@ export function usePushNotifications() {
 
         await PushNotifications.register();
 
+        await PushNotifications.createChannel?.({
+          id: 'calls',
+          name: 'Incoming calls',
+          description: 'CRM phone call alerts',
+          importance: 5,
+          visibility: 1,
+          sound: 'default',
+          vibration: true,
+          lights: true,
+        });
+
         const regHandle = await PushNotifications.addListener('registration', async (t) => {
-          await supabase.from('device_tokens').upsert(
-            { user_id: user.id, token: t.value, platform: 'android' },
-            { onConflict: 'token' },
-          );
+          await supabase.functions.invoke('register-device-token', {
+            body: {
+              user_id: user.id,
+              token: t.value,
+              platform: 'android',
+              device_name: navigator.userAgent,
+            },
+          });
         });
 
         const errHandle = await PushNotifications.addListener('registrationError', (err) => {
