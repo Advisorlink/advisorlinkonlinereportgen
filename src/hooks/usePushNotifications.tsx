@@ -85,22 +85,23 @@ export function usePushNotifications() {
         const receivedHandle = await PushNotifications.addListener(
           'pushNotificationReceived',
           async (notification) => {
-            if (notification.data?.type !== 'call') return;
+            const data = (notification.data || {}) as Record<string, string>;
+            const route = data.route || (data.type === 'call' ? '/phone' : data.type === 'sms' ? '/messages' : '/');
             try {
               await LocalNotifications.schedule({
                 notifications: [{
                   id: Math.max(1, Date.now() % 2147483647),
-                  title: notification.title || 'Incoming AdvisorLink call',
-                  body: notification.body || 'Tap to answer in AdvisorLink Online',
+                  title: notification.title || 'AdvisorLink',
+                  body: notification.body || '',
                   channelId: 'calls',
                   sound: 'default',
                   autoCancel: true,
                   interruptionLevel: 'timeSensitive',
-                  extra: { ...(notification.data || {}), route: '/phone' },
+                  extra: { ...data, route },
                 }],
               });
             } catch (e) {
-              console.error('Foreground call notification failed', e);
+              console.error('Foreground notification failed', e);
             }
           },
         );
