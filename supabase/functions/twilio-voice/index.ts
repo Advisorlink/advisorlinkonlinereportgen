@@ -108,10 +108,9 @@ Deno.serve(async (req: Request) => {
   try {
     const { data: tokens } = await supa
       .from("device_tokens")
-      .select("token")
-      .eq("token_type", "expo");
-    const messages = (tokens ?? [])
-      .filter((t: any) => t.token?.startsWith("ExponentPushToken"))
+      .select("token, token_type, platform");
+    const expoMessages = (tokens ?? [])
+      .filter((t: any) => t.token_type === "expo" && t.token?.startsWith("ExponentPushToken"))
       .map((t: any) => ({
         to: t.token,
         sound: "default",
@@ -121,12 +120,32 @@ Deno.serve(async (req: Request) => {
         priority: "high",
         channelId: "calls",
       }));
-    if (messages.length > 0) {
+    if (expoMessages.length > 0) {
       await fetch("https://exp.host/--/api/v2/push/send", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(messages),
+        body: JSON.stringify(expoMessages),
       });
+    }
+    const fcmTokens = (tokens ?? []).filter((t: any) => t.token_type === "fcm");
+    const projectId = Deno.env.get("FCM_PROJECT_ID");
+    const saJson = Deno.env.get("FCM_SERVICE_ACCOUNT");
+    if (fcmTokens.length > 0 && projectId && saJson) {
+      const accessToken = await getGoogleAccessToken(saJson);
+      const url = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
+      await Promise.allSettled(fcmTokens.map((t: any) => fetch(url, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: {
+            token: t.token,
+            notification: { title: contactName ? `Call from ${contactName}` : "Incoming call", body: `Call from ${From}` },
+            data: { type: "call", from: From, sid: CallSid, route: "/phone" },
+            android: { priority: "HIGH", notification: { channel_id: "calls", sound: "default", priority: "PRIORITY_MAX" } },
+            apns: { payload: { aps: { sound: "default", category: "INCOMING_CALL" } } },
+          },
+        }),
+      })));
     }
   } catch (e) {
     console.log("push notify failed:", e);
