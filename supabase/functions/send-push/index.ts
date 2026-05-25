@@ -74,15 +74,6 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const projectId = Deno.env.get('FCM_PROJECT_ID');
-    const saJson = Deno.env.get('FCM_SERVICE_ACCOUNT');
-    if (!projectId || !saJson) {
-      return new Response(
-        JSON.stringify({ error: 'FCM_PROJECT_ID or FCM_SERVICE_ACCOUNT not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
-    }
-
     const payload = (await req.json()) as PushPayload;
     if (!payload.user_id || !payload.title || !payload.body) {
       return new Response(JSON.stringify({ error: 'user_id, title, body required' }), {
@@ -98,7 +89,7 @@ Deno.serve(async (req) => {
 
     const { data: tokens, error } = await supabase
       .from('device_tokens')
-      .select('token, platform')
+      .select('token, platform, token_type')
       .eq('user_id', payload.user_id);
 
     if (error) throw error;
@@ -108,37 +99,54 @@ Deno.serve(async (req) => {
       });
     }
 
-    const accessToken = await getAccessToken(saJson);
-    const url = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
+    const expoTokens = tokens.filter((t) => t.token_type === 'expo' || t.token?.startsWith('ExponentPushToken'));
+    const fcmTokens = tokens.filter((t) => !expoTokens.includes(t));
+    const results: PromiseSettledResult<unknown>[] = [];
 
-    const results = await Promise.allSettled(
-      tokens.map((t) =>
-        fetch(url, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: {
-              token: t.token,
-              notification: { title: payload.title, body: payload.body },
-              data: payload.data ?? {},
-              android: { priority: 'HIGH' },
-            },
-          }),
-        }).then(async (r) => {
-          if (!r.ok) {
-            const txt = await r.text();
-            if (r.status === 404 || r.status === 400) {
-              await supabase.from('device_tokens').delete().eq('token', t.token);
-            }
-            throw new Error(`FCM ${r.status}: ${txt}`);
-          }
-          return r.json();
-        }),
-      ),
-    );
+    if (expoTokens.length > 0) {
+      const expoRes = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(expoTokens.map((t) => ({
+          to: t.token,
+          title: payload.title,
+          body: payload.body,
+          data: payload.data ?? {},
+          sound: 'default',
+          priority: 'high',
+          channelId: 'calls',
+        }))),
+      });
+      const expoJson = await expoRes.json().catch(() => ({}));
+      results.push(...expoTokens.map((t, i) => {
+        const item = Array.isArray(expoJson.data) ? expoJson.data[i] : null;
+        if (!expoRes.ok || item?.status === 'error') {
+          if (item?.details?.error === 'DeviceNotRegistered') void supabase.from('device_tokens').delete().eq('token', t.token);
+          return { status: 'rejected' as const, reason: item?.message || `Expo ${expoRes.status}` };
+        }
+        return { status: 'fulfilled' as const, value: item };
+      }));
+    }
+
+    if (fcmTokens.length > 0) {
+      const projectId = Deno.env.get('FCM_PROJECT_ID');
+      const saJson = Deno.env.get('FCM_SERVICE_ACCOUNT');
+      if (!projectId || !saJson) throw new Error('FCM_PROJECT_ID or FCM_SERVICE_ACCOUNT not configured');
+      const accessToken = await getAccessToken(saJson);
+      const url = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
+      results.push(...await Promise.allSettled(fcmTokens.map((t) => fetch(url, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: { token: t.token, notification: { title: payload.title, body: payload.body }, data: payload.data ?? {}, android: { priority: 'HIGH' } } }),
+      }).then(async (r) => {
+        if (!r.ok) {
+          const txt = await r.text();
+          if (r.status === 404 || r.status === 400) await supabase.from('device_tokens').delete().eq('token', t.token);
+          throw new Error(`FCM ${r.status}: ${txt}`);
+        }
+        return r.json();
+      }))));
+    }
 
     const sent = results.filter((r) => r.status === 'fulfilled').length;
     const failed = results.length - sent;
