@@ -37,17 +37,27 @@ Deno.serve(async (req) => {
     const base = `https://api.twilio.com/2010-04-01/Accounts/${ACCOUNT_SID}`;
     const voiceUrl = `${SUPABASE_URL}/functions/v1/twilio-voice`;
 
-    // Load existing config
+    // Load existing config and prefer the same Twilio number used for outbound SMS.
     const { data: existing } = await supa.from("twilio_voice_config").select("*").eq("id", 1).maybeSingle();
+    const { data: smsNumber } = await supa
+      .from("sms_twilio_numbers")
+      .select("phone_number")
+      .eq("provider", "twilio")
+      .eq("sms_enabled", true)
+      .eq("is_default", true)
+      .maybeSingle();
+    const preferredCallerId = smsNumber?.phone_number as string | null | undefined;
     const update: Record<string, unknown> = {};
 
-    // 1. Caller ID — pick first owned number if not set
-    let callerId = existing?.caller_id as string | null | undefined;
+    // 1. Caller ID — use the texting number first, then existing, then first owned number.
+    let callerId = preferredCallerId || (existing?.caller_id as string | null | undefined);
     if (!callerId) {
       const r = await fetch(`${base}/IncomingPhoneNumbers.json?PageSize=1`, { headers: { Authorization: basic } });
       const j = await r.json();
       callerId = j.incoming_phone_numbers?.[0]?.phone_number ?? null;
       if (callerId) update.caller_id = callerId;
+    } else {
+      update.caller_id = callerId;
     }
 
     // 2. API Key (cannot retrieve secret after creation, so always create new if missing)
@@ -99,12 +109,16 @@ Deno.serve(async (req) => {
         { headers: { Authorization: basic } },
       ).then((r) => r.json());
       const num = list.incoming_phone_numbers?.[0];
+      if (!num?.sid && preferredCallerId) {
+        return json(500, { error: "Default SMS number was not found in the Twilio account", caller_id: preferredCallerId });
+      }
       if (num?.sid && num.voice_application_sid !== appSid) {
-        await fetch(`${base}/IncomingPhoneNumbers/${num.sid}.json`, {
+        const bind = await fetch(`${base}/IncomingPhoneNumbers/${num.sid}.json`, {
           method: "POST",
           headers: { Authorization: basic, "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({ VoiceApplicationSid: appSid!, VoiceUrl: "", VoiceMethod: "POST" }),
         });
+        if (!bind.ok) return json(500, { error: "Failed to bind texting number to softphone", detail: await bind.json() });
       }
     }
 
