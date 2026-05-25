@@ -151,11 +151,13 @@ Deno.serve(async (req: Request) => {
         channelId: "calls",
       }));
     if (expoMessages.length > 0) {
-      await fetch("https://exp.host/--/api/v2/push/send", {
+      const expoRes = await fetch("https://exp.host/--/api/v2/push/send", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(expoMessages),
       });
+      const expoText = await expoRes.text();
+      console.log("expo push response:", expoRes.status, expoText);
     }
     const fcmTokens = (tokens ?? []).filter((t: any) => t.token_type === "fcm");
     const projectId = Deno.env.get("FCM_PROJECT_ID");
