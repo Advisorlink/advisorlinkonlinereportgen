@@ -6,8 +6,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ClientInputsProvider } from "@/hooks/useClientInputs";
 import { MeetingHostProvider } from "@/hooks/useMeetingHost";
+import { SoftphoneProvider } from "@/hooks/useSoftphone";
+import { SoftphoneDock } from "@/components/softphone/SoftphoneDock";
 import { ProtectedApp } from "@/components/ProtectedApp";
 import AICaller from "./pages/AICaller.tsx";
+import Phone from "./pages/Phone.tsx";
 import FactFind from "./pages/FactFind.tsx";
 import Auth from "./pages/Auth.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
@@ -40,29 +43,33 @@ const App = () => (
         <AuthProvider>
           <ClientInputsProvider>
             <MeetingHostProvider>
-              <Routes>
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/dashboard" element={<ProtectedApp><Dashboard /></ProtectedApp>} />
-                <Route path="/pipeline" element={<ProtectedApp><Pipeline /></ProtectedApp>} />
-                <Route path="/presentations" element={<ProtectedApp><Presentations /></ProtectedApp>} />
-                <Route path="/" element={<ProtectedApp><Index /></ProtectedApp>} />
-                <Route path="/admin" element={<ProtectedApp><Admin /></ProtectedApp>} />
-                <Route path="/referrals" element={<ProtectedApp><Referrals /></ProtectedApp>} />
-                <Route path="/messages" element={<ProtectedApp><Messages /></ProtectedApp>} />
-                <Route path="/sms-hub" element={<ProtectedApp><SMSHub /></ProtectedApp>} />
-                <Route path="/esign" element={<ProtectedApp><ESign /></ProtectedApp>} />
-                <Route path="/ai-caller" element={<ProtectedApp><AICaller /></ProtectedApp>} />
-                <Route path="/fact-find" element={<ProtectedApp><FactFind /></ProtectedApp>} />
-                <Route path="/refer" element={<ReferralForm />} />
-                <Route path="/refer/claim" element={<ReferralLanding />} />
-                <Route path="/meeting/join" element={<MeetingJoin />} />
-                <Route path="/esign/sign" element={<ESignPublic />} />
-                <Route path="/upload" element={<UploadDocuments />} />
-                <Route path="/upload-statement" element={<StatementUpload />} />
-                <Route path="/upload-license" element={<LicenseUpload />} />
-                <Route path="/documents" element={<ProtectedApp><Documents /></ProtectedApp>} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <SoftphoneProvider>
+                <Routes>
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/dashboard" element={<ProtectedApp><Dashboard /></ProtectedApp>} />
+                  <Route path="/pipeline" element={<ProtectedApp><Pipeline /></ProtectedApp>} />
+                  <Route path="/presentations" element={<ProtectedApp><Presentations /></ProtectedApp>} />
+                  <Route path="/" element={<ProtectedApp><Index /></ProtectedApp>} />
+                  <Route path="/admin" element={<ProtectedApp><Admin /></ProtectedApp>} />
+                  <Route path="/referrals" element={<ProtectedApp><Referrals /></ProtectedApp>} />
+                  <Route path="/messages" element={<ProtectedApp><Messages /></ProtectedApp>} />
+                  <Route path="/sms-hub" element={<ProtectedApp><SMSHub /></ProtectedApp>} />
+                  <Route path="/esign" element={<ProtectedApp><ESign /></ProtectedApp>} />
+                  <Route path="/ai-caller" element={<ProtectedApp><AICaller /></ProtectedApp>} />
+                  <Route path="/phone" element={<ProtectedApp><Phone /></ProtectedApp>} />
+                  <Route path="/fact-find" element={<ProtectedApp><FactFind /></ProtectedApp>} />
+                  <Route path="/refer" element={<ReferralForm />} />
+                  <Route path="/refer/claim" element={<ReferralLanding />} />
+                  <Route path="/meeting/join" element={<MeetingJoin />} />
+                  <Route path="/esign/sign" element={<ESignPublic />} />
+                  <Route path="/upload" element={<UploadDocuments />} />
+                  <Route path="/upload-statement" element={<StatementUpload />} />
+                  <Route path="/upload-license" element={<LicenseUpload />} />
+                  <Route path="/documents" element={<ProtectedApp><Documents /></ProtectedApp>} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <SoftphoneDock />
+              </SoftphoneProvider>
             </MeetingHostProvider>
           </ClientInputsProvider>
         </AuthProvider>
