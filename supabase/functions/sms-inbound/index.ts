@@ -137,12 +137,20 @@ Deno.serve(async (req) => {
 
     // Fire push notification to the owner's devices (no-op if FCM not configured)
     try {
+      const deepLink = `/messages?phone=${encodeURIComponent(from)}&name=${encodeURIComponent(contact.full_name || "")}`;
       await supabase.functions.invoke("send-push", {
         body: {
           user_id: ownerId,
           title: `SMS from ${contact.full_name || from}`,
           body: body.slice(0, 140) || "(media message)",
-          data: { route: "/sms-hub" },
+          data: {
+            type: "sms",
+            route: deepLink,
+            phone: from,
+            name: contact.full_name || "",
+            contact_id: contact.id,
+            conversation_id: conversation.id,
+          },
         },
       });
     } catch (e) {
