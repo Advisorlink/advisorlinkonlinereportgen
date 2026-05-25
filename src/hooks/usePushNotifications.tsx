@@ -44,12 +44,13 @@ export function usePushNotifications() {
         });
 
         const regHandle = await PushNotifications.addListener('registration', async (t) => {
+          const tokenType = t.value.startsWith('ExponentPushToken') ? 'expo' : 'fcm';
           await supabase.functions.invoke('register-device-token', {
             body: {
               user_id: user.id,
               token: t.value,
               platform,
-              token_type: 'fcm',
+              token_type: tokenType,
               device_name: navigator.userAgent,
             },
           });
