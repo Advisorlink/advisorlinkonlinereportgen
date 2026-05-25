@@ -152,6 +152,7 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
               annotationCanvasMap: null,
               annotationEditorUIManager: null,
               structTreeLayer: null,
+              linkService,
             });
 
             await annotationLayer.render({
