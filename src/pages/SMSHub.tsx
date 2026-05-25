@@ -41,6 +41,7 @@ const MERGE_FIELDS = [
   { key: "{{company_name}}", label: "Company Name" },
   { key: "{{appointment_date}}", label: "Appointment Date" },
   { key: "{{appointment_time}}", label: "Appointment Time" },
+  { key: "{{fact_find_url}}", label: "Fact Find PDF Link" },
 ];
 
 type Template = {
