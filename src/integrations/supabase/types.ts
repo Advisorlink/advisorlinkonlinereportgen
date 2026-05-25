@@ -1574,8 +1574,61 @@ export type Database = {
         Args: { _signed_pdf_path: string; _token: string }
         Returns: undefined
       }
+      get_esign_doc_by_token: {
+        Args: { _token: string }
+        Returns: {
+          client_address: string | null
+          client_data: Json | null
+          client_email: string | null
+          client_name: string | null
+          client_phone: string | null
+          completed_at: string | null
+          created_at: string
+          document_name: string
+          host_user_id: string
+          id: string
+          original_pdf_path: string | null
+          report_id: string | null
+          resend_email: string | null
+          sent_at: string | null
+          signed_at: string | null
+          signed_pdf_path: string | null
+          signing_token: string
+          status: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "esign_documents"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_meeting_by_id: {
+        Args: { _meeting_id: string }
+        Returns: {
+          host_user_id: string
+          id: string
+          meeting_id: string
+          status: string
+        }[]
+      }
+      get_referral_lead_by_token: {
+        Args: { _token: string }
+        Returns: {
+          id: string
+          lead_email: string
+          lead_name: string
+          lead_phone: string
+          status: string
+        }[]
+      }
       is_blocked: { Args: { _uid: string }; Returns: boolean }
       is_owner: { Args: { _uid: string }; Returns: boolean }
+      submit_esign_signature: {
+        Args: { _field_index?: number; _signature_data: string; _token: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
