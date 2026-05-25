@@ -25,12 +25,11 @@ export function usePushNotifications() {
 
       try {
         const { PushNotifications } = await import('@capacitor/push-notifications');
+        const { LocalNotifications } = await import('@capacitor/local-notifications');
 
         let perm = await PushNotifications.checkPermissions();
         if (perm.receive === 'prompt') perm = await PushNotifications.requestPermissions();
         if (perm.receive !== 'granted') return;
-
-        await PushNotifications.register();
 
         await PushNotifications.createChannel?.({
           id: 'calls',
@@ -41,6 +40,17 @@ export function usePushNotifications() {
           sound: 'default',
           vibration: true,
           lights: true,
+        });
+        await LocalNotifications.createChannel?.({
+          id: 'calls',
+          name: 'Incoming calls',
+          description: 'AdvisorLink Online call alerts',
+          importance: 5,
+          visibility: 1,
+          sound: 'default',
+          vibration: true,
+          lights: true,
+          lightColor: '#22d3ee',
         });
 
         const regHandle = await PushNotifications.addListener('registration', async (t) => {
@@ -70,23 +80,13 @@ export function usePushNotifications() {
           },
         );
 
+        await PushNotifications.register();
+
         const receivedHandle = await PushNotifications.addListener(
           'pushNotificationReceived',
           async (notification) => {
             if (notification.data?.type !== 'call') return;
             try {
-              const { LocalNotifications } = await import('@capacitor/local-notifications');
-              await LocalNotifications.createChannel?.({
-                id: 'calls',
-                name: 'Incoming calls',
-                description: 'AdvisorLink Online call alerts',
-                importance: 5,
-                visibility: 1,
-                sound: 'default',
-                vibration: true,
-                lights: true,
-                lightColor: '#22d3ee',
-              });
               await LocalNotifications.schedule({
                 notifications: [{
                   id: Math.max(1, Date.now() % 2147483647),
