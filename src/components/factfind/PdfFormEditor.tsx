@@ -227,6 +227,7 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
           .pdf-form-editor .annotationLayer .textWidgetAnnotation {
             background: #ffffff;
           }
+          .pdf-form-editor .annotationLayer .textWidgetAnnotation input,
           .pdf-form-editor .annotationLayer .textWidgetAnnotation textarea,
           .pdf-form-editor .annotationLayer .choiceWidgetAnnotation select {
             background: #ffffff;
