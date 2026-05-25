@@ -4,7 +4,7 @@ import { useSoftphone } from "@/hooks/useSoftphone";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Phone, PhoneOff, PhoneIncoming, PhoneOutgoing, Settings, Loader2, Delete } from "lucide-react";
+import { Phone, PhoneOff, PhoneIncoming, PhoneOutgoing, Settings, Loader2, Delete, BellRing } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -26,6 +26,9 @@ export default function PhonePage() {
   const [number, setNumber] = useState("");
   const [provisioning, setProvisioning] = useState(false);
   const [logs, setLogs] = useState<LogRow[]>([]);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">(
+    typeof window !== "undefined" && "Notification" in window ? Notification.permission : "unsupported",
+  );
 
   const loadLogs = async () => {
     const { data } = await supabase
@@ -38,9 +41,21 @@ export default function PhonePage() {
 
   useEffect(() => { loadLogs(); }, []);
 
+  const requestCallAlerts = async () => {
+    if (!("Notification" in window)) {
+      toast.error("Call pop-ups are not supported in this browser.");
+      return;
+    }
+    const permission = await Notification.requestPermission();
+    setNotificationPermission(permission);
+    if (permission === "granted") toast.success("Call pop-ups enabled");
+    if (permission === "denied") toast.error("Call pop-ups are blocked in browser settings.");
+  };
+
   const provision = async () => {
     setProvisioning(true);
     try {
+      if (notificationPermission === "default") await requestCallAlerts();
       await bootstrap();
       await initialize();
       toast.success("Phone system provisioned");
@@ -76,6 +91,11 @@ export default function PhonePage() {
               {provisioning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Settings className="w-4 h-4" />}
               {ready ? "Re-provision" : "Set up phone system"}
             </Button>
+            {notificationPermission !== "granted" && notificationPermission !== "unsupported" && (
+              <Button onClick={requestCallAlerts} variant="outline" className="gap-2 bg-transparent border-white/20 text-white hover:bg-white/10">
+                <BellRing className="w-4 h-4" /> Enable call pop-ups
+              </Button>
+            )}
           </div>
         </div>
 

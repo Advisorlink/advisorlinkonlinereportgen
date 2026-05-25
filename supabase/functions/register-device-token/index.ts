@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token, platform, user_id, device_name } = await req.json();
+    const { token, platform, user_id, device_name, token_type } = await req.json();
 
     if (!token || typeof token !== "string") {
       return new Response(JSON.stringify({ error: "token is required" }), {
@@ -30,6 +30,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const resolvedTokenType = token_type === "expo" ? "expo" : "fcm";
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -39,7 +40,7 @@ Deno.serve(async (req) => {
     const row: Record<string, unknown> = {
       token,
       platform,
-      token_type: "expo",
+      token_type: resolvedTokenType,
       updated_at: new Date().toISOString(),
     };
     if (user_id) row.user_id = user_id;

@@ -22,6 +22,7 @@ type Ctx = {
   callerId: string | null;
   identity: string | null;
   incoming: Call | null;
+  incomingMatch: ContactMatch | null;
   active: CallState | null;
   initialize: () => Promise<void>;
   bootstrap: () => Promise<void>;
@@ -37,6 +38,34 @@ type Ctx = {
 const SoftphoneCtx = createContext<Ctx | null>(null);
 
 type ContactMatch = { name: string | null; contactId?: string | null; dealId?: string | null };
+
+function normalizeDialNumber(input: string) {
+  const raw = input.trim();
+  if (!raw) return "";
+  const value = raw.replace(/[^\d+]/g, "");
+  if (value.startsWith("+")) return value;
+  if (value.startsWith("0011")) return `+${value.slice(4)}`;
+  if (value.startsWith("00")) return `+${value.slice(2)}`;
+  if (value.startsWith("61")) return `+${value}`;
+  if (value.startsWith("0")) return `+61${value.slice(1)}`;
+  if (/^4\d{8}$/.test(value)) return `+61${value}`;
+  return `+${value}`;
+}
+
+function isE164(number: string) {
+  return /^\+[1-9]\d{7,14}$/.test(number);
+}
+
+function notifyIncomingCall(title: string, body: string) {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate?.([700, 250, 700, 250, 700]);
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const n = new Notification(title, { body, tag: "crm-incoming-call", requireInteraction: true });
+  n.onclick = () => {
+    window.focus();
+    window.location.assign("/phone");
+    n.close();
+  };
+}
 
 async function lookupCaller(rawNumber: string): Promise<ContactMatch> {
   const digits = rawNumber.replace(/[^0-9]/g, "").slice(-9);
@@ -64,11 +93,13 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
   const deviceRef = useRef<Device | null>(null);
   const activeCallRef = useRef<Call | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
+  const callMatchesRef = useRef(new WeakMap<Call, ContactMatch>());
   const [ready, setReady] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [callerId, setCallerId] = useState<string | null>(null);
   const [identity, setIdentity] = useState<string | null>(null);
   const [incoming, setIncoming] = useState<Call | null>(null);
+  const [incomingMatch, setIncomingMatch] = useState<ContactMatch | null>(null);
   const [active, setActive] = useState<CallState | null>(null);
 
   const fetchToken = useCallback(async () => {
@@ -99,12 +130,21 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
       });
       device.on("incoming", async (call: Call) => {
         const from = call.parameters?.From || "Unknown";
-        const match = await lookupCaller(from);
+        callMatchesRef.current.set(call, { name: null });
+        setIncomingMatch({ name: null });
         setIncoming(call);
-        call.on("cancel", () => setIncoming((c) => (c === call ? null : c)));
-        call.on("disconnect", () => setIncoming((c) => (c === call ? null : c)));
-        call.on("reject", () => setIncoming((c) => (c === call ? null : c)));
-        (call as any).__match = match;
+        const clearIncoming = () => {
+          setIncoming((c) => (c === call ? null : c));
+          setIncomingMatch(null);
+        };
+        call.on("cancel", clearIncoming);
+        call.on("disconnect", clearIncoming);
+        call.on("reject", clearIncoming);
+        const match = await lookupCaller(from);
+        callMatchesRef.current.set(call, match);
+        setIncomingMatch(match);
+        setIncoming((c) => (c === call ? call : c));
+        notifyIncomingCall("Incoming CRM call", `${match.name || from} is calling ${caller_id}`);
         toast.message(`Incoming call from ${match.name || from}`);
       });
       await device.register();
@@ -140,25 +180,31 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
       activeCallRef.current = null;
       setActive(null);
     });
-    call.on("error", (e: any) => {
-      toast.error(`Call error: ${e?.message || e}`);
+    call.on("error", (e: unknown) => {
+      const message = e instanceof Error ? e.message : String(e);
+      toast.error(`Call error: ${message}`);
     });
   }, []);
 
   const dial = useCallback<Ctx["dial"]>(async (number, meta) => {
+    const normalized = normalizeDialNumber(number);
+    if (!isE164(normalized)) {
+      toast.error("That phone number is invalid. Try 0400 000 000 or +61400000000.");
+      return;
+    }
     if (!deviceRef.current) await initialize();
     const device = deviceRef.current;
     if (!device) return;
     let lookupMeta = meta;
     if (!lookupMeta?.contactName) {
-      const m = await lookupCaller(number);
+      const m = await lookupCaller(normalized);
       lookupMeta = { contactName: m.name ?? undefined, contactId: m.contactId ?? undefined, dealId: m.dealId ?? undefined };
     }
-    const call = await device.connect({ params: { To: number } });
+    const call = await device.connect({ params: { To: normalized } });
     attachCall(call, {
       direction: "outbound",
       from: callerId || "",
-      to: number,
+      to: normalized,
       contactName: lookupMeta?.contactName ?? null,
       contactId: lookupMeta?.contactId ?? null,
       dealId: lookupMeta?.dealId ?? null,
@@ -169,7 +215,7 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
 
   const answer = useCallback(() => {
     if (!incoming) return;
-    const match = (incoming as any).__match as ContactMatch | undefined;
+    const match = callMatchesRef.current.get(incoming);
     const from = incoming.parameters?.From || "Unknown";
     const to = incoming.parameters?.To || callerId || "";
     incoming.accept();
@@ -184,11 +230,13 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
       status: "in-progress",
     });
     setIncoming(null);
+    setIncomingMatch(null);
   }, [attachCall, callerId, incoming]);
 
   const reject = useCallback(() => {
     incoming?.reject();
     setIncoming(null);
+    setIncomingMatch(null);
   }, [incoming]);
 
   const hangup = useCallback(() => {
@@ -249,9 +297,9 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
   }, [initialize]);
 
   const value = useMemo<Ctx>(() => ({
-    ready, registering, callerId, identity, incoming, active,
+    ready, registering, callerId, identity, incoming, incomingMatch, active,
     initialize, bootstrap, dial, answer, reject, hangup, toggleMute, toggleHold, sendDigit,
-  }), [ready, registering, callerId, identity, incoming, active, initialize, bootstrap, dial, answer, reject, hangup, toggleMute, toggleHold, sendDigit]);
+  }), [ready, registering, callerId, identity, incoming, incomingMatch, active, initialize, bootstrap, dial, answer, reject, hangup, toggleMute, toggleHold, sendDigit]);
 
   return <SoftphoneCtx.Provider value={value}>{children}</SoftphoneCtx.Provider>;
 }
