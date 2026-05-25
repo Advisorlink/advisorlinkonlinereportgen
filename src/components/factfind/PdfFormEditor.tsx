@@ -1,9 +1,9 @@
 import { useEffect, useImperativeHandle, useRef, forwardRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import { EventBus, PDFLinkService, PDFScriptingManager } from "pdfjs-dist/web/pdf_viewer.mjs";
-// @ts-expect-error - vite worker import
+// Vite worker import.
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-// @ts-expect-error - vite asset import for sandbox bundle (needed for AcroForm JS calculations)
+// Vite asset import for sandbox bundle (needed for AcroForm JS calculations).
 import sandboxUrl from "pdfjs-dist/build/pdf.sandbox.min.mjs?url";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
@@ -44,6 +44,20 @@ type ScriptingManagerLike = {
   dispatchDidSave?: () => Promise<void> | void;
   destroy?: () => void;
 };
+
+type AnnotationLayerLike = {
+  render: (params: Record<string, unknown>) => Promise<void> | void;
+};
+
+const ScriptingManagerCtor = PDFScriptingManager as unknown as new (options: {
+  eventBus: EventBus;
+  sandboxBundleSrc: string;
+  wasmUrl: string;
+}) => ScriptingManagerLike;
+
+const AnnotationLayerCtor = (pdfjsLib as unknown as {
+  AnnotationLayer: new (options: Record<string, unknown>) => AnnotationLayerLike;
+}).AnnotationLayer;
 
 const currencyFormatter = new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 });
 
