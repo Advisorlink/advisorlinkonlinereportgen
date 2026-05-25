@@ -219,7 +219,7 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
           .pdf-form-editor .annotationLayer .textWidgetAnnotation input,
           .pdf-form-editor .annotationLayer .textWidgetAnnotation textarea,
           .pdf-form-editor .annotationLayer .choiceWidgetAnnotation select {
-            background: rgba(0, 130, 255, 0.08);
+            background: #ffffff;
             border: 1px solid rgba(0, 130, 255, 0.4);
             border-radius: 2px;
             box-sizing: border-box;
