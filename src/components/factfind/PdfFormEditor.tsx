@@ -190,6 +190,7 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
 
     useEffect(() => {
       let cancelled = false;
+      let manualCalculationCleanup: (() => void) | null = null;
       const container = containerRef.current;
       if (!container) return;
 
@@ -250,6 +251,7 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
 
           const hasJSActions = await pdf.hasJSActions().catch(() => false);
           const fieldObjects = await (pdf as any).getFieldObjects().catch(() => null);
+          const calculationOrderIds = await (pdf as any).getCalculationOrderIds?.().catch(() => null) ?? null;
 
           for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
             const page = await pdf.getPage(pageNum);
@@ -331,6 +333,15 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
             }
           }
 
+          const manualCalculations = setupManualMoneyCalculations(
+            container,
+            pdf.annotationStorage,
+            fieldObjects,
+            calculationOrderIds,
+          );
+          manualCalculationCleanup = manualCalculations.cleanup;
+          manualCalculationSyncRef.current = manualCalculations.sync;
+
           setLoading(false);
         } catch (e: any) {
           console.error("[PdfFormEditor]", e);
@@ -341,6 +352,8 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
 
       return () => {
         cancelled = true;
+        manualCalculationCleanup?.();
+        manualCalculationSyncRef.current = null;
         try { scriptingRef.current?.destroyPromise; } catch {}
         scriptingRef.current = null;
         pdfRef.current?.destroy();
