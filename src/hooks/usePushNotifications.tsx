@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+type CapacitorBridge = { isNativePlatform?: () => boolean };
+
 /**
  * Registers the device for push notifications when running as a native app
  * (Capacitor). On web this is a no-op.
@@ -14,8 +16,9 @@ export function usePushNotifications() {
     let cleanup: (() => void) | undefined;
 
     (async () => {
-      const isNative = typeof (window as any).Capacitor?.isNativePlatform === 'function'
-        && (window as any).Capacitor.isNativePlatform();
+      const capacitor = (window as Window & { Capacitor?: CapacitorBridge }).Capacitor;
+      const isNative = typeof capacitor?.isNativePlatform === 'function'
+        && capacitor.isNativePlatform();
       if (!isNative) return;
 
       try {
