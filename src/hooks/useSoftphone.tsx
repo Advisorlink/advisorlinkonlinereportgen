@@ -157,6 +157,25 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
     return data as { token: string; identity: string; caller_id: string };
   }, []);
 
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleReconnect = useCallback((delayMs = 1500) => {
+    if (reconnectTimerRef.current) return;
+    reconnectTimerRef.current = setTimeout(async () => {
+      reconnectTimerRef.current = null;
+      try {
+        const d = deviceRef.current;
+        if (d) {
+          try { d.destroy(); } catch { /* noop */ }
+          deviceRef.current = null;
+          setReady(false);
+        }
+        await initializeRef.current?.();
+      } catch (e) { console.error("Twilio reconnect failed", e); }
+    }, delayMs);
+  }, []);
+
+  const initializeRef = useRef<(() => Promise<void>) | null>(null);
+
   const initialize = useCallback(async () => {
     if (deviceRef.current || registering) return;
     setRegistering(true);
@@ -164,12 +183,23 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
       const { token, identity: id, caller_id } = await fetchToken();
       setIdentity(id);
       setCallerId(caller_id);
-      const device = new Device(token, { logLevel: 1, allowIncomingWhileBusy: false });
+      const device = new Device(token, { logLevel: 1, allowIncomingWhileBusy: false, closeProtection: true });
       device.on("registered", () => setReady(true));
-      device.on("unregistered", () => setReady(false));
-      device.on("error", (e) => {
+      device.on("unregistered", () => {
+        setReady(false);
+        scheduleReconnect(2000);
+      });
+      device.on("error", (e: { code?: number; message?: string }) => {
         console.error("Twilio Device error", e);
-        toast.error(`Phone error: ${e.message || e}`);
+        const code = e?.code;
+        // 31005 websocket closed, 31009 transport, 20104 token expired, 31204 jwt issues
+        const recoverable = code === 31005 || code === 31009 || code === 20104 || code === 31204 || code === 31000;
+        if (recoverable) {
+          toast.message("Phone reconnecting…");
+          scheduleReconnect(1000);
+        } else {
+          toast.error(`Phone error: ${e?.message || e}`);
+        }
       });
       device.on("tokenWillExpire", async () => {
         try {
