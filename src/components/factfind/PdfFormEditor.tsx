@@ -137,12 +137,11 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
               canvas,
               canvasContext: ctx,
               viewport,
-              // Render annotations but NOT form widgets on the canvas — the
-              // interactive HTML overlay below draws the live field values.
-              // Using ENABLE_FORMS bakes the stale field appearance (e.g. "$0",
-              // "0.00") into the canvas, which then shows through behind the
-              // updated calculated values and looks like double-rendered text.
-              annotationMode: pdfjsLib.AnnotationMode.ENABLE,
+              // ENABLE_FORMS = render annotations on canvas EXCEPT form widgets
+              // (those are drawn by the HTML annotation layer below, so we don't
+              // get the field's stale baked-in "$0" / "0.00" appearance ghosting
+              // through behind the live calculated values).
+              annotationMode: pdfjsLib.AnnotationMode.ENABLE_FORMS,
             } as any).promise;
             pageViews[pageNum - 1] = { pdfPage: page, renderingState: 3 };
             eventBus.dispatch("pagerendered", { source: page, pageNumber: pageNum });
@@ -216,6 +215,18 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
         <style>{`
           .pdf-form-editor .annotationLayer { position: absolute; inset: 0; pointer-events: auto; transform-origin: 0 0; }
           .pdf-form-editor .annotationLayer section { position: absolute; pointer-events: auto; }
+          /* Hide any baked-in widget appearance stream (e.g. canvas/svg the
+             annotation layer paints under the input showing the field's saved
+             "$0" / "0.00" value). The live HTML input above shows the current
+             value, so the underlay just produces ghost text. */
+          .pdf-form-editor .annotationLayer .textWidgetAnnotation > :not(input):not(textarea),
+          .pdf-form-editor .annotationLayer .textWidgetAnnotation canvas,
+          .pdf-form-editor .annotationLayer .textWidgetAnnotation svg {
+            display: none !important;
+          }
+          .pdf-form-editor .annotationLayer .textWidgetAnnotation {
+            background: #ffffff;
+          }
           .pdf-form-editor .annotationLayer .textWidgetAnnotation input,
           .pdf-form-editor .annotationLayer .textWidgetAnnotation textarea,
           .pdf-form-editor .annotationLayer .choiceWidgetAnnotation select {
