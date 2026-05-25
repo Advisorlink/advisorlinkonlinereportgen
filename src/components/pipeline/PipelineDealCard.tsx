@@ -109,7 +109,7 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
         {!isOverlay && onDelete && (
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(deal.id); }}
-            className="opacity-0 group-hover:opacity-100 p-1 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+            className="opacity-100 p-1 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
             onPointerDown={(e) => e.stopPropagation()}
           >
             <Trash2 className="w-3.5 h-3.5" />
