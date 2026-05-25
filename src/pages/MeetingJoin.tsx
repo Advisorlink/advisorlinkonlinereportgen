@@ -207,11 +207,10 @@ export default function MeetingJoin() {
     setError("");
     setStatus("connecting");
 
-    const { data: meeting } = await supabase
-      .from("meetings")
-      .select("*")
-      .eq("meeting_id", mid)
-      .single();
+    const { data: meetingRows } = await supabase
+      .rpc("get_meeting_by_id", { _meeting_id: mid });
+    const meeting = Array.isArray(meetingRows) ? meetingRows[0] : meetingRows;
+
 
     if (!meeting) {
       setError("Meeting not found. Please check the ID and try again.");
