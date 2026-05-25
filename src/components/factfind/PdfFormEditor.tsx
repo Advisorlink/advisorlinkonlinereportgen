@@ -20,17 +20,167 @@ interface Props {
   scale?: number;
 }
 
+type PdfFieldObject = {
+  id?: string;
+  name?: string;
+  value?: unknown;
+  actions?: Record<string, string[]>;
+};
+
+const currencyFormatter = new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 });
+
+const parseMoney = (value: unknown) => {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  const cleaned = String(value ?? "").replace(/[^0-9.-]/g, "");
+  if (!cleaned || cleaned === "-" || cleaned === ".") return 0;
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const formatMoney = (value: number) => `$ ${currencyFormatter.format(Math.round(value || 0))}`;
+
+const extractSimpleCalculation = (script?: string) => {
+  const match = script?.match(/AFSimple_Calculate\("(SUM|PRD|AVG|MIN|MAX)",\s*new Array\s*\(([^)]*)\)\)/);
+  if (!match) return null;
+  const fields = [...match[2].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+  return { op: match[1], fields };
+};
+
+const setupManualMoneyCalculations = (
+  container: HTMLDivElement,
+  annotationStorage: any,
+  fieldObjects: Record<string, PdfFieldObject[]> | null,
+  calculationOrderIds: string[] | null,
+) => {
+  if (!fieldObjects) return { sync: () => {}, cleanup: () => {} };
+
+  const currencyFields = new Set<string>();
+  const idToName = new Map<string, string>();
+  const formulas = new Map<string, { op: string; fields: string[] }>();
+
+  for (const [name, fields] of Object.entries(fieldObjects)) {
+    for (const field of fields) {
+      if (field.id) idToName.set(field.id, name);
+      const formatAction = field.actions?.Format?.join("\n") ?? "";
+      if (/AFNumber_Format/.test(formatAction) && (/\\u0024|\$/.test(formatAction))) {
+        currencyFields.add(field.name || name);
+      }
+      const calculation = extractSimpleCalculation(field.actions?.Calculate?.[0]);
+      if (calculation) formulas.set(field.name || name, calculation);
+    }
+  }
+
+  const getElementsByName = (name: string) =>
+    Array.from(container.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input[name], textarea[name]"))
+      .filter((element) => element.name === name);
+
+  const getInitialValue = (name: string) => {
+    const field = fieldObjects[name]?.find((item) => item.value !== undefined);
+    return field?.value ?? "";
+  };
+
+  const syncStorage = (element: HTMLInputElement | HTMLTextAreaElement, raw: number, formatted: string) => {
+    const id = element.getAttribute("data-element-id");
+    if (!id) return;
+    annotationStorage.setValue(id, { value: String(raw), formattedValue: formatted });
+  };
+
+  const setFieldValue = (name: string, raw: number) => {
+    const formatted = currencyFields.has(name) ? formatMoney(raw) : String(raw);
+    for (const element of getElementsByName(name)) {
+      element.value = formatted;
+      syncStorage(element, raw, formatted);
+    }
+  };
+
+  const orderedFormulaNames = [
+    ...(calculationOrderIds ?? []).map((id) => idToName.get(id)).filter((name): name is string => !!name && formulas.has(name)),
+    ...Array.from(formulas.keys()).filter((name) => !(calculationOrderIds ?? []).some((id) => idToName.get(id) === name)),
+  ];
+
+  const calculate = (formatEditableFields = false) => {
+    const computed = new Map<string, number>();
+    const getValue = (name: string) => {
+      if (computed.has(name)) return computed.get(name)!;
+      const element = getElementsByName(name).find((item) => item.value.trim() !== "");
+      return parseMoney(element?.value ?? getInitialValue(name));
+    };
+
+    for (const name of orderedFormulaNames) {
+      const formula = formulas.get(name);
+      if (!formula) continue;
+      const values = formula.fields.map(getValue);
+      const result = formula.op === "PRD"
+        ? values.reduce((total, value) => total * value, values.length ? 1 : 0)
+        : formula.op === "AVG"
+          ? values.reduce((total, value) => total + value, 0) / Math.max(values.length, 1)
+          : formula.op === "MIN"
+            ? Math.min(...values)
+            : formula.op === "MAX"
+              ? Math.max(...values)
+              : values.reduce((total, value) => total + value, 0);
+      computed.set(name, result);
+      setFieldValue(name, result);
+    }
+
+    if (formatEditableFields) {
+      for (const name of currencyFields) {
+        for (const element of getElementsByName(name)) {
+          if (element.disabled || !element.value.trim() || document.activeElement === element) continue;
+          const raw = parseMoney(element.value);
+          const formatted = formatMoney(raw);
+          element.value = formatted;
+          syncStorage(element, raw, formatted);
+        }
+      }
+    }
+  };
+
+  let frame = 0;
+  const scheduleCalculate = () => {
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => calculate(false));
+  };
+  const onFocus = (event: FocusEvent) => {
+    const element = event.target as HTMLInputElement | HTMLTextAreaElement;
+    if (!currencyFields.has(element.name) || element.disabled || !element.value.trim()) return;
+    element.value = String(parseMoney(element.value) || "");
+  };
+  const onBlur = (event: FocusEvent) => {
+    const element = event.target as HTMLInputElement | HTMLTextAreaElement;
+    if (!currencyFields.has(element.name) || element.disabled) return;
+    setTimeout(() => calculate(true), 0);
+  };
+
+  container.addEventListener("input", scheduleCalculate, true);
+  container.addEventListener("focus", onFocus, true);
+  container.addEventListener("blur", onBlur, true);
+  setTimeout(() => calculate(true), 0);
+
+  return {
+    sync: () => calculate(true),
+    cleanup: () => {
+      cancelAnimationFrame(frame);
+      container.removeEventListener("input", scheduleCalculate, true);
+      container.removeEventListener("focus", onFocus, true);
+      container.removeEventListener("blur", onBlur, true);
+    },
+  };
+};
+
 export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
   ({ src, scale = 1.5 }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const pdfRef = useRef<pdfjsLib.PDFDocumentProxy | null>(null);
     const scriptingRef = useRef<any>(null);
+    const manualCalculationSyncRef = useRef<(() => void) | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useImperativeHandle(ref, () => ({
       async getFilledPdfBytes() {
         if (!pdfRef.current) throw new Error("PDF not loaded");
+        manualCalculationSyncRef.current?.();
         await scriptingRef.current?.dispatchWillSave?.();
         const bytes = await pdfRef.current.saveDocument();
         await scriptingRef.current?.dispatchDidSave?.();
