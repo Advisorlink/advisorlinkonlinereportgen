@@ -141,6 +141,9 @@ const setupManualMoneyCalculations = (
     cancelAnimationFrame(frame);
     frame = requestAnimationFrame(() => calculate(false));
   };
+  const managedElements = Array.from(
+    container.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input[name], textarea[name]"),
+  );
   const onFocus = (event: FocusEvent) => {
     const element = event.target as HTMLInputElement | HTMLTextAreaElement;
     if (!currencyFields.has(element.name) || element.disabled || !element.value.trim()) return;
@@ -153,8 +156,11 @@ const setupManualMoneyCalculations = (
   };
 
   container.addEventListener("input", scheduleCalculate, true);
+  container.addEventListener("change", scheduleCalculate, true);
+  container.addEventListener("keyup", scheduleCalculate, true);
   container.addEventListener("focus", onFocus, true);
   container.addEventListener("blur", onBlur, true);
+  managedElements.forEach((element) => element.addEventListener("updatefromsandbox", scheduleCalculate));
   setTimeout(() => calculate(true), 0);
 
   return {
@@ -162,8 +168,11 @@ const setupManualMoneyCalculations = (
     cleanup: () => {
       cancelAnimationFrame(frame);
       container.removeEventListener("input", scheduleCalculate, true);
+      container.removeEventListener("change", scheduleCalculate, true);
+      container.removeEventListener("keyup", scheduleCalculate, true);
       container.removeEventListener("focus", onFocus, true);
       container.removeEventListener("blur", onBlur, true);
+      managedElements.forEach((element) => element.removeEventListener("updatefromsandbox", scheduleCalculate));
     },
   };
 };
