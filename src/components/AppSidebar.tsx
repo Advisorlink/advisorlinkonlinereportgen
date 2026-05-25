@@ -1,4 +1,4 @@
-import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall, ClipboardList, MessageSquare, Send, Sparkles, Kanban, Sun, Moon, ShieldCheck } from "lucide-react";
+import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall, ClipboardList, MessageSquare, Send, Sparkles, Kanban, Sun, Moon, ShieldCheck, Phone } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -27,6 +27,7 @@ const navItems = [
   { title: "Fact Find", url: "/fact-find", icon: ClipboardList },
   { title: "E-Sign Docs", url: "/esign", icon: FileSignature },
   { title: "Documents", url: "/documents", icon: ShieldCheck, badge: "NEW", badgeColor: "gradient-accent" },
+  { title: "Phone", url: "/phone", icon: Phone, badge: "NEW", badgeColor: "gradient-accent" },
   { title: "Dialer", url: "/ai-caller", icon: PhoneCall, badge: "LEAP", badgeColor: "bg-emerald-500" },
   { title: "Referrals", url: "/referrals", icon: Gift, badge: "12 new" },
   { title: "Client Reports", url: "/admin", icon: Settings },
