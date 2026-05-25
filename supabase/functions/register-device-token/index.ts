@@ -37,13 +37,23 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    let resolvedUserId = user_id;
+    if (!resolvedUserId) {
+      const { data: owner } = await supabase
+        .from("app_config")
+        .select("owner_user_id")
+        .eq("id", 1)
+        .maybeSingle();
+      resolvedUserId = owner?.owner_user_id;
+    }
+
     const row: Record<string, unknown> = {
       token,
       platform,
       token_type: resolvedTokenType,
       updated_at: new Date().toISOString(),
     };
-    if (user_id) row.user_id = user_id;
+    if (resolvedUserId) row.user_id = resolvedUserId;
     if (device_name) row.device_name = device_name;
 
     const { data, error } = await supabase
