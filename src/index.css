@@ -145,6 +145,20 @@
   background: linear-gradient(135deg, hsl(var(--cyan)), hsl(var(--cyan-glow)));
 }
 
+.softphone-incoming-screen {
+  width: 100vw;
+  height: var(--softphone-mobile-vh, 100dvh);
+  min-height: 100svh;
+  color: hsl(var(--navy-foreground));
+  background:
+    radial-gradient(120% 80% at 50% 0%, hsl(var(--cyan) / 0.34) 0%, transparent 42%),
+    radial-gradient(140% 85% at 50% 100%, hsl(var(--primary) / 0.62) 0%, transparent 55%),
+    linear-gradient(180deg, hsl(215 65% 16%) 0%, hsl(var(--navy)) 58%, hsl(220 70% 5%) 100%);
+  padding-top: max(env(safe-area-inset-top), 2rem);
+  padding-bottom: max(env(safe-area-inset-bottom), 2.5rem);
+  overscroll-behavior: contain;
+}
+
 /* Smooth page transitions */
 .page-enter {
   animation: pageIn 0.3s ease-out;
