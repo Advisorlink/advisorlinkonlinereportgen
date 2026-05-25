@@ -137,7 +137,12 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
               canvas,
               canvasContext: ctx,
               viewport,
-              annotationMode: pdfjsLib.AnnotationMode.ENABLE_FORMS,
+              // Render annotations but NOT form widgets on the canvas — the
+              // interactive HTML overlay below draws the live field values.
+              // Using ENABLE_FORMS bakes the stale field appearance (e.g. "$0",
+              // "0.00") into the canvas, which then shows through behind the
+              // updated calculated values and looks like double-rendered text.
+              annotationMode: pdfjsLib.AnnotationMode.ENABLE,
             } as any).promise;
             pageViews[pageNum - 1] = { pdfPage: page, renderingState: 3 };
             eventBus.dispatch("pagerendered", { source: page, pageNumber: pageNum });
