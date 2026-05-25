@@ -1,5 +1,6 @@
 import { useEffect, useImperativeHandle, useRef, forwardRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
+import { EventBus, PDFLinkService, PDFScriptingManager } from "pdfjs-dist/web/pdf_viewer.mjs";
 // @ts-ignore - vite worker import
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 // @ts-ignore - vite asset import for sandbox bundle (needed for AcroForm JS calculations)
@@ -30,7 +31,9 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
     useImperativeHandle(ref, () => ({
       async getFilledPdfBytes() {
         if (!pdfRef.current) throw new Error("PDF not loaded");
+        await scriptingRef.current?.dispatchWillSave?.();
         const bytes = await pdfRef.current.saveDocument();
+        await scriptingRef.current?.dispatchDidSave?.();
         return bytes;
       },
     }), []);
@@ -54,18 +57,43 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
           if (cancelled) return;
           pdfRef.current = pdf;
 
+          const eventBus = new EventBus();
+          const linkService = new PDFLinkService({
+            eventBus,
+            externalLinkTarget: 2,
+            externalLinkRel: "noopener noreferrer nofollow",
+          });
+          linkService.setDocument(pdf);
+          linkService.externalLinkEnabled = true;
+
+          const pageViews: Array<{ pdfPage: pdfjsLib.PDFPageProxy; renderingState: number }> = [];
+          const viewer = {
+            currentPageNumber: 1,
+            pagesCount: pdf.numPages,
+            pagesPromise: Promise.resolve(),
+            isInPresentationMode: false,
+            isChangingPresentationMode: false,
+            getPageView: (index: number) => pageViews[index],
+            nextPage: () => { viewer.currentPageNumber = Math.min(pdf.numPages, viewer.currentPageNumber + 1); },
+            previousPage: () => { viewer.currentPageNumber = Math.max(1, viewer.currentPageNumber - 1); },
+            increaseScale: () => {},
+            decreaseScale: () => {},
+            currentScaleValue: "auto",
+            spreadMode: 0,
+          } as any;
+          linkService.setViewer(viewer);
+
           // Set up scripting manager so AcroForm JavaScript calculations
           // (BMI, totals, etc.) actually run as the user fills the form.
           let scriptingManager: any = null;
           try {
-            const SM = (pdfjsLib as any).PDFScriptingManager;
-            if (SM) {
-              scriptingManager = new SM({
-                sandboxBundleSrc: sandboxUrl,
-              });
-              scriptingManager.setDocument(pdf);
-              scriptingRef.current = scriptingManager;
-            }
+            scriptingManager = new PDFScriptingManager({
+              eventBus,
+              sandboxBundleSrc: sandboxUrl,
+              wasmUrl: "/pdfjs/wasm/",
+            } as any);
+            scriptingManager.setViewer(viewer);
+            scriptingRef.current = scriptingManager;
           } catch (e) {
             console.warn("[PdfFormEditor] scripting disabled:", e);
           }
@@ -111,6 +139,8 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
               viewport,
               annotationMode: pdfjsLib.AnnotationMode.ENABLE_FORMS,
             } as any).promise;
+            pageViews[pageNum - 1] = { pdfPage: page, renderingState: 3 };
+            eventBus.dispatch("pagerendered", { source: page, pageNumber: pageNum });
 
             const annotations = await page.getAnnotations({ intent: "display" });
 
@@ -122,22 +152,14 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
               annotationCanvasMap: null,
               annotationEditorUIManager: null,
               structTreeLayer: null,
+              linkService,
             });
 
             await annotationLayer.render({
               annotations,
               imageResourcesPath: "",
               renderForms: true,
-              linkService: {
-                externalLinkTarget: 2,
-                externalLinkRel: "noopener noreferrer nofollow",
-                externalLinkEnabled: true,
-                getDestinationHash: () => "#",
-                getAnchorUrl: () => "#",
-                isPageVisible: () => true,
-                isInPresentationMode: false,
-                addLinkAttributes: () => {},
-              },
+              linkService,
               downloadManager: null,
               annotationStorage: pdf.annotationStorage,
               enableScripting: !!scriptingManager,
@@ -149,12 +171,10 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
           // Start the scripting sandbox now that pages + widgets exist
           if (scriptingManager) {
             try {
-              await scriptingManager.dispatchWillPrint?.();
-            } catch {}
-            try {
-              // viewerEvent => sets up listeners against the document
-              await scriptingManager.dispatchDidOpen?.();
-            } catch {}
+              await scriptingManager.setDocument(pdf);
+            } catch (e) {
+              console.warn("[PdfFormEditor] scripting startup failed:", e);
+            }
           }
 
           setLoading(false);
