@@ -1565,6 +1565,96 @@ export type Database = {
         }
         Relationships: []
       }
+      twilio_voice_config: {
+        Row: {
+          api_key_secret: string | null
+          api_key_sid: string | null
+          caller_id: string | null
+          client_identity: string
+          created_at: string
+          id: number
+          twiml_app_sid: string | null
+          updated_at: string
+        }
+        Insert: {
+          api_key_secret?: string | null
+          api_key_sid?: string | null
+          caller_id?: string | null
+          client_identity?: string
+          created_at?: string
+          id?: number
+          twiml_app_sid?: string | null
+          updated_at?: string
+        }
+        Update: {
+          api_key_secret?: string | null
+          api_key_sid?: string | null
+          caller_id?: string | null
+          client_identity?: string
+          created_at?: string
+          id?: number
+          twiml_app_sid?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      voice_call_logs: {
+        Row: {
+          call_sid: string | null
+          contact_id: string | null
+          contact_name: string | null
+          created_at: string
+          deal_id: string | null
+          direction: string
+          duration_seconds: number | null
+          ended_at: string | null
+          from_number: string | null
+          id: string
+          notes: string | null
+          recording_url: string | null
+          started_at: string
+          status: string
+          to_number: string | null
+          user_id: string | null
+        }
+        Insert: {
+          call_sid?: string | null
+          contact_id?: string | null
+          contact_name?: string | null
+          created_at?: string
+          deal_id?: string | null
+          direction: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          from_number?: string | null
+          id?: string
+          notes?: string | null
+          recording_url?: string | null
+          started_at?: string
+          status?: string
+          to_number?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          call_sid?: string | null
+          contact_id?: string | null
+          contact_name?: string | null
+          created_at?: string
+          deal_id?: string | null
+          direction?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          from_number?: string | null
+          id?: string
+          notes?: string | null
+          recording_url?: string | null
+          started_at?: string
+          status?: string
+          to_number?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
