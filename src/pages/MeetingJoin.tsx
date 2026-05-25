@@ -207,11 +207,10 @@ export default function MeetingJoin() {
     setError("");
     setStatus("connecting");
 
-    const { data: meeting } = await supabase
-      .from("meetings")
-      .select("*")
-      .eq("meeting_id", mid)
-      .single();
+    const { data: meetingRows } = await supabase
+      .rpc("get_meeting_by_id", { _meeting_id: mid });
+    const meeting = Array.isArray(meetingRows) ? meetingRows[0] : meetingRows;
+
 
     if (!meeting) {
       setError("Meeting not found. Please check the ID and try again.");
@@ -255,15 +254,17 @@ export default function MeetingJoin() {
       meetingIdRef.current = mid;
       setMeetingId(mid);
       setStatus("connecting");
-      supabase.from("meetings").select("status").eq("meeting_id", mid).single().then(({ data }) => {
-        if (data && data.status !== "ended") {
+      supabase.rpc("get_meeting_by_id", { _meeting_id: mid }).then(({ data }) => {
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row && row.status !== "ended") {
           connectToMeeting(mid, cid);
         } else {
           clearSession();
-          if (data?.status === "ended") setStatus("ended");
+          if (row?.status === "ended") setStatus("ended");
           else setStatus("idle");
         }
       });
+
     }
   }, [connectToMeeting]);
 
@@ -282,8 +283,11 @@ export default function MeetingJoin() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible" && meetingIdRef.current && status !== "ended") {
-        supabase.from("meetings").select("status").eq("meeting_id", meetingIdRef.current).single().then(({ data }) => {
-          if (data?.status === "ended") {
+        supabase.rpc("get_meeting_by_id", { _meeting_id: meetingIdRef.current }).then(({ data }) => {
+          const row = Array.isArray(data) ? data[0] : data;
+          const d = row as { status?: string } | null;
+          if (d?.status === "ended") {
+
             markMeetingEnded();
             return;
           }

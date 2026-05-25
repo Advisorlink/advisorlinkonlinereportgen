@@ -11,3 +11,7 @@ verify_jwt = false
 
 [functions.push-debug]
 verify_jwt = false
+
+[functions.esign-signed-url]
+verify_jwt = false
+

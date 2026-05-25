@@ -140,13 +140,11 @@ export default function ESignPublic() {
 
   const loadDocument = async () => {
     const { data, error } = await supabase
-      .from("esign_documents")
-      .select("*")
-      .eq("signing_token", token!)
-      .single();
+      .rpc("get_esign_doc_by_token", { _token: token! });
 
-    if (error || !data) { setState("error"); return; }
-    const d = data as ESignDoc;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (error || !row) { setState("error"); return; }
+    const d = row as ESignDoc;
     setDoc(d);
 
     if (d.status === "signed" || d.status === "completed") {
@@ -155,14 +153,16 @@ export default function ESignPublic() {
     }
 
     if (d.original_pdf_path) {
-      const { data: urlData } = await supabase.storage
-        .from("esign-documents")
-        .createSignedUrl(d.original_pdf_path, 3600);
-      if (urlData?.signedUrl) setPdfUrl(urlData.signedUrl);
+      const { data: urlData, error: urlErr } = await supabase.functions.invoke(
+        "esign-signed-url",
+        { body: { token: token!, path: d.original_pdf_path } },
+      );
+      if (!urlErr && urlData?.signedUrl) setPdfUrl(urlData.signedUrl);
     }
 
     setState("ready");
   };
+
 
   const getPos = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
@@ -277,23 +277,20 @@ export default function ESignPublic() {
         }
       }
 
-      await supabase.from("esign_signatures").insert({
-        document_id: doc.id,
-        signer_name: doc.client_name || "Unknown",
-        signer_email: doc.client_email,
-        signature_data: signatureData,
-        field_index: 1,
+      await supabase.rpc("submit_esign_signature", {
+        _token: token,
+        _signature_data: signatureData,
+        _field_index: 1,
       });
 
       if (signingFields.length > 1) {
-        await supabase.from("esign_signatures").insert({
-          document_id: doc.id,
-          signer_name: doc.client_name || "Unknown",
-          signer_email: doc.client_email,
-          signature_data: signatureData,
-          field_index: 2,
+        await supabase.rpc("submit_esign_signature", {
+          _token: token,
+          _signature_data: signatureData,
+          _field_index: 2,
         });
       }
+
 
       const { error: rpcError } = await supabase.rpc("complete_signing", {
         _token: token,

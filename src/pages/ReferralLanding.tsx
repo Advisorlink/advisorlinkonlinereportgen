@@ -64,20 +64,18 @@ export default function ReferralLanding() {
       setLoading(false);
       return;
     }
-    (supabase
-      .from("referral_leads" as any)
-      .select("*")
-      .eq("token", token)
-      .single() as any)
-      .then(({ data, error }: any) => {
-        if (data) {
-          setLead(data);
-          setName(data.lead_name || "");
-          setPhone(data.lead_phone || "");
-          setEmail(data.lead_email || "");
+    (supabase.rpc("get_referral_lead_by_token", { _token: token }) as any)
+      .then(({ data }: any) => {
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row) {
+          setLead(row);
+          setName(row.lead_name || "");
+          setPhone(row.lead_phone || "");
+          setEmail(row.lead_email || "");
         }
         setLoading(false);
       });
+
   }, [token]);
 
   const handleSubmit = async () => {
