@@ -14,7 +14,7 @@ const xmlEscape = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 
 function normalizePhoneNumber(input: string) {
-  let value = input.trim().replace(/[^\d+]/g, "");
+  const value = input.trim().replace(/[^\d+]/g, "");
   if (!value) return "";
   if (value.startsWith("+")) return value;
   if (value.startsWith("0011")) return `+${value.slice(4)}`;
@@ -27,6 +27,36 @@ function normalizePhoneNumber(input: string) {
 
 function isE164(value: string) {
   return /^\+[1-9]\d{7,14}$/.test(value);
+}
+
+async function getGoogleAccessToken(serviceAccountJson: string): Promise<string> {
+  const sa = JSON.parse(serviceAccountJson);
+  const now = Math.floor(Date.now() / 1000);
+  const b64url = (buf: ArrayBuffer | Uint8Array | string) => {
+    const bytes = typeof buf === "string" ? new TextEncoder().encode(buf) : buf instanceof ArrayBuffer ? new Uint8Array(buf) : buf;
+    let str = "";
+    bytes.forEach((b) => (str += String.fromCharCode(b)));
+    return btoa(str).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+  };
+  const unsigned = `${b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }))}.${b64url(JSON.stringify({
+    iss: sa.client_email,
+    scope: "https://www.googleapis.com/auth/firebase.messaging",
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3600,
+  }))}`;
+  const pem = sa.private_key.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "");
+  const keyBytes = Uint8Array.from(atob(pem), (c) => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey("pkcs8", keyBytes, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(unsigned));
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion: `${unsigned}.${b64url(sig)}` }),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(`Google token error: ${JSON.stringify(json)}`);
+  return json.access_token as string;
 }
 
 function twiml(body = ""): Response {
