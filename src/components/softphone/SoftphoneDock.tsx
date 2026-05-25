@@ -12,7 +12,7 @@ function formatDuration(ms: number) {
 }
 
 export function SoftphoneDock() {
-  const { ready, registering, callerId, incoming, active, answer, reject, hangup, toggleMute, toggleHold, sendDigit } = useSoftphone();
+  const { ready, registering, callerId, incoming, incomingMatch, active, answer, reject, hangup, toggleMute, toggleHold, sendDigit } = useSoftphone();
   const [now, setNow] = useState(Date.now());
   const [showDtmf, setShowDtmf] = useState(false);
   const [expanded, setExpanded] = useState(true);
@@ -26,7 +26,7 @@ export function SoftphoneDock() {
   if (!incoming && !active) return null;
 
   const callee = incoming
-    ? { title: ((incoming as any).__match?.name) || incoming.parameters?.From || "Unknown", sub: incoming.parameters?.From || "" }
+    ? { title: incomingMatch?.name || incoming.parameters?.From || "Unknown", sub: incoming.parameters?.From || "" }
     : active
       ? { title: active.contactName || active.to || active.from, sub: active.direction === "inbound" ? active.from : active.to }
       : null;
