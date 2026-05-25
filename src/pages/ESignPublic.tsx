@@ -277,23 +277,20 @@ export default function ESignPublic() {
         }
       }
 
-      await supabase.from("esign_signatures").insert({
-        document_id: doc.id,
-        signer_name: doc.client_name || "Unknown",
-        signer_email: doc.client_email,
-        signature_data: signatureData,
-        field_index: 1,
+      await supabase.rpc("submit_esign_signature", {
+        _token: token,
+        _signature_data: signatureData,
+        _field_index: 1,
       });
 
       if (signingFields.length > 1) {
-        await supabase.from("esign_signatures").insert({
-          document_id: doc.id,
-          signer_name: doc.client_name || "Unknown",
-          signer_email: doc.client_email,
-          signature_data: signatureData,
-          field_index: 2,
+        await supabase.rpc("submit_esign_signature", {
+          _token: token,
+          _signature_data: signatureData,
+          _field_index: 2,
         });
       }
+
 
       const { error: rpcError } = await supabase.rpc("complete_signing", {
         _token: token,
