@@ -1,9 +1,9 @@
 import { useEffect, useImperativeHandle, useRef, forwardRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import { EventBus, PDFLinkService, PDFScriptingManager } from "pdfjs-dist/web/pdf_viewer.mjs";
-// @ts-ignore - vite worker import
+// @ts-expect-error - vite worker import
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-// @ts-ignore - vite asset import for sandbox bundle (needed for AcroForm JS calculations)
+// @ts-expect-error - vite asset import for sandbox bundle (needed for AcroForm JS calculations)
 import sandboxUrl from "pdfjs-dist/build/pdf.sandbox.min.mjs?url";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
@@ -27,6 +27,24 @@ type PdfFieldObject = {
   actions?: Record<string, string[]>;
 };
 
+type AnnotationStorageLike = {
+  setValue: (key: string, value: Record<string, unknown>) => void;
+};
+
+type PdfDocumentWithFields = pdfjsLib.PDFDocumentProxy & {
+  annotationStorage: AnnotationStorageLike;
+  getFieldObjects: () => Promise<Record<string, PdfFieldObject[]> | null>;
+  getCalculationOrderIds?: () => Promise<string[] | null>;
+};
+
+type ScriptingManagerLike = {
+  setViewer: (viewer: unknown) => void;
+  setDocument: (pdf: pdfjsLib.PDFDocumentProxy) => Promise<void> | void;
+  dispatchWillSave?: () => Promise<void> | void;
+  dispatchDidSave?: () => Promise<void> | void;
+  destroy?: () => void;
+};
+
 const currencyFormatter = new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 });
 
 const parseMoney = (value: unknown) => {
@@ -48,7 +66,7 @@ const extractSimpleCalculation = (script?: string) => {
 
 const setupManualMoneyCalculations = (
   container: HTMLDivElement,
-  annotationStorage: any,
+  annotationStorage: AnnotationStorageLike,
   fieldObjects: Record<string, PdfFieldObject[]> | null,
   calculationOrderIds: string[] | null,
 ) => {
@@ -181,7 +199,7 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
   ({ src, scale = 1.5 }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const pdfRef = useRef<pdfjsLib.PDFDocumentProxy | null>(null);
-    const scriptingRef = useRef<any>(null);
+    const scriptingRef = useRef<ScriptingManagerLike | null>(null);
     const manualCalculationSyncRef = useRef<(() => void) | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
