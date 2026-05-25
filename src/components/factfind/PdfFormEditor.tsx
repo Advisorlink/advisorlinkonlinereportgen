@@ -395,7 +395,7 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
         cancelled = true;
         manualCalculationCleanup?.();
         manualCalculationSyncRef.current = null;
-        try { scriptingRef.current?.destroyPromise; } catch {}
+        try { scriptingRef.current?.destroy?.(); } catch {}
         scriptingRef.current = null;
         pdfRef.current?.destroy();
         pdfRef.current = null;
