@@ -140,6 +140,7 @@ async function lookupCaller(rawNumber: string): Promise<ContactMatch> {
 
 export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
   const deviceRef = useRef<Device | null>(null);
+  const initializingRef = useRef(false);
   const activeCallRef = useRef<Call | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const callMatchesRef = useRef(new WeakMap<Call, ContactMatch>());
@@ -177,13 +178,15 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
   const initializeRef = useRef<(() => Promise<void>) | null>(null);
 
   const initialize = useCallback(async () => {
-    if (deviceRef.current || registering) return;
+    if (deviceRef.current || initializingRef.current) return;
+    initializingRef.current = true;
     setRegistering(true);
     try {
       const { token, identity: id, caller_id } = await fetchToken();
       setIdentity(id);
       setCallerId(caller_id);
       const device = new Device(token, { logLevel: 1, allowIncomingWhileBusy: false, closeProtection: true });
+      deviceRef.current = device;
       device.on("registered", () => setReady(true));
       device.on("unregistered", () => {
         setReady(false);
@@ -239,14 +242,20 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
         }
       });
       await device.register();
-      deviceRef.current = device;
     } catch (e) {
+      const d = deviceRef.current;
+      if (d) {
+        try { d.destroy(); } catch { /* noop */ }
+        deviceRef.current = null;
+      }
+      setReady(false);
       console.error("initialize failed", e);
       toast.error(`Couldn't start phone: ${String(e)}`);
     } finally {
+      initializingRef.current = false;
       setRegistering(false);
     }
-  }, [fetchToken, registering, scheduleReconnect]);
+  }, [fetchToken, scheduleReconnect]);
 
   // Keep latest initialize in a ref so scheduleReconnect can call it without circular deps
   useEffect(() => { initializeRef.current = initialize; }, [initialize]);
