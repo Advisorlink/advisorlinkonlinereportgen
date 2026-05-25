@@ -9,6 +9,12 @@ verify_jwt = false
 [functions.twilio-voice]
 verify_jwt = false
 
+[functions.twilio-voice-bootstrap]
+verify_jwt = false
+
+[functions.twilio-voice-token]
+verify_jwt = false
+
 [functions.push-debug]
 verify_jwt = false
 
