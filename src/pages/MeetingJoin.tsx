@@ -254,15 +254,17 @@ export default function MeetingJoin() {
       meetingIdRef.current = mid;
       setMeetingId(mid);
       setStatus("connecting");
-      supabase.from("meetings").select("status").eq("meeting_id", mid).single().then(({ data }) => {
-        if (data && data.status !== "ended") {
+      supabase.rpc("get_meeting_by_id", { _meeting_id: mid }).then(({ data }) => {
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row && row.status !== "ended") {
           connectToMeeting(mid, cid);
         } else {
           clearSession();
-          if (data?.status === "ended") setStatus("ended");
+          if (row?.status === "ended") setStatus("ended");
           else setStatus("idle");
         }
       });
+
     }
   }, [connectToMeeting]);
 
