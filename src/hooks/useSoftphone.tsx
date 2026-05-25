@@ -179,6 +179,13 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
       });
       device.on("incoming", async (call: Call) => {
         const from = call.parameters?.From || "Unknown";
+        const sid = call.parameters?.CallSid || "incoming-call";
+        notifyIncomingCall("Incoming AdvisorLink call", `${from} is calling ${caller_id}`, { type: "call", from, sid, route: "/phone" });
+        toast.message("Incoming call", {
+          description: `${from} is calling ${caller_id}`,
+          duration: 30_000,
+          action: { label: "Open", onClick: () => window.location.assign("/phone") },
+        });
         callMatchesRef.current.set(call, { name: null });
         setIncomingMatch({ name: null });
         setIncoming(call);
@@ -193,8 +200,13 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
         callMatchesRef.current.set(call, match);
         setIncomingMatch(match);
         setIncoming((c) => (c === call ? call : c));
-        notifyIncomingCall("Incoming CRM call", `${match.name || from} is calling ${caller_id}`);
-        toast.message(`Incoming call from ${match.name || from}`);
+        if (match.name) {
+          toast.message("Incoming call", {
+            description: `${match.name} is calling ${caller_id}`,
+            duration: 30_000,
+            action: { label: "Open", onClick: () => window.location.assign("/phone") },
+          });
+        }
       });
       await device.register();
       deviceRef.current = device;
