@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const resolvedTokenType = token_type === "expo" ? "expo" : "fcm";
+    const resolvedTokenType = token_type === "expo" || token.startsWith("ExponentPushToken") ? "expo" : "fcm";
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,

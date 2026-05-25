@@ -3,6 +3,8 @@ import { Device, Call } from "@twilio/voice-sdk";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+type CapacitorBridge = { isNativePlatform?: () => boolean };
+
 export type CallState = {
   direction: "inbound" | "outbound";
   from: string;
@@ -56,9 +58,56 @@ function isE164(number: string) {
   return /^\+[1-9]\d{7,14}$/.test(number);
 }
 
-function notifyIncomingCall(title: string, body: string) {
+function callNotificationId(seed: string) {
+  return Math.max(1, Array.from(seed).reduce((sum, char) => sum + char.charCodeAt(0), 7001) % 2147483647);
+}
+
+async function notifyNativeIncomingCall(title: string, body: string, extra: Record<string, string>) {
+  const capacitor = (window as Window & { Capacitor?: CapacitorBridge }).Capacitor;
+  const isNative = typeof capacitor?.isNativePlatform === "function" && capacitor.isNativePlatform();
+  if (!isNative) return;
+
+  try {
+    const { LocalNotifications } = await import("@capacitor/local-notifications");
+    let permission = await LocalNotifications.checkPermissions();
+    if (permission.display === "prompt") permission = await LocalNotifications.requestPermissions();
+    if (permission.display !== "granted") return;
+
+    await LocalNotifications.createChannel?.({
+      id: "calls",
+      name: "Incoming calls",
+      description: "AdvisorLink Online call alerts",
+      importance: 5,
+      visibility: 1,
+      sound: "default",
+      vibration: true,
+      lights: true,
+      lightColor: "#22d3ee",
+    });
+
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: callNotificationId(extra.sid || extra.from || String(Date.now())),
+        title,
+        body,
+        largeBody: body,
+        summaryText: "AdvisorLink Online",
+        channelId: "calls",
+        sound: "default",
+        autoCancel: true,
+        interruptionLevel: "timeSensitive",
+        extra: { ...extra, route: "/phone" },
+      }],
+    });
+  } catch (e) {
+    console.error("Native call notification failed", e);
+  }
+}
+
+function notifyIncomingCall(title: string, body: string, extra: Record<string, string>) {
   if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate?.([700, 250, 700, 250, 700]);
-  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  void notifyNativeIncomingCall(title, body, extra);
+  if (typeof window === "undefined" || !("Notification" in window) || Notification.permission !== "granted") return;
   const n = new Notification(title, { body, tag: "crm-incoming-call", requireInteraction: true });
   n.onclick = () => {
     window.focus();
@@ -130,6 +179,13 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
       });
       device.on("incoming", async (call: Call) => {
         const from = call.parameters?.From || "Unknown";
+        const sid = call.parameters?.CallSid || "incoming-call";
+        notifyIncomingCall("Incoming AdvisorLink call", `${from} is calling ${caller_id}`, { type: "call", from, sid, route: "/phone" });
+        toast.message("Incoming call", {
+          description: `${from} is calling ${caller_id}`,
+          duration: 30_000,
+          action: { label: "Open", onClick: () => window.location.assign("/phone") },
+        });
         callMatchesRef.current.set(call, { name: null });
         setIncomingMatch({ name: null });
         setIncoming(call);
@@ -144,8 +200,13 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
         callMatchesRef.current.set(call, match);
         setIncomingMatch(match);
         setIncoming((c) => (c === call ? call : c));
-        notifyIncomingCall("Incoming CRM call", `${match.name || from} is calling ${caller_id}`);
-        toast.message(`Incoming call from ${match.name || from}`);
+        if (match.name) {
+          toast.message("Incoming call", {
+            description: `${match.name} is calling ${caller_id}`,
+            duration: 30_000,
+            action: { label: "Open", onClick: () => window.location.assign("/phone") },
+          });
+        }
       });
       await device.register();
       deviceRef.current = device;
