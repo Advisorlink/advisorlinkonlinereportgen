@@ -246,7 +246,30 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setRegistering(false);
     }
-  }, [fetchToken, registering]);
+  }, [fetchToken, registering, scheduleReconnect]);
+
+  // Keep latest initialize in a ref so scheduleReconnect can call it without circular deps
+  useEffect(() => { initializeRef.current = initialize; }, [initialize]);
+
+  // Reconnect when app returns to foreground / regains network (mobile websockets often die)
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && !deviceRef.current) {
+        initialize().catch(() => { /* noop */ });
+      }
+    };
+    const onOnline = () => {
+      if (!deviceRef.current) initialize().catch(() => { /* noop */ });
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("focus", onVisible);
+    };
+  }, [initialize]);
 
   const bootstrap = useCallback(async () => {
     const { error } = await supabase.functions.invoke("twilio-voice-bootstrap");
