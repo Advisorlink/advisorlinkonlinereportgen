@@ -174,7 +174,7 @@ export function ESignNewRequest({ onBack, initialFile, initialFileName, prefillC
 
       const signingUrl = `${window.location.origin}/esign/sign?token=${doc.signing_token}`;
       
-      await supabase.functions.invoke("send-esign-email", {
+      const { data: emailData, error: emailError } = await supabase.functions.invoke("send-esign-email", {
         body: {
           to: confirmEmail,
           clientName,
@@ -182,6 +182,8 @@ export function ESignNewRequest({ onBack, initialFile, initialFileName, prefillC
           documentName: fileName,
         },
       });
+      if (emailError) throw emailError;
+      if ((emailData as { error?: string } | null)?.error) throw new Error((emailData as { error: string }).error);
 
       toast.success("Document sent for e-signature!");
       setShowEmailConfirm(false);

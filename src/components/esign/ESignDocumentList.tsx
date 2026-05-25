@@ -54,7 +54,7 @@ export function ESignDocumentList({ onBack }: { onBack: () => void }) {
     setResending(true);
     try {
       const signingUrl = `${window.location.origin}/esign/sign?token=${resendDoc.signing_token}`;
-      await supabase.functions.invoke("send-esign-email", {
+      const { data: emailData, error: emailError } = await supabase.functions.invoke("send-esign-email", {
         body: {
           to: resendEmail,
           clientName: resendDoc.client_name || "Client",
@@ -62,6 +62,8 @@ export function ESignDocumentList({ onBack }: { onBack: () => void }) {
           documentName: resendDoc.document_name,
         },
       });
+      if (emailError) throw emailError;
+      if ((emailData as { error?: string } | null)?.error) throw new Error((emailData as { error: string }).error);
 
       // Update resend email on record
       await supabase
