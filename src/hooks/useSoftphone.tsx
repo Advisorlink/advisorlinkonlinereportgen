@@ -41,7 +41,7 @@ type ContactMatch = { name: string | null; contactId?: string | null; dealId?: s
 function normalizeDialNumber(input: string) {
   const raw = input.trim();
   if (!raw) return "";
-  let value = raw.replace(/[^\d+]/g, "");
+  const value = raw.replace(/[^\d+]/g, "");
   if (value.startsWith("+")) return value;
   if (value.startsWith("0011")) return `+${value.slice(4)}`;
   if (value.startsWith("00")) return `+${value.slice(2)}`;
@@ -92,6 +92,7 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
   const deviceRef = useRef<Device | null>(null);
   const activeCallRef = useRef<Call | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
+  const callMatchesRef = useRef(new WeakMap<Call, ContactMatch>());
   const [ready, setReady] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [callerId, setCallerId] = useState<string | null>(null);
@@ -127,13 +128,13 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
       });
       device.on("incoming", async (call: Call) => {
         const from = call.parameters?.From || "Unknown";
-        (call as any).__match = { name: null };
+        callMatchesRef.current.set(call, { name: null });
         setIncoming(call);
         call.on("cancel", () => setIncoming((c) => (c === call ? null : c)));
         call.on("disconnect", () => setIncoming((c) => (c === call ? null : c)));
         call.on("reject", () => setIncoming((c) => (c === call ? null : c)));
         const match = await lookupCaller(from);
-        (call as any).__match = match;
+        callMatchesRef.current.set(call, match);
         setIncoming((c) => (c === call ? call : c));
         notifyIncomingCall("Incoming CRM call", `${match.name || from} is calling ${caller_id}`);
         toast.message(`Incoming call from ${match.name || from}`);
@@ -171,8 +172,9 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
       activeCallRef.current = null;
       setActive(null);
     });
-    call.on("error", (e: any) => {
-      toast.error(`Call error: ${e?.message || e}`);
+    call.on("error", (e: unknown) => {
+      const message = e instanceof Error ? e.message : String(e);
+      toast.error(`Call error: ${message}`);
     });
   }, []);
 
@@ -205,7 +207,7 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
 
   const answer = useCallback(() => {
     if (!incoming) return;
-    const match = (incoming as any).__match as ContactMatch | undefined;
+    const match = callMatchesRef.current.get(incoming);
     const from = incoming.parameters?.From || "Unknown";
     const to = incoming.parameters?.To || callerId || "";
     incoming.accept();
