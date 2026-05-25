@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-type CapacitorBridge = { isNativePlatform?: () => boolean };
+type CapacitorBridge = { isNativePlatform?: () => boolean; getPlatform?: () => string };
 
 /**
  * Registers the device for push notifications when running as a native app
@@ -20,6 +20,8 @@ export function usePushNotifications() {
       const isNative = typeof capacitor?.isNativePlatform === 'function'
         && capacitor.isNativePlatform();
       if (!isNative) return;
+      const nativePlatform = capacitor?.getPlatform?.();
+      const platform = nativePlatform === 'ios' || nativePlatform === 'android' ? nativePlatform : 'android';
 
       try {
         const { PushNotifications } = await import('@capacitor/push-notifications');
@@ -46,7 +48,8 @@ export function usePushNotifications() {
             body: {
               user_id: user.id,
               token: t.value,
-              platform: 'android',
+              platform,
+              token_type: 'fcm',
               device_name: navigator.userAgent,
             },
           });
