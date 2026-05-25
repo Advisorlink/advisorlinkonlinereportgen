@@ -13,6 +13,22 @@ const cors = {
 const xmlEscape = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 
+function normalizePhoneNumber(input: string) {
+  let value = input.trim().replace(/[^\d+]/g, "");
+  if (!value) return "";
+  if (value.startsWith("+")) return value;
+  if (value.startsWith("0011")) return `+${value.slice(4)}`;
+  if (value.startsWith("00")) return `+${value.slice(2)}`;
+  if (value.startsWith("61")) return `+${value}`;
+  if (value.startsWith("0")) return `+61${value.slice(1)}`;
+  if (/^4\d{8}$/.test(value)) return `+61${value}`;
+  return `+${value}`;
+}
+
+function isE164(value: string) {
+  return /^\+[1-9]\d{7,14}$/.test(value);
+}
+
 function twiml(body = ""): Response {
   return new Response(
     `<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`,
@@ -45,15 +61,18 @@ Deno.serve(async (req: Request) => {
 
   // Outbound: browser → PSTN
   if (From.startsWith("client:")) {
-    if (!To) return twiml("<Say>No destination provided.</Say><Hangup/>");
+    const normalizedTo = normalizePhoneNumber(To);
+    if (!normalizedTo || !isE164(normalizedTo)) {
+      return twiml("<Say>That phone number is not valid. Please use the full mobile number.</Say><Hangup/>");
+    }
     await supa.from("voice_call_logs").insert({
       call_sid: CallSid,
       direction: "outbound",
       from_number: callerId,
-      to_number: To,
+      to_number: normalizedTo,
       status: "initiated",
     });
-    const safeTo = xmlEscape(To);
+    const safeTo = xmlEscape(normalizedTo);
     const safeCaller = xmlEscape(callerId);
     return twiml(
       `<Dial callerId="${safeCaller}" answerOnBridge="true" timeout="30"><Number>${safeTo}</Number></Dial>`,
@@ -100,7 +119,7 @@ Deno.serve(async (req: Request) => {
         body: `Call from ${From}`,
         data: { type: "call", from: From, sid: CallSid, route: "/phone" },
         priority: "high",
-        channelId: "default",
+        channelId: "calls",
       }));
     if (messages.length > 0) {
       await fetch("https://exp.host/--/api/v2/push/send", {
