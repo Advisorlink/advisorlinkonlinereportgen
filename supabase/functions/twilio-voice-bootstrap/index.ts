@@ -108,9 +108,20 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (Object.keys(update).length > 0) {
-      await supa.from("twilio_voice_config").update(update).eq("id", 1);
-    }
+    const nextConfig = {
+      id: 1,
+      client_identity: existing?.client_identity || "crm_user",
+      caller_id: callerId,
+      api_key_sid: apiKeySid,
+      api_key_secret: apiKeySecret,
+      twiml_app_sid: appSid,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error: saveError } = await supa
+      .from("twilio_voice_config")
+      .upsert(nextConfig, { onConflict: "id" });
+    if (saveError) return json(500, { error: "Failed to save voice configuration", detail: saveError.message });
 
     return json(200, {
       ok: true,

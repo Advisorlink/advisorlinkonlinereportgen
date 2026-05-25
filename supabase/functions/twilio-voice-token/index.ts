@@ -48,10 +48,19 @@ Deno.serve(async (req) => {
     const { data: claims } = await supa.auth.getClaims(authHeader.replace("Bearer ", ""));
     if (!claims?.claims?.sub) return json(401, { error: "Unauthorized" });
 
-    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { data: cfg } = await admin.from("twilio_voice_config").select("*").eq("id", 1).maybeSingle();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const admin = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    let { data: cfg } = await admin.from("twilio_voice_config").select("*").eq("id", 1).maybeSingle();
     if (!cfg?.api_key_sid || !cfg?.api_key_secret || !cfg?.twiml_app_sid) {
-      return json(400, { error: "Voice not provisioned. Run bootstrap first." });
+      await fetch(`${supabaseUrl}/functions/v1/twilio-voice-bootstrap`, {
+        method: "POST",
+        headers: { Authorization: authHeader, "Content-Type": "application/json" },
+      }).catch(() => null);
+      const refreshed = await admin.from("twilio_voice_config").select("*").eq("id", 1).maybeSingle();
+      cfg = refreshed.data;
+    }
+    if (!cfg?.api_key_sid || !cfg?.api_key_secret || !cfg?.twiml_app_sid) {
+      return json(400, { error: "Voice setup is still incomplete. Open Phone and click Set up phone system." });
     }
 
     const identity = cfg.client_identity || "crm_user";
