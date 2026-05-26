@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import {
   CORS, json, GCAL_BASE, gcalHeaders,
-  formatInTz, brandedEmailHtml, sendGmail, sendSmsViaTwilio,
+  formatInTz, brandedEmailHtml, sendGmail, sendAndLogSms,
 } from "../_shared/booking-utils.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
