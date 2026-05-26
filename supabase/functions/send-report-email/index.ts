@@ -231,7 +231,25 @@ Kind regards,`;
     }
 
     console.log("[send-report-email] Sent successfully, messageId:", gmailData.id);
-    return json({ success: true, messageId: gmailData.id });
+
+    // Fire workflow trigger
+    try {
+      await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/workflow-trigger`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+          "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+        },
+        body: JSON.stringify({
+          triggerType: "report_sent",
+          context: { client_name: clientName ?? "", client_email: recipientEmail },
+        }),
+      });
+    } catch (e) { console.warn("workflow trigger failed", e); }
+
+    return { messageId: gmailData.id };
+
   } catch (e) {
     console.error("[send-report-email] Error:", e);
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
