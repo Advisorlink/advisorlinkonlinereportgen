@@ -384,6 +384,11 @@ export default function Documents() {
                       onDelete={() => handleDelete(d)}
                       onSendToDrive={() => setDrivePicker({ docIds: [d.id] })}
                       onRename={(name) => handleRename(d, name)}
+                      onEdit={
+                        d.mime_type === "application/pdf"
+                          ? () => { setOpenClient(null); navigate(`/fact-find?edit=${d.id}`); }
+                          : undefined
+                      }
                     />
                   ))}
                 </div>
