@@ -36,4 +36,12 @@ verify_jwt = false
 [functions.booking-reminders-cron]
 verify_jwt = false
 
+[functions.gcal-webhook]
+verify_jwt = false
+
+[functions.workflow-tick]
+verify_jwt = false
+
+
+
 

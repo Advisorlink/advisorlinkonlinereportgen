@@ -3,6 +3,8 @@ import {
   CORS, json, GCAL_BASE, gcalHeaders,
   formatInTz, brandedEmailHtml, sendGmail, sendAndLogSms,
 } from "../_shared/booking-utils.ts";
+import { fireWorkflowTrigger } from "../_shared/workflow-shared.ts";
+
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -59,8 +61,16 @@ Deno.serve(async (req) => {
       } catch (e) { console.warn("sms failed", e); }
     }
 
+    await fireWorkflowTrigger("booking_cancelled", {
+      client_name: booking.client_name,
+      client_email: booking.client_email,
+      client_phone: booking.client_phone,
+      booking_id: booking.id,
+    });
+
     return json({ ok: true });
   } catch (e) {
+
     console.error("cancel error", e);
     return json({ error: (e as Error).message }, 500);
   }

@@ -787,6 +787,33 @@ export type Database = {
         }
         Relationships: []
       }
+      gcal_sync_state: {
+        Row: {
+          channel_id: string | null
+          expires_at: string | null
+          id: number
+          resource_id: string | null
+          sync_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          channel_id?: string | null
+          expires_at?: string | null
+          id?: number
+          resource_id?: string | null
+          sync_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          channel_id?: string | null
+          expires_at?: string | null
+          id?: number
+          resource_id?: string | null
+          sync_token?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       meetings: {
         Row: {
           client_email: string | null
@@ -1811,6 +1838,136 @@ export type Database = {
           status?: string
           to_number?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      workflow_run_steps: {
+        Row: {
+          error: string | null
+          executed_at: string
+          id: string
+          node_id: string
+          node_type: string
+          result: Json | null
+          run_id: string
+        }
+        Insert: {
+          error?: string | null
+          executed_at?: string
+          id?: string
+          node_id: string
+          node_type: string
+          result?: Json | null
+          run_id: string
+        }
+        Update: {
+          error?: string | null
+          executed_at?: string
+          id?: string
+          node_id?: string
+          node_type?: string
+          result?: Json | null
+          run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_run_steps_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_runs: {
+        Row: {
+          client_email: string | null
+          client_name: string | null
+          client_phone: string | null
+          completed_at: string | null
+          created_at: string
+          current_node_id: string | null
+          error: string | null
+          id: string
+          next_run_at: string
+          status: string
+          trigger_context: Json
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_node_id?: string | null
+          error?: string | null
+          id?: string
+          next_run_at?: string
+          status?: string
+          trigger_context?: Json
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_node_id?: string | null
+          error?: string | null
+          id?: string
+          next_run_at?: string
+          status?: string
+          trigger_context?: Json
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_runs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflows: {
+        Row: {
+          created_at: string
+          description: string | null
+          graph: Json
+          id: string
+          is_active: boolean
+          name: string
+          trigger_config: Json
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          graph?: Json
+          id?: string
+          is_active?: boolean
+          name: string
+          trigger_config?: Json
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          graph?: Json
+          id?: string
+          is_active?: boolean
+          name?: string
+          trigger_config?: Json
+          trigger_type?: string
+          updated_at?: string
         }
         Relationships: []
       }

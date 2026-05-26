@@ -3,6 +3,8 @@ import {
   CORS, json, GCAL_BASE, gcalHeaders,
   formatInTz, brandedEmailHtml, sendGmail, sendAndLogSms, appBaseUrl,
 } from "../_shared/booking-utils.ts";
+import { fireWorkflowTrigger } from "../_shared/workflow-shared.ts";
+
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -91,7 +93,19 @@ Deno.serve(async (req) => {
       } catch (e) { console.warn("sms failed", e); }
     }
 
+    await fireWorkflowTrigger("booking_rescheduled", {
+      client_name: booking.client_name,
+      client_email: booking.client_email,
+      client_phone: booking.client_phone,
+      booking_id: booking.id,
+      meeting_link: meetingLink,
+      date: dateStr,
+      time: timeStr,
+      timezone: tz,
+    });
+
     return json({ ok: true, dateStr, timeStr, tz });
+
   } catch (e) {
     console.error("reschedule error", e);
     return json({ error: (e as Error).message }, 500);

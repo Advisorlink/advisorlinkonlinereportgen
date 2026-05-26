@@ -1,77 +1,104 @@
+## Two new systems
 
-# Booking & Calendar System
+### 1. Two-way Google Calendar sync
 
-A full GoHighLevel-style booking system: clients pick a time from a branded, timezone-aware booking page, get a beautiful confirmation email, the meeting auto-writes to your Google Calendar, and they get reminder email + SMS 24h and 1h before. Reschedule and cancel via branded links.
+Right now bookings push to your Google Calendar, but if you edit or delete the event in Google Calendar, nothing happens back in the app. We need GCal → app sync.
 
-## Defaults
+**How it works**
+- Subscribe to Google Calendar push notifications (watch channel) on your primary calendar. Google pings our edge function whenever anything changes.
+- New edge function `gcal-webhook` receives the ping, pulls the changed events since the last sync token, and for any event linked to a booking (`google_event_id` match):
+  - **Time changed** → update `bookings.start_at` / `end_at`, mark `status='rescheduled'`, clear reminder timestamps so 24h/1h reminders re-fire, send the client the branded "rescheduled" email + SMS.
+  - **Event deleted/cancelled** → mark booking `status='cancelled'`, send branded cancellation email + SMS, free the slot.
+  - **Attendee changed / title changed** → just sync the fields, no notifications.
+- Channels expire after ~7 days, so a daily cron (`gcal-watch-refresh`) renews them.
+- Store the channel id, resource id, and sync token in a new tiny table `gcal_sync_state`.
 
-- **Availability:** Mon–Fri, 10:00 AM – 7:00 PM (your local timezone, AEST)
-- **Meeting length:** 45 minutes + 15 min buffer
-- **Meeting link:** Your existing in-app screen-share room (not Google Meet)
-- **Reminders:** Email + SMS at 24h before, Email + SMS at 1h before
-- **Sender:** advisorlinkonline.com.au (already verified)
-- **Google account:** Advisor Link calendar (connected via OAuth in next step)
+**What you'll see**
+- Drag a meeting in Google Calendar → within seconds the Bookings list updates, the client gets a "rescheduled" email + SMS, and reminders reset for the new time.
+- Delete it in GCal → booking shows as Cancelled, client gets the cancellation email.
 
-## What You'll See in the App
+---
 
-1. **New "Calendar" page** in the sidebar with three tabs:
-   - **Bookings** — list of upcoming/past meetings, status (booked / rescheduled / cancelled / completed)
-   - **Availability** — edit your hours, meeting length, buffer, timezone, max bookings per day
-   - **Reminder Templates** — edit the email + SMS reminder copy (24h and 1h), with merge fields like `{{client_name}}`, `{{time}}`, `{{reschedule_link}}`
+### 2. Visual workflow builder (drag-and-drop automation tree)
 
-2. **Public booking page** at `/book/travis` (also linkable from your dashboard):
-   - Hero with logo, "Book a call with Travis Seckold", brand colours
-   - Timezone auto-detected with picker to override
-   - Calendar showing only valid days; click a day → time slots in client's timezone
-   - Form: name, email, phone, notes
-   - Beautiful confirmation screen with the meeting link
+A new **Automations** tab (inside the Messages page, as you suggested) with a canvas where you drag nodes to build flows.
 
-3. **Reschedule page** at `/reschedule/{token}` — same calendar UI, prefilled, branded
-4. **Cancel page** at `/cancel/{token}` — confirms then frees the slot
+**Node types**
+- **Triggers** (the green start node — pick one):
+  - Report generated
+  - Report sent
+  - Pipeline stage changed (pick stage, e.g. "Presentation Booked", "Report Sent")
+  - Booking created / rescheduled / cancelled
+  - Form submitted (referral, fact find)
+- **Actions**:
+  - Send email (pick a template, edit subject/body with merge fields like `{{client_name}}`, `{{meeting_link}}`)
+  - Send SMS (same merge fields)
+  - Move deal to pipeline stage
+  - Create booking reminder
+  - Webhook (POST to a URL)
+- **Logic**:
+  - Wait (seconds / minutes / hours / days)
+  - Condition / branch (if email opened, if has phone, if value > X — yes/no branches)
+- **End**: stop node.
 
-## What Happens When a Booking is Made
+**Canvas**
+- Built with React Flow (industry standard, drag-drop, snap-to-grid, mini-map, zoom). Nodes have ports, you drag connections between them.
+- Save loads a JSON graph from a new `workflows` table.
+- Click any node to open a side panel and edit its config (template body, wait duration, condition rules).
+- Toggle to enable/disable a workflow.
 
-1. Slot conflict check against existing bookings + Google Calendar busy times
-2. Booking saved in DB
-3. Event created in your Google Calendar (title, description, attendee = client email)
-4. Confirmation email to client (branded, dark/cyan theme, logo, meeting link, add-to-calendar buttons, reschedule/cancel buttons)
-5. Confirmation email to you (so you know it's booked)
-6. Two reminders scheduled (24h + 1h before) — sent via cron
+**How runs work**
+- When a trigger event fires anywhere in the app, we call `workflow-trigger` edge function with `(trigger_type, context)`.
+- It finds matching enabled workflows, creates a `workflow_run` row, and queues the first step.
+- Cron `workflow-tick` runs every minute, picks up runs whose `next_run_at <= now()`, executes the current node (send email, evaluate condition, etc.), advances to the next node, and sets the next `next_run_at` (now + wait duration, or now for instant nodes).
+- Each step is logged to `workflow_run_steps` so you can see what happened per client.
 
-## Technical Section
+**What you'll see**
+- New **Messages → Automations** tab with a list of workflows + "New workflow" button.
+- Builder page with the React Flow canvas, node palette on the left, properties panel on the right.
+- A **Runs** sub-tab showing in-flight and completed runs, with the timeline of each.
 
-**New DB tables**
-- `booking_settings` (1 row) — availability JSON, timezone, meeting length, buffer, slug, max/day
-- `bookings` — client info, start/end (UTC), client_timezone, status, google_event_id, reschedule_token, cancel_token, reminder_24h_sent_at, reminder_1h_sent_at, notes
-- `booking_reminder_templates` — type (`email_24h`, `sms_24h`, `email_1h`, `sms_1h`), subject, body, is_active
+---
 
-**Connector**
-- Google Calendar (via `standard_connectors--connect`) — the connection authorises your Advisor Link Google account so events write there.
+### Technical section
 
-**Edge functions**
-- `booking-availability` (public) — returns free slots for a given date in the client's TZ
-- `booking-create` (public) — validates, writes to Google Calendar, saves booking, enqueues confirmation emails
-- `booking-reschedule` (public) — moves the booking + updates GCal event
-- `booking-cancel` (public) — deletes GCal event, marks cancelled, frees slot
-- `booking-reminders-cron` — runs every 5 min, sends due reminders (email via existing send-transactional-email, SMS via existing sms-send)
-- Add new email templates: `booking-confirmation-client`, `booking-confirmation-host`, `booking-reminder-24h`, `booking-reminder-1h`, `booking-rescheduled`, `booking-cancelled`
+**New tables**
+- `gcal_sync_state` — channel_id, resource_id, sync_token, expires_at
+- `workflows` — name, trigger_type, trigger_config (jsonb), graph (jsonb: nodes + edges), is_active
+- `workflow_runs` — workflow_id, trigger_context (jsonb: client info), current_node_id, status (`running`/`completed`/`failed`/`cancelled`), next_run_at
+- `workflow_run_steps` — run_id, node_id, node_type, executed_at, result (jsonb), error
 
-**Cron** — pg_cron to ping `booking-reminders-cron` every 5 minutes.
+**New edge functions**
+- `gcal-webhook` (public, no JWT) — receives Google push notifications, syncs changed events to bookings, sends reschedule/cancel emails + SMS reusing existing branded templates from `_shared/booking-utils.ts`.
+- `gcal-watch-register` — creates/refreshes the push channel on primary calendar. Runs once at install + daily via cron.
+- `workflow-trigger` — called from app code (after report sent, booking created, pipeline move, etc.). Spawns runs.
+- `workflow-tick` — cron every minute, advances runs.
 
-**Routes**
-- `/calendar` (authenticated, in app)
-- `/book/:slug` (public)
-- `/reschedule/:token` (public)
-- `/cancel/:token` (public)
+**Cron**
+- `gcal-watch-refresh` daily — refresh the watch channel before it expires
+- `workflow-tick` every minute
 
-## Order of work
+**Frontend**
+- `src/pages/Messages.tsx` — add **Automations** tab
+- `src/components/automations/WorkflowList.tsx` — list + new
+- `src/components/automations/WorkflowBuilder.tsx` — React Flow canvas
+- `src/components/automations/nodes/*` — custom node components (TriggerNode, EmailNode, SmsNode, WaitNode, ConditionNode, etc.)
+- `src/components/automations/WorkflowRuns.tsx` — run history viewer
+- `react-flow` (now `@xyflow/react`) added to deps
 
-1. Migration: tables + RLS + cron
-2. Connect Google Calendar (you'll click through OAuth)
-3. Edge functions for availability / create / reschedule / cancel / reminders
-4. Email templates (using transactional email infrastructure already set up)
-5. Public booking + reschedule + cancel pages (branded)
-6. In-app Calendar page (bookings list, availability editor, reminder template editor)
-7. Test end-to-end
+**App hooks** (places we fire `workflow-trigger`)
+- `send-report-email` edge function on success
+- `pipeline-auto.ts moveDealToStage` on every stage change
+- `booking-create` / `booking-reschedule` / `booking-cancel` / `gcal-webhook` on every booking change
 
-Once you approve, I'll start with step 1 (database). Step 2 will prompt you to authorise Google.
+---
+
+### Order of work
+
+1. Migration: `gcal_sync_state`, `workflows`, `workflow_runs`, `workflow_run_steps` + crons
+2. GCal two-way sync (webhook + watch register + refresh cron)
+3. Workflow engine (trigger + tick edge functions)
+4. Wire up trigger calls across the app (report sent, pipeline moves, bookings)
+5. Frontend: Automations tab + React Flow builder + node config panels
+6. Runs viewer
+7. End-to-end test

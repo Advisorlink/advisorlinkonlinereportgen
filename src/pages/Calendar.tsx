@@ -96,7 +96,7 @@ export default function Calendar() {
             <p className="text-sm text-muted-foreground">Bookings, availability, and reminder templates.</p>
           </div>
           {settings && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <code className="text-xs px-3 py-2 rounded-md bg-muted text-foreground/80 truncate max-w-[260px]">{bookUrl}</code>
               <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(bookUrl); toast.success("Link copied"); }}>
                 <Copy className="w-4 h-4" />
@@ -104,8 +104,14 @@ export default function Calendar() {
               <Button variant="outline" size="icon" asChild>
                 <a href={bookUrl} target="_blank" rel="noopener"><ExternalLink className="w-4 h-4" /></a>
               </Button>
+              <Button variant="outline" size="sm" onClick={async () => {
+                const { data, error } = await supabase.functions.invoke("gcal-watch-register", { body: {} });
+                if (error || (data as { error?: string })?.error) toast.error((data as { error?: string })?.error || error?.message || "Failed");
+                else toast.success("Google Calendar two-way sync enabled");
+              }}>Enable GCal sync</Button>
             </div>
           )}
+
         </div>
 
         {loading || !settings ? (

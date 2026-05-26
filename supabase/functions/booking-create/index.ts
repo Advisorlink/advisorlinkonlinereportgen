@@ -4,6 +4,8 @@ import {
   formatInTz, brandedEmailHtml, sendGmail, sendAndLogSms,
   renderTemplate, appBaseUrl, normalizePhone, buildIcs,
 } from "../_shared/booking-utils.ts";
+import { fireWorkflowTrigger } from "../_shared/workflow-shared.ts";
+
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -235,6 +237,18 @@ Deno.serve(async (req) => {
     }
 
     await supabase.from("bookings").update({ confirmation_sent_at: new Date().toISOString() }).eq("id", booking.id);
+
+    await fireWorkflowTrigger("booking_created", {
+      client_name: clientName,
+      client_email: clientEmail,
+      client_phone: booking.client_phone,
+      booking_id: booking.id,
+      meeting_link: meetingLink,
+      date: dateStr,
+      time: timeStr,
+      timezone: tz,
+    });
+
 
     return json({
       ok: true,
