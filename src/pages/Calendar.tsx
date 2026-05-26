@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
-import { Copy, ExternalLink, Save } from "lucide-react";
+import { Copy, ExternalLink, Save, Send } from "lucide-react";
 
 const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
@@ -17,6 +17,9 @@ export default function Calendar() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [testEmail, setTestEmail] = useState("");
+  const [testPhone, setTestPhone] = useState("");
+  const [sendingTest, setSendingTest] = useState<string | null>(null);
 
   const reload = async () => {
     const [{ data: s }, { data: b }, { data: t }] = await Promise.all([
@@ -57,6 +60,19 @@ export default function Calendar() {
     }).eq("id", t.id);
     if (error) toast.error(error.message);
     else toast.success("Template saved");
+  };
+
+  const sendTest = async (kind: string) => {
+    const isEmail = kind.startsWith("email");
+    if (isEmail && !testEmail) { toast.error("Enter a test email address"); return; }
+    if (!isEmail && !testPhone) { toast.error("Enter a test phone number"); return; }
+    setSendingTest(kind);
+    const { data, error } = await supabase.functions.invoke("booking-test-reminder", {
+      body: { kind, email: testEmail || undefined, phone: testPhone || undefined },
+    });
+    setSendingTest(null);
+    if (error || (data as any)?.error) toast.error(error?.message || (data as any).error);
+    else toast.success(isEmail ? `Test email sent to ${testEmail}` : `Test SMS sent to ${testPhone}`);
   };
 
   const updateDay = (dow: number, idx: number, field: "start" | "end", v: string) => {
@@ -167,6 +183,18 @@ export default function Calendar() {
 
             <TabsContent value="reminders" className="space-y-3 mt-4">
               <p className="text-xs text-muted-foreground">Use merge fields: <code>{`{{client_name}}`}</code>, <code>{`{{date}}`}</code>, <code>{`{{time}}`}</code>, <code>{`{{client_timezone}}`}</code>, <code>{`{{meeting_link}}`}</code>, <code>{`{{reschedule_link}}`}</code>, <code>{`{{cancel_link}}`}</code>.</p>
+
+              <div className="rounded-xl border bg-card p-5 space-y-3">
+                <div>
+                  <div className="font-semibold">Send a test</div>
+                  <p className="text-xs text-muted-foreground">Save your changes first, then send a test of any template to your own email or phone. Uses a sample booking 24 hours from now.</p>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div><Label>Test email</Label><Input type="email" placeholder="you@example.com" value={testEmail} onChange={(e) => setTestEmail(e.target.value)}/></div>
+                  <div><Label>Test phone (SMS)</Label><Input type="tel" placeholder="+61 4XX XXX XXX" value={testPhone} onChange={(e) => setTestPhone(e.target.value)}/></div>
+                </div>
+              </div>
+
               {templates.map(t => (
                 <div key={t.id} className="rounded-xl border bg-card p-5 space-y-3">
                   <div className="flex items-center justify-between">
@@ -177,7 +205,12 @@ export default function Calendar() {
                     <div><Label>Subject</Label><Input value={t.subject ?? ""} onChange={(e) => setTemplates(templates.map(x => x.id === t.id ? { ...x, subject: e.target.value } : x))}/></div>
                   )}
                   <div><Label>Message</Label><Textarea rows={5} value={t.body} onChange={(e) => setTemplates(templates.map(x => x.id === t.id ? { ...x, body: e.target.value } : x))}/></div>
-                  <Button size="sm" onClick={() => saveTemplate(t)}><Save className="w-4 h-4 mr-2"/>Save</Button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button size="sm" onClick={() => saveTemplate(t)}><Save className="w-4 h-4 mr-2"/>Save</Button>
+                    <Button size="sm" variant="outline" disabled={sendingTest === t.kind} onClick={() => sendTest(t.kind)}>
+                      <Send className="w-4 h-4 mr-2"/>{sendingTest === t.kind ? "Sending…" : `Send test ${t.kind.startsWith("email") ? "email" : "SMS"}`}
+                    </Button>
+                  </div>
                 </div>
               ))}
             </TabsContent>
