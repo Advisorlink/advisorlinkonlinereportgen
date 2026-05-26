@@ -144,25 +144,63 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
           </p>
         </DialogHeader>
 
-        {/* Quick send to default folder */}
-        <div className="mx-5 mb-2 flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+        {/* Quick send to default folder - optionally create a named subfolder first */}
+        <div className="mx-5 mb-2 rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
           <div className="flex items-center gap-2 min-w-0">
             <Folder className="w-4 h-4 text-primary shrink-0" />
             <div className="min-w-0">
               <div className="text-sm font-medium truncate">{DEFAULT_FOLDER_NAME}</div>
-              <div className="text-[11px] text-muted-foreground">One-click send to your default Drive folder</div>
+              <div className="text-[11px] text-muted-foreground">
+                Type a subfolder name (e.g. client name) — we'll create it inside the default folder and send the files there. Leave blank to send straight to the default folder.
+              </div>
             </div>
           </div>
-          <Button
-            size="sm"
-            onClick={() => sendToFolder(DEFAULT_FOLDER_ID, DEFAULT_FOLDER_NAME)}
-            disabled={sending}
-            className="shrink-0 gap-1.5"
-          >
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            Send here
-          </Button>
+          <div className="flex gap-2">
+            <Input
+              placeholder="New subfolder name (optional)"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              className="h-9"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  (document.getElementById("send-to-default-btn") as HTMLButtonElement)?.click();
+                }
+              }}
+            />
+            <Button
+              id="send-to-default-btn"
+              size="sm"
+              onClick={async () => {
+                const name = newFolderName.trim();
+                if (!name) {
+                  await sendToFolder(DEFAULT_FOLDER_ID, DEFAULT_FOLDER_NAME);
+                  return;
+                }
+                setSending(true);
+                try {
+                  const { data, error } = await supabase.functions.invoke("gdrive-send", {
+                    body: { action: "create_folder", parent: DEFAULT_FOLDER_ID, name },
+                  });
+                  if (error) throw error;
+                  const folder = (data as any)?.folder as DriveFolder | undefined;
+                  if (!folder?.id) throw new Error("Folder not created");
+                  setNewFolderName("");
+                  await sendToFolder(folder.id, folder.name);
+                } catch (e: any) {
+                  toast.error("Couldn't create subfolder", { description: e?.message });
+                  setSending(false);
+                }
+              }}
+              disabled={sending}
+              className="shrink-0 gap-1.5"
+            >
+              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+              Send
+            </Button>
+          </div>
         </div>
+
 
 
         {/* Breadcrumb / back */}
