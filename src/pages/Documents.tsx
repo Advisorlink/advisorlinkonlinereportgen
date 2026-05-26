@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CRMLayout } from "@/components/CRMLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,11 +10,13 @@ import { toast } from "sonner";
 import {
   Eye, FileText, Image as ImageIcon, RefreshCw, Search, Send, Shield,
   Trash2, ChevronRight, ArrowLeft, Mail, Phone, Calendar, FileCheck2, X, HardDrive, Pencil, Check, FileEdit,
+  Upload,
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { SendUploadLinkDialog } from "@/components/documents/SendUploadLinkDialog";
 import { GoogleDriveFolderPicker } from "@/components/documents/GoogleDriveFolderPicker";
+import { useAuth } from "@/hooks/useAuth";
 
 type ClientDocument = {
   id: string;
