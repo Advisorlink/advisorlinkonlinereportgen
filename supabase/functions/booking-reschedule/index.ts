@@ -93,7 +93,19 @@ Deno.serve(async (req) => {
       } catch (e) { console.warn("sms failed", e); }
     }
 
+    await fireWorkflowTrigger("booking_rescheduled", {
+      client_name: booking.client_name,
+      client_email: booking.client_email,
+      client_phone: booking.client_phone,
+      booking_id: booking.id,
+      meeting_link: meetingLink,
+      date: dateStr,
+      time: timeStr,
+      timezone: tz,
+    });
+
     return json({ ok: true, dateStr, timeStr, tz });
+
   } catch (e) {
     console.error("reschedule error", e);
     return json({ error: (e as Error).message }, 500);
