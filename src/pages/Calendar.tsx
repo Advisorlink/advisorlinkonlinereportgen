@@ -17,6 +17,9 @@ export default function Calendar() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [testEmail, setTestEmail] = useState("");
+  const [testPhone, setTestPhone] = useState("");
+  const [sendingTest, setSendingTest] = useState<string | null>(null);
 
   const reload = async () => {
     const [{ data: s }, { data: b }, { data: t }] = await Promise.all([
