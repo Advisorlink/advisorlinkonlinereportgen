@@ -483,11 +483,16 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
           /* Hide any baked-in widget appearance stream (e.g. canvas/svg the
              annotation layer paints under the input showing the field's saved
              "$0" / "0.00" value). The live HTML input above shows the current
-             value, so the underlay just produces ghost text. */
+             value, so the underlay just produces ghost text.
+             IMPORTANT: use visibility:hidden (not display:none) so pdfjs's
+             internal element refs still resolve. display:none breaks the
+             annotation layer's wiring into annotationStorage and causes
+             saveDocument() to write a blank PDF. */
           .pdf-form-editor .annotationLayer .textWidgetAnnotation > :not(input):not(textarea),
           .pdf-form-editor .annotationLayer .textWidgetAnnotation canvas,
           .pdf-form-editor .annotationLayer .textWidgetAnnotation svg {
-            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
           }
           .pdf-form-editor .annotationLayer .textWidgetAnnotation {
             background: #ffffff;
