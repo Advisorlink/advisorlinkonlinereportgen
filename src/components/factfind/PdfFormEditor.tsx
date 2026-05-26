@@ -218,10 +218,71 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    /**
+     * Walk every form widget in the rendered annotation layer and push the
+     * user's current value into the PDF's annotationStorage. Safety net before
+     * saving: pdfjs scripting/storage wiring can silently fail (sandbox load
+     * issues etc.) and leave the saved PDF blank.
+     */
+    const forceSyncAllFieldsToStorage = () => {
+      const pdf = pdfRef.current;
+      const container = containerRef.current;
+      if (!pdf || !container) return;
+      const storage = (pdf as unknown as { annotationStorage: AnnotationStorageLike })
+        .annotationStorage;
+      if (!storage?.setValue) return;
+
+      const widgets = container.querySelectorAll<HTMLElement>(
+        ".annotationLayer [data-annotation-id], .annotationLayer [data-element-id]",
+      );
+      widgets.forEach((widget) => {
+        const id =
+          widget.getAttribute("data-element-id") ||
+          widget.getAttribute("data-annotation-id");
+        if (!id) return;
+        const input = (widget.matches("input,textarea,select")
+          ? widget
+          : widget.querySelector("input,textarea,select")) as
+          | HTMLInputElement
+          | HTMLTextAreaElement
+          | HTMLSelectElement
+          | null;
+        if (!input) return;
+        try {
+          if (
+            input instanceof HTMLInputElement &&
+            (input.type === "checkbox" || input.type === "radio")
+          ) {
+            storage.setValue(id, { value: input.checked });
+          } else if (input instanceof HTMLSelectElement) {
+            const values = Array.from(input.selectedOptions).map((o) => o.value);
+            storage.setValue(id, {
+              value: input.multiple ? values : values[0] ?? "",
+            });
+          } else {
+            storage.setValue(id, { value: input.value ?? "" });
+          }
+        } catch {
+          /* ignore individual field sync failures */
+        }
+      });
+    };
+
     useImperativeHandle(ref, () => ({
       async getFilledPdfBytes() {
         if (!pdfRef.current) throw new Error("PDF not loaded");
+        // Commit any focused field first so its value is in the DOM
+        const active = document.activeElement as HTMLElement | null;
+        if (
+          active &&
+          (active.tagName === "INPUT" ||
+            active.tagName === "TEXTAREA" ||
+            active.tagName === "SELECT")
+        ) {
+          active.blur();
+        }
         manualCalculationSyncRef.current?.();
+        forceSyncAllFieldsToStorage();
         await scriptingRef.current?.dispatchWillSave?.();
         const bytes = await pdfRef.current.saveDocument();
         await scriptingRef.current?.dispatchDidSave?.();
