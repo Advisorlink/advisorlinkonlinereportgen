@@ -539,12 +539,14 @@ function FileTile({
   onDelete,
   onSendToDrive,
   onRename,
+  onEdit,
 }: {
   doc: ClientDocument;
   onPreview: () => void;
   onDelete: () => void;
   onSendToDrive?: () => void;
   onRename?: (name: string) => void;
+  onEdit?: () => void;
 }) {
   const isImage = doc.mime_type?.startsWith("image/");
   const isPdf = doc.mime_type === "application/pdf";
