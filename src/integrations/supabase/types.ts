@@ -398,6 +398,165 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_reminder_templates: {
+        Row: {
+          body: string
+          id: string
+          is_active: boolean
+          kind: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          id?: string
+          is_active?: boolean
+          kind: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      booking_settings: {
+        Row: {
+          buffer_minutes: number
+          created_at: string
+          host_email: string | null
+          host_name: string
+          host_title: string | null
+          id: number
+          max_days_ahead: number
+          max_per_day: number
+          meeting_description: string | null
+          meeting_duration_minutes: number
+          meeting_link: string | null
+          meeting_title: string
+          min_notice_hours: number
+          slug: string
+          timezone: string
+          updated_at: string
+          weekly_availability: Json
+        }
+        Insert: {
+          buffer_minutes?: number
+          created_at?: string
+          host_email?: string | null
+          host_name?: string
+          host_title?: string | null
+          id?: number
+          max_days_ahead?: number
+          max_per_day?: number
+          meeting_description?: string | null
+          meeting_duration_minutes?: number
+          meeting_link?: string | null
+          meeting_title?: string
+          min_notice_hours?: number
+          slug?: string
+          timezone?: string
+          updated_at?: string
+          weekly_availability?: Json
+        }
+        Update: {
+          buffer_minutes?: number
+          created_at?: string
+          host_email?: string | null
+          host_name?: string
+          host_title?: string | null
+          id?: number
+          max_days_ahead?: number
+          max_per_day?: number
+          meeting_description?: string | null
+          meeting_duration_minutes?: number
+          meeting_link?: string | null
+          meeting_title?: string
+          min_notice_hours?: number
+          slug?: string
+          timezone?: string
+          updated_at?: string
+          weekly_availability?: Json
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          cancel_token: string
+          cancelled_at: string | null
+          client_email: string
+          client_name: string
+          client_phone: string | null
+          client_timezone: string
+          confirmation_sent_at: string | null
+          contact_id: string | null
+          created_at: string
+          end_at: string
+          google_event_id: string | null
+          id: string
+          meeting_link: string | null
+          notes: string | null
+          reminder_1h_sent_at: string | null
+          reminder_24h_sent_at: string | null
+          reschedule_token: string
+          source: string | null
+          start_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cancel_token?: string
+          cancelled_at?: string | null
+          client_email: string
+          client_name: string
+          client_phone?: string | null
+          client_timezone?: string
+          confirmation_sent_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          end_at: string
+          google_event_id?: string | null
+          id?: string
+          meeting_link?: string | null
+          notes?: string | null
+          reminder_1h_sent_at?: string | null
+          reminder_24h_sent_at?: string | null
+          reschedule_token?: string
+          source?: string | null
+          start_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cancel_token?: string
+          cancelled_at?: string | null
+          client_email?: string
+          client_name?: string
+          client_phone?: string | null
+          client_timezone?: string
+          confirmation_sent_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          end_at?: string
+          google_event_id?: string | null
+          id?: string
+          meeting_link?: string | null
+          notes?: string | null
+          reminder_1h_sent_at?: string | null
+          reminder_24h_sent_at?: string | null
+          reschedule_token?: string
+          source?: string | null
+          start_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_documents: {
         Row: {
           client_email: string
@@ -1663,6 +1822,22 @@ export type Database = {
       complete_signing: {
         Args: { _signed_pdf_path: string; _token: string }
         Returns: undefined
+      }
+      get_booking_by_token: {
+        Args: { _token: string }
+        Returns: {
+          client_email: string
+          client_name: string
+          client_phone: string
+          client_timezone: string
+          end_at: string
+          id: string
+          meeting_link: string
+          notes: string
+          start_at: string
+          status: string
+          token_kind: string
+        }[]
       }
       get_esign_doc_by_token: {
         Args: { _token: string }
