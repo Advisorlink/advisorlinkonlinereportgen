@@ -138,12 +138,27 @@ Deno.serve(async (req) => {
       cancel_link: cancelLink,
     };
 
-    // Confirmation email (client)
+    // Build ICS for both emails
+    const ics = {
+      filename: "advisor-link-booking.ics",
+      content: buildIcs({
+        uid: `${booking.id}@advisorlinkonline.com.au`,
+        start, end,
+        summary: `${settings.meeting_title} — ${clientName}`,
+        description: `Strategy call with Travis Seckold.\nJoin: ${meetingLink}\nReschedule: ${rescheduleLink}\nCancel: ${cancelLink}`,
+        location: meetingLink,
+        organizerEmail: settings.host_email || "travis@advisorlinkonline.com.au",
+        attendeeEmail: clientEmail,
+        attendeeName: clientName,
+      }),
+    };
+
+    // Confirmation email (client) — with .ics attachment
     try {
       const html = brandedEmailHtml({
         preheader: `You're booked for ${dateStr} at ${timeStr}`,
         heading: `You're booked in, ${clientName.split(" ")[0]}!`,
-        intro: `Your ${settings.meeting_duration_minutes}-minute strategy call with Travis is locked in. We'll see you at the time below — full details and your join link are saved for you.`,
+        intro: `Your ${settings.meeting_duration_minutes}-minute strategy call with Travis is locked in. Add it to your calendar with the attached invite — full details and your join link are below.`,
         details: [
           { label: "Date", value: dateStr },
           { label: "Time", value: `${timeStr} (${tz})` },
@@ -157,10 +172,10 @@ Deno.serve(async (req) => {
         ],
         footerNote: "If anything changes, use the reschedule or cancel links above — no need to email back.",
       });
-      await sendGmail(clientEmail, `Confirmed: ${dateStr} at ${timeStr} with Travis`, html);
+      await sendGmail(clientEmail, `Confirmed: ${dateStr} at ${timeStr} with Travis`, html, ics);
     } catch (e) { console.warn("client email failed", e); }
 
-    // Host notification
+    // Host notification — also with .ics
     try {
       if (settings.host_email) {
         const html = brandedEmailHtml({
@@ -175,7 +190,7 @@ Deno.serve(async (req) => {
           ],
           primaryCta: { label: "Open Google Calendar", url: "https://calendar.google.com/" },
         });
-        await sendGmail(settings.host_email, `New booking: ${clientName} — ${dateStr}`, html);
+        await sendGmail(settings.host_email, `New booking: ${clientName} — ${dateStr}`, html, ics);
       }
     } catch (e) { console.warn("host email failed", e); }
 
