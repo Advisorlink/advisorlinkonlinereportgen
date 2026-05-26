@@ -174,8 +174,20 @@ export default function Messages() {
           (d: any) => (d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))
         );
       }
+      const cf = (c.custom_fields || {}) as Record<string, any>;
+      const contactFields = {
+        age: cf.age ?? null,
+        state: cf.state ?? null,
+        super_fund_name: cf.super_fund_name ?? null,
+        super_balance: cf.super_balance != null && cf.super_balance !== "" ? Number(cf.super_balance) : null,
+        had_review_before:
+          cf.had_review_before === true ? true : cf.had_review_before === false ? false : null,
+        source: c.lead_source ?? null,
+        notes: c.notes ?? null,
+      };
+
       if (!deal) {
-        // Create a new deal in the first stage
+        // Create a new deal in the first stage with all contact info auto-filled
         let stages = pipelineStages;
         if (!stages.length) {
           const { data: s } = await supabase.from("pipeline_stages").select("*").order("position");
@@ -203,6 +215,7 @@ export default function Messages() {
             client_phone: c.phone || null,
             stage_id: firstStage.id,
             position: nextPos,
+            ...contactFields,
           } as any)
           .select("*")
           .single();
@@ -211,6 +224,21 @@ export default function Messages() {
           return;
         }
         deal = created;
+      } else {
+        // Backfill any missing fields on the existing deal from the contact
+        const patch: Record<string, any> = {};
+        for (const [k, v] of Object.entries(contactFields)) {
+          if ((deal as any)[k] == null && v != null) patch[k] = v;
+        }
+        if (Object.keys(patch).length) {
+          const { data: updated } = await supabase
+            .from("pipeline_deals")
+            .update(patch as any)
+            .eq("id", deal.id)
+            .select("*")
+            .single();
+          if (updated) deal = updated;
+        }
       }
       setProfileDeal(deal);
       setProfileOpen(true);
