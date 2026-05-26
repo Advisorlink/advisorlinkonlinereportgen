@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import {
-  CORS, json, formatInTz, brandedEmailHtml, sendGmail, sendSmsViaTwilio,
+  CORS, json, formatInTz, brandedEmailHtml, sendGmail, sendAndLogSms,
   renderTemplate, appBaseUrl,
 } from "../_shared/booking-utils.ts";
 
