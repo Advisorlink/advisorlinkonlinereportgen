@@ -903,12 +903,16 @@ function ContactPanelContent({
   teamMembers,
   onReassign,
   onClose,
+  onOpenFullProfile,
+  loadingFullProfile,
   isSheet = false,
 }: {
   conversation: Conversation;
   teamMembers: { id: string; email: string }[];
   onReassign: (userId: string) => void;
   onClose: () => void;
+  onOpenFullProfile?: () => void;
+  loadingFullProfile?: boolean;
   isSheet?: boolean;
 }) {
   const c = conversation.sms_contacts;
