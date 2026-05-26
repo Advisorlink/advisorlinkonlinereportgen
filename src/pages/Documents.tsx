@@ -555,15 +555,35 @@ function ClientCard({
   group,
   onOpen,
   onDelete,
+  onDropFiles,
 }: {
   group: ClientGroup;
   onOpen: () => void;
   onDelete: () => void;
+  onDropFiles: (files: File[]) => void;
 }) {
   const types = Array.from(new Set(group.items.map((i) => i.document_type)));
+  const [dragOver, setDragOver] = useState(false);
   return (
     <div
-      className="group relative rounded-2xl border bg-card hover:border-primary/40 hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 overflow-hidden"
+      onDragOver={(e) => {
+        if (e.dataTransfer.types?.includes("Files")) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+          if (!dragOver) setDragOver(true);
+        }
+      }}
+      onDragLeave={(e) => {
+        if (e.currentTarget === e.target) setDragOver(false);
+      }}
+      onDrop={(e) => {
+        if (e.dataTransfer.files?.length) {
+          e.preventDefault();
+          setDragOver(false);
+          onDropFiles(Array.from(e.dataTransfer.files));
+        }
+      }}
+      className={`group relative rounded-2xl border bg-card hover:border-primary/40 hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 overflow-hidden ${dragOver ? "ring-2 ring-primary border-primary" : ""}`}
     >
       <button onClick={onOpen} className="block w-full text-left">
         <div className="p-5">
@@ -599,6 +619,13 @@ function ClientCard({
           <span>{formatDistanceToNow(new Date(group.latest), { addSuffix: true })}</span>
         </div>
       </button>
+      {dragOver && (
+        <div className="absolute inset-0 bg-primary/10 backdrop-blur-[1px] grid place-items-center pointer-events-none">
+          <div className="flex items-center gap-2 text-primary font-semibold text-sm bg-background/90 px-3 py-1.5 rounded-full border border-primary/40 shadow">
+            <Upload className="w-4 h-4" /> Drop to add to {group.name.split(" ")[0]}
+          </div>
+        </div>
+      )}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -612,6 +639,57 @@ function ClientCard({
     </div>
   );
 }
+
+function ClientDropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [over, setOver] = useState(false);
+  return (
+    <div className="px-5 pt-3">
+      <div
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => {
+          if (e.dataTransfer.types?.includes("Files")) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+            if (!over) setOver(true);
+          }
+        }}
+        onDragLeave={(e) => {
+          if (e.currentTarget === e.target) setOver(false);
+        }}
+        onDrop={(e) => {
+          if (e.dataTransfer.files?.length) {
+            e.preventDefault();
+            setOver(false);
+            onFiles(Array.from(e.dataTransfer.files));
+          }
+        }}
+        className={`flex items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-4 text-sm cursor-pointer transition-all ${
+          over
+            ? "border-primary bg-primary/10 text-primary"
+            : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground hover:bg-muted/40"
+        }`}
+      >
+        <Upload className="w-4 h-4" />
+        <span>
+          {over ? "Drop files to add to this client" : "Drag & drop files here, or click to browse"}
+        </span>
+        <input
+          ref={inputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            const files = Array.from(e.target.files || []);
+            e.target.value = "";
+            if (files.length) onFiles(files);
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 
 function FileTile({
   doc,
