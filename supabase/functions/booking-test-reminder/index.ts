@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
           { label: "Reschedule", url: vars.reschedule_link },
           { label: "Cancel", url: vars.cancel_link },
         ],
-        footerNote: "TEST — no real booking was created.",
+        footerNote: "TEST. No real booking was created.",
       });
       results.email = await sendGmail(to, `[TEST] ${subject}`, html);
       results.email_to = to;
