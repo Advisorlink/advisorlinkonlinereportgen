@@ -8,6 +8,10 @@ import { Folder, ChevronRight, ArrowLeft, Loader2, Search, Check, HardDrive, Fol
 
 type DriveFolder = { id: string; name: string };
 
+// Default destination folder in Google Drive (My Drive › ...)
+const DEFAULT_FOLDER_ID = "1ntFxL3PqQxM36x4BoS789yRbfZddLRm4";
+const DEFAULT_FOLDER_NAME = "Default client folder";
+
 type Props = {
   open: boolean;
   onOpenChange: (o: boolean) => void;
