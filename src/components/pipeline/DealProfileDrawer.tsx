@@ -120,8 +120,36 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
       setProgress(Array.isArray(d.progress_stages) ? d.progress_stages : []);
       setOriginalStageId(deal.stage_id);
       fetchNotes(deal.id);
+      fetchClientDocs(deal.client_email, deal.client_phone);
     }
   }, [deal]);
+
+  const fetchClientDocs = useCallback(async (email?: string | null, phone?: string | null) => {
+    const e = (email || "").trim().toLowerCase();
+    const phoneDigits = (phone || "").replace(/\D+/g, "");
+    if (!e && phoneDigits.length < 6) { setClientDocs([]); return; }
+    let q = supabase.from("client_documents").select("*").order("created_at", { ascending: false }).limit(50);
+    if (e) q = q.ilike("client_email", e);
+    const { data } = await q;
+    let rows = data || [];
+    if (!rows.length && phoneDigits.length >= 6) {
+      const { data: byPhone } = await supabase
+        .from("client_documents").select("*").order("created_at", { ascending: false }).limit(100);
+      rows = (byPhone || []).filter((r: any) =>
+        (r.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))
+      );
+    }
+    setClientDocs(rows);
+  }, []);
+
+  const openClientDoc = async (path: string) => {
+    const { data, error } = await supabase.storage.from("client-documents").createSignedUrl(path, 60 * 10);
+    if (error || !data?.signedUrl) {
+      toast({ title: "Couldn't open file", variant: "destructive" });
+      return;
+    }
+    window.open(data.signedUrl, "_blank");
+  };
 
   const toggleMilestone = async (key: string) => {
     if (!deal) return;
