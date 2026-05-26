@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import {
   CORS, json, GCAL_BASE, gcalHeaders,
-  generateSlotsForDate, formatInTz,
+  generateSlotsForDate, formatInTz, isoDateInTz,
 } from "../_shared/booking-utils.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
