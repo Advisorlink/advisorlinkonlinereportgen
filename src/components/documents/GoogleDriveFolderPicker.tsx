@@ -103,21 +103,17 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
     }
   };
 
-  const sendHere = async () => {
-    if (!current.id) {
-      toast.error("Pick a folder", { description: "Open a folder first or create one in Google Drive." });
-      return;
-    }
+  const sendToFolder = async (folderId: string, folderName: string) => {
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("gdrive-send", {
-        body: { action: "send", folder_id: current.id, doc_ids: docIds },
+        body: { action: "send", folder_id: folderId, doc_ids: docIds },
       });
       if (error) throw error;
       const results = (data as any)?.results || [];
       const ok = results.filter((r: any) => r.ok).length;
       const fail = results.length - ok;
-      if (ok > 0) toast.success(`Sent ${ok} file${ok > 1 ? "s" : ""} to ${current.name}`);
+      if (ok > 0) toast.success(`Sent ${ok} file${ok > 1 ? "s" : ""} to ${folderName}`);
       if (fail > 0) toast.error(`${fail} file${fail > 1 ? "s" : ""} failed`);
       onOpenChange(false);
       onSent?.();
@@ -126,6 +122,14 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
     } finally {
       setSending(false);
     }
+  };
+
+  const sendHere = async () => {
+    if (!current.id) {
+      toast.error("Pick a folder", { description: "Open a folder first or create one in Google Drive." });
+      return;
+    }
+    await sendToFolder(current.id, current.name);
   };
 
   return (
