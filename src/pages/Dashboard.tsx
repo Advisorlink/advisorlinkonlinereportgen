@@ -3,14 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { CRMLayout } from "@/components/CRMLayout";
-import { FileText, Gift, Monitor, Users, TrendingUp, ArrowRight, Sparkles } from "lucide-react";
+import { FileText, Gift, Monitor, Users, TrendingUp, ArrowRight, Sparkles, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BookAppointmentDialog } from "@/components/booking/BookAppointmentDialog";
 
 export default function Dashboard() {
   const nav = useNavigate();
   const { profile, loading } = useAuth();
   const [stats, setStats] = useState({ reports: 0, referrals: 0, meetings: 0, leads: 0 });
   const [recentReports, setRecentReports] = useState<Array<{ id: string; client_name: string; created_at: string }>>([]);
+  const [bookOpen, setBookOpen] = useState(false);
 
   useEffect(() => {
     if (!profile?.is_owner) return;
@@ -86,6 +88,13 @@ export default function Dashboard() {
                 <span className="flex items-center gap-2.5"><Monitor className="w-4 h-4" /> Start Presentation</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
+              <Button
+                className="w-full justify-between h-12 bg-cyan text-navy hover:bg-cyan-glow border-0 shadow-lg shadow-cyan/20 transition-all"
+                onClick={() => setBookOpen(true)}
+              >
+                <span className="flex items-center gap-2.5"><CalendarPlus className="w-4 h-4" /> Book a Call</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
               <Button variant="outline" className="w-full justify-between h-11 hover:bg-muted/50" onClick={() => nav("/")}>
                 <span className="flex items-center gap-2.5"><FileText className="w-4 h-4" /> Generate Report</span>
                 <ArrowRight className="w-4 h-4" />
@@ -144,6 +153,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      <BookAppointmentDialog open={bookOpen} onOpenChange={setBookOpen} />
     </CRMLayout>
   );
 }

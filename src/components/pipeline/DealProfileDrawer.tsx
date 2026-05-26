@@ -15,8 +15,9 @@ import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, DollarSign, Tag, StickyNote,
   MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark, ArrowLeft,
-  ListChecks, Check,
+  ListChecks, Check, CalendarPlus,
 } from "lucide-react";
+import { BookAppointmentDialog } from "@/components/booking/BookAppointmentDialog";
 
 const PROGRESS_MILESTONES: { key: string; label: string }[] = [
   { key: "email_sent", label: "Email sent" },
@@ -93,6 +94,7 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
   const [addingNote, setAddingNote] = useState(false);
   const [progress, setProgress] = useState<string[]>([]);
   const [progressSaving, setProgressSaving] = useState<string | null>(null);
+  const [bookOpen, setBookOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -455,6 +457,23 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
               <Mail className="w-3.5 h-3.5" /> Email
             </Button>
           </div>
+
+          {/* Book appointment */}
+          <Button
+            onClick={() => setBookOpen(true)}
+            disabled={!form.client_email}
+            className="w-full gap-2 gradient-accent text-white border-0 shadow-lg shadow-cyan/20 h-11"
+          >
+            <CalendarPlus className="w-4 h-4" /> Book Appointment / Presentation
+          </Button>
+          <BookAppointmentDialog
+            open={bookOpen}
+            onOpenChange={setBookOpen}
+            prefill={{ clientName: form.client_name, clientEmail: form.client_email, clientPhone: form.client_phone }}
+            dealId={deal?.id || null}
+            onBooked={() => { onDealUpdated(); setBookOpen(false); }}
+          />
+
 
 
 
