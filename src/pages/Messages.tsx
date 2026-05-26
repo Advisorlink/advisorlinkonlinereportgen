@@ -1040,6 +1040,17 @@ function ContactPanelContent({
       </div>
 
       <div className="p-4 space-y-5">
+        {onOpenFullProfile && (
+          <Button
+            onClick={onOpenFullProfile}
+            disabled={loadingFullProfile}
+            className="w-full gradient-accent text-white border-0 shadow-md gap-2 h-10"
+          >
+            <User className="w-4 h-4" />
+            {loadingFullProfile ? "Loading…" : "Open full client profile"}
+          </Button>
+        )}
+
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5 flex items-center gap-1.5">
             <UserCog className="w-3 h-3" /> Assigned to
