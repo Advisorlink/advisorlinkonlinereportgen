@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import {
   CORS, json, GCAL_BASE, gcalHeaders,
   formatInTz, brandedEmailHtml, sendGmail, sendSmsViaTwilio,
-  renderTemplate, appBaseUrl, normalizePhone,
+  renderTemplate, appBaseUrl, normalizePhone, buildIcs,
 } from "../_shared/booking-utils.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -12,7 +12,10 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   try {
     const body = await req.json();
-    const { startAt, clientName, clientEmail, clientPhone, clientTimezone, notes, slug = "travis" } = body;
+    const {
+      startAt, clientName, clientEmail, clientPhone, clientTimezone, notes,
+      slug = "travis", dealId = null, source = "public",
+    } = body;
     if (!startAt || !clientName || !clientEmail) {
       return json({ error: "Missing required fields" }, 400);
     }
@@ -30,6 +33,7 @@ Deno.serve(async (req) => {
 
     const tz = clientTimezone || settings.timezone;
     const meetingLink = settings.meeting_link || `${appBaseUrl()}/phone`;
+    const phoneNorm = normalizePhone(clientPhone);
 
     // Conflict check
     const { data: clash } = await supabase
@@ -41,24 +45,58 @@ Deno.serve(async (req) => {
       .limit(1);
     if (clash && clash.length > 0) return json({ error: "Slot no longer available" }, 409);
 
+    // Auto-link to pipeline deal
+    let linkedDealId: string | null = dealId;
+    if (!linkedDealId) {
+      const orParts: string[] = [];
+      if (clientEmail) orParts.push(`client_email.ilike.${clientEmail}`);
+      if (phoneNorm) orParts.push(`client_phone.ilike.%${phoneNorm.slice(-9)}%`);
+      if (orParts.length) {
+        const { data: deals } = await supabase
+          .from("pipeline_deals").select("id").or(orParts.join(",")).limit(1);
+        if (deals && deals.length) linkedDealId = deals[0].id;
+      }
+    }
+
     // Insert booking
     const { data: booking, error: insErr } = await supabase
       .from("bookings")
       .insert({
         client_name: clientName,
         client_email: clientEmail,
-        client_phone: normalizePhone(clientPhone),
+        client_phone: phoneNorm,
         client_timezone: tz,
         notes: notes || null,
         start_at: start.toISOString(),
         end_at: end.toISOString(),
         meeting_link: meetingLink,
+        contact_id: linkedDealId,
+        source,
       })
       .select()
       .single();
     if (insErr || !booking) {
       console.error("insert error", insErr);
       return json({ error: "Failed to save booking" }, 500);
+    }
+
+    // Update linked deal: add a note + mark presentation_booked milestone
+    if (linkedDealId) {
+      try {
+        const dateLabel = formatInTz(start, tz, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
+        await supabase.from("pipeline_deal_notes").insert({
+          deal_id: linkedDealId,
+          content: `📅 Appointment booked for ${dateLabel} (${tz}). Meeting link: ${meetingLink}`,
+        });
+        const { data: d } = await supabase
+          .from("pipeline_deals").select("progress_stages").eq("id", linkedDealId).single();
+        const cur: string[] = Array.isArray((d as any)?.progress_stages) ? (d as any).progress_stages : [];
+        if (!cur.includes("presentation_booked")) {
+          await supabase.from("pipeline_deals")
+            .update({ progress_stages: [...cur, "presentation_booked"] })
+            .eq("id", linkedDealId);
+        }
+      } catch (e) { console.warn("deal link failed", e); }
     }
 
     // Create Google Calendar event
