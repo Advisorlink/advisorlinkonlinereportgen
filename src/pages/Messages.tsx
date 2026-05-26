@@ -139,6 +139,86 @@ export default function Messages() {
   // Team members for assignment
   const [teamMembers, setTeamMembers] = useState<{ id: string; email: string }[]>([]);
 
+  // Unified Pipeline-style profile (shared between Pipeline & Messages)
+  const [pipelineStages, setPipelineStages] = useState<{ id: string; name: string; color: string; position: number }[]>([]);
+  const [profileDeal, setProfileDeal] = useState<any | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+
+  const fetchPipelineStages = useCallback(async () => {
+    const { data } = await supabase.from("pipeline_stages").select("*").order("position");
+    if (data) setPipelineStages(data as any);
+  }, []);
+
+  const openFullProfile = useCallback(async (conv: Conversation) => {
+    setLoadingProfile(true);
+    try {
+      const c = conv.sms_contacts;
+      const phoneDigits = (c.phone || "").replace(/\D+/g, "");
+      let deal: any = null;
+      if (c.email) {
+        const { data } = await supabase
+          .from("pipeline_deals")
+          .select("*")
+          .ilike("client_email", c.email)
+          .limit(1)
+          .maybeSingle();
+        if (data) deal = data;
+      }
+      if (!deal && phoneDigits.length >= 6) {
+        const { data: all } = await supabase
+          .from("pipeline_deals")
+          .select("*")
+          .not("client_phone", "is", null);
+        deal = (all || []).find(
+          (d: any) => (d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))
+        );
+      }
+      if (!deal) {
+        // Create a new deal in the first stage
+        let stages = pipelineStages;
+        if (!stages.length) {
+          const { data: s } = await supabase.from("pipeline_stages").select("*").order("position");
+          stages = (s as any) || [];
+          setPipelineStages(stages);
+        }
+        const firstStage = stages[0];
+        if (!firstStage) {
+          toast({ title: "No pipeline stages set up", variant: "destructive" });
+          return;
+        }
+        const { data: maxRow } = await supabase
+          .from("pipeline_deals")
+          .select("position")
+          .eq("stage_id", firstStage.id)
+          .order("position", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        const nextPos = ((maxRow as any)?.position ?? -1) + 1;
+        const { data: created, error } = await supabase
+          .from("pipeline_deals")
+          .insert({
+            client_name: c.full_name || "Unnamed",
+            client_email: c.email || null,
+            client_phone: c.phone || null,
+            stage_id: firstStage.id,
+            position: nextPos,
+          } as any)
+          .select("*")
+          .single();
+        if (error) {
+          toast({ title: "Could not create deal", description: error.message, variant: "destructive" });
+          return;
+        }
+        deal = created;
+      }
+      setProfileDeal(deal);
+      setProfileOpen(true);
+    } finally {
+      setLoadingProfile(false);
+    }
+  }, [pipelineStages]);
+
   const fetchConversations = useCallback(async () => {
     const { data, error } = await supabase
       .from("sms_conversations")
