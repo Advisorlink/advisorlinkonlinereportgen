@@ -30,6 +30,10 @@ import UploadDocuments from "./pages/UploadDocuments.tsx";
 import StatementUpload from "./pages/StatementUpload.tsx";
 import LicenseUpload from "./pages/LicenseUpload.tsx";
 import Documents from "./pages/Documents.tsx";
+import Calendar from "./pages/Calendar.tsx";
+import BookPublic from "./pages/BookPublic.tsx";
+import ReschedulePublic from "./pages/ReschedulePublic.tsx";
+import CancelPublic from "./pages/CancelPublic.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -66,6 +70,10 @@ const App = () => (
                   <Route path="/upload-statement" element={<StatementUpload />} />
                   <Route path="/upload-license" element={<LicenseUpload />} />
                   <Route path="/documents" element={<ProtectedApp><Documents /></ProtectedApp>} />
+                  <Route path="/calendar" element={<ProtectedApp><Calendar /></ProtectedApp>} />
+                  <Route path="/book/:slug" element={<BookPublic />} />
+                  <Route path="/reschedule/:token" element={<ReschedulePublic />} />
+                  <Route path="/cancel/:token" element={<CancelPublic />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <SoftphoneDock />
