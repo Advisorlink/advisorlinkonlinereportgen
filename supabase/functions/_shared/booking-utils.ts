@@ -182,6 +182,9 @@ export function appBaseUrl(): string {
 export interface IcsAttachment { filename: string; content: string; }
 
 export async function sendGmail(to: string, subject: string, html: string, ics?: IcsAttachment) {
+  // Strip em/en dashes from outgoing copy (subject + body).
+  subject = subject.replace(/[—–]/g, "-");
+  html = html.replace(/[—–]/g, "-");
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
   const gmailKey = Deno.env.get("GOOGLE_MAIL_API_KEY");
   if (!lovableKey || !gmailKey) {
