@@ -82,6 +82,7 @@ type ClientGroup = {
 };
 
 export default function Documents() {
+  const navigate = useNavigate();
   const [docs, setDocs] = useState<ClientDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
