@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import {
-  CORS, json, formatInTz, brandedEmailHtml, sendGmail, sendSmsViaTwilio,
+  CORS, json, formatInTz, brandedEmailHtml, sendGmail, sendAndLogSms,
   renderTemplate, appBaseUrl,
 } from "../_shared/booking-utils.ts";
 
@@ -82,7 +82,12 @@ Deno.serve(async (req) => {
     const smsTpl = tpl(`sms_${kind}`);
     if (smsTpl?.is_active && b.client_phone) {
       try {
-        await sendSmsViaTwilio(b.client_phone, renderTemplate(smsTpl.body, vars));
+        await sendAndLogSms(supabase, {
+          to: b.client_phone,
+          body: renderTemplate(smsTpl.body, vars),
+          clientName: b.client_name,
+          clientEmail: b.client_email,
+        });
       } catch (e) { console.warn("sms reminder failed", e); }
     }
 

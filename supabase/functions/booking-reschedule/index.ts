@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import {
   CORS, json, GCAL_BASE, gcalHeaders,
-  formatInTz, brandedEmailHtml, sendGmail, sendSmsViaTwilio, appBaseUrl,
+  formatInTz, brandedEmailHtml, sendGmail, sendAndLogSms, appBaseUrl,
 } from "../_shared/booking-utils.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
     try {
       const html = brandedEmailHtml({
         heading: "Your call has been rescheduled",
-        intro: `All set — your call with Travis is now booked for the new time below.`,
+        intro: `All set. Your call with Travis is now booked for the new time below.`,
         details: [
           { label: "Date", value: dateStr },
           { label: "Time", value: `${timeStr} (${tz})` },
@@ -82,7 +82,12 @@ Deno.serve(async (req) => {
 
     if (booking.client_phone) {
       try {
-        await sendSmsViaTwilio(booking.client_phone, `Hi ${booking.client_name.split(" ")[0]}, your call with Travis has been rescheduled to ${dateStr} at ${timeStr} (${tz}). Link: ${meetingLink}`);
+        await sendAndLogSms(supabase, {
+          to: booking.client_phone,
+          body: `Hi ${booking.client_name.split(" ")[0]}, your call with Travis has been rescheduled to ${dateStr} at ${timeStr} (${tz}). Link: ${meetingLink}`,
+          clientName: booking.client_name,
+          clientEmail: booking.client_email,
+        });
       } catch (e) { console.warn("sms failed", e); }
     }
 

@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import {
   CORS, json, GCAL_BASE, gcalHeaders,
-  formatInTz, brandedEmailHtml, sendGmail, sendSmsViaTwilio,
+  formatInTz, brandedEmailHtml, sendGmail, sendAndLogSms,
 } from "../_shared/booking-utils.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -50,7 +50,12 @@ Deno.serve(async (req) => {
 
     if (booking.client_phone) {
       try {
-        await sendSmsViaTwilio(booking.client_phone, `Your call with Travis on ${dateStr} at ${timeStr} has been cancelled. Reply if you'd like to rebook.`);
+        await sendAndLogSms(supabase, {
+          to: booking.client_phone,
+          body: `Your call with Travis on ${dateStr} at ${timeStr} has been cancelled. Reply if you'd like to rebook.`,
+          clientName: booking.client_name,
+          clientEmail: booking.client_email,
+        });
       } catch (e) { console.warn("sms failed", e); }
     }
 
