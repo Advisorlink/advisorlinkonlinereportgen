@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, DollarSign, Tag, StickyNote,
   MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark, ArrowLeft,
-  ListChecks, Check, CalendarPlus,
+  ListChecks, Check, CalendarPlus, FileText, ExternalLink,
 } from "lucide-react";
 import { BookAppointmentDialog } from "@/components/booking/BookAppointmentDialog";
 
@@ -95,6 +95,7 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
   const [progress, setProgress] = useState<string[]>([]);
   const [progressSaving, setProgressSaving] = useState<string | null>(null);
   const [bookOpen, setBookOpen] = useState(false);
+  const [clientDocs, setClientDocs] = useState<any[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -119,8 +120,36 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
       setProgress(Array.isArray(d.progress_stages) ? d.progress_stages : []);
       setOriginalStageId(deal.stage_id);
       fetchNotes(deal.id);
+      fetchClientDocs(deal.client_email, deal.client_phone);
     }
   }, [deal]);
+
+  const fetchClientDocs = useCallback(async (email?: string | null, phone?: string | null) => {
+    const e = (email || "").trim().toLowerCase();
+    const phoneDigits = (phone || "").replace(/\D+/g, "");
+    if (!e && phoneDigits.length < 6) { setClientDocs([]); return; }
+    let q = supabase.from("client_documents").select("*").order("created_at", { ascending: false }).limit(50);
+    if (e) q = q.ilike("client_email", e);
+    const { data } = await q;
+    let rows = data || [];
+    if (!rows.length && phoneDigits.length >= 6) {
+      const { data: byPhone } = await supabase
+        .from("client_documents").select("*").order("created_at", { ascending: false }).limit(100);
+      rows = (byPhone || []).filter((r: any) =>
+        (r.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))
+      );
+    }
+    setClientDocs(rows);
+  }, []);
+
+  const openClientDoc = async (path: string) => {
+    const { data, error } = await supabase.storage.from("client-documents").createSignedUrl(path, 60 * 10);
+    if (error || !data?.signedUrl) {
+      toast({ title: "Couldn't open file", variant: "destructive" });
+      return;
+    }
+    window.open(data.signedUrl, "_blank");
+  };
 
   const toggleMilestone = async (key: string) => {
     if (!deal) return;
@@ -526,6 +555,44 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
               <Textarea id="prof-notes" value={form.notes} onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))} className="mt-1 resize-none" rows={2} />
             </div>
           </div>
+
+          {/* Client Documents */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5" /> Client Documents
+              </h3>
+              <span className="text-[11px] text-muted-foreground">{clientDocs.length}</span>
+            </div>
+            {clientDocs.length === 0 ? (
+              <p className="text-xs text-muted-foreground/60 text-center py-3 border border-dashed border-border rounded-lg">
+                No documents yet. Signed ATCs and uploads appear here automatically.
+              </p>
+            ) : (
+              <div className="grid gap-1.5 max-h-56 overflow-y-auto">
+                {clientDocs.map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => openClientDoc(d.file_path)}
+                    className="group flex items-center gap-2.5 rounded-lg border border-border bg-muted/30 hover:bg-muted/60 px-2.5 py-2 text-left transition-colors"
+                  >
+                    <div className="w-7 h-7 rounded-md bg-background flex items-center justify-center shrink-0">
+                      <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">{d.file_name}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {(d.document_type || "document").replace(/_/g, " ")} · {new Date(d.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}
+                      </p>
+                    </div>
+                    <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
 
           {/* Generate Report form */}
           <ReportStartForm
