@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, DollarSign, Tag, StickyNote,
   MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark, ArrowLeft,
-  ListChecks, Check, CalendarPlus,
+  ListChecks, Check, CalendarPlus, FileText, ExternalLink,
 } from "lucide-react";
 import { BookAppointmentDialog } from "@/components/booking/BookAppointmentDialog";
 
