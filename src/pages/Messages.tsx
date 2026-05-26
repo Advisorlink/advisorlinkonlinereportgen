@@ -827,38 +827,7 @@ export default function Messages() {
           </div>
         )}
 
-        {/* RIGHT — Contact Panel (rich profile, mirrors client profile) */}
-        {activeConv && showContactPanel && (
-          isBelowLg ? (
-            <Sheet open={showContactPanel} onOpenChange={setShowContactPanel}>
-              <SheetContent
-                side="right"
-                className="w-screen h-[100dvh] max-w-none sm:max-w-2xl sm:h-full overflow-y-auto p-0 border-0 sm:border-l"
-              >
-                <ContactPanelContent
-                  conversation={activeConv}
-                  teamMembers={teamMembers}
-                  onReassign={handleReassign}
-                  onClose={() => setShowContactPanel(false)}
-                  onOpenFullProfile={() => openFullProfile(activeConv)}
-                  loadingFullProfile={loadingProfile}
-                  isSheet
-                />
-              </SheetContent>
-            </Sheet>
-          ) : (
-            <div className="flex flex-col w-[26rem] border-l border-border bg-card shrink-0 overflow-y-auto">
-              <ContactPanelContent
-                conversation={activeConv}
-                teamMembers={teamMembers}
-                onReassign={handleReassign}
-                onClose={() => setShowContactPanel(false)}
-                onOpenFullProfile={() => openFullProfile(activeConv)}
-                loadingFullProfile={loadingProfile}
-              />
-            </div>
-          )
-        )}
+        {/* Right-side contact panel removed — unified DealProfileDrawer below opens automatically */}
 
         {/* Unified Pipeline-style profile drawer */}
         <DealProfileDrawer
