@@ -8,6 +8,10 @@ import { Folder, ChevronRight, ArrowLeft, Loader2, Search, Check, HardDrive, Fol
 
 type DriveFolder = { id: string; name: string };
 
+// Default destination folder in Google Drive (My Drive › ...)
+const DEFAULT_FOLDER_ID = "1ntFxL3PqQxM36x4BoS789yRbfZddLRm4";
+const DEFAULT_FOLDER_NAME = "Default client folder";
+
 type Props = {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -99,21 +103,17 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
     }
   };
 
-  const sendHere = async () => {
-    if (!current.id) {
-      toast.error("Pick a folder", { description: "Open a folder first or create one in Google Drive." });
-      return;
-    }
+  const sendToFolder = async (folderId: string, folderName: string) => {
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("gdrive-send", {
-        body: { action: "send", folder_id: current.id, doc_ids: docIds },
+        body: { action: "send", folder_id: folderId, doc_ids: docIds },
       });
       if (error) throw error;
       const results = (data as any)?.results || [];
       const ok = results.filter((r: any) => r.ok).length;
       const fail = results.length - ok;
-      if (ok > 0) toast.success(`Sent ${ok} file${ok > 1 ? "s" : ""} to ${current.name}`);
+      if (ok > 0) toast.success(`Sent ${ok} file${ok > 1 ? "s" : ""} to ${folderName}`);
       if (fail > 0) toast.error(`${fail} file${fail > 1 ? "s" : ""} failed`);
       onOpenChange(false);
       onSent?.();
@@ -122,6 +122,14 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
     } finally {
       setSending(false);
     }
+  };
+
+  const sendHere = async () => {
+    if (!current.id) {
+      toast.error("Pick a folder", { description: "Open a folder first or create one in Google Drive." });
+      return;
+    }
+    await sendToFolder(current.id, current.name);
   };
 
   return (
@@ -135,6 +143,27 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
             Choose a folder for {fileCount} file{fileCount !== 1 ? "s" : ""}.
           </p>
         </DialogHeader>
+
+        {/* Quick send to default folder */}
+        <div className="mx-5 mb-2 flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <Folder className="w-4 h-4 text-primary shrink-0" />
+            <div className="min-w-0">
+              <div className="text-sm font-medium truncate">{DEFAULT_FOLDER_NAME}</div>
+              <div className="text-[11px] text-muted-foreground">One-click send to your default Drive folder</div>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => sendToFolder(DEFAULT_FOLDER_ID, DEFAULT_FOLDER_NAME)}
+            disabled={sending}
+            className="shrink-0 gap-1.5"
+          >
+            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+            Send here
+          </Button>
+        </div>
+
 
         {/* Breadcrumb / back */}
         <div className="px-5 flex items-center gap-2 pb-2">
