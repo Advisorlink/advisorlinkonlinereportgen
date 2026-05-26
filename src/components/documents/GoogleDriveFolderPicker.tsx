@@ -144,6 +144,27 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
           </p>
         </DialogHeader>
 
+        {/* Quick send to default folder */}
+        <div className="mx-5 mb-2 flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <Folder className="w-4 h-4 text-primary shrink-0" />
+            <div className="min-w-0">
+              <div className="text-sm font-medium truncate">{DEFAULT_FOLDER_NAME}</div>
+              <div className="text-[11px] text-muted-foreground">One-click send to your default Drive folder</div>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => sendToFolder(DEFAULT_FOLDER_ID, DEFAULT_FOLDER_NAME)}
+            disabled={sending}
+            className="shrink-0 gap-1.5"
+          >
+            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+            Send here
+          </Button>
+        </div>
+
+
         {/* Breadcrumb / back */}
         <div className="px-5 flex items-center gap-2 pb-2">
           <Button variant="ghost" size="sm" onClick={back} disabled={stack.length <= 1} className="gap-1.5">
