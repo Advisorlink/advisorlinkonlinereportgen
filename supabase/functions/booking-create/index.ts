@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import {
   CORS, json, GCAL_BASE, gcalHeaders,
-  formatInTz, brandedEmailHtml, sendGmail, sendSmsViaTwilio,
+  formatInTz, brandedEmailHtml, sendGmail, sendAndLogSms,
   renderTemplate, appBaseUrl, normalizePhone, buildIcs,
 } from "../_shared/booking-utils.ts";
 
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       .limit(1);
     if (clash && clash.length > 0) return json({ error: "Slot no longer available" }, 409);
 
-    // Auto-link to pipeline deal
+    // Auto-link to pipeline deal (by email or last 9 digits of phone).
     let linkedDealId: string | null = dealId;
     if (!linkedDealId) {
       const orParts: string[] = [];
@@ -56,6 +56,27 @@ Deno.serve(async (req) => {
           .from("pipeline_deals").select("id").or(orParts.join(",")).limit(1);
         if (deals && deals.length) linkedDealId = deals[0].id;
       }
+    }
+
+    // If still no deal, create one so the client shows up in the pipeline
+    // with the "presentation booked" milestone.
+    if (!linkedDealId) {
+      try {
+        const { data: firstStage } = await supabase
+          .from("pipeline_stages").select("id").order("position", { ascending: true }).limit(1).single();
+        if (firstStage?.id) {
+          const { data: newDeal } = await supabase
+            .from("pipeline_deals").insert({
+              stage_id: firstStage.id,
+              client_name: clientName,
+              client_email: clientEmail,
+              client_phone: phoneNorm,
+              source: "booking",
+              progress_stages: ["presentation_booked"],
+            }).select("id").single();
+          if (newDeal?.id) linkedDealId = newDeal.id;
+        }
+      } catch (e) { console.warn("auto-create deal failed", e); }
     }
 
     // Insert booking
@@ -80,13 +101,13 @@ Deno.serve(async (req) => {
       return json({ error: "Failed to save booking" }, 500);
     }
 
-    // Update linked deal: add a note + mark presentation_booked milestone
+    // Update linked deal: add a note + mark presentation_booked milestone.
     if (linkedDealId) {
       try {
         const dateLabel = formatInTz(start, tz, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
         await supabase.from("pipeline_deal_notes").insert({
           deal_id: linkedDealId,
-          content: `📅 Appointment booked for ${dateLabel} (${tz}). Meeting link: ${meetingLink}`,
+          content: `Appointment booked for ${dateLabel} (${tz}). Meeting link: ${meetingLink}`,
         });
         const { data: d } = await supabase
           .from("pipeline_deals").select("progress_stages").eq("id", linkedDealId).single();
@@ -99,14 +120,14 @@ Deno.serve(async (req) => {
       } catch (e) { console.warn("deal link failed", e); }
     }
 
-    // Create Google Calendar event
+    // Create Google Calendar event (use host timezone so Calendar shows clean times).
     let gcalEventId: string | null = null;
     try {
       const ev = {
-        summary: `${settings.meeting_title} — ${clientName}`,
-        description: `${settings.meeting_description}\n\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone || "—"}\n${notes ? `Notes: ${notes}\n` : ""}\nMeeting link: ${meetingLink}\nReschedule: ${appBaseUrl()}/reschedule/${booking.reschedule_token}\nCancel: ${appBaseUrl()}/cancel/${booking.cancel_token}`,
-        start: { dateTime: start.toISOString(), timeZone: "UTC" },
-        end: { dateTime: end.toISOString(), timeZone: "UTC" },
+        summary: `${settings.meeting_title} with ${clientName}`,
+        description: `${settings.meeting_description}\n\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone || "n/a"}\n${notes ? `Notes: ${notes}\n` : ""}\nMeeting link: ${meetingLink}\nReschedule: ${appBaseUrl()}/reschedule/${booking.reschedule_token}\nCancel: ${appBaseUrl()}/cancel/${booking.cancel_token}`,
+        start: { dateTime: start.toISOString(), timeZone: settings.timezone },
+        end: { dateTime: end.toISOString(), timeZone: settings.timezone },
         attendees: [{ email: clientEmail, displayName: clientName }],
       };
       const r = await fetch(`${GCAL_BASE}/calendars/primary/events?sendUpdates=none`, {
@@ -138,13 +159,14 @@ Deno.serve(async (req) => {
       cancel_link: cancelLink,
     };
 
-    // Build ICS for both emails
+    // Build ICS for both emails (use host timezone so clients don't see UTC).
     const ics = {
       filename: "advisor-link-booking.ics",
       content: buildIcs({
         uid: `${booking.id}@advisorlinkonline.com.au`,
         start, end,
-        summary: `${settings.meeting_title} — ${clientName}`,
+        tz: settings.timezone,
+        summary: `${settings.meeting_title} with ${clientName}`,
         description: `Strategy call with Travis Seckold.\nJoin: ${meetingLink}\nReschedule: ${rescheduleLink}\nCancel: ${cancelLink}`,
         location: meetingLink,
         organizerEmail: settings.host_email || "travis@advisorlinkonline.com.au",
@@ -153,12 +175,12 @@ Deno.serve(async (req) => {
       }),
     };
 
-    // Confirmation email (client) — with .ics attachment
+    // Confirmation email (client) with .ics attachment.
     try {
       const html = brandedEmailHtml({
         preheader: `You're booked for ${dateStr} at ${timeStr}`,
         heading: `You're booked in, ${clientName.split(" ")[0]}!`,
-        intro: `Your ${settings.meeting_duration_minutes}-minute strategy call with Travis is locked in. Add it to your calendar with the attached invite — full details and your join link are below.`,
+        intro: `Your ${settings.meeting_duration_minutes}-minute strategy call with Travis is locked in. Add it to your calendar with the attached invite. Full details and your join link are below.`,
         details: [
           { label: "Date", value: dateStr },
           { label: "Time", value: `${timeStr} (${tz})` },
@@ -170,12 +192,12 @@ Deno.serve(async (req) => {
           { label: "Reschedule", url: rescheduleLink },
           { label: "Cancel", url: cancelLink },
         ],
-        footerNote: "If anything changes, use the reschedule or cancel links above — no need to email back.",
+        footerNote: "If anything changes, use the reschedule or cancel links above. No need to email back.",
       });
       await sendGmail(clientEmail, `Confirmed: ${dateStr} at ${timeStr} with Travis`, html, ics);
     } catch (e) { console.warn("client email failed", e); }
 
-    // Host notification — also with .ics
+    // Host notification with .ics.
     try {
       if (settings.host_email) {
         const html = brandedEmailHtml({
@@ -183,18 +205,18 @@ Deno.serve(async (req) => {
           intro: `A new strategy call was just booked through your calendar.`,
           details: [
             { label: "Client", value: `${clientName} (${clientEmail})` },
-            { label: "Phone", value: clientPhone || "—" },
+            { label: "Phone", value: clientPhone || "n/a" },
             { label: "Date", value: dateStr },
             { label: "Time", value: `${timeStr} (${tz})` },
-            { label: "Notes", value: notes || "—" },
+            { label: "Notes", value: notes || "n/a" },
           ],
           primaryCta: { label: "Open Google Calendar", url: "https://calendar.google.com/" },
         });
-        await sendGmail(settings.host_email, `New booking: ${clientName} — ${dateStr}`, html, ics);
+        await sendGmail(settings.host_email, `New booking: ${clientName} on ${dateStr}`, html, ics);
       }
     } catch (e) { console.warn("host email failed", e); }
 
-    // SMS confirmation
+    // SMS confirmation (also logged into in-app Messages thread).
     if (booking.client_phone) {
       try {
         const { data: tpl } = await supabase
@@ -202,7 +224,12 @@ Deno.serve(async (req) => {
           .select("body, is_active")
           .eq("kind", "sms_confirmation").maybeSingle();
         if (tpl?.is_active) {
-          await sendSmsViaTwilio(booking.client_phone, renderTemplate(tpl.body, vars));
+          await sendAndLogSms(supabase, {
+            to: booking.client_phone,
+            body: renderTemplate(tpl.body, vars),
+            clientName,
+            clientEmail,
+          });
         }
       } catch (e) { console.warn("sms confirmation failed", e); }
     }
