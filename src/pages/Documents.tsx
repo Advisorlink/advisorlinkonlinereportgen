@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CRMLayout } from "@/components/CRMLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,11 +10,13 @@ import { toast } from "sonner";
 import {
   Eye, FileText, Image as ImageIcon, RefreshCw, Search, Send, Shield,
   Trash2, ChevronRight, ArrowLeft, Mail, Phone, Calendar, FileCheck2, X, HardDrive, Pencil, Check, FileEdit,
+  Upload,
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { SendUploadLinkDialog } from "@/components/documents/SendUploadLinkDialog";
 import { GoogleDriveFolderPicker } from "@/components/documents/GoogleDriveFolderPicker";
+import { useAuth } from "@/hooks/useAuth";
 
 type ClientDocument = {
   id: string;
@@ -83,6 +85,7 @@ type ClientGroup = {
 
 export default function Documents() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [docs, setDocs] = useState<ClientDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -186,7 +189,72 @@ export default function Documents() {
     setPreview((p) => (p && p.doc.id === doc.id ? { ...p, doc: { ...p.doc, file_name: trimmed } } : p));
   };
 
+  const inferDocType = (file: File): string => {
+    const n = file.name.toLowerCase();
+    if (file.type.startsWith("image/")) {
+      if (/licen[sc]e|licen[sc]/.test(n)) return "license";
+      if (/statement|super/.test(n)) return "super_statement";
+      return "screenshot";
+    }
+    if (file.type === "application/pdf") {
+      if (/statement|super/.test(n)) return "super_statement";
+      if (/licen[sc]e/.test(n)) return "license";
+      return "other";
+    }
+    return "other";
+  };
+
+  const uploadFilesToClient = async (
+    target: { name: string; email: string; phone: string | null },
+    files: File[]
+  ) => {
+    if (!files.length) return;
+    const toastId = toast.loading(`Uploading ${files.length} file${files.length > 1 ? "s" : ""}…`);
+    const safeKey = (target.email || target.name).replace(/[^a-z0-9@._-]+/gi, "_").toLowerCase();
+    const inserts: Partial<ClientDocument>[] = [];
+    for (const file of files) {
+      try {
+        if (file.size > 25 * 1024 * 1024) {
+          toast.error(`${file.name} exceeds 25MB`);
+          continue;
+        }
+        const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+        const path = `${safeKey}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("client-documents")
+          .upload(path, file, { contentType: file.type || "application/octet-stream", upsert: false });
+        if (upErr) {
+          toast.error(`Upload failed: ${file.name}`, { description: upErr.message });
+          continue;
+        }
+        inserts.push({
+          client_name: target.name,
+          client_email: target.email,
+          client_phone: target.phone,
+          document_type: inferDocType(file),
+          file_path: path,
+          file_name: file.name,
+          file_size: file.size,
+          mime_type: file.type || "application/octet-stream",
+          status: "received",
+          consent_given: true,
+          notes: "Added by advisor (drag & drop)",
+        });
+      } catch (e) {
+        toast.error(`Failed: ${file.name}`);
+      }
+    }
+    if (inserts.length) {
+      const { error } = await supabase.from("client_documents").insert(inserts as never);
+      if (error) toast.error(error.message);
+    }
+    toast.dismiss(toastId);
+    toast.success(`Added ${inserts.length} file${inserts.length === 1 ? "" : "s"} to ${target.name}`);
+    await load();
+  };
+
   const filteredDocs = useMemo(() => {
+
     const q = search.toLowerCase();
     if (!q) return docs;
     return docs.filter(
@@ -308,6 +376,9 @@ export default function Documents() {
                 group={g}
                 onOpen={() => setOpenClient(g)}
                 onDelete={() => handleDeleteGroup(g)}
+                onDropFiles={(files) =>
+                  uploadFilesToClient({ name: g.name, email: g.email, phone: g.phone }, files)
+                }
               />
             ))}
           </div>
@@ -373,6 +444,15 @@ export default function Documents() {
                   Delete entire package
                 </Button>
               </div>
+
+              <ClientDropZone
+                onFiles={(files) =>
+                  uploadFilesToClient(
+                    { name: openClient.name, email: openClient.email, phone: openClient.phone },
+                    files
+                  )
+                }
+              />
 
               <div className="p-5 max-h-[60vh] overflow-y-auto">
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -475,15 +555,35 @@ function ClientCard({
   group,
   onOpen,
   onDelete,
+  onDropFiles,
 }: {
   group: ClientGroup;
   onOpen: () => void;
   onDelete: () => void;
+  onDropFiles: (files: File[]) => void;
 }) {
   const types = Array.from(new Set(group.items.map((i) => i.document_type)));
+  const [dragOver, setDragOver] = useState(false);
   return (
     <div
-      className="group relative rounded-2xl border bg-card hover:border-primary/40 hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 overflow-hidden"
+      onDragOver={(e) => {
+        if (e.dataTransfer.types?.includes("Files")) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+          if (!dragOver) setDragOver(true);
+        }
+      }}
+      onDragLeave={(e) => {
+        if (e.currentTarget === e.target) setDragOver(false);
+      }}
+      onDrop={(e) => {
+        if (e.dataTransfer.files?.length) {
+          e.preventDefault();
+          setDragOver(false);
+          onDropFiles(Array.from(e.dataTransfer.files));
+        }
+      }}
+      className={`group relative rounded-2xl border bg-card hover:border-primary/40 hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 overflow-hidden ${dragOver ? "ring-2 ring-primary border-primary" : ""}`}
     >
       <button onClick={onOpen} className="block w-full text-left">
         <div className="p-5">
@@ -519,6 +619,13 @@ function ClientCard({
           <span>{formatDistanceToNow(new Date(group.latest), { addSuffix: true })}</span>
         </div>
       </button>
+      {dragOver && (
+        <div className="absolute inset-0 bg-primary/10 backdrop-blur-[1px] grid place-items-center pointer-events-none">
+          <div className="flex items-center gap-2 text-primary font-semibold text-sm bg-background/90 px-3 py-1.5 rounded-full border border-primary/40 shadow">
+            <Upload className="w-4 h-4" /> Drop to add to {group.name.split(" ")[0]}
+          </div>
+        </div>
+      )}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -532,6 +639,57 @@ function ClientCard({
     </div>
   );
 }
+
+function ClientDropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [over, setOver] = useState(false);
+  return (
+    <div className="px-5 pt-3">
+      <div
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => {
+          if (e.dataTransfer.types?.includes("Files")) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+            if (!over) setOver(true);
+          }
+        }}
+        onDragLeave={(e) => {
+          if (e.currentTarget === e.target) setOver(false);
+        }}
+        onDrop={(e) => {
+          if (e.dataTransfer.files?.length) {
+            e.preventDefault();
+            setOver(false);
+            onFiles(Array.from(e.dataTransfer.files));
+          }
+        }}
+        className={`flex items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-4 text-sm cursor-pointer transition-all ${
+          over
+            ? "border-primary bg-primary/10 text-primary"
+            : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground hover:bg-muted/40"
+        }`}
+      >
+        <Upload className="w-4 h-4" />
+        <span>
+          {over ? "Drop files to add to this client" : "Drag & drop files here, or click to browse"}
+        </span>
+        <input
+          ref={inputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            const files = Array.from(e.target.files || []);
+            e.target.value = "";
+            if (files.length) onFiles(files);
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 
 function FileTile({
   doc,

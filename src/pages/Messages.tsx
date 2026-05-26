@@ -26,6 +26,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ReportStartForm } from "@/components/ReportStartForm";
+import { DealProfileDrawer } from "@/components/pipeline/DealProfileDrawer";
 
 
 type Conversation = {
@@ -138,6 +139,86 @@ export default function Messages() {
   // Team members for assignment
   const [teamMembers, setTeamMembers] = useState<{ id: string; email: string }[]>([]);
 
+  // Unified Pipeline-style profile (shared between Pipeline & Messages)
+  const [pipelineStages, setPipelineStages] = useState<{ id: string; name: string; color: string; position: number }[]>([]);
+  const [profileDeal, setProfileDeal] = useState<any | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+
+  const fetchPipelineStages = useCallback(async () => {
+    const { data } = await supabase.from("pipeline_stages").select("*").order("position");
+    if (data) setPipelineStages(data as any);
+  }, []);
+
+  const openFullProfile = useCallback(async (conv: Conversation) => {
+    setLoadingProfile(true);
+    try {
+      const c = conv.sms_contacts;
+      const phoneDigits = (c.phone || "").replace(/\D+/g, "");
+      let deal: any = null;
+      if (c.email) {
+        const { data } = await supabase
+          .from("pipeline_deals")
+          .select("*")
+          .ilike("client_email", c.email)
+          .limit(1)
+          .maybeSingle();
+        if (data) deal = data;
+      }
+      if (!deal && phoneDigits.length >= 6) {
+        const { data: all } = await supabase
+          .from("pipeline_deals")
+          .select("*")
+          .not("client_phone", "is", null);
+        deal = (all || []).find(
+          (d: any) => (d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))
+        );
+      }
+      if (!deal) {
+        // Create a new deal in the first stage
+        let stages = pipelineStages;
+        if (!stages.length) {
+          const { data: s } = await supabase.from("pipeline_stages").select("*").order("position");
+          stages = (s as any) || [];
+          setPipelineStages(stages);
+        }
+        const firstStage = stages[0];
+        if (!firstStage) {
+          toast({ title: "No pipeline stages set up", variant: "destructive" });
+          return;
+        }
+        const { data: maxRow } = await supabase
+          .from("pipeline_deals")
+          .select("position")
+          .eq("stage_id", firstStage.id)
+          .order("position", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        const nextPos = ((maxRow as any)?.position ?? -1) + 1;
+        const { data: created, error } = await supabase
+          .from("pipeline_deals")
+          .insert({
+            client_name: c.full_name || "Unnamed",
+            client_email: c.email || null,
+            client_phone: c.phone || null,
+            stage_id: firstStage.id,
+            position: nextPos,
+          } as any)
+          .select("*")
+          .single();
+        if (error) {
+          toast({ title: "Could not create deal", description: error.message, variant: "destructive" });
+          return;
+        }
+        deal = created;
+      }
+      setProfileDeal(deal);
+      setProfileOpen(true);
+    } finally {
+      setLoadingProfile(false);
+    }
+  }, [pipelineStages]);
+
   const fetchConversations = useCallback(async () => {
     const { data, error } = await supabase
       .from("sms_conversations")
@@ -183,7 +264,7 @@ export default function Messages() {
     if (data) setTeamMembers(data);
   }, []);
 
-  useEffect(() => { fetchConversations(); fetchSmsNumbers(); fetchTemplates(); fetchTeam(); }, [fetchConversations, fetchSmsNumbers, fetchTemplates, fetchTeam]);
+  useEffect(() => { fetchConversations(); fetchSmsNumbers(); fetchTemplates(); fetchTeam(); fetchPipelineStages(); }, [fetchConversations, fetchSmsNumbers, fetchTemplates, fetchTeam, fetchPipelineStages]);
 
   // Deep-link: /messages?phone=...&name=... opens (or creates) a conversation
   const [searchParams, setSearchParams] = useSearchParams();
@@ -757,6 +838,8 @@ export default function Messages() {
                   teamMembers={teamMembers}
                   onReassign={handleReassign}
                   onClose={() => setShowContactPanel(false)}
+                  onOpenFullProfile={() => openFullProfile(activeConv)}
+                  loadingFullProfile={loadingProfile}
                   isSheet
                 />
               </SheetContent>
@@ -768,10 +851,25 @@ export default function Messages() {
                 teamMembers={teamMembers}
                 onReassign={handleReassign}
                 onClose={() => setShowContactPanel(false)}
+                onOpenFullProfile={() => openFullProfile(activeConv)}
+                loadingFullProfile={loadingProfile}
               />
             </div>
           )
         )}
+
+        {/* Unified Pipeline-style profile drawer */}
+        <DealProfileDrawer
+          deal={profileDeal}
+          stages={pipelineStages}
+          open={profileOpen}
+          onOpenChange={setProfileOpen}
+          onDealUpdated={() => { /* no-op */ }}
+          onDeleteDeal={async (id) => {
+            await supabase.from("pipeline_deals").delete().eq("id", id);
+            setProfileOpen(false);
+          }}
+        />
 
         {/* Hidden file input for MMS */}
         <input ref={fileInputRef} type="file" multiple accept="image/*,application/pdf,.doc,.docx,.txt" className="hidden" onChange={handleFilePick} />
@@ -805,12 +903,16 @@ function ContactPanelContent({
   teamMembers,
   onReassign,
   onClose,
+  onOpenFullProfile,
+  loadingFullProfile,
   isSheet = false,
 }: {
   conversation: Conversation;
   teamMembers: { id: string; email: string }[];
   onReassign: (userId: string) => void;
   onClose: () => void;
+  onOpenFullProfile?: () => void;
+  loadingFullProfile?: boolean;
   isSheet?: boolean;
 }) {
   const c = conversation.sms_contacts;
@@ -938,6 +1040,17 @@ function ContactPanelContent({
       </div>
 
       <div className="p-4 space-y-5">
+        {onOpenFullProfile && (
+          <Button
+            onClick={onOpenFullProfile}
+            disabled={loadingFullProfile}
+            className="w-full gradient-accent text-white border-0 shadow-md gap-2 h-10"
+          >
+            <User className="w-4 h-4" />
+            {loadingFullProfile ? "Loading…" : "Open full client profile"}
+          </Button>
+        )}
+
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5 flex items-center gap-1.5">
             <UserCog className="w-3 h-3" /> Assigned to
