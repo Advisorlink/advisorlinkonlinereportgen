@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
     // Per-day cap
     const perDayCount = new Map<string, number>();
     for (const b of existing ?? []) {
-      const k = formatInTz(new Date(b.start_at), hostTz, { year: "numeric", month: "2-digit", day: "2-digit" });
+      const k = isoDateInTz(new Date(b.start_at), hostTz);
       perDayCount.set(k, (perDayCount.get(k) || 0) + 1);
     }
 
@@ -112,9 +112,9 @@ Deno.serve(async (req) => {
     const out: Record<string, string[]> = {};
     for (const s of allSlots) {
       if (isBusy(s)) continue;
-      const dayKeyHost = formatInTz(s, hostTz, { year: "numeric", month: "2-digit", day: "2-digit" });
+      const dayKeyHost = isoDateInTz(s, hostTz);
       if ((perDayCount.get(dayKeyHost) || 0) >= settings.max_per_day) continue;
-      const clientDayKey = formatInTz(s, clientTz, { year: "numeric", month: "2-digit", day: "2-digit" });
+      const clientDayKey = isoDateInTz(s, clientTz);
       (out[clientDayKey] ||= []).push(s.toISOString());
     }
 
