@@ -240,7 +240,50 @@ export function PipelineBoard() {
     await supabase.from("pipeline_deals").delete().eq("id", dealId);
   };
 
-  const handleDealClick = (deal: Deal) => setSelectedDeal(deal);
+  const handleDealClick = async (deal: Deal) => {
+    setSelectedDeal(deal);
+    // Auto-fill any missing profile fields from a matching SMS contact (email or phone)
+    try {
+      const d: any = deal;
+      const missing = ["age","state","super_fund_name","super_balance","had_review_before","source","notes"]
+        .filter((k) => d[k] == null || d[k] === "");
+      if (!missing.length) return;
+      let contact: any = null;
+      if (d.client_email) {
+        const { data } = await supabase
+          .from("sms_contacts").select("*").ilike("email", d.client_email).limit(1).maybeSingle();
+        if (data) contact = data;
+      }
+      if (!contact && d.client_phone) {
+        const digits = String(d.client_phone).replace(/\D+/g, "");
+        if (digits.length >= 6) {
+          const { data: all } = await supabase
+            .from("sms_contacts").select("*").not("phone", "is", null);
+          contact = (all || []).find(
+            (x: any) => (x.phone || "").replace(/\D+/g, "").endsWith(digits.slice(-9))
+          );
+        }
+      }
+      if (!contact) return;
+      const cf = (contact.custom_fields || {}) as Record<string, any>;
+      const candidate: Record<string, any> = {
+        age: cf.age ?? null,
+        state: cf.state ?? null,
+        super_fund_name: cf.super_fund_name ?? null,
+        super_balance: cf.super_balance != null && cf.super_balance !== "" ? Number(cf.super_balance) : null,
+        had_review_before:
+          cf.had_review_before === true ? true : cf.had_review_before === false ? false : null,
+        source: contact.lead_source ?? null,
+        notes: contact.notes ?? null,
+      };
+      const patch: Record<string, any> = {};
+      for (const k of missing) if (candidate[k] != null) patch[k] = candidate[k];
+      if (!Object.keys(patch).length) return;
+      const { data: updated } = await supabase
+        .from("pipeline_deals").update(patch as any).eq("id", d.id).select("*").single();
+      if (updated) { setSelectedDeal(updated as any); fetchData(); }
+    } catch { /* noop */ }
+  };
 
   const handleSyncQualified = async () => {
     const newLeadStage = stages.find((s) => s.name.toLowerCase() === "new lead");
