@@ -249,6 +249,19 @@ function icsDate(d: Date): string {
   return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 }
 
+/** Format a Date as a floating local time string YYYYMMDDTHHMMSS in the given tz (no Z). */
+function icsLocalDate(d: Date, tz: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz, hour12: false,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(d);
+  const m: Record<string,string> = {};
+  for (const p of parts) if (p.type !== "literal") m[p.type] = p.value;
+  const hh = m.hour === "24" ? "00" : m.hour;
+  return `${m.year}${m.month}${m.day}T${hh}${m.minute}${m.second}`;
+}
+
 export function buildIcs(opts: {
   uid: string;
   start: Date;
@@ -261,13 +274,19 @@ export function buildIcs(opts: {
   attendeeName?: string;
   status?: "CONFIRMED" | "CANCELLED";
   sequence?: number;
+  tz?: string;
 }): string {
   const {
     uid, start, end, summary, description, location = "",
     organizerEmail, attendeeEmail, attendeeName,
-    status = "CONFIRMED", sequence = 0,
+    status = "CONFIRMED", sequence = 0, tz,
   } = opts;
-  const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
+  // Scrub dashes from human-facing strings.
+  const clean = (s: string) => s.replace(/[—–]/g, "-");
+  const esc = (s: string) =>
+    clean(s).replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
+  const dtStart = tz ? `DTSTART;TZID=${tz}:${icsLocalDate(start, tz)}` : `DTSTART:${icsDate(start)}`;
+  const dtEnd   = tz ? `DTEND;TZID=${tz}:${icsLocalDate(end, tz)}`     : `DTEND:${icsDate(end)}`;
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -277,8 +296,8 @@ export function buildIcs(opts: {
     "BEGIN:VEVENT",
     `UID:${uid}`,
     `DTSTAMP:${icsDate(new Date())}`,
-    `DTSTART:${icsDate(start)}`,
-    `DTEND:${icsDate(end)}`,
+    dtStart,
+    dtEnd,
     `SUMMARY:${esc(summary)}`,
     `DESCRIPTION:${esc(description)}`,
     location ? `LOCATION:${esc(location)}` : "",
