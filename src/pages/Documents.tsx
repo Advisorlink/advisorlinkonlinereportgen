@@ -445,6 +445,15 @@ export default function Documents() {
                 </Button>
               </div>
 
+              <ClientDropZone
+                onFiles={(files) =>
+                  uploadFilesToClient(
+                    { name: openClient.name, email: openClient.email, phone: openClient.phone },
+                    files
+                  )
+                }
+              />
+
               <div className="p-5 max-h-[60vh] overflow-y-auto">
                 <div className="grid sm:grid-cols-2 gap-3">
                   {openClient.items.map((d) => (
