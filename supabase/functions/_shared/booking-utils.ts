@@ -169,21 +169,50 @@ export function appBaseUrl(): string {
   return Deno.env.get("PUBLIC_APP_URL") || "https://advisorlinkonlinereportgen.lovable.app";
 }
 
-export async function sendGmail(to: string, subject: string, html: string) {
+export interface IcsAttachment { filename: string; content: string; }
+
+export async function sendGmail(to: string, subject: string, html: string, ics?: IcsAttachment) {
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
   const gmailKey = Deno.env.get("GOOGLE_MAIL_API_KEY");
   if (!lovableKey || !gmailKey) {
     console.warn("Gmail not configured, skipping email to", to);
     return { skipped: true };
   }
-  const message = [
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    `MIME-Version: 1.0`,
-    `Content-Type: text/html; charset="UTF-8"`,
-    ``,
-    html,
-  ].join("\r\n");
+  let message: string;
+  if (ics) {
+    const boundary = `bnd_${crypto.randomUUID().replace(/-/g, "")}`;
+    const icsB64 = btoa(unescape(encodeURIComponent(ics.content)));
+    message = [
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      `MIME-Version: 1.0`,
+      `Content-Type: multipart/mixed; boundary="${boundary}"`,
+      ``,
+      `--${boundary}`,
+      `Content-Type: text/html; charset="UTF-8"`,
+      `Content-Transfer-Encoding: 7bit`,
+      ``,
+      html,
+      ``,
+      `--${boundary}`,
+      `Content-Type: text/calendar; method=REQUEST; name="${ics.filename}"`,
+      `Content-Disposition: attachment; filename="${ics.filename}"`,
+      `Content-Transfer-Encoding: base64`,
+      ``,
+      icsB64.match(/.{1,76}/g)?.join("\r\n") ?? icsB64,
+      ``,
+      `--${boundary}--`,
+    ].join("\r\n");
+  } else {
+    message = [
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      `MIME-Version: 1.0`,
+      `Content-Type: text/html; charset="UTF-8"`,
+      ``,
+      html,
+    ].join("\r\n");
+  }
   const raw = btoa(unescape(encodeURIComponent(message)))
     .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const res = await fetch("https://connector-gateway.lovable.dev/google_mail/gmail/v1/users/me/messages/send", {
@@ -201,6 +230,53 @@ export async function sendGmail(to: string, subject: string, html: string) {
     throw new Error(`Gmail send failed: ${res.status}`);
   }
   return await res.json();
+}
+
+function icsDate(d: Date): string {
+  return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+}
+
+export function buildIcs(opts: {
+  uid: string;
+  start: Date;
+  end: Date;
+  summary: string;
+  description: string;
+  location?: string;
+  organizerEmail?: string;
+  attendeeEmail?: string;
+  attendeeName?: string;
+  status?: "CONFIRMED" | "CANCELLED";
+  sequence?: number;
+}): string {
+  const {
+    uid, start, end, summary, description, location = "",
+    organizerEmail, attendeeEmail, attendeeName,
+    status = "CONFIRMED", sequence = 0,
+  } = opts;
+  const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Advisor Link Online//Bookings//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:REQUEST",
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${icsDate(new Date())}`,
+    `DTSTART:${icsDate(start)}`,
+    `DTEND:${icsDate(end)}`,
+    `SUMMARY:${esc(summary)}`,
+    `DESCRIPTION:${esc(description)}`,
+    location ? `LOCATION:${esc(location)}` : "",
+    `STATUS:${status}`,
+    `SEQUENCE:${sequence}`,
+    organizerEmail ? `ORGANIZER;CN=Travis Seckold:mailto:${organizerEmail}` : "",
+    attendeeEmail ? `ATTENDEE;CN=${esc(attendeeName ?? attendeeEmail)};RSVP=TRUE:mailto:${attendeeEmail}` : "",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].filter(Boolean);
+  return lines.join("\r\n");
 }
 
 export async function sendSmsViaTwilio(to: string, body: string) {
