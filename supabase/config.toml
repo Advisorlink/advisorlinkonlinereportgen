@@ -21,3 +21,19 @@ verify_jwt = false
 [functions.esign-signed-url]
 verify_jwt = false
 
+[functions.booking-availability]
+verify_jwt = false
+
+[functions.booking-create]
+verify_jwt = false
+
+[functions.booking-reschedule]
+verify_jwt = false
+
+[functions.booking-cancel]
+verify_jwt = false
+
+[functions.booking-reminders-cron]
+verify_jwt = false
+
+
