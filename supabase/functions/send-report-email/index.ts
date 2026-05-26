@@ -248,7 +248,7 @@ Kind regards,`;
       });
     } catch (e) { console.warn("workflow trigger failed", e); }
 
-    return { messageId: gmailData.id };
+    return json({ success: true, messageId: gmailData.id });
 
   } catch (e) {
     console.error("[send-report-email] Error:", e);
