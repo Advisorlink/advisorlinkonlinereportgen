@@ -233,7 +233,7 @@ export default function Messages() {
         if (Object.keys(patch).length) {
           const { data: updated } = await supabase
             .from("pipeline_deals")
-            .update(patch)
+            .update(patch as any)
             .eq("id", deal.id)
             .select("*")
             .single();
