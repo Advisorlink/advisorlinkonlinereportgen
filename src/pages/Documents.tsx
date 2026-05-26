@@ -376,6 +376,9 @@ export default function Documents() {
                 group={g}
                 onOpen={() => setOpenClient(g)}
                 onDelete={() => handleDeleteGroup(g)}
+                onDropFiles={(files) =>
+                  uploadFilesToClient({ name: g.name, email: g.email, phone: g.phone }, files)
+                }
               />
             ))}
           </div>
