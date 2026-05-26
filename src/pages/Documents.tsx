@@ -667,6 +667,18 @@ function FileTile({
         </div>
       </div>
       <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        {onEdit && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            className="h-7 w-7 rounded-full bg-black/50 text-white grid place-items-center hover:bg-primary transition-all"
+            title="Edit PDF"
+          >
+            <FileEdit className="w-3.5 h-3.5" />
+          </button>
+        )}
         {onSendToDrive && (
           <button
             onClick={(e) => {
