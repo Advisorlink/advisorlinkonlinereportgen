@@ -67,6 +67,24 @@ export async function moveDealToStage(stageName: string, opts: {
         position: nextPos,
       } as never);
     }
+
+    // Fire workflow trigger for stage change
+    try {
+      await supabase.functions.invoke("workflow-trigger", {
+        body: {
+          triggerType: "pipeline_stage_changed",
+          context: {
+            client_name: name,
+            client_email: email,
+            client_phone: opts.clientPhone || null,
+            stage_name: stageName,
+          },
+        },
+      });
+    } catch (e) {
+      console.warn("workflow trigger failed", e);
+    }
+
   } catch (e) {
     console.error("moveDealToStage failed", e);
   }
