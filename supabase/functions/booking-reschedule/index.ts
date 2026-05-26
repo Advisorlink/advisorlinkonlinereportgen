@@ -3,6 +3,8 @@ import {
   CORS, json, GCAL_BASE, gcalHeaders,
   formatInTz, brandedEmailHtml, sendGmail, sendAndLogSms, appBaseUrl,
 } from "../_shared/booking-utils.ts";
+import { fireWorkflowTrigger } from "../_shared/workflow-shared.ts";
+
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

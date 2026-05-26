@@ -238,6 +238,18 @@ Deno.serve(async (req) => {
 
     await supabase.from("bookings").update({ confirmation_sent_at: new Date().toISOString() }).eq("id", booking.id);
 
+    await fireWorkflowTrigger("booking_created", {
+      client_name: clientName,
+      client_email: clientEmail,
+      client_phone: booking.client_phone,
+      booking_id: booking.id,
+      meeting_link: meetingLink,
+      date: dateStr,
+      time: timeStr,
+      timezone: tz,
+    });
+
+
     return json({
       ok: true,
       booking: {
