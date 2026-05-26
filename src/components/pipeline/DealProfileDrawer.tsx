@@ -556,6 +556,44 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
             </div>
           </div>
 
+          {/* Client Documents */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5" /> Client Documents
+              </h3>
+              <span className="text-[11px] text-muted-foreground">{clientDocs.length}</span>
+            </div>
+            {clientDocs.length === 0 ? (
+              <p className="text-xs text-muted-foreground/60 text-center py-3 border border-dashed border-border rounded-lg">
+                No documents yet. Signed ATCs and uploads appear here automatically.
+              </p>
+            ) : (
+              <div className="grid gap-1.5 max-h-56 overflow-y-auto">
+                {clientDocs.map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => openClientDoc(d.file_path)}
+                    className="group flex items-center gap-2.5 rounded-lg border border-border bg-muted/30 hover:bg-muted/60 px-2.5 py-2 text-left transition-colors"
+                  >
+                    <div className="w-7 h-7 rounded-md bg-background flex items-center justify-center shrink-0">
+                      <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">{d.file_name}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {(d.document_type || "document").replace(/_/g, " ")} · {new Date(d.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}
+                      </p>
+                    </div>
+                    <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+
           {/* Generate Report form */}
           <ReportStartForm
             prefill={{
