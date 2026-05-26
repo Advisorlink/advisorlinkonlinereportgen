@@ -1,56 +1,77 @@
-# Recreate presentation slides as code
 
-Rebuild all 15 slides (currently static JPGs in `public/slides/`) as React components, matching the existing design closely but with crisper typography, consistent spacing, and a more professional finish. Tighten copy where it helps (e.g. fix "superanuation" → "superannuation", remove duplicated slides 9/10/11/12 if they truly are duplicates of slide 8).
+# Booking & Calendar System
 
-## Approach
+A full GoHighLevel-style booking system: clients pick a time from a branded, timezone-aware booking page, get a beautiful confirmation email, the meeting auto-writes to your Google Calendar, and they get reminder email + SMS 24h and 1h before. Reschedule and cancel via branded links.
 
-1. **Extract reusable image assets** from the current JPGs and save as standalone files in `src/assets/slides/`:
-   - Travis Seckold headshot
-   - Couple-with-tablet photo (slide 1)
-   - Hands-signing photo (slide 5 — SMSF)
-   - Stefano Duro / IFA Excellence Awards composite (slide 8)
-   - Document screenshots (slide 15 — super statement, balance screenshot)
-   - Fund/platform logos (AustralianSuper, Aware, CBUS, Rest, HESTA, TWUSUPER, Mercer, CareSuper, AMP, BT, Macquarie, North, HUB24, Netwealth, Colonial)
-   - Google reviews badge, "Trusted Adviser" seal
+## Defaults
 
-2. **Build a slide component system** at `src/components/slides/`:
-   - `SlideFrame.tsx` — 1920×1080 base with the navy/white diagonal chrome, AdvisorLink logo top-left, footer contact strip
-   - `Slide01_Intro.tsx` through `Slide15_Documents.tsx` — one component per slide
-   - A `slides.ts` index exporting `[{ id, Component }]`
+- **Availability:** Mon–Fri, 10:00 AM – 7:00 PM (your local timezone, AEST)
+- **Meeting length:** 45 minutes + 15 min buffer
+- **Meeting link:** Your existing in-app screen-share room (not Google Meet)
+- **Reminders:** Email + SMS at 24h before, Email + SMS at 1h before
+- **Sender:** advisorlinkonline.com.au (already verified)
+- **Google account:** Advisor Link calendar (connected via OAuth in next step)
 
-3. **Swap `PresentationSlideshow.tsx`** to render the React slide components inside a scaled 1920×1080 stage (matches the existing image dimensions, so all existing controls — fullscreen, nav, pause-share, the share-report hotspot on slide 6 — keep working). Use the same proportional-scaling pattern as the slides-app skill.
+## What You'll See in the App
 
-4. **Keep all surrounding behaviour identical**: slide count stays 15, slide indices stay aligned with the screen-share/sync logic, keyboard nav, fullscreen, share-report button overlay on slide 6, etc.
+1. **New "Calendar" page** in the sidebar with three tabs:
+   - **Bookings** — list of upcoming/past meetings, status (booked / rescheduled / cancelled / completed)
+   - **Availability** — edit your hours, meeting length, buffer, timezone, max bookings per day
+   - **Reminder Templates** — edit the email + SMS reminder copy (24h and 1h), with merge fields like `{{client_name}}`, `{{time}}`, `{{reschedule_link}}`
 
-## Slide inventory (content to preserve)
+2. **Public booking page** at `/book/travis` (also linkable from your dashboard):
+   - Hero with logo, "Book a call with Travis Seckold", brand colours
+   - Timezone auto-detected with picker to override
+   - Calendar showing only valid days; click a day → time slots in client's timezone
+   - Form: name, email, phone, notes
+   - Beautiful confirmation screen with the meeting link
 
-1. **Hi 👋 So let's have a chat..** — couple-with-tablet hero + chat icon, contact details footer
-2. **Important Disclaimer + Travis Seckold profile card** — recorded-call disclaimer, professional profile
-3. **Why So Many People Choose Us To Help** — Matching Process Guarantee + 100% Free service cards, Trusted Adviser seal, Google reviews badge
-4. **Option 1: Industry/Retail Super Funds** — fund logos grid + pros/cons
-5. **Option 2: Self Managed Super Fund** — hands-signing photo + pros/cons
-6. **Option 3: Actively Managed Super Funds** — platform logos grid + pros/cons (share-report button stays here)
-7. **Fees And Costs For Advice** — fee philosophy + one-time setup / ongoing / no out-of-pocket cards
-8. **Stefano Duro — IFA Excellence Awards 2025 Official Judge** — full-bleed editorial portrait + "Book A Time" CTA
-9–12. **Was Everything Explained To You Clearly?** — 4 clipboard cards (difference between 3 options / next steps / fees in SOA / open to alternatives). Currently slides 9, 10, 11, 12 look identical in the JPG grid — I will **collapse to one slide** unless you want them kept as a deliberate animation/reveal.
-13. **(duplicate of above)** — same treatment
-14. **Review Completed! Book A Time For Advice** — success envelope graphic + CTA
-15. **Setting Up Your Adviser Meeting** — document checklist with super statement + balance screenshot
+3. **Reschedule page** at `/reschedule/{token}` — same calendar UI, prefilled, branded
+4. **Cancel page** at `/cancel/{token}` — confirms then frees the slot
 
-## Open question
+## What Happens When a Booking is Made
 
-The current deck has slides 9–13 that look like the same "Was everything explained clearly?" layout repeated 5×. They might be a build-up animation in PowerPoint that exported as separate frames. **I will collapse them to a single slide** (so the new deck is ~11 slides instead of 15) unless you tell me to keep all 5 frames.
+1. Slot conflict check against existing bookings + Google Calendar busy times
+2. Booking saved in DB
+3. Event created in your Google Calendar (title, description, attendee = client email)
+4. Confirmation email to client (branded, dark/cyan theme, logo, meeting link, add-to-calendar buttons, reschedule/cancel buttons)
+5. Confirmation email to you (so you know it's booked)
+6. Two reminders scheduled (24h + 1h before) — sent via cron
 
-## Technical details
+## Technical Section
 
-- Image extraction: ImageMagick crops from existing JPGs into `src/assets/slides/*.{png,jpg}`. Each photo only extracted once and reused.
-- Typography: existing site fonts; semantic slide classes (`slide-title`, `slide-body`, `slide-caption`) defined in `index.css` scoped to `.slide-content`.
-- Colors: reuse existing navy `--primary` and the bright accent blue from the current slides as design tokens.
-- `PresentationSlideshow` change: keep the same `current` index state and keyboard/fullscreen logic; replace the `<img>` with `<SlideRenderer index={current} />` that renders a scaled 1920×1080 frame.
-- Old JPGs left in `public/slides/` untouched (no deletes) in case you want to roll back.
+**New DB tables**
+- `booking_settings` (1 row) — availability JSON, timezone, meeting length, buffer, slug, max/day
+- `bookings` — client info, start/end (UTC), client_timezone, status, google_event_id, reschedule_token, cancel_token, reminder_24h_sent_at, reminder_1h_sent_at, notes
+- `booking_reminder_templates` — type (`email_24h`, `sms_24h`, `email_1h`, `sms_1h`), subject, body, is_active
 
-## Out of scope
+**Connector**
+- Google Calendar (via `standard_connectors--connect`) — the connection authorises your Advisor Link Google account so events write there.
 
-- Animations / transitions between slides (can add later)
-- Editable slide content via a CMS (slides remain code)
-- Redesigning slide content/messaging beyond minor copy fixes
+**Edge functions**
+- `booking-availability` (public) — returns free slots for a given date in the client's TZ
+- `booking-create` (public) — validates, writes to Google Calendar, saves booking, enqueues confirmation emails
+- `booking-reschedule` (public) — moves the booking + updates GCal event
+- `booking-cancel` (public) — deletes GCal event, marks cancelled, frees slot
+- `booking-reminders-cron` — runs every 5 min, sends due reminders (email via existing send-transactional-email, SMS via existing sms-send)
+- Add new email templates: `booking-confirmation-client`, `booking-confirmation-host`, `booking-reminder-24h`, `booking-reminder-1h`, `booking-rescheduled`, `booking-cancelled`
+
+**Cron** — pg_cron to ping `booking-reminders-cron` every 5 minutes.
+
+**Routes**
+- `/calendar` (authenticated, in app)
+- `/book/:slug` (public)
+- `/reschedule/:token` (public)
+- `/cancel/:token` (public)
+
+## Order of work
+
+1. Migration: tables + RLS + cron
+2. Connect Google Calendar (you'll click through OAuth)
+3. Edge functions for availability / create / reschedule / cancel / reminders
+4. Email templates (using transactional email infrastructure already set up)
+5. Public booking + reschedule + cancel pages (branded)
+6. In-app Calendar page (bookings list, availability editor, reminder template editor)
+7. Test end-to-end
+
+Once you approve, I'll start with step 1 (database). Step 2 will prompt you to authorise Google.
