@@ -264,7 +264,7 @@ export default function Messages() {
     if (data) setTeamMembers(data);
   }, []);
 
-  useEffect(() => { fetchConversations(); fetchSmsNumbers(); fetchTemplates(); fetchTeam(); }, [fetchConversations, fetchSmsNumbers, fetchTemplates, fetchTeam]);
+  useEffect(() => { fetchConversations(); fetchSmsNumbers(); fetchTemplates(); fetchTeam(); fetchPipelineStages(); }, [fetchConversations, fetchSmsNumbers, fetchTemplates, fetchTeam, fetchPipelineStages]);
 
   // Deep-link: /messages?phone=...&name=... opens (or creates) a conversation
   const [searchParams, setSearchParams] = useSearchParams();
