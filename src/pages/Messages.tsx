@@ -342,8 +342,10 @@ export default function Messages() {
       if (activeConv.is_unread) {
         supabase.from("sms_conversations").update({ is_unread: false, unread_count: 0 }).eq("id", activeConv.id).then();
       }
+      // Auto-open the unified full client profile (same drawer as Pipeline)
+      openFullProfile(activeConv);
     }
-  }, [activeConv, fetchMessages]);
+  }, [activeConv, fetchMessages, openFullProfile]);
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
