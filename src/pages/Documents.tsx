@@ -189,7 +189,72 @@ export default function Documents() {
     setPreview((p) => (p && p.doc.id === doc.id ? { ...p, doc: { ...p.doc, file_name: trimmed } } : p));
   };
 
+  const inferDocType = (file: File): string => {
+    const n = file.name.toLowerCase();
+    if (file.type.startsWith("image/")) {
+      if (/licen[sc]e|licen[sc]/.test(n)) return "license";
+      if (/statement|super/.test(n)) return "super_statement";
+      return "screenshot";
+    }
+    if (file.type === "application/pdf") {
+      if (/statement|super/.test(n)) return "super_statement";
+      if (/licen[sc]e/.test(n)) return "license";
+      return "other";
+    }
+    return "other";
+  };
+
+  const uploadFilesToClient = async (
+    target: { name: string; email: string; phone: string | null },
+    files: File[]
+  ) => {
+    if (!files.length) return;
+    const toastId = toast.loading(`Uploading ${files.length} file${files.length > 1 ? "s" : ""}…`);
+    const safeKey = (target.email || target.name).replace(/[^a-z0-9@._-]+/gi, "_").toLowerCase();
+    const inserts: Partial<ClientDocument>[] = [];
+    for (const file of files) {
+      try {
+        if (file.size > 25 * 1024 * 1024) {
+          toast.error(`${file.name} exceeds 25MB`);
+          continue;
+        }
+        const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+        const path = `${safeKey}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("client-documents")
+          .upload(path, file, { contentType: file.type || "application/octet-stream", upsert: false });
+        if (upErr) {
+          toast.error(`Upload failed: ${file.name}`, { description: upErr.message });
+          continue;
+        }
+        inserts.push({
+          client_name: target.name,
+          client_email: target.email,
+          client_phone: target.phone,
+          document_type: inferDocType(file),
+          file_path: path,
+          file_name: file.name,
+          file_size: file.size,
+          mime_type: file.type || "application/octet-stream",
+          status: "received",
+          consent_given: true,
+          notes: "Added by advisor (drag & drop)",
+        });
+      } catch (e) {
+        toast.error(`Failed: ${file.name}`);
+      }
+    }
+    if (inserts.length) {
+      const { error } = await supabase.from("client_documents").insert(inserts as never);
+      if (error) toast.error(error.message);
+    }
+    toast.dismiss(toastId);
+    toast.success(`Added ${inserts.length} file${inserts.length === 1 ? "" : "s"} to ${target.name}`);
+    await load();
+  };
+
   const filteredDocs = useMemo(() => {
+
     const q = search.toLowerCase();
     if (!q) return docs;
     return docs.filter(
