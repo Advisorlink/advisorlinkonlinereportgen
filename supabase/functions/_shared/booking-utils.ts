@@ -66,6 +66,16 @@ export function formatInTz(date: Date, tz: string, opts: Intl.DateTimeFormatOpti
   return new Intl.DateTimeFormat("en-AU", { timeZone: tz, ...opts }).format(date);
 }
 
+/** Get ISO date key (YYYY-MM-DD) for a UTC instant in a given tz. */
+export function isoDateInTz(date: Date, tz: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(date);
+  const map: Record<string, string> = {};
+  for (const p of parts) if (p.type !== "literal") map[p.type] = p.value;
+  return `${map.year}-${map.month}-${map.day}`;
+}
+
 export interface AvailabilityWindow { start: string; end: string }
 export type WeeklyAvailability = Record<string, AvailabilityWindow[]>;
 
