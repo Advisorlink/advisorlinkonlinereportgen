@@ -269,6 +269,76 @@ Deno.serve(async (req) => {
         );
       }
 
+      // ---- Automation: save signed PDF to client documents + advance pipeline ----
+      try {
+        if (doc.signed_pdf_path && doc.client_email) {
+          const { data: signedBlob } = await supabase.storage
+            .from("esign-documents")
+            .download(doc.signed_pdf_path);
+          if (signedBlob) {
+            const safeName = (doc.document_name || "Signed_Document").replace(/[^a-z0-9._-]+/gi, "_");
+            const targetPath = `signed/${doc.client_email.toLowerCase()}/${Date.now()}_${safeName}.pdf`;
+            const buf = new Uint8Array(await signedBlob.arrayBuffer());
+            const { error: upErr } = await supabase.storage
+              .from("client-documents")
+              .upload(targetPath, buf, { contentType: "application/pdf", upsert: false });
+            if (!upErr) {
+              await supabase.from("client_documents").insert({
+                client_name: doc.client_name || "Client",
+                client_email: doc.client_email,
+                client_phone: doc.client_phone || null,
+                document_type: "signed_atc",
+                file_name: `${doc.document_name || "Signed Document"}.pdf`,
+                file_path: targetPath,
+                file_size: buf.length,
+                mime_type: "application/pdf",
+                status: "received",
+                consent_given: true,
+                notes: "Auto-saved from e-sign completion",
+              });
+            }
+          }
+        }
+
+        const email = (doc.client_email || "").toLowerCase().trim();
+        const phoneDigits = (doc.client_phone || "").replace(/\D+/g, "");
+        let deal: any = null;
+        if (email) {
+          const { data } = await supabase
+            .from("pipeline_deals")
+            .select("id, progress_stages, stage_id")
+            .ilike("client_email", email)
+            .limit(1)
+            .maybeSingle();
+          deal = data;
+        }
+        if (!deal && phoneDigits.length >= 6) {
+          const { data: list } = await supabase
+            .from("pipeline_deals")
+            .select("id, progress_stages, stage_id, client_phone");
+          deal = (list || []).find((d: any) =>
+            (d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))
+          );
+        }
+        if (deal) {
+          const { data: signedStage } = await supabase
+            .from("pipeline_stages")
+            .select("id")
+            .eq("name", "Signed")
+            .maybeSingle();
+          const existing: string[] = Array.isArray(deal.progress_stages) ? deal.progress_stages : [];
+          const merged = Array.from(new Set([...existing, "presentation_completed", "atc_tpa_sent"]));
+          const updates: any = { progress_stages: merged, updated_at: new Date().toISOString() };
+          if (signedStage?.id && deal.stage_id !== signedStage.id) {
+            updates.stage_id = signedStage.id;
+            updates.position = 0;
+          }
+          await supabase.from("pipeline_deals").update(updates).eq("id", deal.id);
+        }
+      } catch (autoErr) {
+        console.error("Post-sign automation failed:", autoErr);
+      }
+
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
