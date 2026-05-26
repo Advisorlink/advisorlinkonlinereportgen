@@ -289,26 +289,32 @@ export function buildIcs(opts: {
   return lines.join("\r\n");
 }
 
+/** Strip em-dashes / en-dashes from any user-facing copy. */
+export function stripDashes(s: string): string {
+  return s.replace(/[—–]/g, "-");
+}
+
 export async function sendSmsViaTwilio(to: string, body: string) {
   const sid = Deno.env.get("TWILIO_ACCOUNT_SID");
   const tok = Deno.env.get("TWILIO_AUTH_TOKEN");
   if (!sid || !tok) {
     console.warn("Twilio not configured, skipping SMS");
-    return { skipped: true };
+    return { skipped: true } as any;
   }
   // Find default sender number
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const numRes = await fetch(`${supabaseUrl}/rest/v1/sms_twilio_numbers?is_default=eq.true&select=phone_number&limit=1`, {
+  const numRes = await fetch(`${supabaseUrl}/rest/v1/sms_twilio_numbers?is_default=eq.true&select=phone_number,user_id&limit=1`, {
     headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
   });
   const nums = await numRes.json();
   const from = nums[0]?.phone_number;
   if (!from) {
     console.warn("No default SMS sender configured");
-    return { skipped: true };
+    return { skipped: true } as any;
   }
-  const params = new URLSearchParams({ To: to, From: from, Body: body });
+  const cleanBody = stripDashes(body);
+  const params = new URLSearchParams({ To: to, From: from, Body: cleanBody });
   const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
     method: "POST",
     headers: {
@@ -322,7 +328,92 @@ export async function sendSmsViaTwilio(to: string, body: string) {
     console.error("Twilio SMS failed:", data);
     throw new Error(`Twilio error: ${data.message || res.status}`);
   }
-  return data;
+  return { ...data, from, body: cleanBody, ownerUserId: nums[0]?.user_id };
+}
+
+/**
+ * Send an SMS and also log it into the in-app conversation thread
+ * (sms_contacts / sms_conversations / sms_messages) so it appears
+ * in the Messages tab alongside other SMS history.
+ */
+export async function sendAndLogSms(
+  supabase: any,
+  opts: { to: string; body: string; clientName?: string; clientEmail?: string | null },
+) {
+  const result = await sendSmsViaTwilio(opts.to, opts.body);
+  if ((result as any)?.skipped) return result;
+  try {
+    const ownerUserId = (result as any).ownerUserId;
+    if (!ownerUserId) return result;
+
+    // Find or create the contact (one per phone, scoped to owner).
+    let contactId: string | null = null;
+    const { data: existing } = await supabase
+      .from("sms_contacts").select("id")
+      .eq("user_id", ownerUserId).eq("phone", opts.to).maybeSingle();
+    if (existing?.id) {
+      contactId = existing.id;
+    } else {
+      const { data: created } = await supabase
+        .from("sms_contacts").insert({
+          user_id: ownerUserId,
+          phone: opts.to,
+          full_name: opts.clientName ?? opts.to,
+          first_name: opts.clientName?.split(" ")[0] ?? null,
+          email: opts.clientEmail ?? null,
+          lead_source: "booking",
+          opt_in_status: true,
+          opt_in_source: "booking",
+          opt_in_date: new Date().toISOString(),
+        }).select("id").single();
+      contactId = created?.id ?? null;
+    }
+    if (!contactId) return result;
+
+    // Find or create the conversation.
+    let convoId: string | null = null;
+    const { data: convo } = await supabase
+      .from("sms_conversations").select("id")
+      .eq("user_id", ownerUserId).eq("contact_id", contactId).maybeSingle();
+    if (convo?.id) {
+      convoId = convo.id;
+    } else {
+      const { data: newConvo } = await supabase
+        .from("sms_conversations").insert({
+          user_id: ownerUserId,
+          contact_id: contactId,
+          status: "open",
+        }).select("id").single();
+      convoId = newConvo?.id ?? null;
+    }
+    if (!convoId) return result;
+
+    const nowIso = new Date().toISOString();
+    await supabase.from("sms_messages").insert({
+      user_id: ownerUserId,
+      conversation_id: convoId,
+      contact_id: contactId,
+      twilio_sid: (result as any).sid ?? null,
+      direction: "outbound",
+      channel: "sms",
+      from_number: (result as any).from,
+      to_number: opts.to,
+      body: (result as any).body ?? opts.body,
+      status: (result as any).status ?? "sent",
+    });
+    await supabase.from("sms_conversations").update({
+      last_message_at: nowIso,
+      last_message_body: (result as any).body ?? opts.body,
+      last_message_direction: "outbound",
+      updated_at: nowIso,
+    }).eq("id", convoId);
+    await supabase.from("sms_contacts").update({
+      last_message_at: nowIso, updated_at: nowIso,
+    }).eq("id", contactId);
+  } catch (e) {
+    console.warn("sms conversation log failed", e);
+  }
+  return result;
 }
 
 export function normalizePhone(input: string | null | undefined): string | null {
