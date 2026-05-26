@@ -153,6 +153,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      <BookAppointmentDialog open={bookOpen} onOpenChange={setBookOpen} />
     </CRMLayout>
   );
 }
