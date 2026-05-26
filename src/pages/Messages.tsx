@@ -838,6 +838,8 @@ export default function Messages() {
                   teamMembers={teamMembers}
                   onReassign={handleReassign}
                   onClose={() => setShowContactPanel(false)}
+                  onOpenFullProfile={() => openFullProfile(activeConv)}
+                  loadingFullProfile={loadingProfile}
                   isSheet
                 />
               </SheetContent>
@@ -849,10 +851,25 @@ export default function Messages() {
                 teamMembers={teamMembers}
                 onReassign={handleReassign}
                 onClose={() => setShowContactPanel(false)}
+                onOpenFullProfile={() => openFullProfile(activeConv)}
+                loadingFullProfile={loadingProfile}
               />
             </div>
           )
         )}
+
+        {/* Unified Pipeline-style profile drawer */}
+        <DealProfileDrawer
+          deal={profileDeal}
+          stages={pipelineStages}
+          open={profileOpen}
+          onOpenChange={setProfileOpen}
+          onDealUpdated={() => { /* no-op */ }}
+          onDeleteDeal={async (id) => {
+            await supabase.from("pipeline_deals").delete().eq("id", id);
+            setProfileOpen(false);
+          }}
+        />
 
         {/* Hidden file input for MMS */}
         <input ref={fileInputRef} type="file" multiple accept="image/*,application/pdf,.doc,.docx,.txt" className="hidden" onChange={handleFilePick} />
