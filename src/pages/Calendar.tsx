@@ -62,6 +62,19 @@ export default function Calendar() {
     else toast.success("Template saved");
   };
 
+  const sendTest = async (kind: string) => {
+    const isEmail = kind.startsWith("email");
+    if (isEmail && !testEmail) { toast.error("Enter a test email address"); return; }
+    if (!isEmail && !testPhone) { toast.error("Enter a test phone number"); return; }
+    setSendingTest(kind);
+    const { data, error } = await supabase.functions.invoke("booking-test-reminder", {
+      body: { kind, email: testEmail || undefined, phone: testPhone || undefined },
+    });
+    setSendingTest(null);
+    if (error || (data as any)?.error) toast.error(error?.message || (data as any).error);
+    else toast.success(isEmail ? `Test email sent to ${testEmail}` : `Test SMS sent to ${testPhone}`);
+  };
+
   const updateDay = (dow: number, idx: number, field: "start" | "end", v: string) => {
     const wa = { ...settings.weekly_availability };
     wa[dow] = [...(wa[dow] || [])];
