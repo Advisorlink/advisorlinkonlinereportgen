@@ -16,12 +16,12 @@ export default function CancelPublic() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    supabase.rpc("get_booking_by_token", { _token: token })
-      .then(({ data, error }) => {
-        if (error) toast.error("Invalid link");
-        else setBooking((data as any)?.[0] || null);
-      })
-      .finally(() => setLoading(false));
+    (async () => {
+      const { data, error } = await supabase.rpc("get_booking_by_token", { _token: token });
+      if (error) toast.error("Invalid link");
+      else setBooking((data as any)?.[0] || null);
+      setLoading(false);
+    })();
   }, [token]);
 
   const submit = async () => {
