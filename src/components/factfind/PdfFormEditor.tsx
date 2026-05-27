@@ -216,7 +216,7 @@ const setupManualMoneyCalculations = (
 };
 
 export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
-  ({ src, scale = 1.5 }, ref) => {
+  ({ src, scale = 1.5, storageKey }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const pdfRef = useRef<pdfjsLib.PDFDocumentProxy | null>(null);
     const scriptingRef = useRef<ScriptingManagerLike | null>(null);
