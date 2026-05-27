@@ -120,7 +120,7 @@ const MAX_BYTES = 10 * 1024 * 1024;
 const DOC_OPTIONS: { type: DocType; label: string; description: string; icon: typeof IdCard }[] = [
   { type: "statement", label: "Statement", description: "Super or bank statement (PDF or photo)", icon: FileText },
   { type: "license", label: "Photo ID", description: "Front and back of your photo ID", icon: IdCard },
-  { type: "screenshot", label: "Screenshot", description: "Only needed for up-to-date balance or if you haven't supplied a statement", icon: ImageIcon },
+  { type: "screenshot", label: "Screenshots", description: "Only needed for up-to-date balance or if you haven't supplied a statement", icon: ImageIcon },
 ];
 
 type Stage =
