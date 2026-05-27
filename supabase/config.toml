@@ -21,6 +21,9 @@ verify_jwt = false
 [functions.esign-signed-url]
 verify_jwt = false
 
+[functions.complete-esign-signing]
+verify_jwt = false
+
 [functions.booking-availability]
 verify_jwt = false
 

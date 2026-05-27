@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { PDFDocument, rgb } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { Button } from "@/components/ui/button";
@@ -76,15 +75,6 @@ interface ESignDoc {
   original_pdf_path: string | null;
   signing_token: string;
   client_data?: any;
-}
-
-interface SigningField {
-  kind: "text" | "signature";
-  pageIndex: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 }
 
 type PageState = "loading" | "ready" | "signing" | "submitted" | "already-signed" | "error";
@@ -226,80 +216,16 @@ export default function ESignPublic() {
     if (!doc || !signatureData || !token) return;
     setSubmitting(true);
     try {
-      const signingFields: SigningField[] = (doc.client_data?.signing_fields || []).filter(
-        (field: SigningField) => field.kind === "signature"
-      );
-
-      let signedPdfPath: string | null = null;
-      if (doc.original_pdf_path && pdfUrl && signingFields.length > 0) {
-        const pdfBytes = await fetch(pdfUrl).then((res) => res.arrayBuffer());
-        const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
-        const signatureImage = await pdfDoc.embedPng(signatureData);
-        const pages = pdfDoc.getPages();
-
-        for (const field of signingFields) {
-          const page = pages[field.pageIndex];
-          if (!page) continue;
-          const pageWidth = page.getWidth();
-          const pageHeight = page.getHeight();
-          const w = field.width * pageWidth;
-          const h = field.height * pageHeight;
-          const fx = field.x * pageWidth;
-          const fy = pageHeight - field.y * pageHeight - h;
-
-          // Cover the "Sign here" box border with a white rectangle
-          page.drawRectangle({
-            x: fx - 2,
-            y: fy - 2,
-            width: w + 4,
-            height: h + 4,
-            color: rgb(1, 1, 1),
-            borderWidth: 0,
-          });
-
-          // Draw the actual signature
-          page.drawImage(signatureImage, {
-            x: fx + 6,
-            y: fy + 4,
-            width: w - 12,
-            height: h - 8,
-          });
-        }
-
-        const completedBytes = await pdfDoc.save();
-        signedPdfPath = doc.original_pdf_path.replace(/\.pdf$/i, "_signed.pdf");
-        const { error: uploadError } = await supabase.storage
-          .from("esign-documents")
-          .upload(signedPdfPath, new Blob([completedBytes as BlobPart], { type: "application/pdf" }), { upsert: true });
-        if (uploadError) {
-          console.error("Upload error:", uploadError);
-          throw new Error("Failed to upload signed document");
-        }
-      }
-
-      await supabase.rpc("submit_esign_signature", {
-        _token: token,
-        _signature_data: signatureData,
-        _field_index: 1,
+      const { data, error } = await supabase.functions.invoke("complete-esign-signing", {
+        body: {
+          token,
+          signatureData,
+        },
       });
 
-      if (signingFields.length > 1) {
-        await supabase.rpc("submit_esign_signature", {
-          _token: token,
-          _signature_data: signatureData,
-          _field_index: 2,
-        });
-      }
-
-
-      const { error: rpcError } = await supabase.rpc("complete_signing", {
-        _token: token,
-        _signed_pdf_path: signedPdfPath,
-      });
-
-      if (rpcError) {
-        console.error("RPC error:", rpcError);
-        throw new Error("Failed to update document status");
+      if (error || (data as { error?: string } | null)?.error) {
+        console.error("Signing completion error:", error || data);
+        throw new Error((data as { error?: string } | null)?.error || "Failed to submit signed document");
       }
 
       try {
@@ -316,9 +242,9 @@ export default function ESignPublic() {
       }
 
       setState("submitted");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Signing error:", err);
-      toast.error(err.message || "Failed to submit signature. Please try again.");
+      toast.error(err instanceof Error ? err.message : "Failed to submit signature. Please try again.");
     } finally {
       setSubmitting(false);
     }
