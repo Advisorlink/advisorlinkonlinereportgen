@@ -16,12 +16,12 @@ const UPLOAD_PATHS = {
   license_only: "/upload-license",
 } as const;
 
-const origin = typeof window !== "undefined" ? window.location.origin : "https://report.advisorlinkonline.com.au";
+const PUBLIC_UPLOAD_ORIGIN = "https://report.advisorlinkonline.com.au";
 
 const UPLOAD_URLS = {
-  license_and_statement: `${origin}${UPLOAD_PATHS.license_and_statement}`,
-  statement_only: `${origin}${UPLOAD_PATHS.statement_only}`,
-  license_only: `${origin}${UPLOAD_PATHS.license_only}`,
+  license_and_statement: `${PUBLIC_UPLOAD_ORIGIN}${UPLOAD_PATHS.license_and_statement}`,
+  statement_only: `${PUBLIC_UPLOAD_ORIGIN}${UPLOAD_PATHS.statement_only}`,
+  license_only: `${PUBLIC_UPLOAD_ORIGIN}${UPLOAD_PATHS.license_only}`,
 } as const;
 
 type UploadType = keyof typeof UPLOAD_URLS;
@@ -149,19 +149,45 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const sendEmailNow = async () => {
+  const buildUploadEmailHtml = () => {
     const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const url = UPLOAD_URLS[uploadType];
+    const safeUrl = escape(url);
+    const buttonHtml = `
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 14px 0;border-collapse:collapse">
+        <tr>
+          <td bgcolor="#0891b2" style="border-radius:8px;background:#0891b2;text-align:center">
+            <a href="${safeUrl}" target="_blank" style="background:#0891b2;border:1px solid #0891b2;border-radius:8px;color:#ffffff;display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:20px;padding:14px 22px;text-align:center;text-decoration:none;mso-padding-alt:0">
+              Upload your documents
+            </a>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#4b5563">If the button does not appear, copy and paste this secure link into your browser:</p>
+      <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;word-break:break-all"><a href="${safeUrl}" target="_blank" style="color:#0891b2;text-decoration:underline">${safeUrl}</a></p>`;
+
+    let insertedButton = false;
     const html = emailBody
       .split("\n")
       .map(line => {
-        if (line.trim() === "") return "<br>";
+        const trimmed = line.trim();
+        if (trimmed === "") return "<br>";
+        if (trimmed === url) {
+          insertedButton = true;
+          return buttonHtml;
+        }
         const safe = escape(line).replace(
           /(https?:\/\/[^\s]+)/g,
-          '<a href="$1" style="color:#0891b2;text-decoration:underline">$1</a>'
+          '<a href="$1" target="_blank" style="color:#0891b2;text-decoration:underline">$1</a>'
         );
-        return `<p style="margin:0 0 8px 0">${safe}</p>`;
+        return `<p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:22px;color:#111827">${safe}</p>`;
       })
       .join("\n");
+    return insertedButton ? html : `${html}\n${buttonHtml}`;
+  };
+
+  const sendEmailNow = async () => {
+    const html = buildUploadEmailHtml();
     const { data, error } = await supabase.functions.invoke("send-report-email", {
       body: {
         recipientEmail: email,
