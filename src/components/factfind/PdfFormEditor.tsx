@@ -11,6 +11,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 export type PdfFormEditorHandle = {
   /** Returns the filled PDF bytes (with all user input applied to AcroForm fields). */
   getFilledPdfBytes: () => Promise<Uint8Array>;
+  /** Clear any auto-saved draft for this storageKey (call after successful save/download). */
+  clearDraft: () => void;
 };
 
 interface Props {
