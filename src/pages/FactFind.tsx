@@ -257,7 +257,7 @@ export default function FactFind() {
         {loadingEdit ? (
           <div className="text-center py-12 text-muted-foreground">Loading saved Fact Find…</div>
         ) : (
-          <PdfFormEditor ref={editorRef} src={pdfSrc} />
+          <PdfFormEditor ref={editorRef} src={pdfSrc} storageKey={draftKey} />
         )}
 
         <div className="flex flex-wrap gap-2 justify-end pb-12">
