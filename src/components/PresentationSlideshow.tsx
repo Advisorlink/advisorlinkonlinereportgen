@@ -17,6 +17,7 @@ const SLIDE_SRCS = [
   "/slides/slide-12.jpg",
   "/slides/slide-13.jpg",
   "/slides/slide-14.jpg",
+  "/slides/slide-14b.jpg",
   "/slides/slide-16.jpg",
   "/slides/slide-17.jpg",
 
