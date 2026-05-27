@@ -18,6 +18,12 @@ interface Props {
   src: string;
   /** Render scale. */
   scale?: number;
+  /**
+   * Optional key for auto-persisting form input to localStorage so the user's
+   * in-progress answers survive navigating away and coming back. Use a stable
+   * value per logical document (e.g. "factfind:new" or `factfind:${docId}`).
+   */
+  storageKey?: string;
 }
 
 type PdfFieldObject = {
