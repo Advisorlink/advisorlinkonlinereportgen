@@ -296,7 +296,11 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
         await scriptingRef.current?.dispatchDidSave?.();
         return bytes;
       },
-    }), []);
+      clearDraft() {
+        if (!storageKey) return;
+        try { localStorage.removeItem(`pdfFormEditor:${storageKey}`); } catch {}
+      },
+    }), [storageKey]);
 
     useEffect(() => {
       let cancelled = false;
