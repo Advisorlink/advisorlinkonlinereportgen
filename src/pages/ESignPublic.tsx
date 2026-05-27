@@ -77,15 +77,6 @@ interface ESignDoc {
   client_data?: any;
 }
 
-interface SigningField {
-  kind: "text" | "signature";
-  pageIndex: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
 type PageState = "loading" | "ready" | "signing" | "submitted" | "already-signed" | "error";
 
 const BRAND = {
@@ -251,9 +242,9 @@ export default function ESignPublic() {
       }
 
       setState("submitted");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Signing error:", err);
-      toast.error(err.message || "Failed to submit signature. Please try again.");
+      toast.error(err instanceof Error ? err.message : "Failed to submit signature. Please try again.");
     } finally {
       setSubmitting(false);
     }
