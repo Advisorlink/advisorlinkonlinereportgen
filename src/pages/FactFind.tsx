@@ -206,6 +206,10 @@ export default function FactFind() {
         if (insErr) throw insErr;
         toast.success(`Fact Find saved to ${clientName}'s documents`);
       }
+      // Successfully saved — clear the auto-saved draft so we don't keep
+      // re-hydrating stale answers next time.
+      editorRef.current?.clearDraft();
+      try { localStorage.removeItem(headerDraftKey); } catch {}
     } catch (e: any) {
       toast.error(e?.message || "Failed to save Fact Find");
     } finally {
