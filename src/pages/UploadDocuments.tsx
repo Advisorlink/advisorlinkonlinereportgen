@@ -118,9 +118,9 @@ type CapturedFile = {
 const MAX_BYTES = 10 * 1024 * 1024;
 
 const DOC_OPTIONS: { type: DocType; label: string; description: string; icon: typeof IdCard }[] = [
-  { type: "license", label: "Photo ID", description: "Front and back of your photo ID", icon: IdCard },
   { type: "statement", label: "Statement", description: "Super or bank statement (PDF or photo)", icon: FileText },
-  { type: "screenshot", label: "Screenshot", description: "An image from your phone or computer", icon: ImageIcon },
+  { type: "license", label: "Photo ID", description: "Front and back of your photo ID", icon: IdCard },
+  { type: "screenshot", label: "Screenshot", description: "Only needed for up-to-date balance or if you haven't supplied a statement", icon: ImageIcon },
 ];
 
 type Stage =
@@ -820,9 +820,9 @@ export default function UploadDocuments() {
               </div>
               <button
                 onClick={() => setStage("choose")}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-sm border border-dashed border-[hsl(var(--ink))]/25 bg-white py-3 text-[13px] font-semibold text-[hsl(var(--ink))] hover:border-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))]/[0.03]"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[hsl(var(--ink))]/30 bg-white py-4 text-[15px] font-bold text-[hsl(var(--ink))] shadow-sm hover:border-[hsl(var(--ink))]/60 hover:bg-[hsl(var(--ink))]/[0.03] hover:shadow-md transition-all"
               >
-                <Plus className="h-4 w-4" /> Add another document
+                <Plus className="h-5 w-5" /> Add another document
               </button>
             </div>
             <Button
