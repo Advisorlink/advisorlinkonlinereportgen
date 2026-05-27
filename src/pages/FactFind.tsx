@@ -27,6 +27,11 @@ export default function FactFind() {
   const [searchParams, setSearchParams] = useSearchParams();
   const editId = searchParams.get("edit");
 
+  // Stable key for auto-persisting in-progress form work so navigation away
+  // doesn't wipe the user's answers.
+  const draftKey = editId ? `factfind:${editId}` : "factfind:new";
+  const headerDraftKey = `${draftKey}:header`;
+
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
@@ -35,9 +40,36 @@ export default function FactFind() {
   const [editingDoc, setEditingDoc] = useState<EditingDoc | null>(null);
   const [pdfSrc, setPdfSrc] = useState<string>(BLANK_PDF_URL);
   const [loadingEdit, setLoadingEdit] = useState(false);
+  const [headerHydrated, setHeaderHydrated] = useState(false);
+
+  // Restore saved client header (name/email/phone) on mount.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(headerDraftKey);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.clientName) setClientName(d.clientName);
+        if (d.clientEmail) setClientEmail(d.clientEmail);
+        if (d.clientPhone) setClientPhone(d.clientPhone);
+      }
+    } catch {}
+    setHeaderHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [headerDraftKey]);
+
+  // Persist header as it changes.
+  useEffect(() => {
+    if (!headerHydrated) return;
+    try {
+      localStorage.setItem(
+        headerDraftKey,
+        JSON.stringify({ clientName, clientEmail, clientPhone }),
+      );
+    } catch {}
+  }, [headerHydrated, headerDraftKey, clientName, clientEmail, clientPhone]);
 
   // Prefill from client inputs (e.g. set during presentation / report flow)
-  // when not editing an existing saved PDF.
+  // when not editing an existing saved PDF and no draft was restored.
   useEffect(() => {
     if (editId) return;
     if (!clientName && inputs.clientName && inputs.clientName !== "New Client") {
