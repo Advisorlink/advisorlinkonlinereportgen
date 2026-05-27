@@ -820,9 +820,9 @@ export default function UploadDocuments() {
               </div>
               <button
                 onClick={() => setStage("choose")}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-sm border border-dashed border-[hsl(var(--ink))]/25 bg-white py-3 text-[13px] font-semibold text-[hsl(var(--ink))] hover:border-[hsl(var(--ink))] hover:bg-[hsl(var(--ink))]/[0.03]"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[hsl(var(--ink))]/30 bg-white py-4 text-[15px] font-bold text-[hsl(var(--ink))] shadow-sm hover:border-[hsl(var(--ink))]/60 hover:bg-[hsl(var(--ink))]/[0.03] hover:shadow-md transition-all"
               >
-                <Plus className="h-4 w-4" /> Add another document
+                <Plus className="h-5 w-5" /> Add another document
               </button>
             </div>
             <Button
