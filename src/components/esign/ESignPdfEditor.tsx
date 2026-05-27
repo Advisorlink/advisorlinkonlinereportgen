@@ -444,26 +444,9 @@ export function ESignPdfEditor({
           });
         }
 
-        if (field.kind === "signature") {
-          page.drawRectangle({
-            x,
-            y,
-            width,
-            height,
-            borderWidth: 1.4,
-            borderColor: rgb(0.02, 0.58, 0.78),
-            color: rgb(0.94, 0.99, 1),
-            opacity: 0.65,
-          });
-          page.drawText("Sign here", {
-            x: x + 8,
-            y: y + height / 2 - 5,
-            size: clamp(height * 0.2, 8, 12),
-            font: boldFont,
-            color: rgb(0.02, 0.41, 0.57),
-            maxWidth: width - 16,
-          });
-        }
+        // Signature fields are intentionally NOT drawn onto the PDF.
+        // The signing coordinates are preserved in the field metadata so the
+        // signature image is stamped in the exact spot when the client signs.
       }
 
       const preparedBytes = await pdfDoc.save();
