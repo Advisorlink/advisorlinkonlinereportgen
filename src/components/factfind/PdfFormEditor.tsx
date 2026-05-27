@@ -450,6 +450,105 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
           manualCalculationCleanup = manualCalculations.cleanup;
           manualCalculationSyncRef.current = manualCalculations.sync;
 
+          // ---------- Auto-persist field values across navigation ----------
+          // Snapshot every form widget into localStorage on input so leaving
+          // the page and coming back doesn't wipe the user's work.
+          let persistCleanup: (() => void) | null = null;
+          if (storageKey) {
+            const lsKey = `pdfFormEditor:${storageKey}`;
+            type Snapshot = Record<string, { type: string; value: string | boolean | string[] }>;
+
+            const collectInputs = () =>
+              Array.from(
+                container.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+                  ".annotationLayer input, .annotationLayer textarea, .annotationLayer select",
+                ),
+              );
+
+            const keyFor = (el: HTMLElement) => {
+              const widget = el.closest<HTMLElement>("[data-annotation-id], [data-element-id]");
+              const id =
+                widget?.getAttribute("data-element-id") ||
+                widget?.getAttribute("data-annotation-id") ||
+                "";
+              const name = (el as HTMLInputElement).name || "";
+              // Combine id + name + type so radio groups don't collide.
+              return `${id}|${name}|${(el as HTMLInputElement).type || el.tagName}`;
+            };
+
+            // Restore first.
+            try {
+              const raw = localStorage.getItem(lsKey);
+              if (raw) {
+                const snap: Snapshot = JSON.parse(raw);
+                const storage = pdf.annotationStorage;
+                for (const el of collectInputs()) {
+                  const k = keyFor(el);
+                  const entry = snap[k];
+                  if (!entry) continue;
+                  const widget = el.closest<HTMLElement>("[data-annotation-id], [data-element-id]");
+                  const annId =
+                    widget?.getAttribute("data-element-id") ||
+                    widget?.getAttribute("data-annotation-id") ||
+                    "";
+                  if (el instanceof HTMLInputElement && (el.type === "checkbox" || el.type === "radio")) {
+                    el.checked = !!entry.value;
+                    if (annId) storage.setValue(annId, { value: el.checked });
+                  } else if (el instanceof HTMLSelectElement) {
+                    const values = Array.isArray(entry.value) ? entry.value : [String(entry.value ?? "")];
+                    for (const opt of Array.from(el.options)) opt.selected = values.includes(opt.value);
+                    if (annId) storage.setValue(annId, { value: el.multiple ? values : values[0] ?? "" });
+                  } else {
+                    el.value = String(entry.value ?? "");
+                    if (annId) storage.setValue(annId, { value: el.value });
+                  }
+                  el.dispatchEvent(new Event("input", { bubbles: true }));
+                  el.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+                // Re-run formulas after restoring.
+                manualCalculations.sync();
+              }
+            } catch (err) {
+              console.warn("[PdfFormEditor] restore failed:", err);
+            }
+
+            // Persist on every change.
+            let persistTimer: number | undefined;
+            const persist = () => {
+              window.clearTimeout(persistTimer);
+              persistTimer = window.setTimeout(() => {
+                try {
+                  const snap: Snapshot = {};
+                  for (const el of collectInputs()) {
+                    const k = keyFor(el);
+                    if (el instanceof HTMLInputElement && (el.type === "checkbox" || el.type === "radio")) {
+                      snap[k] = { type: el.type, value: el.checked };
+                    } else if (el instanceof HTMLSelectElement) {
+                      const vals = Array.from(el.selectedOptions).map((o) => o.value);
+                      snap[k] = { type: "select", value: el.multiple ? vals : vals[0] ?? "" };
+                    } else {
+                      snap[k] = { type: (el as HTMLInputElement).type || "text", value: el.value };
+                    }
+                  }
+                  localStorage.setItem(lsKey, JSON.stringify(snap));
+                } catch (err) {
+                  console.warn("[PdfFormEditor] persist failed:", err);
+                }
+              }, 250);
+            };
+            container.addEventListener("input", persist, true);
+            container.addEventListener("change", persist, true);
+            persistCleanup = () => {
+              window.clearTimeout(persistTimer);
+              container.removeEventListener("input", persist, true);
+              container.removeEventListener("change", persist, true);
+            };
+          }
+          // Stash cleanup so the outer effect teardown runs it.
+          (manualCalculationCleanup as any) = (function (prev) {
+            return () => { prev?.(); persistCleanup?.(); };
+          })(manualCalculationCleanup);
+
           setLoading(false);
         } catch (e: any) {
           console.error("[PdfFormEditor]", e);
@@ -467,7 +566,7 @@ export const PdfFormEditor = forwardRef<PdfFormEditorHandle, Props>(
         pdfRef.current?.destroy();
         pdfRef.current = null;
       };
-    }, [src, scale]);
+    }, [src, scale, storageKey]);
 
     return (
       <div className="w-full">
