@@ -16,6 +16,7 @@ type Deal = {
   created_at: string;
   updated_at: string;
   progress_stages?: string[] | null;
+  source?: string | null;
 };
 
 const PROGRESS_TOTAL = 8;
