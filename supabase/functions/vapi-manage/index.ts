@@ -1650,6 +1650,17 @@ After all questions have been asked (or if the caller wants to end early), wrap 
         throw new Error(`Failed to assign assistant to number [${patchRes.status}]: ${errText}`);
       }
 
+
+      // Save local routing so twilio-voice can hand inbound calls to this assistant
+      if (e164Number) {
+        await supabase.from("inbound_ai_routing").upsert({
+          phone_number: e164Number,
+          vapi_assistant_id: assistant.id,
+          vapi_phone_number_id: phoneNumberId,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "phone_number" });
+      }
+
       return new Response(JSON.stringify({ success: true, assistantId: assistant.id }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
