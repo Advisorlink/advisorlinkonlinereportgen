@@ -1482,6 +1482,20 @@ After all questions have been asked (or if the client wants to end early), wrap 
       const { phoneNumberId, scriptId } = body;
       if (!phoneNumberId) throw new Error("phoneNumberId is required");
 
+      // Look up the actual E.164 number from Vapi so we can store it in our routing table
+      let e164Number: string | null = null;
+      try {
+        const numRes = await fetch(`${VAPI_BASE}/phone-number/${phoneNumberId}`, {
+          headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
+        });
+        if (numRes.ok) {
+          const numData = await numRes.json();
+          e164Number = numData?.number || numData?.twilioPhoneNumber || null;
+        }
+      } catch (e) {
+        console.warn("Could not fetch Vapi phone number details", e);
+      }
+
       if (!scriptId) {
         // Remove inbound assistant from number
         const vapiRes = await fetch(`${VAPI_BASE}/phone-number/${phoneNumberId}`, {
@@ -1495,6 +1509,9 @@ After all questions have been asked (or if the client wants to end early), wrap 
         if (!vapiRes.ok) {
           const errText = await vapiRes.text();
           throw new Error(`Failed to remove inbound assistant [${vapiRes.status}]: ${errText}`);
+        }
+        if (e164Number) {
+          await supabase.from("inbound_ai_routing").delete().eq("phone_number", e164Number);
         }
         return new Response(JSON.stringify({ success: true, removed: true }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
