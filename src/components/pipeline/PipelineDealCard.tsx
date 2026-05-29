@@ -131,20 +131,16 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
             const localNumber = deal.client_phone
               .replace(/\s+/g, "")
               .replace(/^\+61/, "0");
-            const sipUrl = `sip:${localNumber}`;
-            const handleCall = (e: React.MouseEvent) => {
-              e.preventDefault();
-              e.stopPropagation();
-              // Use window.location so Capacitor's WebView dispatches the
-              // sip: scheme as an Android intent, letting the user's chosen
-              // softphone (e.g. Ucomm) handle it instead of being swallowed.
-              window.location.href = sipUrl;
-            };
+            // Use tel: — UCOM Call (and most softphones) register as a
+            // handler for the standard tel: scheme on Android. Set UCOM as
+            // the default Phone app (Settings → Apps → Default apps → Phone)
+            // so taps route there instead of the native dialer.
+            const telUrl = `tel:${localNumber}`;
             return (
               <div className="flex items-center justify-between gap-2">
                 <a
-                  href={sipUrl}
-                  onClick={handleCall}
+                  href={telUrl}
+                  onClick={(e) => e.stopPropagation()}
                   onPointerDown={(e) => e.stopPropagation()}
                   className="flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-emerald-600 transition-colors"
                   title="Call"
