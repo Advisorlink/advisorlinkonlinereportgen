@@ -109,7 +109,34 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  // Inbound: PSTN → browser client (with push notification fallback)
+  // Inbound: PSTN → check if this number has an AI assistant assigned; otherwise ring the browser client.
+  // Look up routing for the dialed number.
+  try {
+    const { data: routing } = await supa
+      .from("inbound_ai_routing")
+      .select("vapi_assistant_id")
+      .eq("phone_number", To)
+      .maybeSingle();
+    const assistantId = (routing as any)?.vapi_assistant_id as string | undefined;
+    if (assistantId) {
+      await supa.from("voice_call_logs").insert({
+        call_sid: CallSid,
+        direction: "inbound",
+        from_number: From,
+        to_number: To,
+        status: "ai-answered",
+      });
+      const safeAssistant = xmlEscape(assistantId);
+      // Hand the call to Vapi via SIP. Vapi accepts inbound SIP calls addressed to the assistant id.
+      return twiml(
+        `<Dial answerOnBridge="true" timeout="30"><Sip>sip:${safeAssistant}@sip.vapi.ai</Sip></Dial>`,
+      );
+    }
+  } catch (e) {
+    console.log("inbound routing lookup failed, falling back to softphone:", e);
+  }
+
+  // No AI assistant assigned — ring the browser softphone (with push notification fallback).
   // Attempt contact lookup for nicer logs
   let contactName: string | null = null;
   try {
