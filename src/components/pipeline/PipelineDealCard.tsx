@@ -131,11 +131,30 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
             const localNumber = deal.client_phone
               .replace(/\s+/g, "")
               .replace(/^\+61/, "0");
+            const sipUrl = `sip:${localNumber}`;
+            const handleCall = async (e: React.MouseEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // On native (Capacitor), dispatch as a system intent so the
+              // user's chosen SIP/softphone app (e.g. Ucomm) handles it
+              // instead of the WebView swallowing the unknown scheme.
+              try {
+                const cap = (window as any).Capacitor;
+                if (cap?.isNativePlatform?.()) {
+                  const { App } = await import("@capacitor/app");
+                  await App.openUrl({ url: sipUrl });
+                  return;
+                }
+              } catch (err) {
+                console.warn("openUrl failed, falling back", err);
+              }
+              window.location.href = sipUrl;
+            };
             return (
               <div className="flex items-center justify-between gap-2">
                 <a
-                  href={`sip:${localNumber}`}
-                  onClick={(e) => e.stopPropagation()}
+                  href={sipUrl}
+                  onClick={handleCall}
                   onPointerDown={(e) => e.stopPropagation()}
                   className="flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-emerald-600 transition-colors"
                   title="Call"
