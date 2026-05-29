@@ -114,11 +114,12 @@ Deno.serve(async (req: Request) => {
   try {
     const { data: routing } = await supa
       .from("inbound_ai_routing")
-      .select("vapi_assistant_id")
+      .select("vapi_assistant_id, vapi_phone_number_id")
       .eq("phone_number", To)
       .maybeSingle();
     const assistantId = (routing as any)?.vapi_assistant_id as string | undefined;
-    if (assistantId) {
+    const vapiPhoneNumberId = (routing as any)?.vapi_phone_number_id as string | undefined;
+    if (assistantId && vapiPhoneNumberId) {
       await supa.from("voice_call_logs").insert({
         call_sid: CallSid,
         direction: "inbound",
@@ -126,10 +127,12 @@ Deno.serve(async (req: Request) => {
         to_number: To,
         status: "ai-answered",
       });
-      const safeAssistant = xmlEscape(assistantId);
-      // Hand the call to Vapi via SIP. Vapi accepts inbound SIP calls addressed to the assistant id.
+      // Vapi BYO SIP routing: dial sip:{vapi_phone_number_id}@sip.vapi.ai.
+      // The Vapi phone-number record already has the assistant attached, so the
+      // SIP destination is keyed off the phone-number id (not the assistant id).
+      const safeId = xmlEscape(vapiPhoneNumberId);
       return twiml(
-        `<Dial answerOnBridge="true" timeout="30"><Sip>sip:${safeAssistant}@sip.vapi.ai</Sip></Dial>`,
+        `<Dial answerOnBridge="true" timeout="30"><Sip>sip:${safeId}@sip.vapi.ai</Sip></Dial>`,
       );
     }
   } catch (e) {
