@@ -127,12 +127,11 @@ Deno.serve(async (req: Request) => {
         to_number: To,
         status: "ai-answered",
       });
-      // Vapi BYO SIP routing: dial sip:{vapi_phone_number_id}@sip.vapi.ai.
-      // The Vapi phone-number record already has the assistant attached, so the
-      // SIP destination is keyed off the phone-number id (not the assistant id).
-      const safeId = xmlEscape(vapiPhoneNumberId);
+      // Vapi BYO SIP inbound routing expects the registered phone number as the SIP user.
+      // Using the assistant id or Vapi phone-number resource id makes Vapi answer "number not found".
+      const safeSipNumber = xmlEscape(To.replace(/^\+/, ""));
       return twiml(
-        `<Dial answerOnBridge="true" timeout="30"><Sip>sip:${safeId}@sip.vapi.ai</Sip></Dial>`,
+        `<Dial answerOnBridge="true" timeout="30"><Sip>sip:${safeSipNumber}@sip.vapi.ai</Sip></Dial>`,
       );
     }
   } catch (e) {
