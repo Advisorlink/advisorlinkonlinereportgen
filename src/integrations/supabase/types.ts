@@ -814,6 +814,30 @@ export type Database = {
         }
         Relationships: []
       }
+      inbound_ai_routing: {
+        Row: {
+          created_at: string
+          phone_number: string
+          updated_at: string
+          vapi_assistant_id: string
+          vapi_phone_number_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          phone_number: string
+          updated_at?: string
+          vapi_assistant_id: string
+          vapi_phone_number_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          phone_number?: string
+          updated_at?: string
+          vapi_assistant_id?: string
+          vapi_phone_number_id?: string | null
+        }
+        Relationships: []
+      }
       meetings: {
         Row: {
           client_email: string | null
