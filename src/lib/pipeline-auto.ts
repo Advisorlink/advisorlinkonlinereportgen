@@ -21,34 +21,44 @@ export async function moveDealToStage(stageName: string, opts: {
       .maybeSingle();
     if (!stage?.id) return;
 
-    // 2. Try to find an existing deal by email then phone
-    let existingId: string | null = null;
+    // 2. Find ALL existing deals matching by email, phone, or name (case-insensitive)
+    //    so duplicates across stages (e.g. one still in "New Lead") all get moved.
+    const matchIds = new Set<string>();
+
     if (email) {
       const { data } = await supabase
         .from("pipeline_deals")
         .select("id")
-        .ilike("client_email", email)
-        .limit(1)
-        .maybeSingle();
-      existingId = (data as { id?: string } | null)?.id ?? null;
+        .ilike("client_email", email);
+      (data || []).forEach((d: { id: string }) => matchIds.add(d.id));
     }
-    if (!existingId && phoneDigits.length >= 6) {
+
+    if (phoneDigits.length >= 6) {
       const { data: allWithPhone } = await supabase
         .from("pipeline_deals")
         .select("id, client_phone")
         .not("client_phone", "is", null);
-      const match = (allWithPhone || []).find(
-        (d: { client_phone: string | null }) =>
-          (d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))
-      );
-      existingId = (match as { id?: string } | undefined)?.id ?? null;
+      (allWithPhone || []).forEach((d: { id: string; client_phone: string | null }) => {
+        if ((d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))) {
+          matchIds.add(d.id);
+        }
+      });
     }
 
-    if (existingId) {
+    // Fallback: match by exact (case-insensitive) client_name when no email/phone hit
+    if (matchIds.size === 0 && name && name !== "Unnamed client") {
+      const { data } = await supabase
+        .from("pipeline_deals")
+        .select("id")
+        .ilike("client_name", name);
+      (data || []).forEach((d: { id: string }) => matchIds.add(d.id));
+    }
+
+    if (matchIds.size > 0) {
       await supabase
         .from("pipeline_deals")
         .update({ stage_id: stage.id, updated_at: new Date().toISOString() } as never)
-        .eq("id", existingId);
+        .in("id", Array.from(matchIds));
     } else {
       // Get max position in target stage so it lands at the bottom
       const { data: maxRow } = await supabase
@@ -67,6 +77,7 @@ export async function moveDealToStage(stageName: string, opts: {
         position: nextPos,
       } as never);
     }
+
 
     // Fire workflow trigger for stage change
     try {
