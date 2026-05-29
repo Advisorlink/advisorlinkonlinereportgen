@@ -131,11 +131,20 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
             const localNumber = deal.client_phone
               .replace(/\s+/g, "")
               .replace(/^\+61/, "0");
+            const sipUrl = `sip:${localNumber}`;
+            const handleCall = (e: React.MouseEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // Use window.location so Capacitor's WebView dispatches the
+              // sip: scheme as an Android intent, letting the user's chosen
+              // softphone (e.g. Ucomm) handle it instead of being swallowed.
+              window.location.href = sipUrl;
+            };
             return (
               <div className="flex items-center justify-between gap-2">
                 <a
-                  href={`sip:${localNumber}`}
-                  onClick={(e) => e.stopPropagation()}
+                  href={sipUrl}
+                  onClick={handleCall}
                   onPointerDown={(e) => e.stopPropagation()}
                   className="flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-emerald-600 transition-colors"
                   title="Call"
