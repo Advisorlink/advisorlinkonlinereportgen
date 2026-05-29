@@ -97,6 +97,7 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
           <div className="flex items-center gap-1.5 flex-wrap">
             <p className="text-sm font-semibold text-foreground truncate">{deal.client_name}</p>
             <AgePill createdAt={deal.created_at} />
+            {deal.source && <SourceTag source={deal.source} />}
           </div>
           {deal.value != null && deal.value > 0 && (
             <div className="flex items-center gap-1 mt-1">
