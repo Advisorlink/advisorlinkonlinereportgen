@@ -128,17 +128,35 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
     const e = (email || "").trim().toLowerCase();
     const phoneDigits = (phone || "").replace(/\D+/g, "");
     if (!e && phoneDigits.length < 6) { setClientDocs([]); return; }
-    let q = supabase.from("client_documents").select("*").order("created_at", { ascending: false }).limit(50);
-    if (e) q = q.ilike("client_email", e);
-    const { data } = await q;
-    let rows = data || [];
-    if (!rows.length && phoneDigits.length >= 6) {
-      const { data: byPhone } = await supabase
-        .from("client_documents").select("*").order("created_at", { ascending: false }).limit(100);
-      rows = (byPhone || []).filter((r: any) =>
-        (r.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))
-      );
+
+    const byId = new Map<string, any>();
+
+    if (e) {
+      const { data } = await supabase
+        .from("client_documents")
+        .select("*")
+        .ilike("client_email", e)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      (data || []).forEach((r: any) => byId.set(r.id, r));
     }
+
+    if (phoneDigits.length >= 6) {
+      const tail = phoneDigits.slice(-9);
+      const { data } = await supabase
+        .from("client_documents")
+        .select("*")
+        .like("client_phone", `%${tail}%`)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      (data || [])
+        .filter((r: any) => (r.client_phone || "").replace(/\D+/g, "").endsWith(tail))
+        .forEach((r: any) => byId.set(r.id, r));
+    }
+
+    const rows = Array.from(byId.values()).sort((a, b) =>
+      (b.created_at || "").localeCompare(a.created_at || "")
+    );
     setClientDocs(rows);
   }, []);
 
