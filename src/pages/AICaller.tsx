@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CRMLayout } from "@/components/CRMLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, FileText, Users, BarChart3, ScrollText, PhoneCall, Mic } from "lucide-react";
+import { Phone, FileText, Users, BarChart3, ScrollText, PhoneCall, Mic, PhoneMissed } from "lucide-react";
 import { AICallerDashboard } from "@/components/ai-caller/AICallerDashboard";
 import { AICallerScripts } from "@/components/ai-caller/AICallerScripts";
 import { AICallerCampaigns } from "@/components/ai-caller/AICallerCampaigns";
@@ -9,6 +9,7 @@ import { AICallerLeads } from "@/components/ai-caller/AICallerLeads";
 import { AICallerCallLogs } from "@/components/ai-caller/AICallerCallLogs";
 import { AICallerPhoneNumbers } from "@/components/ai-caller/AICallerPhoneNumbers";
 import { AICallerVoices } from "@/components/ai-caller/AICallerVoices";
+import { AICallerOutcomes } from "@/components/ai-caller/AICallerOutcomes";
 
 const AI_CALLER_ACTIVE_TAB_KEY = "ai-caller-active-tab";
 
@@ -28,6 +29,7 @@ export default function AICaller() {
     { id: "scripts", label: "Scripts", icon: FileText },
     { id: "campaigns", label: "Campaigns", icon: Phone },
     { id: "leads", label: "Leads", icon: Users },
+    { id: "outcomes", label: "Outcomes", icon: PhoneMissed },
     { id: "logs", label: "Call Logs", icon: ScrollText },
     { id: "numbers", label: "Numbers", icon: PhoneCall },
     { id: "voices", label: "Voices", icon: Mic },
@@ -76,6 +78,7 @@ export default function AICaller() {
           <TabsContent value="scripts"><AICallerScripts /></TabsContent>
           <TabsContent value="campaigns"><AICallerCampaigns /></TabsContent>
           <TabsContent value="leads"><AICallerLeads /></TabsContent>
+          <TabsContent value="outcomes"><AICallerOutcomes /></TabsContent>
           <TabsContent value="logs"><AICallerCallLogs /></TabsContent>
           <TabsContent value="numbers"><AICallerPhoneNumbers /></TabsContent>
           <TabsContent value="voices"><AICallerVoices /></TabsContent>

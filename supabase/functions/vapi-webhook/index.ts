@@ -398,16 +398,9 @@ serve(async (req) => {
       }
 
 
-      // Update contact status
-      if (contactId) {
-        const wasAnswered = duration > 10;
-        await supabase
-          .from("ai_caller_contacts")
-          .update({
-            call_status: wasAnswered ? "completed" : "no_answer",
-          })
-          .eq("id", contactId);
-      }
+      // Contact status is set further below based on the routed outcome
+      // (qualified / not_interested / no_answer) so the AI Caller "Outcomes"
+      // view stays separate from the main sales pipeline.
 
       // Create lead if we got meaningful data
       const hasExtractedData = Object.keys(extractedFields).length > 0;
@@ -528,12 +521,25 @@ serve(async (req) => {
           duration < 8;
 
         let targetStage: string;
+        let contactStatus: string;
         if (isNoAnswer) {
           targetStage = "Did Not Answer";
+          contactStatus = "no_answer";
         } else if (interested && finalEmail && consentToContact) {
           targetStage = "New Lead";
+          contactStatus = "qualified";
         } else {
           targetStage = "Do Not Contact";
+          contactStatus = "not_interested";
+        }
+
+        // Track the outcome on the contact so the AI Caller "Outcomes"
+        // section can group by status and re-dial the "Did Not Answer" pile.
+        if (contactId) {
+          await supabase
+            .from("ai_caller_contacts")
+            .update({ call_status: contactStatus })
+            .eq("id", contactId);
         }
 
         const noteLines: string[] = [];
@@ -550,14 +556,19 @@ serve(async (req) => {
         noteLines.push(`Consent to contact: ${consentToContact ? "Yes" : "No"}`);
         noteLines.push(`Interested: ${interested ? "Yes" : "No"}`);
 
-        await routeDealToStage(supabase, targetStage, {
-          clientName,
-          clientEmail: finalEmail,
-          clientPhone,
-          tag: "AI Voice Caller",
-          notes: noteLines.join("\n"),
-          source: "AI Voice Caller",
-        });
+        // Only qualified leads flow into the main sales pipeline.
+        // "Did Not Answer" and "Do Not Contact" stay inside the AI Caller
+        // Outcomes view so the pipeline analytics stay clean.
+        if (targetStage === "New Lead") {
+          await routeDealToStage(supabase, targetStage, {
+            clientName,
+            clientEmail: finalEmail,
+            clientPhone,
+            tag: "AI Voice Caller",
+            notes: noteLines.join("\n"),
+            source: "AI Voice Caller",
+          });
+        }
 
         console.log("Routed deal:", {
           targetStage,
