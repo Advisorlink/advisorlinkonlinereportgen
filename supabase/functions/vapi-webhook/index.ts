@@ -524,7 +524,7 @@ serve(async (req) => {
           clientPhone = call?.customer?.number || call?.customerNumber || null;
           clientName = `Inbound ${clientPhone || "caller"}`;
         }
-        const finalEmail = clientEmailContact || extractedEmail;
+        const finalEmail = clientEmailContact || extractedEmail || (extractedFields.email || "").trim() || null;
 
         const noAnswerReasons = [
           "customer-did-not-answer",
