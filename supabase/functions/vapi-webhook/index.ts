@@ -216,6 +216,20 @@ async function routeDealToStage(
 
   if (matchIds.size > 0) {
     const ids = Array.from(matchIds);
+    const { data: stageRows } = await supabase
+      .from("pipeline_deals")
+      .select("id, position")
+      .eq("stage_id", stage.id);
+    await Promise.all(
+      (stageRows || [])
+        .filter((row: any) => !ids.includes(row.id))
+        .map((row: any) =>
+          supabase
+            .from("pipeline_deals")
+            .update({ position: (row.position ?? 0) + 1 })
+            .eq("id", row.id),
+        ),
+    );
     const { data: existing } = await supabase
       .from("pipeline_deals")
       .select("id, tags, notes")
@@ -230,6 +244,7 @@ async function routeDealToStage(
         .from("pipeline_deals")
         .update({
           stage_id: stage.id,
+          position: 0,
           tags,
           notes: newNotes,
           updated_at: new Date().toISOString(),
@@ -237,20 +252,24 @@ async function routeDealToStage(
         .eq("id", row.id);
     }
   } else {
-    const { data: maxRow } = await supabase
+    const { data: stageRows } = await supabase
       .from("pipeline_deals")
-      .select("position")
+      .select("id, position")
       .eq("stage_id", stage.id)
-      .order("position", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const nextPos = ((maxRow as any)?.position ?? -1) + 1;
+    await Promise.all(
+      (stageRows || []).map((row: any) =>
+        supabase
+          .from("pipeline_deals")
+          .update({ position: (row.position ?? 0) + 1 })
+          .eq("id", row.id),
+      ),
+    );
     await supabase.from("pipeline_deals").insert({
       client_name: name,
       client_email: email,
       client_phone: opts.clientPhone || null,
       stage_id: stage.id,
-      position: nextPos,
+      position: 0,
       tags: opts.tag ? [opts.tag] : [],
       notes: opts.notes || null,
       source: opts.source || "AI Voice Caller",
