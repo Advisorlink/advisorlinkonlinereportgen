@@ -88,8 +88,10 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     const nextLast = prefill.clientLastName ?? s.last;
     if (nextFirst) setFirstName(nextFirst);
     if (nextLast) setLastName(nextLast);
+    if (prefill.clientEmail) setClientEmail(prefill.clientEmail);
+    if (prefill.clientPhone) setClientPhone(prefill.clientPhone);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prefill.clientName, prefill.clientFirstName, prefill.clientLastName, prefill.superFundName, prefill.superBalance, prefill.age]);
+  }, [prefill.clientName, prefill.clientFirstName, prefill.clientLastName, prefill.clientEmail, prefill.clientPhone, prefill.superFundName, prefill.superBalance, prefill.age]);
 
   // Keep the fund-lookup search box in sync with the form so the user can
   // just hit Search without retyping. Include all context the lookup might use:
