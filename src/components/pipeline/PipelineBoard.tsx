@@ -79,6 +79,21 @@ export function PipelineBoard() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  useEffect(() => {
+    const channel = supabase
+      .channel("pipeline-deals-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "pipeline_deals" },
+        () => fetchData(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchData]);
+
   const visibleStages = useMemo(() => {
     if (view === "all") return stages;
     if (view === "won") return stages.filter(isWonStage);
