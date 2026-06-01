@@ -20,7 +20,8 @@ import {
   Search, Send, Paperclip, Phone, Mail, User, MessageSquare,
   Archive, X, MoreVertical, Clock, CheckCheck, Check,
   AlertCircle, Ban, Plus, Tag, ArrowLeft, FileText, ChevronDown,
-  Landmark, MapPin, UserCog, Calendar, Smile,
+  Landmark, MapPin, UserCog, Calendar, Smile, Sparkles, Loader2,
+  SpellCheck, Wand2, ArrowUpNarrowWide, ArrowDownNarrowWide,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
@@ -82,6 +83,31 @@ export default function Messages() {
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageText, setMessageText] = useState("");
+  const [aiMenuOpen, setAiMenuOpen] = useState(false);
+  const [aiBusy, setAiBusy] = useState<null | "fix" | "rewrite" | "longer" | "shorter">(null);
+
+  const runAiRewrite = async (mode: "fix" | "rewrite" | "longer" | "shorter") => {
+    const text = messageText.trim();
+    if (!text) {
+      toast({ title: "Nothing to rewrite", description: "Type a message first.", variant: "destructive" });
+      return;
+    }
+    setAiBusy(mode);
+    try {
+      const { data, error } = await supabase.functions.invoke("rewrite-message", { body: { text, mode } });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (data?.text) {
+        setMessageText(data.text);
+        toast({ title: "Updated", description: "Your message has been rewritten." });
+      }
+      setAiMenuOpen(false);
+    } catch (e: any) {
+      toast({ title: "AI rewrite failed", description: e?.message || "Try again.", variant: "destructive" });
+    } finally {
+      setAiBusy(null);
+    }
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTab, setFilterTab] = useState("all");
   const [loading, setLoading] = useState(true);
