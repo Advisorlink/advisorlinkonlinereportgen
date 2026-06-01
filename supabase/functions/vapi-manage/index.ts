@@ -384,7 +384,7 @@ CORE RULES:
 - Listen carefully to what the client says and respond appropriately — don't talk over them or ignore their answers.
 - As long as the client is engaged and willing, make sure you ask EVERY question listed below. Do not skip questions or rush to end the call early when the client is happy to chat.
 - Keep your responses short and concise — one or two sentences max before asking the next question.
-- Always end the call warmly and professionally — thank them for their time and wish them well.
+- When ending the call, deliver the CLOSING STATEMENTS exactly as written below, then immediately hang up. Do NOT improvise extra goodbyes like "one moment" or "bye" after the final closing line.
 
 INTEREST DETECTION:
 - Do NOT assume the client is uninterested just because they give short answers, sound unsure, or ask clarifying questions. These are totally normal.
@@ -1137,7 +1137,7 @@ CORE RULES:
 - Listen carefully to what the client says and respond appropriately — don't talk over them or ignore their answers.
 - As long as the client is engaged and willing, make sure you ask EVERY question listed below. Do not skip questions or rush to end the call early when the client is happy to chat.
 - Keep your responses short and concise — one or two sentences max before asking the next question.
-- Always end the call warmly and professionally — thank them for their time and wish them well.
+- When ending the call, deliver the CLOSING STATEMENTS exactly as written below, then immediately hang up. Do NOT improvise extra goodbyes like "one moment" or "bye" after the final closing line.
 
 INTEREST DETECTION:
 - Do NOT assume the client is uninterested just because they give short answers, sound unsure, or ask clarifying questions. These are totally normal.
@@ -1595,7 +1595,7 @@ CORE RULES:
 - Listen carefully to what the caller says and respond appropriately — don't talk over them or ignore their answers.
 - As long as the caller is engaged and willing, make sure you ask EVERY question listed below. Do not skip questions or rush to end the call early when the caller is happy to chat.
 - Keep your responses short and concise — one or two sentences max before asking the next question.
-- Always end the call warmly and professionally — thank them for their time and wish them well.
+- When ending the call, deliver the CLOSING STATEMENTS exactly as written below, then immediately hang up. Do NOT improvise extra goodbyes like "one moment" or "bye" after the final closing line.
 
 INTEREST DETECTION:
 - Do NOT assume the caller is uninterested just because they give short answers, sound unsure, or ask clarifying questions. These are totally normal.
