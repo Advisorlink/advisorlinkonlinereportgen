@@ -455,19 +455,19 @@ export function AICallerCampaigns() {
                     <input
                       ref={fileRef}
                       type="file"
-                      accept=".csv"
+                      accept=".csv,.xlsx,.xls"
                       className="hidden"
                       onChange={e => e.target.files?.[0] && handleCSV(e.target.files[0])}
                     />
                     <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} className="gap-1">
-                      <Upload className="w-3 h-3" /> Upload CSV
+                      <Upload className="w-3 h-3" /> Upload CSV / Excel
                     </Button>
                     <Button type="button" variant="outline" size="sm" onClick={addManualContact} className="gap-1">
                       <Plus className="w-3 h-3" /> Add
                     </Button>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">CSV format: name, phone, email (one per row, header row optional)</p>
+                <p className="text-xs text-muted-foreground">CSV or Excel. Recognised columns: First Name, Surname (or Name), Phone/Mobile, Email. Australian numbers auto-normalise to +61.</p>
                 {contacts.length > 0 && (
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {contacts.map((c, i) => (
