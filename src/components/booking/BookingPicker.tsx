@@ -58,7 +58,7 @@ export function BookingPicker({ slug = "travis", onSelect, selected }: Props) {
   const today = startOfDay(new Date());
 
   const dayHasSlots = (day: Date) => {
-    if (!data) return false;
+    if (!data?.slots) return false;
     const key = format(day, "yyyy-MM-dd");
     return (data.slots[key]?.length ?? 0) > 0;
   };
