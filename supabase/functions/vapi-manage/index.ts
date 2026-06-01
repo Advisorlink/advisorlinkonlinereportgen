@@ -258,7 +258,92 @@ serve(async (req) => {
     const body = await req.json();
     const { action } = body;
 
+    if (action === "refresh-voicemail-config") {
+      // PATCH every existing Vapi assistant to add machine-detection / voicemail config,
+      // leaving every other setting untouched.
+      const voicemailDetection = {
+        provider: "twilio",
+        voicemailDetectionTypes: ["machine_end_beep", "machine_end_silence"],
+        enabled: true,
+        machineDetectionTimeout: 15,
+      };
+
+      const listRes = await fetch(`${VAPI_BASE}/assistant?limit=1000`, {
+        headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
+      });
+      if (!listRes.ok) {
+        const txt = await listRes.text();
+        throw new Error(`Vapi list assistants failed [${listRes.status}]: ${txt}`);
+      }
+      const assistants = await listRes.json();
+      const list: any[] = Array.isArray(assistants) ? assistants : (assistants.data || []);
+
+      const results: Array<{ id: string; name?: string; ok: boolean; error?: string }> = [];
+      const runPatches = async () => {
+        for (const a of list) {
+          let attempt = 0;
+          let done = false;
+          while (!done && attempt < 6) {
+            attempt++;
+            try {
+              const patchRes = await fetch(`${VAPI_BASE}/assistant/${a.id}`, {
+                method: "PATCH",
+                headers: {
+                  Authorization: `Bearer ${VAPI_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  voicemailDetection,
+                  voicemailMessage: "",
+                }),
+              });
+              if (patchRes.status === 429) {
+                await patchRes.text();
+                // Exponential backoff: 2s, 4s, 8s, 16s, 32s
+                await new Promise((r) => setTimeout(r, 2000 * Math.pow(2, attempt - 1)));
+                continue;
+              }
+              if (!patchRes.ok) {
+                const txt = await patchRes.text();
+                console.log("voicemail patch failed", a.id, patchRes.status, txt.slice(0, 200));
+                results.push({ id: a.id, name: a.name, ok: false, error: `${patchRes.status}` });
+              } else {
+                await patchRes.text();
+                results.push({ id: a.id, name: a.name, ok: true });
+              }
+              done = true;
+            } catch (e) {
+              console.log("voicemail patch error", a.id, e);
+              results.push({ id: a.id, name: a.name, ok: false, error: String(e) });
+              done = true;
+            }
+          }
+          if (!done) {
+            results.push({ id: a.id, name: a.name, ok: false, error: "rate-limited after retries" });
+          }
+          // Base throttle between assistants to stay well under Vapi's per-second limit
+          await new Promise((r) => setTimeout(r, 1500));
+        }
+        console.log(
+          "voicemail refresh complete:",
+          `total=${list.length} updated=${results.filter((r) => r.ok).length} failed=${results.filter((r) => !r.ok).length}`,
+        );
+      };
+
+      // Fire-and-forget so the HTTP request returns immediately.
+      // @ts-ignore EdgeRuntime is a Deno Deploy global
+      EdgeRuntime.waitUntil(runPatches());
+
+      return new Response(
+        JSON.stringify({ started: true, total: list.length }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+
+
     if (action === "create-assistant") {
+
       const { script } = body;
 
       // Build the questions extraction tool
