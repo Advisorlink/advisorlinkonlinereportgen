@@ -79,6 +79,21 @@ async function extractLeadAnswers(
                   balance: { type: "string" },
                   age: { type: "string" },
                   had_review_before: { type: "string" },
+                  email: {
+                    type: "string",
+                    description:
+                      "Email address the client clearly spelled out or confirmed. Leave blank if not provided.",
+                  },
+                  consent_to_contact: {
+                    type: "boolean",
+                    description:
+                      "True ONLY if the client explicitly agreed to be contacted, called back, or to receive information.",
+                  },
+                  interested: {
+                    type: "boolean",
+                    description:
+                      "True if the client showed genuine interest in a super review or follow-up; false if they declined, hung up early, were not interested, or asked not to be contacted.",
+                  },
                   campaign_answers: {
                     type: "object",
                     additionalProperties: { type: "string" },
@@ -86,7 +101,7 @@ async function extractLeadAnswers(
                   summary: {
                     type: "string",
                     description:
-                      "Concise call summary based only on the transcript",
+                      "Concise 2-3 sentence call summary based only on what the client said. Mention key facts (fund, balance, age, attitude, any objections).",
                   },
                 },
                 required: [
@@ -94,6 +109,9 @@ async function extractLeadAnswers(
                   "balance",
                   "age",
                   "had_review_before",
+                  "email",
+                  "consent_to_contact",
+                  "interested",
                   "campaign_answers",
                   "summary",
                 ],
@@ -108,6 +126,7 @@ async function extractLeadAnswers(
       }),
     },
   );
+
 
   if (!resp.ok) {
     console.error("lead extraction failed", resp.status, await resp.text());
@@ -126,17 +145,120 @@ async function extractLeadAnswers(
       balance: parsed.balance,
       age: parsed.age,
       had_review_before: parsed.had_review_before,
+      email: parsed.email,
       ...(parsed.campaign_answers || {}),
       ...(parsed.fields || {}),
     };
     return {
       fields: stripEmptyFields(fields),
       summary: parsed.summary || summary,
+      email: (parsed.email || "").trim() || null,
+      consent: !!parsed.consent_to_contact,
+      interested: !!parsed.interested,
     };
   } catch {
-    return { fields: {}, summary };
+    return { fields: {}, summary, email: null, consent: false, interested: false };
   }
 }
+
+// ---- Pipeline routing helper (server-side equivalent of moveDealToStage) ----
+async function routeDealToStage(
+  supabase: any,
+  stageName: string,
+  opts: {
+    clientName: string;
+    clientEmail?: string | null;
+    clientPhone?: string | null;
+    tag?: string;
+    notes?: string;
+    source?: string;
+  },
+) {
+  const name = (opts.clientName || "").trim() || "Unnamed client";
+  const email = (opts.clientEmail || "").trim().toLowerCase() || null;
+  const phoneDigits = (opts.clientPhone || "").replace(/\D+/g, "");
+
+  const { data: stage } = await supabase
+    .from("pipeline_stages")
+    .select("id")
+    .eq("name", stageName)
+    .maybeSingle();
+  if (!stage?.id) {
+    console.log("routeDealToStage: stage not found:", stageName);
+    return;
+  }
+
+  const matchIds = new Set<string>();
+  if (email) {
+    const { data } = await supabase
+      .from("pipeline_deals")
+      .select("id")
+      .ilike("client_email", email);
+    (data || []).forEach((d: any) => matchIds.add(d.id));
+  }
+  if (phoneDigits.length >= 6) {
+    const { data: rows } = await supabase
+      .from("pipeline_deals")
+      .select("id, client_phone")
+      .not("client_phone", "is", null);
+    (rows || []).forEach((d: any) => {
+      if ((d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))) {
+        matchIds.add(d.id);
+      }
+    });
+  }
+  if (matchIds.size === 0 && name && name !== "Unnamed client") {
+    const { data } = await supabase
+      .from("pipeline_deals")
+      .select("id")
+      .ilike("client_name", name);
+    (data || []).forEach((d: any) => matchIds.add(d.id));
+  }
+
+  if (matchIds.size > 0) {
+    const ids = Array.from(matchIds);
+    const { data: existing } = await supabase
+      .from("pipeline_deals")
+      .select("id, tags, notes")
+      .in("id", ids);
+    for (const row of existing || []) {
+      const tags: string[] = Array.isArray(row.tags) ? row.tags : [];
+      if (opts.tag && !tags.includes(opts.tag)) tags.push(opts.tag);
+      const newNotes = opts.notes
+        ? (row.notes ? `${row.notes}\n\n${opts.notes}` : opts.notes)
+        : row.notes;
+      await supabase
+        .from("pipeline_deals")
+        .update({
+          stage_id: stage.id,
+          tags,
+          notes: newNotes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", row.id);
+    }
+  } else {
+    const { data: maxRow } = await supabase
+      .from("pipeline_deals")
+      .select("position")
+      .eq("stage_id", stage.id)
+      .order("position", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const nextPos = ((maxRow as any)?.position ?? -1) + 1;
+    await supabase.from("pipeline_deals").insert({
+      client_name: name,
+      client_email: email,
+      client_phone: opts.clientPhone || null,
+      stage_id: stage.id,
+      position: nextPos,
+      tags: opts.tag ? [opts.tag] : [],
+      notes: opts.notes || null,
+      source: opts.source || "AI Voice Caller",
+    });
+  }
+}
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS")
@@ -208,19 +330,28 @@ serve(async (req) => {
         };
       }
 
-      if (!hasMeaningfulFields(extractedFields) && transcript) {
+      // Always run our AI extraction so we get interested/consent/email flags,
+      // then merge any tool-call extracted fields on top.
+      let consentToContact = false;
+      let interested = false;
+      let extractedEmail: string | null = null;
+      if (transcript) {
         const aiExtracted = await extractLeadAnswers(
           transcript,
           summary,
           scriptQuestions,
         );
-        extractedFields = { ...extractedFields, ...aiExtracted.fields };
+        extractedFields = { ...aiExtracted.fields, ...extractedFields };
         if (aiExtracted.summary) summary = aiExtracted.summary;
+        consentToContact = !!(aiExtracted as any).consent;
+        interested = !!(aiExtracted as any).interested;
+        extractedEmail = (aiExtracted as any).email || null;
       }
 
       extractedFields = stripEmptyFields(extractedFields);
 
       const finalSummary = summary;
+
 
       // Update or create call log
       if (vapiCallId) {
@@ -350,6 +481,86 @@ serve(async (req) => {
             .eq("id", campaignId);
         }
       }
+
+      // ---- Route into the correct pipeline stage ----
+      try {
+        // Resolve client identity (prefer outbound contact data, fall back to inbound caller).
+        let clientName = "Unknown Caller";
+        let clientPhone: string | null = null;
+        let clientEmailContact: string | null = null;
+        if (contactId) {
+          const { data: c } = await supabase
+            .from("ai_caller_contacts")
+            .select("name, phone, email")
+            .eq("id", contactId)
+            .maybeSingle();
+          if (c) {
+            clientName = (c as any).name || clientName;
+            clientPhone = (c as any).phone || null;
+            clientEmailContact = (c as any).email || null;
+          }
+        } else {
+          clientPhone = call?.customer?.number || call?.customerNumber || null;
+          clientName = `Inbound ${clientPhone || "caller"}`;
+        }
+        const finalEmail = clientEmailContact || extractedEmail;
+
+        const noAnswerReasons = [
+          "customer-did-not-answer",
+          "voicemail",
+          "no-answer",
+          "customer-busy",
+          "twilio-failed-to-connect-call",
+          "customer-did-not-give-microphone-permission",
+        ];
+        const isNoAnswer =
+          noAnswerReasons.some((r) => endedReason.toLowerCase().includes(r)) ||
+          duration < 8;
+
+        let targetStage: string;
+        if (isNoAnswer) {
+          targetStage = "Did Not Answer";
+        } else if (interested && finalEmail && consentToContact) {
+          targetStage = "New Lead";
+        } else {
+          targetStage = "Do Not Contact";
+        }
+
+        const noteLines: string[] = [];
+        noteLines.push(`[AI Voice Caller — ${new Date().toLocaleString("en-AU")}]`);
+        noteLines.push(`Outcome: ${targetStage} (ended: ${endedReason}, ${Math.round(duration)}s)`);
+        if (finalSummary) noteLines.push(`Summary: ${finalSummary}`);
+        if (Object.keys(extractedFields).length) {
+          noteLines.push(
+            `Details: ${Object.entries(extractedFields)
+              .map(([k, v]) => `${k}: ${v}`)
+              .join(" | ")}`,
+          );
+        }
+        noteLines.push(`Consent to contact: ${consentToContact ? "Yes" : "No"}`);
+        noteLines.push(`Interested: ${interested ? "Yes" : "No"}`);
+
+        await routeDealToStage(supabase, targetStage, {
+          clientName,
+          clientEmail: finalEmail,
+          clientPhone,
+          tag: "AI Voice Caller",
+          notes: noteLines.join("\n"),
+          source: "AI Voice Caller",
+        });
+
+        console.log("Routed deal:", {
+          targetStage,
+          clientName,
+          finalEmail,
+          consentToContact,
+          interested,
+          endedReason,
+        });
+      } catch (e) {
+        console.error("Pipeline routing failed:", e);
+      }
+
 
       console.log("End of call processed:", {
         vapiCallId,
