@@ -53,6 +53,8 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const _init = splitName(prefill.clientName);
   const [firstName, setFirstName] = useState(prefill.clientFirstName ?? _init.first);
   const [lastName, setLastName] = useState(prefill.clientLastName ?? _init.last);
+  const [clientEmail, setClientEmail] = useState(prefill.clientEmail ?? "");
+  const [clientPhone, setClientPhone] = useState(prefill.clientPhone ?? "");
 
   const [annualIncome, setAnnualIncome] = useState("");
   const [superFundName, setSuperFundName] = useState(prefill.superFundName ?? "");
@@ -86,8 +88,10 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     const nextLast = prefill.clientLastName ?? s.last;
     if (nextFirst) setFirstName(nextFirst);
     if (nextLast) setLastName(nextLast);
+    if (prefill.clientEmail) setClientEmail(prefill.clientEmail);
+    if (prefill.clientPhone) setClientPhone(prefill.clientPhone);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prefill.clientName, prefill.clientFirstName, prefill.clientLastName, prefill.superFundName, prefill.superBalance, prefill.age]);
+  }, [prefill.clientName, prefill.clientFirstName, prefill.clientLastName, prefill.clientEmail, prefill.clientPhone, prefill.superFundName, prefill.superBalance, prefill.age]);
 
   // Keep the fund-lookup search box in sync with the form so the user can
   // just hit Search without retyping. Include all context the lookup might use:
@@ -162,8 +166,8 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     const next: ClientInputs = {
       ...DEFAULT_INPUTS,
       clientName: [firstName.trim(), lastName.trim()].filter(Boolean).join(" ") || prefill.clientName || DEFAULT_INPUTS.clientName,
-      clientEmail: prefill.clientEmail || "",
-      clientPhone: prefill.clientPhone || "",
+      clientEmail: clientEmail.trim() || prefill.clientEmail || "",
+      clientPhone: clientPhone.trim() || prefill.clientPhone || "",
       age: num(age, DEFAULT_INPUTS.age),
       retirementAge: num(retirementAge, DEFAULT_INPUTS.retirementAge),
       annualIncome: num(annualIncome),
@@ -237,7 +241,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
 
       <div className="p-5 space-y-5">
         {/* Name */}
-        <Section icon={<Cake className="w-3.5 h-3.5" />} title="Client name">
+        <Section icon={<Cake className="w-3.5 h-3.5" />} title="Client details">
           <div className="grid grid-cols-2 gap-3">
             <Field label="First name">
               <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" />
@@ -246,7 +250,16 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
               <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" />
             </Field>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Email">
+              <Input type="email" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="jane@example.com" />
+            </Field>
+            <Field label="Phone">
+              <Input type="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="+61 4XX XXX XXX" />
+            </Field>
+          </div>
         </Section>
+
 
         {/* 8 survey questions in order */}
         <Section icon={<Sparkles className="w-3.5 h-3.5" />} title="Survey questions">
