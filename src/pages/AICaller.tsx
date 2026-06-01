@@ -29,6 +29,7 @@ export default function AICaller() {
     { id: "scripts", label: "Scripts", icon: FileText },
     { id: "campaigns", label: "Campaigns", icon: Phone },
     { id: "leads", label: "Leads", icon: Users },
+    { id: "outcomes", label: "Outcomes", icon: PhoneMissed },
     { id: "logs", label: "Call Logs", icon: ScrollText },
     { id: "numbers", label: "Numbers", icon: PhoneCall },
     { id: "voices", label: "Voices", icon: Mic },
