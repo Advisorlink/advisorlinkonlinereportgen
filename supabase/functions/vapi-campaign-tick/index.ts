@@ -124,10 +124,22 @@ async function tickCampaign(supabase: any, campaign: any) {
     return { campaignId: campaign.id, error: "missing-assistant-or-phone" };
   }
 
+  // Split the contact's name so scripts can greet them via
+  // {{first_name}} / {{name}} placeholders in the assistant's first message.
+  const fullName = (contact.name || "").trim();
+  const firstName = fullName.split(/\s+/)[0] || fullName;
+
   const callPayload = {
     assistantId,
-    customer: { number: normalizeAUPhone(contact.phone), name: contact.name },
+    customer: { number: normalizeAUPhone(contact.phone), name: fullName || undefined },
     phoneNumberId,
+    assistantOverrides: {
+      variableValues: {
+        name: fullName,
+        first_name: firstName,
+        full_name: fullName,
+      },
+    },
     metadata: { contactId: contact.id, campaignId: campaign.id },
   };
 
