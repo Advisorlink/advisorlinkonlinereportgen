@@ -573,9 +573,9 @@ serve(async (req) => {
             clientName,
             clientEmail: finalEmail,
             clientPhone,
-            tag: "AI Voice Caller",
+            tag: "AI Caller",
             notes: noteLines.join("\n"),
-            source: "AI Voice Caller",
+            source: "AI Caller",
           });
         }
 
