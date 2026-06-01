@@ -330,19 +330,28 @@ serve(async (req) => {
         };
       }
 
-      if (!hasMeaningfulFields(extractedFields) && transcript) {
+      // Always run our AI extraction so we get interested/consent/email flags,
+      // then merge any tool-call extracted fields on top.
+      let consentToContact = false;
+      let interested = false;
+      let extractedEmail: string | null = null;
+      if (transcript) {
         const aiExtracted = await extractLeadAnswers(
           transcript,
           summary,
           scriptQuestions,
         );
-        extractedFields = { ...extractedFields, ...aiExtracted.fields };
+        extractedFields = { ...aiExtracted.fields, ...extractedFields };
         if (aiExtracted.summary) summary = aiExtracted.summary;
+        consentToContact = !!(aiExtracted as any).consent;
+        interested = !!(aiExtracted as any).interested;
+        extractedEmail = (aiExtracted as any).email || null;
       }
 
       extractedFields = stripEmptyFields(extractedFields);
 
       const finalSummary = summary;
+
 
       // Update or create call log
       if (vapiCallId) {
