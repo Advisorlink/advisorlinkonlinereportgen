@@ -482,6 +482,86 @@ serve(async (req) => {
         }
       }
 
+      // ---- Route into the correct pipeline stage ----
+      try {
+        // Resolve client identity (prefer outbound contact data, fall back to inbound caller).
+        let clientName = "Unknown Caller";
+        let clientPhone: string | null = null;
+        let clientEmailContact: string | null = null;
+        if (contactId) {
+          const { data: c } = await supabase
+            .from("ai_caller_contacts")
+            .select("name, phone, email")
+            .eq("id", contactId)
+            .maybeSingle();
+          if (c) {
+            clientName = (c as any).name || clientName;
+            clientPhone = (c as any).phone || null;
+            clientEmailContact = (c as any).email || null;
+          }
+        } else {
+          clientPhone = call?.customer?.number || call?.customerNumber || null;
+          clientName = `Inbound ${clientPhone || "caller"}`;
+        }
+        const finalEmail = clientEmailContact || extractedEmail;
+
+        const noAnswerReasons = [
+          "customer-did-not-answer",
+          "voicemail",
+          "no-answer",
+          "customer-busy",
+          "twilio-failed-to-connect-call",
+          "customer-did-not-give-microphone-permission",
+        ];
+        const isNoAnswer =
+          noAnswerReasons.some((r) => endedReason.toLowerCase().includes(r)) ||
+          duration < 8;
+
+        let targetStage: string;
+        if (isNoAnswer) {
+          targetStage = "Did Not Answer";
+        } else if (interested && finalEmail && consentToContact) {
+          targetStage = "New Lead";
+        } else {
+          targetStage = "Do Not Contact";
+        }
+
+        const noteLines: string[] = [];
+        noteLines.push(`[AI Voice Caller — ${new Date().toLocaleString("en-AU")}]`);
+        noteLines.push(`Outcome: ${targetStage} (ended: ${endedReason}, ${Math.round(duration)}s)`);
+        if (finalSummary) noteLines.push(`Summary: ${finalSummary}`);
+        if (Object.keys(extractedFields).length) {
+          noteLines.push(
+            `Details: ${Object.entries(extractedFields)
+              .map(([k, v]) => `${k}: ${v}`)
+              .join(" | ")}`,
+          );
+        }
+        noteLines.push(`Consent to contact: ${consentToContact ? "Yes" : "No"}`);
+        noteLines.push(`Interested: ${interested ? "Yes" : "No"}`);
+
+        await routeDealToStage(supabase, targetStage, {
+          clientName,
+          clientEmail: finalEmail,
+          clientPhone,
+          tag: "AI Voice Caller",
+          notes: noteLines.join("\n"),
+          source: "AI Voice Caller",
+        });
+
+        console.log("Routed deal:", {
+          targetStage,
+          clientName,
+          finalEmail,
+          consentToContact,
+          interested,
+          endedReason,
+        });
+      } catch (e) {
+        console.error("Pipeline routing failed:", e);
+      }
+
+
       console.log("End of call processed:", {
         vapiCallId,
         contactId,
