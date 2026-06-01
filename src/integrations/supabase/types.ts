@@ -106,52 +106,73 @@ export type Database = {
       }
       ai_caller_campaigns: {
         Row: {
+          active_days: number[]
           calls_answered: number
           calls_completed: number
+          calls_per_hour: number
           completed_at: string | null
           created_at: string
+          daily_end_time: string
+          daily_start_time: string
           id: string
+          last_call_finished_at: string | null
           leads_generated: number
+          min_gap_seconds: number
           name: string
           phone_number_id: string | null
           scheduled_at: string | null
           script_id: string
           started_at: string | null
           status: string
+          timezone: string
           total_contacts: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          active_days?: number[]
           calls_answered?: number
           calls_completed?: number
+          calls_per_hour?: number
           completed_at?: string | null
           created_at?: string
+          daily_end_time?: string
+          daily_start_time?: string
           id?: string
+          last_call_finished_at?: string | null
           leads_generated?: number
+          min_gap_seconds?: number
           name: string
           phone_number_id?: string | null
           scheduled_at?: string | null
           script_id: string
           started_at?: string | null
           status?: string
+          timezone?: string
           total_contacts?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          active_days?: number[]
           calls_answered?: number
           calls_completed?: number
+          calls_per_hour?: number
           completed_at?: string | null
           created_at?: string
+          daily_end_time?: string
+          daily_start_time?: string
           id?: string
+          last_call_finished_at?: string | null
           leads_generated?: number
+          min_gap_seconds?: number
           name?: string
           phone_number_id?: string | null
           scheduled_at?: string | null
           script_id?: string
           started_at?: string | null
           status?: string
+          timezone?: string
           total_contacts?: number
           updated_at?: string
           user_id?: string
