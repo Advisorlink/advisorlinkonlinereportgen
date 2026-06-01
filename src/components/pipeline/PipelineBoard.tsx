@@ -29,6 +29,7 @@ type Deal = {
   client_name: string;
   client_email: string | null;
   client_phone: string | null;
+  tags?: string[] | null;
   value: number | null;
   notes: string | null;
   position: number;
@@ -301,15 +302,23 @@ export function PipelineBoard() {
       if (error) throw error;
 
       // Build set of existing phones to avoid duplicates
-      const existingPhones = new Set(
-        deals.map((d) => (d.client_phone || "").replace(/\s+/g, ""))
+      const existingKeys = new Set(
+        deals.map((d) => {
+          const phone = (d.client_phone || "").replace(/\D+/g, "").slice(-9);
+          const name = (d.client_name || "").trim().toLowerCase();
+          const email = (d.client_email || "").trim().toLowerCase();
+          return email || `${name}|${phone}`;
+        })
       );
 
       const toInsert: any[] = [];
       const summariesByPhone = new Map<string, string>();
       for (const l of leads || []) {
-        const cleanPhone = (l.phone || "").replace(/\s+/g, "");
-        if (cleanPhone && existingPhones.has(cleanPhone)) continue;
+        const cleanPhone = (l.phone || "").replace(/\D+/g, "").slice(-9);
+        const cleanName = (l.name || "").trim().toLowerCase();
+        const cleanEmail = (l.email || "").trim().toLowerCase();
+        const leadKey = cleanEmail || `${cleanName}|${cleanPhone}`;
+        if (leadKey && existingKeys.has(leadKey)) continue;
         const f: any = l.extracted_fields || {};
         const balanceNum = f.balance ? Number(String(f.balance).replace(/[^\d.]/g, "")) : null;
         const reviewed =
@@ -330,13 +339,14 @@ export function PipelineBoard() {
           had_review_before: reviewed,
           value: balanceNum,
           source: "AI Caller",
+          tags: ["AI Caller"],
           notes: null,
           position: 0,
         });
         if (l.transcript_summary && cleanPhone) {
           summariesByPhone.set(cleanPhone, l.transcript_summary);
         }
-        existingPhones.add(cleanPhone);
+        existingKeys.add(leadKey);
       }
 
       if (!toInsert.length) {
