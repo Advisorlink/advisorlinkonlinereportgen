@@ -145,17 +145,120 @@ async function extractLeadAnswers(
       balance: parsed.balance,
       age: parsed.age,
       had_review_before: parsed.had_review_before,
+      email: parsed.email,
       ...(parsed.campaign_answers || {}),
       ...(parsed.fields || {}),
     };
     return {
       fields: stripEmptyFields(fields),
       summary: parsed.summary || summary,
+      email: (parsed.email || "").trim() || null,
+      consent: !!parsed.consent_to_contact,
+      interested: !!parsed.interested,
     };
   } catch {
-    return { fields: {}, summary };
+    return { fields: {}, summary, email: null, consent: false, interested: false };
   }
 }
+
+// ---- Pipeline routing helper (server-side equivalent of moveDealToStage) ----
+async function routeDealToStage(
+  supabase: any,
+  stageName: string,
+  opts: {
+    clientName: string;
+    clientEmail?: string | null;
+    clientPhone?: string | null;
+    tag?: string;
+    notes?: string;
+    source?: string;
+  },
+) {
+  const name = (opts.clientName || "").trim() || "Unnamed client";
+  const email = (opts.clientEmail || "").trim().toLowerCase() || null;
+  const phoneDigits = (opts.clientPhone || "").replace(/\D+/g, "");
+
+  const { data: stage } = await supabase
+    .from("pipeline_stages")
+    .select("id")
+    .eq("name", stageName)
+    .maybeSingle();
+  if (!stage?.id) {
+    console.log("routeDealToStage: stage not found:", stageName);
+    return;
+  }
+
+  const matchIds = new Set<string>();
+  if (email) {
+    const { data } = await supabase
+      .from("pipeline_deals")
+      .select("id")
+      .ilike("client_email", email);
+    (data || []).forEach((d: any) => matchIds.add(d.id));
+  }
+  if (phoneDigits.length >= 6) {
+    const { data: rows } = await supabase
+      .from("pipeline_deals")
+      .select("id, client_phone")
+      .not("client_phone", "is", null);
+    (rows || []).forEach((d: any) => {
+      if ((d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))) {
+        matchIds.add(d.id);
+      }
+    });
+  }
+  if (matchIds.size === 0 && name && name !== "Unnamed client") {
+    const { data } = await supabase
+      .from("pipeline_deals")
+      .select("id")
+      .ilike("client_name", name);
+    (data || []).forEach((d: any) => matchIds.add(d.id));
+  }
+
+  if (matchIds.size > 0) {
+    const ids = Array.from(matchIds);
+    const { data: existing } = await supabase
+      .from("pipeline_deals")
+      .select("id, tags, notes")
+      .in("id", ids);
+    for (const row of existing || []) {
+      const tags: string[] = Array.isArray(row.tags) ? row.tags : [];
+      if (opts.tag && !tags.includes(opts.tag)) tags.push(opts.tag);
+      const newNotes = opts.notes
+        ? (row.notes ? `${row.notes}\n\n${opts.notes}` : opts.notes)
+        : row.notes;
+      await supabase
+        .from("pipeline_deals")
+        .update({
+          stage_id: stage.id,
+          tags,
+          notes: newNotes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", row.id);
+    }
+  } else {
+    const { data: maxRow } = await supabase
+      .from("pipeline_deals")
+      .select("position")
+      .eq("stage_id", stage.id)
+      .order("position", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const nextPos = ((maxRow as any)?.position ?? -1) + 1;
+    await supabase.from("pipeline_deals").insert({
+      client_name: name,
+      client_email: email,
+      client_phone: opts.clientPhone || null,
+      stage_id: stage.id,
+      position: nextPos,
+      tags: opts.tag ? [opts.tag] : [],
+      notes: opts.notes || null,
+      source: opts.source || "AI Voice Caller",
+    });
+  }
+}
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS")
