@@ -1,104 +1,99 @@
-## Two new systems
+## What you'll get
 
-### 1. Two-way Google Calendar sync
+A paced campaign engine for the AI Voice Caller so you can drop in 500 numbers and let it dial through them safely.
 
-Right now bookings push to your Google Calendar, but if you edit or delete the event in Google Calendar, nothing happens back in the app. We need GCal → app sync.
+### How a campaign will run
 
-**How it works**
-- Subscribe to Google Calendar push notifications (watch channel) on your primary calendar. Google pings our edge function whenever anything changes.
-- New edge function `gcal-webhook` receives the ping, pulls the changed events since the last sync token, and for any event linked to a booking (`google_event_id` match):
-  - **Time changed** → update `bookings.start_at` / `end_at`, mark `status='rescheduled'`, clear reminder timestamps so 24h/1h reminders re-fire, send the client the branded "rescheduled" email + SMS.
-  - **Event deleted/cancelled** → mark booking `status='cancelled'`, send branded cancellation email + SMS, free the slot.
-  - **Attendee changed / title changed** → just sync the fields, no notifications.
-- Channels expire after ~7 days, so a daily cron (`gcal-watch-refresh`) renews them.
-- Store the channel id, resource id, and sync token in a new tiny table `gcal_sync_state`.
+1. **Upload your 500 contacts** to a campaign (as you do today).
+2. **Set pacing rules per campaign** (new settings panel on the campaign):
+   - **Max calls per hour** — default 50
+   - **Minimum gap between calls** — default 3 min (timer starts when the previous call *ends*, not when it starts)
+   - **Daily call window** — default 9:00 AM → 5:00 PM (Australia/Sydney)
+   - **Days of week** — default Mon–Fri
+3. **Hit Start.** The campaign goes `active` but no calls fire immediately.
+4. **A background ticker runs every minute.** It looks at every active campaign and asks:
+   - Are we inside the daily window?
+   - Has the per-hour cap been hit in the last 60 minutes?
+   - Has it been at least 3 min since the last call on this campaign finished?
+   - Are there pending contacts left?
+   - If yes to all → fire **one** call to the next pending contact.
+5. At **5:00 PM** the ticker stops firing. Any in-flight call finishes naturally. At 9:00 AM next business day it resumes from where it left off.
+6. When the contact list is exhausted, the campaign auto-completes.
 
-**What you'll see**
-- Drag a meeting in Google Calendar → within seconds the Bookings list updates, the client gets a "rescheduled" email + SMS, and reminders reset for the new time.
-- Delete it in GCal → booking shows as Cancelled, client gets the cancellation email.
+### What you'll see in the dashboard
 
----
+The Campaigns page will get a live status card per active campaign:
 
-### 2. Visual workflow builder (drag-and-drop automation tree)
+- **Progress bar**: `127 / 500 called` (25%)
+- **Today's pace**: `34 calls in the last hour · 8 min until next call`
+- **Outcomes breakdown** (live):
+  - ✅ Answered & qualified → Pipeline (New Lead)
+  - 📞 Answered, not interested → Do Not Contact
+  - 📭 No answer / voicemail → Did Not Answer
+  - ❌ Failed (bad number, etc.)
+- **Window status**: "Calling until 5:00 PM" or "Paused — resumes Mon 9:00 AM"
+- **Per-contact table** with: name, phone, attempts, last call status, duration, outcome, link to transcript
 
-A new **Automations** tab (inside the Messages page, as you suggested) with a canvas where you drag nodes to build flows.
+You can **Pause / Resume / Stop** any campaign with one button. Pause keeps it in place; Stop ends it.
 
-**Node types**
-- **Triggers** (the green start node — pick one):
-  - Report generated
-  - Report sent
-  - Pipeline stage changed (pick stage, e.g. "Presentation Booked", "Report Sent")
-  - Booking created / rescheduled / cancelled
-  - Form submitted (referral, fact find)
-- **Actions**:
-  - Send email (pick a template, edit subject/body with merge fields like `{{client_name}}`, `{{meeting_link}}`)
-  - Send SMS (same merge fields)
-  - Move deal to pipeline stage
-  - Create booking reminder
-  - Webhook (POST to a URL)
-- **Logic**:
-  - Wait (seconds / minutes / hours / days)
-  - Condition / branch (if email opened, if has phone, if value > X — yes/no branches)
-- **End**: stop node.
+### Re-dial the "Did Not Answer" pile
 
-**Canvas**
-- Built with React Flow (industry standard, drag-drop, snap-to-grid, mini-map, zoom). Nodes have ports, you drag connections between them.
-- Save loads a JSON graph from a new `workflows` table.
-- Click any node to open a side panel and edit its config (template body, wait duration, condition rules).
-- Toggle to enable/disable a workflow.
-
-**How runs work**
-- When a trigger event fires anywhere in the app, we call `workflow-trigger` edge function with `(trigger_type, context)`.
-- It finds matching enabled workflows, creates a `workflow_run` row, and queues the first step.
-- Cron `workflow-tick` runs every minute, picks up runs whose `next_run_at <= now()`, executes the current node (send email, evaluate condition, etc.), advances to the next node, and sets the next `next_run_at` (now + wait duration, or now for instant nodes).
-- Each step is logged to `workflow_run_steps` so you can see what happened per client.
-
-**What you'll see**
-- New **Messages → Automations** tab with a list of workflows + "New workflow" button.
-- Builder page with the React Flow canvas, node palette on the left, properties panel on the right.
-- A **Runs** sub-tab showing in-flight and completed runs, with the timeline of each.
+A new button **"Re-dial Did Not Answer"** on the campaign creates a fresh campaign pre-loaded with everyone who didn't pick up, so you can run them through again later with the same pacing rules.
 
 ---
 
 ### Technical section
 
-**New tables**
-- `gcal_sync_state` — channel_id, resource_id, sync_token, expires_at
-- `workflows` — name, trigger_type, trigger_config (jsonb), graph (jsonb: nodes + edges), is_active
-- `workflow_runs` — workflow_id, trigger_context (jsonb: client info), current_node_id, status (`running`/`completed`/`failed`/`cancelled`), next_run_at
-- `workflow_run_steps` — run_id, node_id, node_type, executed_at, result (jsonb), error
+**Schema additions** (`ai_caller_campaigns`)
+- `calls_per_hour int default 50`
+- `min_gap_seconds int default 180`
+- `daily_start_time time default '09:00'`
+- `daily_end_time time default '17:00'`
+- `active_days int[] default '{1,2,3,4,5}'` (1=Mon)
+- `timezone text default 'Australia/Sydney'`
+- `last_call_finished_at timestamptz` (updated when webhook reports call ended)
 
-**New edge functions**
-- `gcal-webhook` (public, no JWT) — receives Google push notifications, syncs changed events to bookings, sends reschedule/cancel emails + SMS reusing existing branded templates from `_shared/booking-utils.ts`.
-- `gcal-watch-register` — creates/refreshes the push channel on primary calendar. Runs once at install + daily via cron.
-- `workflow-trigger` — called from app code (after report sent, booking created, pipeline move, etc.). Spawns runs.
-- `workflow-tick` — cron every minute, advances runs.
+**New edge function `vapi-campaign-tick`** (cron every 60s via `pg_cron` + `pg_net`)
+- For each `status='active'` campaign:
+  - Check window (timezone-aware) → skip if outside
+  - Count `ai_caller_call_logs` rows in last 1h → skip if >= `calls_per_hour`
+  - Check `now() - last_call_finished_at >= min_gap_seconds` → skip if not
+  - Skip if any in-flight call (`status in ('initiated','ringing','in-progress')`) for this campaign
+  - Pick next `ai_caller_contacts` row where `call_status='pending'` → fire 1 call
+  - Mark campaign `completed` when no pending contacts remain
+
+**Existing `start-campaign` action** — change from loop-fire to "mark active + first tick". Drop the inline 2-second loop.
+
+**`vapi-webhook` end-of-call hook** — already exists; add an update to `ai_caller_campaigns.last_call_finished_at = now()` so the ticker can pace correctly.
+
+**Frontend** (`AICallerCampaigns.tsx` + new `CampaignSettingsDialog.tsx`)
+- Settings form for the 5 pacing fields (with sensible defaults)
+- Live status card (polls every 15s)
+- Outcome counts via aggregating `ai_caller_call_logs` joined to `pipeline_deals.stage_id`
+- "Re-dial Did Not Answer" → creates new campaign from contacts whose latest call routed to the Did Not Answer stage
 
 **Cron**
-- `gcal-watch-refresh` daily — refresh the watch channel before it expires
-- `workflow-tick` every minute
-
-**Frontend**
-- `src/pages/Messages.tsx` — add **Automations** tab
-- `src/components/automations/WorkflowList.tsx` — list + new
-- `src/components/automations/WorkflowBuilder.tsx` — React Flow canvas
-- `src/components/automations/nodes/*` — custom node components (TriggerNode, EmailNode, SmsNode, WaitNode, ConditionNode, etc.)
-- `src/components/automations/WorkflowRuns.tsx` — run history viewer
-- `react-flow` (now `@xyflow/react`) added to deps
-
-**App hooks** (places we fire `workflow-trigger`)
-- `send-report-email` edge function on success
-- `pipeline-auto.ts moveDealToStage` on every stage change
-- `booking-create` / `booking-reschedule` / `booking-cancel` / `gcal-webhook` on every booking change
+```sql
+select cron.schedule(
+  'vapi-campaign-tick',
+  '* * * * *',
+  $$ select net.http_post(
+       url:='https://osqreiyssdhpplxtcxdv.supabase.co/functions/v1/vapi-campaign-tick',
+       headers:='{"Content-Type":"application/json","apikey":"<anon>"}'::jsonb
+     ); $$
+);
+```
 
 ---
 
 ### Order of work
 
-1. Migration: `gcal_sync_state`, `workflows`, `workflow_runs`, `workflow_run_steps` + crons
-2. GCal two-way sync (webhook + watch register + refresh cron)
-3. Workflow engine (trigger + tick edge functions)
-4. Wire up trigger calls across the app (report sent, pipeline moves, bookings)
-5. Frontend: Automations tab + React Flow builder + node config panels
-6. Runs viewer
-7. End-to-end test
+1. Migration: add pacing columns + cron job
+2. Build `vapi-campaign-tick` edge function
+3. Wire `last_call_finished_at` update into `vapi-webhook`
+4. Refactor `start-campaign` to non-blocking
+5. Frontend: settings dialog + live status card + outcome table
+6. "Re-dial Did Not Answer" button
+7. End-to-end test with a 5-contact campaign and a 30-second gap to validate pacing
+
+Approve and I'll build it.

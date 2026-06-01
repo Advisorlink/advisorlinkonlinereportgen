@@ -1227,99 +1227,33 @@ After all questions have been asked (or if the client wants to end early), wrap 
       }
       const assistant = await assistantRes.json();
 
-      // Update campaign status
+      // Save the assistant id on the campaign and mark active. The paced
+      // ticker (vapi-campaign-tick) will fire one call at a time according
+      // to the campaign's pacing rules.
       await supabase
         .from("ai_caller_campaigns")
         .update({
           status: "active",
           started_at: new Date().toISOString(),
+          vapi_assistant_id: assistant.id,
+          last_call_finished_at: null,
         } as any)
         .eq("id", campaignId);
-
-      // Start calling contacts (fire calls with small delays)
-      const results: any[] = [];
-
-      for (const contact of contacts) {
-        try {
-          const callPayload = {
-            assistantId: assistant.id,
-            customer: { number: normalizeAUPhone(contact.phone) },
-            phoneNumberId,
-            metadata: { contactId: contact.id, campaignId },
-          };
-
-          const callRes = await fetch(`${VAPI_BASE}/call/phone`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${VAPI_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(callPayload),
-          });
-
-          if (!callRes.ok) {
-            const errText = await callRes.text();
-            console.error(`Call failed for ${contact.phone}:`, errText);
-            results.push({
-              contactId: contact.id,
-              phone: contact.phone,
-              error: errText,
-            });
-            continue;
-          }
-
-          const call = await callRes.json();
-
-          // Log the call
-          await supabase.from("ai_caller_call_logs").insert({
-            campaign_id: campaignId,
-            contact_id: contact.id,
-            vapi_call_id: call.id,
-            status: "initiated",
-            started_at: new Date().toISOString(),
-          });
-
-          // Update contact
-          await supabase
-            .from("ai_caller_contacts")
-            .update({
-              call_status: "calling",
-              call_attempts: (contact.call_attempts || 0) + 1,
-              last_called_at: new Date().toISOString(),
-              vapi_call_id: call.id,
-            })
-            .eq("id", contact.id);
-
-          results.push({
-            contactId: contact.id,
-            phone: contact.phone,
-            callId: call.id,
-          });
-
-          // Small delay between calls to avoid rate limiting
-          await new Promise((r) => setTimeout(r, 2000));
-        } catch (err: any) {
-          console.error(`Error calling ${contact.phone}:`, err);
-          results.push({
-            contactId: contact.id,
-            phone: contact.phone,
-            error: err.message,
-          });
-        }
-      }
 
       return new Response(
         JSON.stringify({
           assistantId: assistant.id,
-          callsInitiated: results.filter((r) => r.callId).length,
-          callsFailed: results.filter((r) => r.error).length,
-          results,
+          status: "active",
+          pendingContacts: contacts.length,
+          message:
+            "Campaign started. Calls will be dialled by the paced ticker.",
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         },
       );
     }
+
 
     if (action === "stop-campaign") {
       const { campaignId } = body;

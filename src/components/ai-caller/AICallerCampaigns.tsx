@@ -6,9 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Upload, Play, Trash2, Users, Loader2, Pencil, Square, Pause, RotateCcw } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Plus, Upload, Play, Trash2, Users, Loader2, Pencil, Square, Pause, RotateCcw, Clock, Gauge } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+
+const DOW_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export function AICallerCampaigns() {
   const { user } = useAuth();
@@ -23,9 +26,26 @@ export function AICallerCampaigns() {
   const [phoneNumberId, setPhoneNumberId] = useState("");
   const [contacts, setContacts] = useState<{ name: string; phone: string; email: string }[]>([]);
   const [starting, setStarting] = useState<string | null>(null);
+
+  // Pacing settings (per campaign)
+  const [callsPerHour, setCallsPerHour] = useState(50);
+  const [minGapSeconds, setMinGapSeconds] = useState(180);
+  const [dailyStart, setDailyStart] = useState("09:00");
+  const [dailyEnd, setDailyEnd] = useState("17:00");
+  const [activeDays, setActiveDays] = useState<number[]>([1, 2, 3, 4, 5]);
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { load(); }, []);
+
+  // Auto-refresh while any campaign is active or paused, so the
+  // progress counters and pacing info stay live.
+  useEffect(() => {
+    const hasLive = campaigns.some(c => c.status === "active" || c.status === "paused");
+    if (!hasLive) return;
+    const id = setInterval(() => { void load(); }, 15000);
+    return () => clearInterval(id);
+  }, [campaigns]);
 
   async function load() {
     setLoading(true);
@@ -66,10 +86,27 @@ export function AICallerCampaigns() {
     setContacts([...contacts, { name: "", phone: "", email: "" }]);
   }
 
+  function toggleDay(day: number) {
+    setActiveDays(prev =>
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day].sort()
+    );
+  }
+
+  function pacingPayload() {
+    return {
+      calls_per_hour: callsPerHour,
+      min_gap_seconds: minGapSeconds,
+      daily_start_time: dailyStart,
+      daily_end_time: dailyEnd,
+      active_days: activeDays,
+    };
+  }
+
   async function createCampaign() {
     if (!name.trim() || !scriptId) { toast.error("Name and script are required"); return; }
     if (!phoneNumberId) { toast.error("Select a phone number to call from"); return; }
     if (contacts.length === 0) { toast.error("Add at least one contact"); return; }
+    if (activeDays.length === 0) { toast.error("Pick at least one active day"); return; }
     if (!user) return;
 
     const validContacts = contacts.filter(c => c.phone.trim());
@@ -81,6 +118,7 @@ export function AICallerCampaigns() {
       script_id: scriptId,
       phone_number_id: phoneNumberId,
       total_contacts: validContacts.length,
+      ...pacingPayload(),
     } as any).select().single();
 
     if (error) { toast.error(error.message); return; }
@@ -107,6 +145,11 @@ export function AICallerCampaigns() {
     setScriptId("");
     setPhoneNumberId("");
     setContacts([]);
+    setCallsPerHour(50);
+    setMinGapSeconds(180);
+    setDailyStart("09:00");
+    setDailyEnd("17:00");
+    setActiveDays([1, 2, 3, 4, 5]);
   }
 
   async function openEditDialog(campaign: any) {
@@ -114,7 +157,11 @@ export function AICallerCampaigns() {
     setName(campaign.name);
     setScriptId(campaign.script_id);
     setPhoneNumberId(campaign.phone_number_id || "");
-    // Load existing contacts
+    setCallsPerHour(campaign.calls_per_hour ?? 50);
+    setMinGapSeconds(campaign.min_gap_seconds ?? 180);
+    setDailyStart((campaign.daily_start_time || "09:00").slice(0, 5));
+    setDailyEnd((campaign.daily_end_time || "17:00").slice(0, 5));
+    setActiveDays(campaign.active_days || [1, 2, 3, 4, 5]);
     const { data } = await supabase.from("ai_caller_contacts").select("*").eq("campaign_id", campaign.id);
     setContacts((data || []).map((c: any) => ({ name: c.name, phone: c.phone, email: c.email || "" })));
     setDialogOpen(true);
@@ -129,6 +176,7 @@ export function AICallerCampaigns() {
       name: name.trim(),
       script_id: scriptId,
       phone_number_id: phoneNumberId,
+      ...pacingPayload(),
     } as any).eq("id", editingCampaign.id);
 
     if (error) { toast.error(error.message); return; }
@@ -156,7 +204,9 @@ export function AICallerCampaigns() {
         load();
         return;
       }
-      toast.success(`Campaign started! ${data.callsInitiated} calls initiated, ${data.callsFailed} failed.`);
+      toast.success(
+        `Campaign started — ${data.pendingContacts ?? "?"} pending. The paced ticker will dial within a minute.`
+      );
       load();
     } catch (e: any) {
       toast.error(e.message || "Failed to start campaign");
@@ -229,12 +279,23 @@ export function AICallerCampaigns() {
     completed: "bg-cyan/20 text-cyan",
   };
 
+  function nextCallEta(c: any): string | null {
+    if (c.status !== "active") return null;
+    if (!c.last_call_finished_at) return "any minute";
+    const gapMs = (c.min_gap_seconds ?? 180) * 1000;
+    const elapsed = Date.now() - new Date(c.last_call_finished_at).getTime();
+    const remaining = Math.max(0, gapMs - elapsed);
+    if (remaining <= 0) return "any minute";
+    const mins = Math.ceil(remaining / 60000);
+    return `in ~${mins} min`;
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Campaigns</h2>
-          <p className="text-sm text-muted-foreground">Manage your calling campaigns</p>
+          <p className="text-sm text-muted-foreground">Paced auto-dialler — set the rules, the ticker handles the rest.</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetDialog(); else setDialogOpen(true); }}>
           <DialogTrigger asChild>
@@ -273,6 +334,59 @@ export function AICallerCampaigns() {
                 {phoneNumbers.length === 0 && (
                   <p className="text-xs text-destructive">No phone numbers available. Buy one in the Phone Numbers tab first.</p>
                 )}
+              </div>
+
+              {/* Pacing settings */}
+              <div className="rounded-lg border border-border p-3 space-y-3 bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <Gauge className="w-4 h-4 text-cyan" />
+                  <Label className="text-sm">Pacing rules</Label>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Max calls / hour</Label>
+                    <Input type="number" min={1} max={500} value={callsPerHour}
+                      onChange={e => setCallsPerHour(Math.max(1, parseInt(e.target.value) || 1))} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Gap between calls (sec)</Label>
+                    <Input type="number" min={0} max={3600} value={minGapSeconds}
+                      onChange={e => setMinGapSeconds(Math.max(0, parseInt(e.target.value) || 0))} />
+                    <p className="text-[10px] text-muted-foreground">Starts when the previous call ends.</p>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Daily start</Label>
+                    <Input type="time" value={dailyStart} onChange={e => setDailyStart(e.target.value)} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Daily end</Label>
+                    <Input type="time" value={dailyEnd} onChange={e => setDailyEnd(e.target.value)} />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Active days</Label>
+                  <div className="flex gap-1">
+                    {DOW_LABELS.map((label, idx) => {
+                      const day = idx + 1;
+                      const on = activeDays.includes(day);
+                      return (
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => toggleDay(day)}
+                          className={`px-2 py-1 text-xs rounded-md border transition ${
+                            on
+                              ? "bg-cyan/20 text-cyan border-cyan/40"
+                              : "bg-card text-muted-foreground border-border"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">Times are Australia/Sydney.</p>
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -341,68 +455,98 @@ export function AICallerCampaigns() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {campaigns.map(c => (
-            <Card key={c.id} className="bg-card border-border">
-              <CardContent className="py-4 px-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-semibold text-foreground">{c.name}</h3>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColor[c.status] || statusColor.draft}`}>
-                        {c.status}
-                      </span>
+          {campaigns.map(c => {
+            const total = c.total_contacts || 0;
+            const done = c.calls_completed || 0;
+            const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
+            const eta = nextCallEta(c);
+            const days = (c.active_days || [1,2,3,4,5]).map((d:number) => DOW_LABELS[d-1]).join(", ");
+            return (
+              <Card key={c.id} className="bg-card border-border">
+                <CardContent className="py-4 px-5 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h3 className="font-semibold text-foreground truncate">{c.name}</h3>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColor[c.status] || statusColor.draft}`}>
+                          {c.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {c.ai_caller_scripts?.name || "No script"} · {done}/{total} called · {c.calls_answered || 0} answered · {c.leads_generated || 0} leads
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {c.ai_caller_scripts?.name || "No script"} · {c.total_contacts} contacts · {c.calls_completed} calls · {c.leads_generated} leads
-                    </p>
-                  </div>
-                  <div className="flex gap-2 flex-wrap justify-end">
-                    {c.status === "draft" && (
-                      <>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}>
-                          <Pencil className="w-4 h-4 text-muted-foreground" />
+                    <div className="flex gap-2 flex-wrap justify-end">
+                      {c.status === "draft" && (
+                        <>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}>
+                            <Pencil className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                          <Button size="sm" className="gap-1" onClick={() => startCampaign(c.id)} disabled={starting !== null}>
+                            {starting === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
+                            {starting === c.id ? "Starting..." : "Start"}
+                          </Button>
+                        </>
+                      )}
+                      {c.status === "active" && (
+                        <>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}>
+                            <Pencil className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                          <Button variant="outline" size="sm" className="gap-1" onClick={() => pauseCampaign(c.id)}>
+                            <Pause className="w-3 h-3" /> Pause
+                          </Button>
+                          <Button variant="destructive" size="sm" className="gap-1" onClick={() => stopCampaign(c.id)}>
+                            <Square className="w-3 h-3" /> Stop
+                          </Button>
+                        </>
+                      )}
+                      {c.status === "paused" && (
+                        <>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}>
+                            <Pencil className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                          <Button variant="outline" size="sm" className="gap-1" onClick={() => resumeCampaign(c.id)}>
+                            <Play className="w-3 h-3" /> Resume
+                          </Button>
+                          <Button variant="destructive" size="sm" className="gap-1" onClick={() => stopCampaign(c.id)}>
+                            <Square className="w-3 h-3" /> Stop
+                          </Button>
+                        </>
+                      )}
+                      {(c.status === "completed" || c.status === "active" || c.status === "paused") && (
+                        <Button variant="outline" size="sm" className="gap-1" onClick={() => resetCampaign(c.id)}>
+                          <RotateCcw className="w-3 h-3" /> Reset
                         </Button>
-                        <Button size="sm" className="gap-1" onClick={() => startCampaign(c.id)} disabled={starting !== null}>
-                          {starting === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
-                          {starting === c.id ? "Starting..." : "Start"}
-                        </Button>
-                      </>
-                    )}
-                    {c.status === "active" && (
-                      <>
-                        <Button variant="outline" size="sm" className="gap-1" onClick={() => pauseCampaign(c.id)}>
-                          <Pause className="w-3 h-3" /> Pause
-                        </Button>
-                        <Button variant="destructive" size="sm" className="gap-1" onClick={() => stopCampaign(c.id)}>
-                          <Square className="w-3 h-3" /> Stop
-                        </Button>
-                      </>
-                    )}
-                    {c.status === "paused" && (
-                      <>
-                        <Button variant="outline" size="sm" className="gap-1" onClick={() => resumeCampaign(c.id)}>
-                          <Play className="w-3 h-3" /> Resume
-                        </Button>
-                        <Button variant="destructive" size="sm" className="gap-1" onClick={() => stopCampaign(c.id)}>
-                          <Square className="w-3 h-3" /> Stop
-                        </Button>
-                      </>
-                    )}
-                    {(c.status === "completed" || c.status === "active" || c.status === "paused") && (
-                      <Button variant="outline" size="sm" className="gap-1" onClick={() => resetCampaign(c.id)}>
-                        <RotateCcw className="w-3 h-3" /> Reset
+                      )}
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                        if (confirm("Delete this campaign and all its contacts?")) deleteCampaign(c.id);
+                      }}>
+                        <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>
-                    )}
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
-                      if (confirm("Delete this campaign and all its contacts?")) deleteCampaign(c.id);
-                    }}>
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                  {(c.status === "active" || c.status === "paused" || c.status === "completed") && (
+                    <div className="space-y-2">
+                      <Progress value={pct} className="h-1.5" />
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Gauge className="w-3 h-3" />
+                          {c.calls_per_hour ?? 50}/hr · {Math.round((c.min_gap_seconds ?? 180) / 60)} min gap
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {(c.daily_start_time || "09:00").slice(0,5)}–{(c.daily_end_time || "17:00").slice(0,5)} · {days}
+                        </span>
+                        {eta && <span>Next call {eta}</span>}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

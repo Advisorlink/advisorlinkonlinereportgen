@@ -388,6 +388,16 @@ serve(async (req) => {
         }
       }
 
+      // Bump the campaign's last_call_finished_at so the paced ticker
+      // can wait for the configured gap before dialling the next contact.
+      if (campaignId) {
+        await supabase
+          .from("ai_caller_campaigns")
+          .update({ last_call_finished_at: new Date().toISOString() } as any)
+          .eq("id", campaignId);
+      }
+
+
       // Update contact status
       if (contactId) {
         const wasAnswered = duration > 10;
