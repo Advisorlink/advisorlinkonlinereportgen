@@ -827,6 +827,41 @@ export default function Messages() {
                       className="min-h-[120px] max-h-[360px] resize-y border-0 bg-transparent px-4 py-3 pr-28 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 leading-relaxed"
                     />
                     <div className="absolute right-2 bottom-2 flex items-center gap-1">
+                      <Popover open={aiMenuOpen} onOpenChange={setAiMenuOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
+                            title="AI rewrite"
+                            disabled={!!aiBusy}
+                          >
+                            {aiBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-1" align="end">
+                          <p className="px-2 py-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">AI rewrite</p>
+                          {[
+                            { key: "fix" as const, label: "Fix spelling", Icon: SpellCheck },
+                            { key: "rewrite" as const, label: "Rewrite", Icon: Wand2 },
+                            { key: "longer" as const, label: "Make longer", Icon: ArrowUpNarrowWide },
+                            { key: "shorter" as const, label: "Make shorter", Icon: ArrowDownNarrowWide },
+                          ].map(({ key, label, Icon }) => (
+                            <button
+                              key={key}
+                              onClick={() => runAiRewrite(key)}
+                              disabled={!!aiBusy}
+                              className="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-muted flex items-center gap-2 disabled:opacity-50"
+                            >
+                              {aiBusy === key ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Icon className="w-3.5 h-3.5 text-muted-foreground" />}
+                              <span className="text-foreground">{label}</span>
+                            </button>
+                          ))}
+                          <p className="px-2 py-1.5 text-[10px] text-muted-foreground border-t border-border mt-1">
+                            Australian English. No em dashes. Brand stays "Advisor Link Online".
+                          </p>
+                        </PopoverContent>
+                      </Popover>
                       <Popover open={showMergeTags} onOpenChange={setShowMergeTags}>
                         <PopoverTrigger asChild>
                           <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" title="Insert merge tag">
