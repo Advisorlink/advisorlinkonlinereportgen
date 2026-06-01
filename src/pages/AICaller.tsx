@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CRMLayout } from "@/components/CRMLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, FileText, Users, BarChart3, ScrollText, PhoneCall, Mic } from "lucide-react";
+import { Phone, FileText, Users, BarChart3, ScrollText, PhoneCall, Mic, PhoneMissed } from "lucide-react";
 import { AICallerDashboard } from "@/components/ai-caller/AICallerDashboard";
 import { AICallerScripts } from "@/components/ai-caller/AICallerScripts";
 import { AICallerCampaigns } from "@/components/ai-caller/AICallerCampaigns";
@@ -9,6 +9,7 @@ import { AICallerLeads } from "@/components/ai-caller/AICallerLeads";
 import { AICallerCallLogs } from "@/components/ai-caller/AICallerCallLogs";
 import { AICallerPhoneNumbers } from "@/components/ai-caller/AICallerPhoneNumbers";
 import { AICallerVoices } from "@/components/ai-caller/AICallerVoices";
+import { AICallerOutcomes } from "@/components/ai-caller/AICallerOutcomes";
 
 const AI_CALLER_ACTIVE_TAB_KEY = "ai-caller-active-tab";
 
