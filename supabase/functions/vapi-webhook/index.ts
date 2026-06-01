@@ -398,16 +398,9 @@ serve(async (req) => {
       }
 
 
-      // Update contact status
-      if (contactId) {
-        const wasAnswered = duration > 10;
-        await supabase
-          .from("ai_caller_contacts")
-          .update({
-            call_status: wasAnswered ? "completed" : "no_answer",
-          })
-          .eq("id", contactId);
-      }
+      // Contact status is set further below based on the routed outcome
+      // (qualified / not_interested / no_answer) so the AI Caller "Outcomes"
+      // view stays separate from the main sales pipeline.
 
       // Create lead if we got meaningful data
       const hasExtractedData = Object.keys(extractedFields).length > 0;
