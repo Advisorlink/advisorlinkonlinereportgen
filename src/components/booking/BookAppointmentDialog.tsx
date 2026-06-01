@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,8 +21,17 @@ interface Props {
   onBooked?: () => void;
 }
 
+function splitName(full?: string | null): { first: string; last: string } {
+  const s = (full || "").trim();
+  if (!s) return { first: "", last: "" };
+  const parts = s.split(/\s+/);
+  return { first: parts[0], last: parts.slice(1).join(" ") };
+}
+
 export function BookAppointmentDialog({ open, onOpenChange, prefill, dealId, onBooked }: Props) {
-  const [name, setName] = useState(prefill?.clientName || "");
+  const init = splitName(prefill?.clientName);
+  const [firstName, setFirstName] = useState(init.first);
+  const [lastName, setLastName] = useState(init.last);
   const [email, setEmail] = useState(prefill?.clientEmail || "");
   const [phone, setPhone] = useState(prefill?.clientPhone || "");
   const [notes, setNotes] = useState("");
@@ -31,23 +40,28 @@ export function BookAppointmentDialog({ open, onOpenChange, prefill, dealId, onB
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<null | { dateStr: string; timeStr: string }>(null);
 
-  const reset = () => {
-    setName(prefill?.clientName || "");
+  // Re-sync prefill whenever the dialog opens or the prefill values change.
+  useEffect(() => {
+    if (!open) return;
+    const { first, last } = splitName(prefill?.clientName);
+    setFirstName(first);
+    setLastName(last);
     setEmail(prefill?.clientEmail || "");
     setPhone(prefill?.clientPhone || "");
     setNotes("");
     setPickedIso(null);
     setDone(null);
-  };
+  }, [open, prefill?.clientName, prefill?.clientEmail, prefill?.clientPhone]);
 
   const submit = async () => {
     if (!pickedIso) return toast.error("Pick a time first");
-    if (!name.trim() || !email.trim()) return toast.error("Name and email required");
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+    if (!fullName || !email.trim()) return toast.error("Name and email required");
     setSubmitting(true);
     const { data, error } = await supabase.functions.invoke("booking-create", {
       body: {
         startAt: pickedIso,
-        clientName: name.trim(),
+        clientName: fullName,
         clientEmail: email.trim(),
         clientPhone: phone.trim() || null,
         clientTimezone: pickedTz,
@@ -67,7 +81,7 @@ export function BookAppointmentDialog({ open, onOpenChange, prefill, dealId, onB
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-[hsl(var(--navy))] text-white border-white/10">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
@@ -90,8 +104,12 @@ export function BookAppointmentDialog({ open, onOpenChange, prefill, dealId, onB
           <div className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-white/60">Client name *</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+                <Label className="text-xs text-white/60">First name *</Label>
+                <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+              </div>
+              <div>
+                <Label className="text-xs text-white/60">Last name</Label>
+                <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-white/5 border-white/10 text-white" />
               </div>
               <div>
                 <Label className="text-xs text-white/60">Email *</Label>
@@ -101,9 +119,9 @@ export function BookAppointmentDialog({ open, onOpenChange, prefill, dealId, onB
                 <Label className="text-xs text-white/60">Phone</Label>
                 <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-white/5 border-white/10 text-white" />
               </div>
-              <div>
+              <div className="sm:col-span-2">
                 <Label className="text-xs text-white/60">Notes</Label>
-                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={1} className="bg-white/5 border-white/10 text-white resize-none" />
+                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="bg-white/5 border-white/10 text-white resize-none" />
               </div>
             </div>
 

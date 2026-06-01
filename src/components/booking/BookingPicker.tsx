@@ -133,7 +133,7 @@ export function BookingPicker({ slug = "travis", onSelect, selected }: Props) {
           <Clock className="w-4 h-4 text-cyan" />
           {selectedDay ? format(selectedDay, "EEEE, MMMM d") : "Pick a date"}
         </div>
-        <p className="text-xs text-white/40 mb-4">{data?.settings.meeting_duration_minutes ?? 45} min · {tz}</p>
+        <p className="text-xs text-white/40 mb-4">{data?.settings?.meeting_duration_minutes ?? 45} min · {tz}</p>
 
         {loading ? (
           <div className="flex items-center justify-center py-10 text-white/40">
