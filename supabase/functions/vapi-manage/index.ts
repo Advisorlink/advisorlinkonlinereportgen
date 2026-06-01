@@ -279,41 +279,51 @@ serve(async (req) => {
       const list: any[] = Array.isArray(assistants) ? assistants : (assistants.data || []);
 
       const results: Array<{ id: string; name?: string; ok: boolean; error?: string }> = [];
-      for (const a of list) {
-        try {
-          const patchRes = await fetch(`${VAPI_BASE}/assistant/${a.id}`, {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${VAPI_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              voicemailDetection,
-              voicemailMessage: "",
-            }),
-          });
-          if (!patchRes.ok) {
-            const txt = await patchRes.text();
-            results.push({ id: a.id, name: a.name, ok: false, error: `${patchRes.status}: ${txt}` });
-          } else {
-            await patchRes.text();
-            results.push({ id: a.id, name: a.name, ok: true });
+      const runPatches = async () => {
+        for (const a of list) {
+          try {
+            const patchRes = await fetch(`${VAPI_BASE}/assistant/${a.id}`, {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${VAPI_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                voicemailDetection,
+                voicemailMessage: "",
+              }),
+            });
+            if (!patchRes.ok) {
+              const txt = await patchRes.text();
+              console.log("voicemail patch failed", a.id, patchRes.status, txt);
+              results.push({ id: a.id, name: a.name, ok: false, error: `${patchRes.status}` });
+            } else {
+              await patchRes.text();
+              results.push({ id: a.id, name: a.name, ok: true });
+            }
+          } catch (e) {
+            console.log("voicemail patch error", a.id, e);
+            results.push({ id: a.id, name: a.name, ok: false, error: String(e) });
           }
-        } catch (e) {
-          results.push({ id: a.id, name: a.name, ok: false, error: String(e) });
+          // Throttle to stay under Vapi rate limits
+          await new Promise((r) => setTimeout(r, 350));
         }
-      }
+        console.log(
+          "voicemail refresh complete:",
+          `total=${list.length} updated=${results.filter((r) => r.ok).length} failed=${results.filter((r) => !r.ok).length}`,
+        );
+      };
+
+      // Fire-and-forget so the HTTP request returns immediately.
+      // @ts-ignore EdgeRuntime is a Deno Deploy global
+      EdgeRuntime.waitUntil(runPatches());
 
       return new Response(
-        JSON.stringify({
-          total: list.length,
-          updated: results.filter((r) => r.ok).length,
-          failed: results.filter((r) => !r.ok).length,
-          results,
-        }),
+        JSON.stringify({ started: true, total: list.length }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
 
     if (action === "create-assistant") {
 
