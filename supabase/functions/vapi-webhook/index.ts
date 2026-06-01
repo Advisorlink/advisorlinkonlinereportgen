@@ -196,23 +196,22 @@ async function routeDealToStage(
       .ilike("client_email", email);
     (data || []).forEach((d: any) => matchIds.add(d.id));
   }
-  if (phoneDigits.length >= 6) {
+
+  // Do not merge AI Caller test contacts by phone alone. Travis often tests
+  // multiple leads with the same phone number, so only treat the phone as an
+  // existing deal when the name also matches and no email match was found.
+  if (matchIds.size === 0 && phoneDigits.length >= 6 && name && name !== "Unnamed client") {
     const { data: rows } = await supabase
       .from("pipeline_deals")
-      .select("id, client_phone")
+      .select("id, client_name, client_phone")
       .not("client_phone", "is", null);
     (rows || []).forEach((d: any) => {
-      if ((d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))) {
+      const samePhone = (d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9));
+      const sameName = (d.client_name || "").trim().toLowerCase() === name.toLowerCase();
+      if (samePhone && sameName) {
         matchIds.add(d.id);
       }
     });
-  }
-  if (matchIds.size === 0 && name && name !== "Unnamed client") {
-    const { data } = await supabase
-      .from("pipeline_deals")
-      .select("id")
-      .ilike("client_name", name);
-    (data || []).forEach((d: any) => matchIds.add(d.id));
   }
 
   if (matchIds.size > 0) {
