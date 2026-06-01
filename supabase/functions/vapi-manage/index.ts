@@ -112,16 +112,17 @@ function formatFollowUps(secondMessage: string | null | undefined): string {
 }
 
 function formatClosingStatements(closingStatements: string | null | undefined): string {
-  if (!closingStatements) return "";
+  const endRule = `\nEND-OF-CALL RULE (CRITICAL):\n- Deliver the FINAL closing statement EXACTLY as written below — word-for-word, no paraphrasing, no additions.\n- Do NOT say "one moment", "okay", "alright", "bye", "goodbye", "have a great day", or ANY extra words after the final closing statement.\n- The moment you finish speaking the final closing statement, immediately call the end_call function to hang up.\n- Do NOT add any goodbye filler. The closing statement IS the goodbye.\n`;
+  if (!closingStatements) return endRule;
   try {
     const parsed = JSON.parse(closingStatements);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return `\nCLOSING STATEMENTS (use these to wrap up the call after all questions have been asked):\n${parsed.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")}\n`;
+      return `\nCLOSING STATEMENTS (deliver these in order to wrap up the call after all questions have been asked — say each one EXACTLY as written):\n${parsed.map((s: string, i: number) => `${i + 1}. "${s}"`).join("\n")}\n${endRule}`;
     }
   } catch {
     /* not JSON, treat as single statement */
   }
-  return `\nCLOSING STATEMENT (use this to wrap up the call after all questions have been asked):\n"${closingStatements}"\n`;
+  return `\nCLOSING STATEMENT (say this EXACTLY as written to wrap up the call after all questions have been asked):\n"${closingStatements}"\n${endRule}`;
 }
 
 async function extractLeadAnswers(
