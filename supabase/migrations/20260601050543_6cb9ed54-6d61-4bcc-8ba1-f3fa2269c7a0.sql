@@ -1,0 +1,2 @@
+UPDATE public.booking_settings SET timezone = 'Australia/Brisbane' WHERE timezone = 'Brisbane';
+UPDATE public.booking_settings SET timezone = 'Australia/' || timezone WHERE timezone IN ('Sydney','Melbourne','Perth','Adelaide','Darwin','Hobart');
