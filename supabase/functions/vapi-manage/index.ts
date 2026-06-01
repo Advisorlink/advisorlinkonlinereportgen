@@ -112,16 +112,17 @@ function formatFollowUps(secondMessage: string | null | undefined): string {
 }
 
 function formatClosingStatements(closingStatements: string | null | undefined): string {
-  if (!closingStatements) return "";
+  const endRule = `\nEND-OF-CALL RULE (CRITICAL):\n- Deliver the FINAL closing statement EXACTLY as written below — word-for-word, no paraphrasing, no additions.\n- Do NOT say "one moment", "okay", "alright", "bye", "goodbye", "have a great day", or ANY extra words after the final closing statement.\n- The moment you finish speaking the final closing statement, immediately call the end_call function to hang up.\n- Do NOT add any goodbye filler. The closing statement IS the goodbye.\n`;
+  if (!closingStatements) return endRule;
   try {
     const parsed = JSON.parse(closingStatements);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return `\nCLOSING STATEMENTS (use these to wrap up the call after all questions have been asked):\n${parsed.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")}\n`;
+      return `\nCLOSING STATEMENTS (deliver these in order to wrap up the call after all questions have been asked — say each one EXACTLY as written):\n${parsed.map((s: string, i: number) => `${i + 1}. "${s}"`).join("\n")}\n${endRule}`;
     }
   } catch {
     /* not JSON, treat as single statement */
   }
-  return `\nCLOSING STATEMENT (use this to wrap up the call after all questions have been asked):\n"${closingStatements}"\n`;
+  return `\nCLOSING STATEMENT (say this EXACTLY as written to wrap up the call after all questions have been asked):\n"${closingStatements}"\n${endRule}`;
 }
 
 async function extractLeadAnswers(
@@ -383,7 +384,7 @@ CORE RULES:
 - Listen carefully to what the client says and respond appropriately — don't talk over them or ignore their answers.
 - As long as the client is engaged and willing, make sure you ask EVERY question listed below. Do not skip questions or rush to end the call early when the client is happy to chat.
 - Keep your responses short and concise — one or two sentences max before asking the next question.
-- Always end the call warmly and professionally — thank them for their time and wish them well.
+- When ending the call, deliver the CLOSING STATEMENTS exactly as written below, then immediately hang up. Do NOT improvise extra goodbyes like "one moment" or "bye" after the final closing line.
 
 INTEREST DETECTION:
 - Do NOT assume the client is uninterested just because they give short answers, sound unsure, or ask clarifying questions. These are totally normal.
@@ -405,7 +406,7 @@ ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the client is willing — but paraphrase them naturally, don't read them word-for-word):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 ${closingMsg}
-After all questions have been asked (or if the client wants to end early), wrap up the call warmly. Always say goodbye nicely.`;
+After all questions have been asked (or if the client wants to end early), go straight into the CLOSING STATEMENTS above. Say the final closing statement EXACTLY as written and then immediately end the call. Do NOT add "one moment", "okay", "bye", or any other words after the final closing statement — the closing statement IS the goodbye.`;
 
       const assistantPayload: any = {
         name: (script.name || "Assistant").substring(0, 40),
@@ -1136,7 +1137,7 @@ CORE RULES:
 - Listen carefully to what the client says and respond appropriately — don't talk over them or ignore their answers.
 - As long as the client is engaged and willing, make sure you ask EVERY question listed below. Do not skip questions or rush to end the call early when the client is happy to chat.
 - Keep your responses short and concise — one or two sentences max before asking the next question.
-- Always end the call warmly and professionally — thank them for their time and wish them well.
+- When ending the call, deliver the CLOSING STATEMENTS exactly as written below, then immediately hang up. Do NOT improvise extra goodbyes like "one moment" or "bye" after the final closing line.
 
 INTEREST DETECTION:
 - Do NOT assume the client is uninterested just because they give short answers, sound unsure, or ask clarifying questions. These are totally normal.
@@ -1158,7 +1159,7 @@ ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the client is willing — but paraphrase them naturally, don't read them word-for-word):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 ${closingMsg}
-After all questions have been asked (or if the client wants to end early), wrap up the call warmly. Always say goodbye nicely.`;
+After all questions have been asked (or if the client wants to end early), go straight into the CLOSING STATEMENTS above. Say the final closing statement EXACTLY as written and then immediately end the call. Do NOT add "one moment", "okay", "bye", or any other words after the final closing statement — the closing statement IS the goodbye.`;
 
       const assistantPayload: any = {
         name: `${script.name} - Campaign`.substring(0, 40),
@@ -1594,7 +1595,7 @@ CORE RULES:
 - Listen carefully to what the caller says and respond appropriately — don't talk over them or ignore their answers.
 - As long as the caller is engaged and willing, make sure you ask EVERY question listed below. Do not skip questions or rush to end the call early when the caller is happy to chat.
 - Keep your responses short and concise — one or two sentences max before asking the next question.
-- Always end the call warmly and professionally — thank them for their time and wish them well.
+- When ending the call, deliver the CLOSING STATEMENTS exactly as written below, then immediately hang up. Do NOT improvise extra goodbyes like "one moment" or "bye" after the final closing line.
 
 INTEREST DETECTION:
 - Do NOT assume the caller is uninterested just because they give short answers, sound unsure, or ask clarifying questions. These are totally normal.
@@ -1616,7 +1617,7 @@ ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the caller is willing — but paraphrase them naturally, don't read them word-for-word):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 ${closingMsg}
-After all questions have been asked (or if the caller wants to end early), wrap up the call warmly. Always say goodbye nicely.`;
+After all questions have been asked (or if the caller wants to end early), go straight into the CLOSING STATEMENTS above. Say the final closing statement EXACTLY as written and then immediately end the call. Do NOT add "one moment", "okay", "bye", or any other words after the final closing statement — the closing statement IS the goodbye.`;
 
       const assistantPayload: any = {
         name: `${(script as any).name} - Inbound`.substring(0, 40),
