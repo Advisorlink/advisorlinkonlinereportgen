@@ -1,0 +1,7 @@
+UPDATE public.ai_caller_scripts SET first_message = 'Hey, is this {{first_name}}? My name is Brooke and I''m calling from Advisor Link, how are you today?' WHERE id = '6b6c8594-494e-40cc-a670-66448c79a791';
+UPDATE public.ai_caller_scripts SET first_message = 'Hi, is this {{first_name}}? My name is Dylan and I''m calling from Advisor Link, how are you today?' WHERE id = 'd0e8ebaf-f94b-4642-83ab-a5435c3d567d';
+UPDATE public.ai_caller_scripts SET first_message = 'Hey, is this {{first_name}}? My name''s Brooke, I''m calling from Advisor Link Online — how are you today?' WHERE id = '1c8761c4-fb60-4d07-8bcd-3113f5162ef7';
+UPDATE public.ai_caller_scripts SET first_message = 'Hey, is this {{first_name}}? My name''s Brooke, I''m calling from Compare Direct — how are you today?' WHERE id = 'f7aa909a-6961-412f-aed6-275512ecbd2a';
+UPDATE public.ai_caller_scripts SET first_message = 'Hey, is this {{first_name}}? My name''s Brooke, I''m calling from Compare Direct — how are you today?' WHERE id = '4d31d0c5-5ec7-4d00-9320-31435ba36819';
+UPDATE public.ai_caller_scripts SET first_message = 'G''day! Is that {{first_name}}?' WHERE id = '976233c8-0339-423f-96d4-32da403854a4';
+UPDATE public.ai_caller_scripts SET first_message = 'Hello, is this {{first_name}}? My name is Brooke from Advisor Link Online — how are you today?' WHERE id = '4cafb392-bb30-48af-8b8d-9e010189e4cd';
