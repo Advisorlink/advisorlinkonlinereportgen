@@ -26,6 +26,7 @@ Deno.serve(async (req) => {
 
     const vars = {
       client_name: "Travis (test)",
+      first_name: "Travis",
       date: dateStr,
       time: timeStr,
       client_timezone: tz,

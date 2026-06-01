@@ -153,6 +153,7 @@ Deno.serve(async (req) => {
     const cancelLink = `${appBaseUrl()}/cancel/${booking.cancel_token}`;
     const vars: Record<string,string> = {
       client_name: clientName,
+      first_name: (clientName || "").split(" ")[0] || clientName,
       date: dateStr,
       time: timeStr,
       client_timezone: tz,

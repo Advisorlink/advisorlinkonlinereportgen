@@ -49,6 +49,7 @@ Deno.serve(async (req) => {
     const start = new Date(b.start_at);
     const vars: Record<string,string> = {
       client_name: b.client_name,
+      first_name: (b.client_name || "").split(" ")[0] || b.client_name,
       date: formatInTz(start, tz, { weekday: "long", day: "numeric", month: "long" }),
       time: formatInTz(start, tz, { hour: "numeric", minute: "2-digit", hour12: true }),
       client_timezone: tz,
