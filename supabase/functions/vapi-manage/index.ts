@@ -281,32 +281,48 @@ serve(async (req) => {
       const results: Array<{ id: string; name?: string; ok: boolean; error?: string }> = [];
       const runPatches = async () => {
         for (const a of list) {
-          try {
-            const patchRes = await fetch(`${VAPI_BASE}/assistant/${a.id}`, {
-              method: "PATCH",
-              headers: {
-                Authorization: `Bearer ${VAPI_API_KEY}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                voicemailDetection,
-                voicemailMessage: "",
-              }),
-            });
-            if (!patchRes.ok) {
-              const txt = await patchRes.text();
-              console.log("voicemail patch failed", a.id, patchRes.status, txt);
-              results.push({ id: a.id, name: a.name, ok: false, error: `${patchRes.status}` });
-            } else {
-              await patchRes.text();
-              results.push({ id: a.id, name: a.name, ok: true });
+          let attempt = 0;
+          let done = false;
+          while (!done && attempt < 6) {
+            attempt++;
+            try {
+              const patchRes = await fetch(`${VAPI_BASE}/assistant/${a.id}`, {
+                method: "PATCH",
+                headers: {
+                  Authorization: `Bearer ${VAPI_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  voicemailDetection,
+                  voicemailMessage: "",
+                }),
+              });
+              if (patchRes.status === 429) {
+                await patchRes.text();
+                // Exponential backoff: 2s, 4s, 8s, 16s, 32s
+                await new Promise((r) => setTimeout(r, 2000 * Math.pow(2, attempt - 1)));
+                continue;
+              }
+              if (!patchRes.ok) {
+                const txt = await patchRes.text();
+                console.log("voicemail patch failed", a.id, patchRes.status, txt.slice(0, 200));
+                results.push({ id: a.id, name: a.name, ok: false, error: `${patchRes.status}` });
+              } else {
+                await patchRes.text();
+                results.push({ id: a.id, name: a.name, ok: true });
+              }
+              done = true;
+            } catch (e) {
+              console.log("voicemail patch error", a.id, e);
+              results.push({ id: a.id, name: a.name, ok: false, error: String(e) });
+              done = true;
             }
-          } catch (e) {
-            console.log("voicemail patch error", a.id, e);
-            results.push({ id: a.id, name: a.name, ok: false, error: String(e) });
           }
-          // Throttle to stay under Vapi rate limits
-          await new Promise((r) => setTimeout(r, 350));
+          if (!done) {
+            results.push({ id: a.id, name: a.name, ok: false, error: "rate-limited after retries" });
+          }
+          // Base throttle between assistants to stay well under Vapi's per-second limit
+          await new Promise((r) => setTimeout(r, 1500));
         }
         console.log(
           "voicemail refresh complete:",
@@ -323,6 +339,7 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
 
 
     if (action === "create-assistant") {
