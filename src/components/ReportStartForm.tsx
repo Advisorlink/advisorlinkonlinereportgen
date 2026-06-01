@@ -53,6 +53,8 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const _init = splitName(prefill.clientName);
   const [firstName, setFirstName] = useState(prefill.clientFirstName ?? _init.first);
   const [lastName, setLastName] = useState(prefill.clientLastName ?? _init.last);
+  const [clientEmail, setClientEmail] = useState(prefill.clientEmail ?? "");
+  const [clientPhone, setClientPhone] = useState(prefill.clientPhone ?? "");
 
   const [annualIncome, setAnnualIncome] = useState("");
   const [superFundName, setSuperFundName] = useState(prefill.superFundName ?? "");
