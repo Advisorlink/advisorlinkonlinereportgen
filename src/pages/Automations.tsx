@@ -341,6 +341,95 @@ function WorkflowList({ onOpen }: { onOpen: (w: Workflow) => void }) {
           </Card>
         </div>
       )}
+
+      <BookingTemplatesEditor />
+    </div>
+  );
+}
+
+// ---------- Booking message templates ----------
+type Tpl = { id: string; kind: string; subject: string | null; body: string; is_active: boolean };
+
+const TPL_META: Record<string, { label: string; hasSubject: boolean; description: string }> = {
+  sms_confirmation: { label: "SMS — Booking confirmation", hasSubject: false, description: "Sent by SMS as soon as a client books." },
+  email_confirmation: { label: "Email — Booking confirmation", hasSubject: true, description: "Sent by email as soon as a client books." },
+  email_24h: { label: "Email — 24h reminder", hasSubject: true, description: "Sent ~24 hours before the call." },
+  email_1h: { label: "Email — 1h reminder", hasSubject: true, description: "Sent ~1 hour before the call." },
+};
+
+function BookingTemplatesEditor() {
+  const [items, setItems] = useState<Tpl[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    const { data } = await supabase.from("booking_reminder_templates").select("*").order("kind");
+    setItems((data ?? []) as Tpl[]);
+    setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+
+  const updateLocal = (id: string, patch: Partial<Tpl>) =>
+    setItems(arr => arr.map(t => t.id === id ? { ...t, ...patch } : t));
+
+  const save = async (t: Tpl) => {
+    const { error } = await supabase.from("booking_reminder_templates")
+      .update({ subject: t.subject, body: t.body, is_active: t.is_active })
+      .eq("id", t.id);
+    if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Saved" });
+  };
+
+  return (
+    <div>
+      <h2 className="text-lg font-semibold mb-1 flex items-center gap-2">
+        <MessageSquare className="w-4 h-4" />Booking message templates
+      </h2>
+      <p className="text-sm text-muted-foreground mb-3">
+        Edit the SMS and emails sent when an appointment is booked or reminded. Use
+        <code className="bg-muted px-1 rounded mx-1">{"{{first_name}}"}</code>,
+        <code className="bg-muted px-1 rounded mx-1">{"{{client_name}}"}</code>,
+        <code className="bg-muted px-1 rounded mx-1">{"{{date}}"}</code>,
+        <code className="bg-muted px-1 rounded mx-1">{"{{time}}"}</code>,
+        <code className="bg-muted px-1 rounded mx-1">{"{{client_timezone}}"}</code>,
+        <code className="bg-muted px-1 rounded mx-1">{"{{meeting_link}}"}</code>,
+        <code className="bg-muted px-1 rounded mx-1">{"{{reschedule_link}}"}</code>,
+        <code className="bg-muted px-1 rounded mx-1">{"{{cancel_link}}"}</code>.
+      </p>
+      {loading ? <Card className="p-6 text-sm text-muted-foreground">Loading…</Card> : (
+        <div className="grid gap-3">
+          {items.map(t => {
+            const meta = TPL_META[t.kind] ?? { label: t.kind, hasSubject: true, description: "" };
+            return (
+              <Card key={t.id} className="p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <div className="font-semibold">{meta.label}</div>
+                    <div className="text-xs text-muted-foreground">{meta.description}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={t.is_active} onCheckedChange={v => updateLocal(t.id, { is_active: v })} />
+                    <span className="text-xs">{t.is_active ? "On" : "Off"}</span>
+                  </div>
+                </div>
+                {meta.hasSubject && (
+                  <div>
+                    <Label className="text-xs">Subject</Label>
+                    <Input value={t.subject ?? ""} onChange={e => updateLocal(t.id, { subject: e.target.value })} />
+                  </div>
+                )}
+                <div>
+                  <Label className="text-xs">Message</Label>
+                  <Textarea rows={meta.hasSubject ? 8 : 6} value={t.body ?? ""} onChange={e => updateLocal(t.id, { body: e.target.value })} />
+                </div>
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => save(t)}><Save className="w-4 h-4 mr-2" />Save</Button>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
