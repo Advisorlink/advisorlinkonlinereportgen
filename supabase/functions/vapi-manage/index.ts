@@ -356,6 +356,13 @@ After all questions have been asked (or if the client wants to end early), wrap 
         recordingEnabled: true,
         maxDurationSeconds: script.max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
+        voicemailDetection: {
+          provider: "twilio",
+          voicemailDetectionTypes: ["machine_end_beep", "machine_end_silence"],
+          enabled: true,
+          machineDetectionTimeout: 15,
+        },
+        voicemailMessage: "",
         responseDelaySeconds: 0.3,
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1102,6 +1109,13 @@ After all questions have been asked (or if the client wants to end early), wrap 
         recordingEnabled: true,
         maxDurationSeconds: script.max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
+        voicemailDetection: {
+          provider: "twilio",
+          voicemailDetectionTypes: ["machine_end_beep", "machine_end_silence"],
+          enabled: true,
+          machineDetectionTimeout: 15,
+        },
+        voicemailMessage: "",
         responseDelaySeconds: 0.3,
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1612,6 +1626,13 @@ After all questions have been asked (or if the caller wants to end early), wrap 
         recordingEnabled: true,
         maxDurationSeconds: (script as any).max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
+        voicemailDetection: {
+          provider: "twilio",
+          voicemailDetectionTypes: ["machine_end_beep", "machine_end_silence"],
+          enabled: true,
+          machineDetectionTimeout: 15,
+        },
+        voicemailMessage: "",
         
         responseDelaySeconds: 0.3,
         backgroundSound: (script as any).background_sound_enabled
