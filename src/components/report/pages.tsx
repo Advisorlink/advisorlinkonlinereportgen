@@ -889,97 +889,55 @@ function cnTone(eligible: boolean) {
 /* ------------------------------------------------------------------ */
 /* PAGE - WHAT'S NEXT                                                  */
 /* ------------------------------------------------------------------ */
-export function WhatsNextPage({ s }: { s: ReportSummary }) {
-  const totalBenefit = Math.max(0, s.potentialUplift) + Math.max(0, s.totalIncomeComparison - s.totalIncomeExisting);
-  const eligible = totalBenefit > 100_000;
-
+export function WhatsNextPage({ s: _s }: { s: ReportSummary }) {
   const steps = [
     {
-      n: "1",
-      title: "Review this report",
-      body: "Read through the projection, fee comparison and income outlook. Make sure the inputs reflect your real situation - especially salary, balance, fees and retirement age.",
+      n: "01",
+      title: "Book in your free review",
+      body: "Pick a time that suits you for a no-cost, no-obligation chat about your superannuation.",
     },
     {
-      n: "2",
-      title: "Check your eligibility",
-      body: "If your total projected extra benefit exceeds $100,000, you qualify for a no-obligation introduction to a licensed financial adviser from our referral network.",
+      n: "02",
+      title: "We share screens and walk through your options",
+      body: "Together we go through your report in detail and look at the options available to you, in plain English.",
     },
     {
-      n: "3",
-      title: "Request a referral",
-      body: "Reply to the email containing this report, or contact Advisor Link Online. We'll match you with an adviser suited to your situation.",
-    },
-    {
-      n: "4",
-      title: "Receive personal advice",
-      body: "Your adviser will assess your full circumstances and provide a Statement of Advice tailored to you - covering investment options, fees, insurance and retirement strategy.",
+      n: "03",
+      title: "Speak with a fully licensed adviser if needed",
+      body: "If personal advice would help, we can connect you with a fully licensed financial adviser at no extra cost. Completely your call.",
     },
   ];
 
   return (
     <PageShell>
-      <PageHeader pageLabel="WHAT'S NEXT" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">What's next</h2>
+      <PageHeader pageLabel="WHAT HAPPENS NEXT" />
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">What happens next</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
-        How to act on the findings in this report and access personal financial advice if you choose to.
+        Your next step is simple. Book in a free, no-cost superannuation review and we'll walk you through everything together.
       </p>
 
+      {/* Hero CTA */}
       <div
-        className="rounded-2xl px-6 py-5 mb-5 text-navy-foreground overflow-hidden relative"
-        style={{ background: "linear-gradient(135deg, hsl(215 60% 18%) 0%, hsl(200 70% 32%) 100%)" }}
+        className="rounded-2xl px-6 py-6 mb-5 text-navy-foreground overflow-hidden relative"
+        style={{ background: "linear-gradient(135deg, hsl(215 65% 14%) 0%, hsl(200 70% 32%) 100%)" }}
       >
-        <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-cyan/30 blur-2xl" />
-        <div className="relative flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider opacity-70">Your eligibility</div>
-            <div className="mt-1 text-2xl font-bold font-heading !text-white drop-shadow-md">
-              {eligible ? "You qualify for a free review" : "Referral threshold not met"}
-            </div>
-            <div className="mt-1 text-xs opacity-80 text-white">
-              Total projected extra benefit: <span className="font-bold tabular-nums">{fmtMoney(totalBenefit)}</span> · Threshold: $100,000
-            </div>
+        <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-cyan/30 blur-3xl pointer-events-none" />
+        <div className="absolute -left-10 -bottom-16 w-48 h-48 rounded-full bg-cyan/15 blur-3xl pointer-events-none" />
+        <div className="relative">
+          <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-cyan mb-2">Your next step</div>
+          <div className="text-2xl leading-tight font-bold font-heading !text-white drop-shadow-md">
+            Book in your <span className="text-cyan">free superannuation review</span>
           </div>
-          <div className={`px-4 py-2 rounded-md text-sm font-bold ${eligible ? "bg-online text-white" : "bg-white/10 text-white/80"}`}>
-            {eligible ? "ELIGIBLE" : "NOT ELIGIBLE"}
+          <div className="mt-2 text-sm text-white/85 max-w-xl">
+            No cost. No obligation. Just a friendly conversation about your super and the options available to you.
           </div>
         </div>
       </div>
 
-
-      <div className="mb-5">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="h-px flex-1 bg-border" />
-          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan">How a referral works</div>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { icon: "$", title: "No cost to you", body: "Advisor Link Online does not charge you for the introduction. We are an education and referral service only." },
-            { icon: "✦", title: "Independent network", body: "Advisers in our network are licensed in Australia and assessed for quality. You are under no obligation to proceed." },
-            { icon: "🔒", title: "Your data, your control", body: "We only share your details with an adviser once you confirm you'd like to be contacted." },
-          ].map((c) => (
-            <div key={c.title} className="relative rounded-xl border border-border bg-card p-4 overflow-hidden group">
-              <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-cyan/5 group-hover:bg-cyan/10 transition-colors" />
-              <div className="relative">
-                <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-cyan/10 text-cyan text-base font-bold mb-2.5">
-                  {c.icon}
-                </div>
-                <div className="text-navy mb-1 text-sm font-bold font-heading">{c.title}</div>
-                <div className="text-[10.5px] text-muted-foreground leading-relaxed">{c.body}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
+      {/* Steps */}
       <div className="mb-5 rounded-2xl border border-cyan/20 bg-gradient-to-br from-cyan/5 via-transparent to-transparent p-5">
-
         <div className="grid grid-cols-3 gap-4">
-          {[
-            { n: "01", title: "Best interest duty", body: "An adviser will only recommend personal advice if it is genuinely in your best interest. If it isn't, they won't proceed." },
-            { n: "02", title: "Annual opt-in", body: "Ongoing advice fees require your written consent every year. You sign a renewal document annually before any fee can be charged - giving you full control." },
-            { n: "03", title: "Paid from super", body: "If you choose to engage an adviser, fees are deducted from your superannuation balance - not paid out of pocket." },
-          ].map((c) => (
+          {steps.map((c) => (
             <div key={c.n} className="relative">
               <div className="text-3xl font-bold text-cyan/30 leading-none mb-1.5 tabular-nums">{c.n}</div>
               <div className="h-px w-8 bg-cyan mb-2" />
@@ -990,67 +948,53 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
         </div>
       </div>
 
+      {/* Best interest policy */}
+      <div className="mb-5 rounded-2xl border border-border bg-card p-5">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-cyan/10 text-cyan text-sm font-bold">★</div>
+          <div className="text-sm font-bold font-heading text-navy">Client's best interest policy</div>
+        </div>
+        <p className="text-[11px] text-muted-foreground leading-relaxed">
+          Everything we do starts with your best interest. We'll only ever suggest a next step if it genuinely makes sense for you. If it doesn't, we'll say so. No pressure, no pushy sales, and no fees from us for booking in a review.
+        </p>
+      </div>
 
+      {/* Contact card */}
       <div
         className="mb-4 rounded-2xl overflow-hidden relative text-navy-foreground shadow-elevated"
         style={{ background: "linear-gradient(120deg, hsl(215 65% 10%) 0%, hsl(210 60% 16%) 50%, hsl(200 70% 22%) 100%)" }}
       >
-        {/* Decorative glow */}
         <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/25 blur-3xl pointer-events-none" />
-        <div className="absolute right-1/3 -bottom-20 w-56 h-56 rounded-full bg-cyan/10 blur-3xl pointer-events-none" />
-        {/* Subtle grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-        {/* Accent bar */}
         <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-cyan via-cyan/70 to-cyan/30" />
 
         <div className="relative px-6 py-5 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-5 items-center">
-          {/* Left: kicker + headline */}
           <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
               <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-cyan">
-                Ready to finally get some help?
+                Ready to book in?
               </div>
             </div>
             <div className="text-2xl leading-tight font-bold font-heading !text-white drop-shadow-md">
-              Call your <span className="text-cyan">Senior Research Consultant</span> today<br />
-              for a no-obligation chat.
+              Get in touch with <span className="text-cyan">Travis</span> today<br />
+              to lock in your free review.
             </div>
           </div>
 
-          {/* Right: consultant card */}
           <div className="rounded-xl bg-white/[0.06] backdrop-blur border border-white/15 px-5 py-4 min-w-[260px]">
-            <div className="flex items-start justify-between gap-4 mb-2">
-              <div>
-                <div className="text-base font-bold leading-tight font-heading !text-white drop-shadow-md">Travis Seckod</div>
-                <div className="text-[10px] uppercase tracking-wider text-white/70 font-bold mt-0.5">
-                  Director · Senior Research
-                </div>
-              </div>
-              <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan whitespace-nowrap pt-1">
-                Your Consultant
+            <div className="mb-2">
+              <div className="text-base font-bold leading-tight font-heading !text-white drop-shadow-md">Travis Seckold</div>
+              <div className="text-[10px] uppercase tracking-wider text-white/70 font-bold mt-0.5">
+                Advisor Link Online
               </div>
             </div>
 
             <div className="mt-3 space-y-1.5">
-              <a
-                href="tel:0485991688"
-                className="flex items-center gap-2.5 text-[12px] font-bold text-white"
-              >
+              <a href="tel:0485991688" className="flex items-center gap-2.5 text-[12px] font-bold text-white">
                 <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">☎</span>
                 <span className="tabular-nums">0485 991 688</span>
               </a>
-              <a
-                href="mailto:admin@advisorlinkonline.com.au"
-                className="flex items-center gap-2.5 text-[12px] font-semibold text-white"
-              >
+              <a href="mailto:admin@advisorlinkonline.com.au" className="flex items-center gap-2.5 text-[12px] font-semibold text-white">
                 <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">✉</span>
                 <span>admin@advisorlinkonline.com.au</span>
               </a>
@@ -1058,13 +1002,6 @@ export function WhatsNextPage({ s }: { s: ReportSummary }) {
           </div>
         </div>
       </div>
-
-      <Disclaimer>
-        Advisor Link Online is an independent education and referral service and is not licensed to provide financial advice.
-        This Super Performance Report contains factual information only and does not constitute personal advice. Eligibility for
-        a referral is based solely on the projected extra benefit shown in this report and does not guarantee a particular outcome.
-        A licensed financial adviser will assess your full circumstances before providing a Statement of Advice.
-      </Disclaimer>
 
       <PageFooter />
     </PageShell>
