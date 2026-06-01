@@ -406,7 +406,7 @@ ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the client is willing — but paraphrase them naturally, don't read them word-for-word):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 ${closingMsg}
-After all questions have been asked (or if the client wants to end early), wrap up the call warmly. Always say goodbye nicely.`;
+After all questions have been asked (or if the client wants to end early), go straight into the CLOSING STATEMENTS above. Say the final closing statement EXACTLY as written and then immediately end the call. Do NOT add "one moment", "okay", "bye", or any other words after the final closing statement — the closing statement IS the goodbye.`;
 
       const assistantPayload: any = {
         name: (script.name || "Assistant").substring(0, 40),
@@ -1159,7 +1159,7 @@ ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the client is willing — but paraphrase them naturally, don't read them word-for-word):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 ${closingMsg}
-After all questions have been asked (or if the client wants to end early), wrap up the call warmly. Always say goodbye nicely.`;
+After all questions have been asked (or if the client wants to end early), go straight into the CLOSING STATEMENTS above. Say the final closing statement EXACTLY as written and then immediately end the call. Do NOT add "one moment", "okay", "bye", or any other words after the final closing statement — the closing statement IS the goodbye.`;
 
       const assistantPayload: any = {
         name: `${script.name} - Campaign`.substring(0, 40),
@@ -1617,7 +1617,7 @@ ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the caller is willing — but paraphrase them naturally, don't read them word-for-word):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 ${closingMsg}
-After all questions have been asked (or if the caller wants to end early), wrap up the call warmly. Always say goodbye nicely.`;
+After all questions have been asked (or if the caller wants to end early), go straight into the CLOSING STATEMENTS above. Say the final closing statement EXACTLY as written and then immediately end the call. Do NOT add "one moment", "okay", "bye", or any other words after the final closing statement — the closing statement IS the goodbye.`;
 
       const assistantPayload: any = {
         name: `${(script as any).name} - Inbound`.substring(0, 40),
