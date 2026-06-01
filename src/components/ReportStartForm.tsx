@@ -241,7 +241,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
 
       <div className="p-5 space-y-5">
         {/* Name */}
-        <Section icon={<Cake className="w-3.5 h-3.5" />} title="Client name">
+        <Section icon={<Cake className="w-3.5 h-3.5" />} title="Client details">
           <div className="grid grid-cols-2 gap-3">
             <Field label="First name">
               <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" />
@@ -250,7 +250,16 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
               <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" />
             </Field>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Email">
+              <Input type="email" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="jane@example.com" />
+            </Field>
+            <Field label="Phone">
+              <Input type="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="+61 4XX XXX XXX" />
+            </Field>
+          </div>
         </Section>
+
 
         {/* 8 survey questions in order */}
         <Section icon={<Sparkles className="w-3.5 h-3.5" />} title="Survey questions">
