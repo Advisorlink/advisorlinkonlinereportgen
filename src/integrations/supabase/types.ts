@@ -128,6 +128,7 @@ export type Database = {
           total_contacts: number
           updated_at: string
           user_id: string
+          vapi_assistant_id: string | null
         }
         Insert: {
           active_days?: number[]
@@ -152,6 +153,7 @@ export type Database = {
           total_contacts?: number
           updated_at?: string
           user_id: string
+          vapi_assistant_id?: string | null
         }
         Update: {
           active_days?: number[]
@@ -176,6 +178,7 @@ export type Database = {
           total_contacts?: number
           updated_at?: string
           user_id?: string
+          vapi_assistant_id?: string | null
         }
         Relationships: [
           {
