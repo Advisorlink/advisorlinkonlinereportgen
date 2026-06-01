@@ -335,6 +335,7 @@ export function PipelineBoard() {
         const leadKey = cleanEmail || `${cleanName}|${cleanPhone}`;
         if (leadKey && existingKeys.has(leadKey)) continue;
         const f: any = l.extracted_fields || {};
+        const leadEmail = (l.email || f.email || "").trim() || null;
         const balanceNum = f.balance ? Number(String(f.balance).replace(/[^\d.]/g, "")) : null;
         const reviewed =
           f.had_review_before === true || /^(y|yes|true)$/i.test(String(f.had_review_before || ""))
@@ -346,7 +347,7 @@ export function PipelineBoard() {
           stage_id: newLeadStage.id,
           client_name: l.name || "Unknown",
           client_phone: l.phone || null,
-          client_email: l.email || null,
+          client_email: leadEmail,
           age: f.age ? String(f.age) : null,
           super_fund_name: f.super_fund_name || f.fund || null,
           super_balance: balanceNum,
