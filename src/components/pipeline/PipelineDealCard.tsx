@@ -17,6 +17,7 @@ type Deal = {
   updated_at: string;
   progress_stages?: string[] | null;
   source?: string | null;
+  tags?: string[] | null;
 };
 
 const PROGRESS_TOTAL = 8;
@@ -98,6 +99,10 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
             <p className="text-sm font-semibold text-foreground truncate">{deal.client_name}</p>
             <AgePill createdAt={deal.created_at} />
             {deal.source && <SourceTag source={deal.source} />}
+            {(deal.tags || [])
+              .filter((tag) => tag && tag !== deal.source)
+              .slice(0, 2)
+              .map((tag) => <SourceTag key={tag} source={tag} />)}
           </div>
           {deal.value != null && deal.value > 0 && (
             <div className="flex items-center gap-1 mt-1">
