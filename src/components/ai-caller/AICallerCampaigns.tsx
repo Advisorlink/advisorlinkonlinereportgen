@@ -64,22 +64,81 @@ export function AICallerCampaigns() {
     setLoading(false);
   }
 
-  function handleCSV(file: File) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const lines = text.split("\n").filter(l => l.trim());
-      const parsed: { name: string; phone: string; email: string }[] = [];
-      for (let i = 1; i < lines.length; i++) {
-        const cols = lines[i].split(",").map(c => c.trim().replace(/^"|"$/g, ""));
-        if (cols.length >= 2) {
-          parsed.push({ name: cols[0] || "Unknown", phone: cols[1] || "", email: cols[2] || "" });
-        }
+  function normalizeAUPhone(raw: string): string {
+    let s = String(raw ?? "").replace(/[^\d+]/g, "");
+    if (!s) return "";
+    if (s.startsWith("+")) return s;
+    // Strip leading 0 from AU mobile
+    if (s.startsWith("0") && s.length === 10) return "+61" + s.slice(1);
+    // Already has 61 country code
+    if (s.startsWith("61") && s.length >= 11) return "+" + s;
+    // Missing leading 0 (e.g. Excel dropped it from 0401082755 → 401082755)
+    if (s.length === 9 && /^[2-9]/.test(s)) return "+61" + s;
+    if (s.length === 10) return "+" + s;
+    return "+" + s;
+  }
+
+  function rowsToContacts(rows: any[][]): { name: string; phone: string; email: string }[] {
+    if (rows.length === 0) return [];
+    // Detect header row
+    const first = rows[0].map(c => String(c ?? "").trim().toLowerCase());
+    const hasHeader = first.some(c => /name|phone|mobile|email|surname/.test(c));
+    let firstIdx = -1, lastIdx = -1, fullIdx = -1, phoneIdx = -1, emailIdx = -1;
+    if (hasHeader) {
+      first.forEach((h, i) => {
+        if (/first\s*name|given/.test(h)) firstIdx = i;
+        else if (/last\s*name|surname|family/.test(h)) lastIdx = i;
+        else if (/^name$|full\s*name|contact/.test(h)) fullIdx = i;
+        else if (/phone|mobile|number|cell/.test(h)) phoneIdx = i;
+        else if (/email|e-?mail/.test(h)) emailIdx = i;
+      });
+    }
+    // Fallbacks: assume col0 name, col1 phone, col2 email
+    if (!hasHeader || (fullIdx < 0 && firstIdx < 0 && phoneIdx < 0)) {
+      fullIdx = 0; phoneIdx = 1; emailIdx = 2;
+    }
+    const dataRows = hasHeader ? rows.slice(1) : rows;
+    const out: { name: string; phone: string; email: string }[] = [];
+    for (const r of dataRows) {
+      if (!r || r.every(c => c == null || String(c).trim() === "")) continue;
+      let name = "";
+      if (firstIdx >= 0 || lastIdx >= 0) {
+        const fn = String(r[firstIdx] ?? "").trim();
+        const ln = String(r[lastIdx] ?? "").trim();
+        name = `${fn} ${ln}`.trim();
+      } else if (fullIdx >= 0) {
+        name = String(r[fullIdx] ?? "").trim();
       }
-      setContacts(parsed);
-      toast.success(`Parsed ${parsed.length} contacts from CSV`);
-    };
-    reader.readAsText(file);
+      const phone = normalizeAUPhone(String(r[phoneIdx] ?? ""));
+      const email = emailIdx >= 0 ? String(r[emailIdx] ?? "").trim() : "";
+      if (!phone) continue;
+      out.push({ name: name || "Unknown", phone, email });
+    }
+    return out;
+  }
+
+  async function handleCSV(file: File) {
+    const isXlsx = /\.(xlsx|xls)$/i.test(file.name);
+    let rows: any[][] = [];
+    if (isXlsx) {
+      const XLSX = await import("xlsx");
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(ws, { header: 1, blankrows: false, raw: true }) as any[][];
+    } else {
+      const text = await file.text();
+      rows = text.split(/\r?\n/).filter(l => l.trim()).map(l =>
+        l.split(",").map(c => c.trim().replace(/^"|"$/g, ""))
+      );
+    }
+    const parsed = rowsToContacts(rows);
+    if (parsed.length === 0) {
+      toast.error("No valid contacts found. Check that phone numbers are present.");
+      return;
+    }
+    setContacts(parsed);
+    toast.success(`Parsed ${parsed.length} contacts`);
   }
 
   function addManualContact() {
@@ -396,19 +455,19 @@ export function AICallerCampaigns() {
                     <input
                       ref={fileRef}
                       type="file"
-                      accept=".csv"
+                      accept=".csv,.xlsx,.xls"
                       className="hidden"
                       onChange={e => e.target.files?.[0] && handleCSV(e.target.files[0])}
                     />
                     <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} className="gap-1">
-                      <Upload className="w-3 h-3" /> Upload CSV
+                      <Upload className="w-3 h-3" /> Upload CSV / Excel
                     </Button>
                     <Button type="button" variant="outline" size="sm" onClick={addManualContact} className="gap-1">
                       <Plus className="w-3 h-3" /> Add
                     </Button>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">CSV format: name, phone, email (one per row, header row optional)</p>
+                <p className="text-xs text-muted-foreground">CSV or Excel. Recognised columns: First Name, Surname (or Name), Phone/Mobile, Email. Australian numbers auto-normalise to +61.</p>
                 {contacts.length > 0 && (
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {contacts.map((c, i) => (
