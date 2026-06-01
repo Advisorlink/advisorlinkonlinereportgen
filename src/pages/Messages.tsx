@@ -20,7 +20,8 @@ import {
   Search, Send, Paperclip, Phone, Mail, User, MessageSquare,
   Archive, X, MoreVertical, Clock, CheckCheck, Check,
   AlertCircle, Ban, Plus, Tag, ArrowLeft, FileText, ChevronDown,
-  Landmark, MapPin, UserCog, Calendar, Smile,
+  Landmark, MapPin, UserCog, Calendar, Smile, Sparkles, Loader2,
+  SpellCheck, Wand2, ArrowUpNarrowWide, ArrowDownNarrowWide,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
@@ -82,6 +83,31 @@ export default function Messages() {
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageText, setMessageText] = useState("");
+  const [aiMenuOpen, setAiMenuOpen] = useState(false);
+  const [aiBusy, setAiBusy] = useState<null | "fix" | "rewrite" | "longer" | "shorter">(null);
+
+  const runAiRewrite = async (mode: "fix" | "rewrite" | "longer" | "shorter") => {
+    const text = messageText.trim();
+    if (!text) {
+      toast({ title: "Nothing to rewrite", description: "Type a message first.", variant: "destructive" });
+      return;
+    }
+    setAiBusy(mode);
+    try {
+      const { data, error } = await supabase.functions.invoke("rewrite-message", { body: { text, mode } });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (data?.text) {
+        setMessageText(data.text);
+        toast({ title: "Updated", description: "Your message has been rewritten." });
+      }
+      setAiMenuOpen(false);
+    } catch (e: any) {
+      toast({ title: "AI rewrite failed", description: e?.message || "Try again.", variant: "destructive" });
+    } finally {
+      setAiBusy(null);
+    }
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTab, setFilterTab] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -801,6 +827,41 @@ export default function Messages() {
                       className="min-h-[120px] max-h-[360px] resize-y border-0 bg-transparent px-4 py-3 pr-28 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 leading-relaxed"
                     />
                     <div className="absolute right-2 bottom-2 flex items-center gap-1">
+                      <Popover open={aiMenuOpen} onOpenChange={setAiMenuOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
+                            title="AI rewrite"
+                            disabled={!!aiBusy}
+                          >
+                            {aiBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-1" align="end">
+                          <p className="px-2 py-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">AI rewrite</p>
+                          {[
+                            { key: "fix" as const, label: "Fix spelling", Icon: SpellCheck },
+                            { key: "rewrite" as const, label: "Rewrite", Icon: Wand2 },
+                            { key: "longer" as const, label: "Make longer", Icon: ArrowUpNarrowWide },
+                            { key: "shorter" as const, label: "Make shorter", Icon: ArrowDownNarrowWide },
+                          ].map(({ key, label, Icon }) => (
+                            <button
+                              key={key}
+                              onClick={() => runAiRewrite(key)}
+                              disabled={!!aiBusy}
+                              className="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-muted flex items-center gap-2 disabled:opacity-50"
+                            >
+                              {aiBusy === key ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Icon className="w-3.5 h-3.5 text-muted-foreground" />}
+                              <span className="text-foreground">{label}</span>
+                            </button>
+                          ))}
+                          <p className="px-2 py-1.5 text-[10px] text-muted-foreground border-t border-border mt-1">
+                            Australian English. No em dashes. Brand stays "Advisor Link Online".
+                          </p>
+                        </PopoverContent>
+                      </Popover>
                       <Popover open={showMergeTags} onOpenChange={setShowMergeTags}>
                         <PopoverTrigger asChild>
                           <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" title="Insert merge tag">
