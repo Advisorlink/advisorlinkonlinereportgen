@@ -78,6 +78,7 @@ export default function AICaller() {
           <TabsContent value="scripts"><AICallerScripts /></TabsContent>
           <TabsContent value="campaigns"><AICallerCampaigns /></TabsContent>
           <TabsContent value="leads"><AICallerLeads /></TabsContent>
+          <TabsContent value="outcomes"><AICallerOutcomes /></TabsContent>
           <TabsContent value="logs"><AICallerCallLogs /></TabsContent>
           <TabsContent value="numbers"><AICallerPhoneNumbers /></TabsContent>
           <TabsContent value="voices"><AICallerVoices /></TabsContent>
