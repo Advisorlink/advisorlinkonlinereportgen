@@ -258,7 +258,65 @@ serve(async (req) => {
     const body = await req.json();
     const { action } = body;
 
+    if (action === "refresh-voicemail-config") {
+      // PATCH every existing Vapi assistant to add machine-detection / voicemail config,
+      // leaving every other setting untouched.
+      const voicemailDetection = {
+        provider: "twilio",
+        voicemailDetectionTypes: ["machine_end_beep", "machine_end_silence"],
+        enabled: true,
+        machineDetectionTimeout: 15,
+      };
+
+      const listRes = await fetch(`${VAPI_BASE}/assistant?limit=1000`, {
+        headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
+      });
+      if (!listRes.ok) {
+        const txt = await listRes.text();
+        throw new Error(`Vapi list assistants failed [${listRes.status}]: ${txt}`);
+      }
+      const assistants = await listRes.json();
+      const list: any[] = Array.isArray(assistants) ? assistants : (assistants.data || []);
+
+      const results: Array<{ id: string; name?: string; ok: boolean; error?: string }> = [];
+      for (const a of list) {
+        try {
+          const patchRes = await fetch(`${VAPI_BASE}/assistant/${a.id}`, {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${VAPI_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              voicemailDetection,
+              voicemailMessage: "",
+            }),
+          });
+          if (!patchRes.ok) {
+            const txt = await patchRes.text();
+            results.push({ id: a.id, name: a.name, ok: false, error: `${patchRes.status}: ${txt}` });
+          } else {
+            await patchRes.text();
+            results.push({ id: a.id, name: a.name, ok: true });
+          }
+        } catch (e) {
+          results.push({ id: a.id, name: a.name, ok: false, error: String(e) });
+        }
+      }
+
+      return new Response(
+        JSON.stringify({
+          total: list.length,
+          updated: results.filter((r) => r.ok).length,
+          failed: results.filter((r) => !r.ok).length,
+          results,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     if (action === "create-assistant") {
+
       const { script } = body;
 
       // Build the questions extraction tool
