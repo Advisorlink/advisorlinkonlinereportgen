@@ -79,6 +79,21 @@ async function extractLeadAnswers(
                   balance: { type: "string" },
                   age: { type: "string" },
                   had_review_before: { type: "string" },
+                  email: {
+                    type: "string",
+                    description:
+                      "Email address the client clearly spelled out or confirmed. Leave blank if not provided.",
+                  },
+                  consent_to_contact: {
+                    type: "boolean",
+                    description:
+                      "True ONLY if the client explicitly agreed to be contacted, called back, or to receive information.",
+                  },
+                  interested: {
+                    type: "boolean",
+                    description:
+                      "True if the client showed genuine interest in a super review or follow-up; false if they declined, hung up early, were not interested, or asked not to be contacted.",
+                  },
                   campaign_answers: {
                     type: "object",
                     additionalProperties: { type: "string" },
@@ -86,7 +101,7 @@ async function extractLeadAnswers(
                   summary: {
                     type: "string",
                     description:
-                      "Concise call summary based only on the transcript",
+                      "Concise 2-3 sentence call summary based only on what the client said. Mention key facts (fund, balance, age, attitude, any objections).",
                   },
                 },
                 required: [
@@ -94,6 +109,9 @@ async function extractLeadAnswers(
                   "balance",
                   "age",
                   "had_review_before",
+                  "email",
+                  "consent_to_contact",
+                  "interested",
                   "campaign_answers",
                   "summary",
                 ],
@@ -108,6 +126,7 @@ async function extractLeadAnswers(
       }),
     },
   );
+
 
   if (!resp.ok) {
     console.error("lead extraction failed", resp.status, await resp.text());
