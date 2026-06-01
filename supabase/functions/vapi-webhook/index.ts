@@ -196,27 +196,40 @@ async function routeDealToStage(
       .ilike("client_email", email);
     (data || []).forEach((d: any) => matchIds.add(d.id));
   }
-  if (phoneDigits.length >= 6) {
+
+  // Do not merge AI Caller test contacts by phone alone. Travis often tests
+  // multiple leads with the same phone number, so only treat the phone as an
+  // existing deal when the name also matches and no email match was found.
+  if (matchIds.size === 0 && phoneDigits.length >= 6 && name && name !== "Unnamed client") {
     const { data: rows } = await supabase
       .from("pipeline_deals")
-      .select("id, client_phone")
+      .select("id, client_name, client_phone")
       .not("client_phone", "is", null);
     (rows || []).forEach((d: any) => {
-      if ((d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9))) {
+      const samePhone = (d.client_phone || "").replace(/\D+/g, "").endsWith(phoneDigits.slice(-9));
+      const sameName = (d.client_name || "").trim().toLowerCase() === name.toLowerCase();
+      if (samePhone && sameName) {
         matchIds.add(d.id);
       }
     });
   }
-  if (matchIds.size === 0 && name && name !== "Unnamed client") {
-    const { data } = await supabase
-      .from("pipeline_deals")
-      .select("id")
-      .ilike("client_name", name);
-    (data || []).forEach((d: any) => matchIds.add(d.id));
-  }
 
   if (matchIds.size > 0) {
     const ids = Array.from(matchIds);
+    const { data: stageRows } = await supabase
+      .from("pipeline_deals")
+      .select("id, position")
+      .eq("stage_id", stage.id);
+    await Promise.all(
+      (stageRows || [])
+        .filter((row: any) => !ids.includes(row.id))
+        .map((row: any) =>
+          supabase
+            .from("pipeline_deals")
+            .update({ position: (row.position ?? 0) + 1 })
+            .eq("id", row.id),
+        ),
+    );
     const { data: existing } = await supabase
       .from("pipeline_deals")
       .select("id, tags, notes")
@@ -231,6 +244,7 @@ async function routeDealToStage(
         .from("pipeline_deals")
         .update({
           stage_id: stage.id,
+          position: 0,
           tags,
           notes: newNotes,
           updated_at: new Date().toISOString(),
@@ -238,20 +252,24 @@ async function routeDealToStage(
         .eq("id", row.id);
     }
   } else {
-    const { data: maxRow } = await supabase
+    const { data: stageRows } = await supabase
       .from("pipeline_deals")
-      .select("position")
+      .select("id, position")
       .eq("stage_id", stage.id)
-      .order("position", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const nextPos = ((maxRow as any)?.position ?? -1) + 1;
+    await Promise.all(
+      (stageRows || []).map((row: any) =>
+        supabase
+          .from("pipeline_deals")
+          .update({ position: (row.position ?? 0) + 1 })
+          .eq("id", row.id),
+      ),
+    );
     await supabase.from("pipeline_deals").insert({
       client_name: name,
       client_email: email,
       client_phone: opts.clientPhone || null,
       stage_id: stage.id,
-      position: nextPos,
+      position: 0,
       tags: opts.tag ? [opts.tag] : [],
       notes: opts.notes || null,
       source: opts.source || "AI Voice Caller",
@@ -506,7 +524,7 @@ serve(async (req) => {
           clientPhone = call?.customer?.number || call?.customerNumber || null;
           clientName = `Inbound ${clientPhone || "caller"}`;
         }
-        const finalEmail = clientEmailContact || extractedEmail;
+        const finalEmail = clientEmailContact || extractedEmail || (extractedFields.email || "").trim() || null;
 
         const noAnswerReasons = [
           "customer-did-not-answer",
@@ -574,9 +592,9 @@ serve(async (req) => {
             clientName,
             clientEmail: finalEmail,
             clientPhone,
-            tag: "AI Voice Caller",
+            tag: "AI Caller",
             notes: noteLines.join("\n"),
-            source: "AI Voice Caller",
+            source: "AI Caller",
           });
         }
 
