@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -400,8 +399,6 @@ export default function UploadDocuments() {
     setSubmitting(true);
     setProgress(5);
     try {
-      const slug = client.email.toLowerCase().replace(/[^a-z0-9]/g, "-");
-      const folder = `${slug}/${Date.now()}`;
       const total = captured.length;
       let done = 0;
       for (const item of captured) {
