@@ -100,16 +100,27 @@ Deno.serve(async (req) => {
       .eq("sheet_name", cfg.sheet_name);
     const imported = new Set<string>((existingImports ?? []).map((r: { phone_digits: string }) => r.phone_digits));
 
-    // Existing pipeline phones (last 9 digits match)
-    const { data: existingDeals } = await admin
-      .from("pipeline_deals")
-      .select("client_phone")
-      .not("client_phone", "is", null);
-    const existingTails = new Set<string>(
-      (existingDeals ?? [])
-        .map((d: { client_phone: string | null }) => digits(d.client_phone).slice(-9))
-        .filter((s: string) => s.length >= 9),
-    );
+    // Existing pipeline phones (last 9 digits match) — paginate to bypass 1000-row default
+    const existingTails = new Set<string>();
+    {
+      const pageSize = 1000;
+      let from = 0;
+      while (true) {
+        const { data: page, error: pageErr } = await admin
+          .from("pipeline_deals")
+          .select("client_phone")
+          .not("client_phone", "is", null)
+          .range(from, from + pageSize - 1);
+        if (pageErr) throw pageErr;
+        if (!page || page.length === 0) break;
+        for (const d of page as { client_phone: string | null }[]) {
+          const t = digits(d.client_phone).slice(-9);
+          if (t.length >= 9) existingTails.add(t);
+        }
+        if (page.length < pageSize) break;
+        from += pageSize;
+      }
+    }
 
     // Find min position so new rows can be placed above existing ones without a heavy bulk shift
     const { data: minRow } = await admin
