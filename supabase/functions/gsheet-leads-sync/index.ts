@@ -136,7 +136,10 @@ Deno.serve(async (req) => {
     const toInsert: Array<Record<string, unknown>> = [];
     const trackInsert: Array<Record<string, unknown>> = [];
 
-    for (let i = 0; i < rows.length; i++) {
+    // Iterate from bottom of sheet upward so the most-recently-added sheet row
+    // (assumed to be at the bottom) gets inserted first and ends up at the very
+    // top of the New Lead column, with older entries fading down beneath it.
+    for (let i = rows.length - 1; i >= 0; i--) {
       if (i === headerIdx) continue;
       const row = rows[i];
       if (!row || row.length === 0) continue;
