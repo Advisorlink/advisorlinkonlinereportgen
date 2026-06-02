@@ -111,13 +111,16 @@ Deno.serve(async (req) => {
         .filter((s: string) => s.length >= 9),
     );
 
-    // Max position in target stage so new rows go to the top (insert at position 0, shift others down)
-    const { data: stageDeals } = await admin
+    // Find min position so new rows can be placed above existing ones without a heavy bulk shift
+    const { data: minRow } = await admin
       .from("pipeline_deals")
-      .select("id, position")
-      .eq("stage_id", stage.id);
+      .select("position")
+      .eq("stage_id", stage.id)
+      .order("position", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    let nextPos = ((minRow as { position?: number } | null)?.position ?? 0) - 1;
     let imports = 0;
-    const newlyImportedDeals: { id: string }[] = [];
 
     const toInsert: Array<Record<string, unknown>> = [];
     const trackInsert: Array<Record<string, unknown>> = [];
@@ -133,7 +136,6 @@ Deno.serve(async (req) => {
       if (imported.has(d)) continue;
       const tail = d.slice(-9);
       if (tail && existingTails.has(tail)) {
-        // already in pipeline by another import — track to avoid re-checking
         trackInsert.push({
           spreadsheet_id: cfg.spreadsheet_id,
           sheet_name: cfg.sheet_name,
@@ -152,7 +154,7 @@ Deno.serve(async (req) => {
         client_name: name,
         client_phone: phone,
         stage_id: stage.id,
-        position: 0, // temp; we'll shift below
+        position: nextPos--,
         tags: [cfg.source_tag],
         source: cfg.source_label,
         age: idxAge >= 0 ? (row[idxAge] ?? "").toString() || null : null,
@@ -173,21 +175,13 @@ Deno.serve(async (req) => {
     }
 
     if (toInsert.length > 0) {
-      // shift existing deals down so new ones appear on top
-      const ids = (stageDeals ?? []).map((d: { id: string }) => d.id);
-      if (ids.length > 0) {
-        // bump each existing by toInsert.length
-        for (const sd of (stageDeals ?? []) as { id: string; position: number }[]) {
-          await admin.from("pipeline_deals").update({ position: (sd.position ?? 0) + toInsert.length }).eq("id", sd.id);
-        }
-      }
-      // assign positions 0..n-1
-      toInsert.forEach((r, i) => { r.position = i; });
-      const { data: inserted, error: insErr } = await admin.from("pipeline_deals").insert(toInsert).select("id, client_phone");
+      const { data: inserted, error: insErr } = await admin
+        .from("pipeline_deals")
+        .insert(toInsert)
+        .select("id, client_phone");
       if (insErr) throw insErr;
       imports = inserted?.length ?? 0;
 
-      // attach deal_id to track rows
       const phoneToDeal = new Map<string, string>();
       (inserted ?? []).forEach((d: { id: string; client_phone: string | null }) => {
         phoneToDeal.set(digits(d.client_phone), d.id);
@@ -196,7 +190,6 @@ Deno.serve(async (req) => {
         const did = phoneToDeal.get(t.phone_digits as string);
         if (did) t.deal_id = did;
       });
-      newlyImportedDeals.push(...(inserted ?? []).map((d: { id: string }) => ({ id: d.id })));
     }
 
     if (trackInsert.length > 0) {
