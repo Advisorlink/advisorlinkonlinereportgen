@@ -68,6 +68,19 @@ export default function Admin() {
     return { ...DEFAULT_INPUTS, ...saved, clientName: saved.clientName || r.client_name } as ClientInputs;
   };
 
+  const isRecoveredPdfOnly = (r: ReportRow) => Boolean((r.inputs as Record<string, unknown> | null)?.recoveredPdfOnly && r.pdf_path);
+
+  const openStoredPdf = async (r: ReportRow) => {
+    if (!r.pdf_path) return false;
+    const { data, error } = await supabase.storage.from("client-reports").createSignedUrl(r.pdf_path, 60 * 10);
+    if (error || !data?.signedUrl) {
+      toast.error("Could not open the recovered PDF");
+      return false;
+    }
+    window.open(data.signedUrl, "_blank");
+    return true;
+  };
+
   const editReport = (r: ReportRow) => {
     setInputs(resolveInputs(r));
     setEditingReportId(r.id);
@@ -75,7 +88,8 @@ export default function Admin() {
     nav("/");
   };
 
-  const openViewReport = (r: ReportRow) => {
+  const openViewReport = async (r: ReportRow) => {
+    if (isRecoveredPdfOnly(r) && await openStoredPdf(r)) return;
     setViewReportData(r);
     // Try to enter fullscreen on the modal container after it mounts
     setTimeout(() => {
