@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { uploadClientDocumentSubmission } from "@/lib/client-document-upload";
 import {
   Shield, Lock, FileCheck2, Camera, Upload, CheckCircle2,
   IdCard, FileText, Image as ImageIcon, ArrowRight, ArrowLeft,
@@ -404,25 +405,14 @@ export default function UploadDocuments() {
       const total = captured.length;
       let done = 0;
       for (const item of captured) {
-        const ext = item.file.name.split(".").pop() || "jpg";
-        const path = `${folder}/${item.docType}_${item.id}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("client-documents")
-          .upload(path, item.file, { contentType: item.file.type, upsert: false });
-        if (upErr) throw upErr;
-        const { error: dbErr } = await supabase.from("client_documents").insert({
-          client_name: client.fullName,
-          client_email: client.email,
-          client_phone: `Adviser: ${client.representative}`,
-          document_type: item.docType,
-          file_path: path,
-          file_name: item.file.name,
-          file_size: item.file.size,
-          mime_type: item.file.type,
-          consent_given: true,
+        await uploadClientDocumentSubmission({
+          clientName: client.fullName,
+          clientEmail: client.email,
+          clientPhone: `Adviser: ${client.representative}`,
+          documentType: item.docType,
           notes: item.label,
+          file: item.file,
         });
-        if (dbErr) throw dbErr;
         done += 1;
         setProgress(Math.round((done / total) * 100));
       }
