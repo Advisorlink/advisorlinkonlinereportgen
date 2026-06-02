@@ -155,6 +155,11 @@ export default function Admin() {
     // Always regenerate from saved inputs so every report (including older ones)
     // uses the current report design rather than the PDF that was stored at creation time.
     setPdfBusyId(r.id);
+    if (isRecoveredPdfOnly(r)) {
+      await openStoredPdf(r);
+      setPdfBusyId(null);
+      return;
+    }
     setPdfStageInputs(resolveInputs(r));
     try {
       await new Promise(requestAnimationFrame);
@@ -289,7 +294,14 @@ export default function Admin() {
       let pdfBlob: Blob | null = null;
       // Always regenerate the PDF from saved inputs so emailed reports use the
       // current design rather than the (potentially out-of-date) stored PDF.
-      if (shouldAttachPdf) {
+      if (shouldAttachPdf && isRecoveredPdfOnly(r) && r.pdf_path) {
+        const { data, error } = await supabase.storage.from("client-reports").createSignedUrl(r.pdf_path, 60 * 10);
+        if (error || !data?.signedUrl) throw new Error("Could not load the recovered PDF");
+        pdfBlob = await fetch(data.signedUrl).then((res) => {
+          if (!res.ok) throw new Error("Could not download the recovered PDF");
+          return res.blob();
+        });
+      } else if (shouldAttachPdf) {
         setPdfStageInputs(resolveInputs(r));
         await new Promise(requestAnimationFrame);
         await new Promise(requestAnimationFrame);
