@@ -82,6 +82,10 @@ export default function Admin() {
   };
 
   const editReport = (r: ReportRow) => {
+    if (isRecoveredPdfOnly(r)) {
+      toast.info("This restored report opens as the original PDF only.");
+      return;
+    }
     setInputs(resolveInputs(r));
     setEditingReportId(r.id);
     toast.success(`Editing ${r.client_name}`, { description: "Make your changes and click Save." });
