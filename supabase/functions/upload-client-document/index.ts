@@ -22,6 +22,9 @@ function json(body: unknown, status = 200) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (!req.headers.get("content-type")?.toLowerCase().includes("multipart/form-data")) {
+    return json({ error: "Upload must be sent as form data" }, 400);
+  }
 
   try {
     const form = await req.formData();
