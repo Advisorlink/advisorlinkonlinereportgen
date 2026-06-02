@@ -342,7 +342,122 @@ function WorkflowList({ onOpen }: { onOpen: (w: Workflow) => void }) {
         </div>
       )}
 
+      <SheetLeadSyncEditor />
       <BookingTemplatesEditor />
+    </div>
+  );
+}
+
+// ---------- Google Sheet → New Lead sync ----------
+type SyncCfg = {
+  id: number;
+  spreadsheet_id: string;
+  sheet_name: string;
+  header_row: number;
+  target_stage_name: string;
+  source_tag: string;
+  source_label: string;
+  is_active: boolean;
+  last_synced_at: string | null;
+  last_imported_count: number;
+  last_error: string | null;
+};
+
+function SheetLeadSyncEditor() {
+  const [cfg, setCfg] = useState<SyncCfg | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    const { data } = await supabase.from("sheet_lead_sync_config" as never).select("*").eq("id", 1).maybeSingle();
+    setCfg(data as SyncCfg | null);
+    setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+
+  const save = async () => {
+    if (!cfg) return;
+    const { error } = await supabase.from("sheet_lead_sync_config" as never).update({
+      spreadsheet_id: cfg.spreadsheet_id,
+      sheet_name: cfg.sheet_name,
+      header_row: cfg.header_row,
+      target_stage_name: cfg.target_stage_name,
+      source_tag: cfg.source_tag,
+      source_label: cfg.source_label,
+      is_active: cfg.is_active,
+    } as never).eq("id", 1);
+    if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Saved" });
+  };
+
+  const syncNow = async () => {
+    setSyncing(true);
+    const { data, error } = await supabase.functions.invoke("gsheet-leads-sync", { body: { source: "manual" } });
+    setSyncing(false);
+    if (error) { toast({ title: "Sync failed", description: error.message, variant: "destructive" }); return; }
+    const imp = (data as { imported?: number } | null)?.imported ?? 0;
+    toast({ title: `Synced — ${imp} new lead${imp === 1 ? "" : "s"}` });
+    load();
+  };
+
+  if (loading || !cfg) return <Card className="p-6 text-sm text-muted-foreground">Loading sheet sync…</Card>;
+
+  return (
+    <div>
+      <h2 className="text-lg font-semibold mb-1 flex items-center gap-2">
+        <Zap className="w-4 h-4" />Google Sheet → New Lead
+      </h2>
+      <p className="text-sm text-muted-foreground mb-3">
+        Every 5 minutes, new rows from your Google Sheet are added to the chosen pipeline stage with the chosen tag.
+        Duplicates are skipped by phone number. Sheet columns expected: <code className="bg-muted px-1 rounded">Name, Number, Age, State, Fund Name, Fund Balance, Employment, Comments</code>.
+      </p>
+      <Card className="p-4 space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs">Spreadsheet ID</Label>
+            <Input value={cfg.spreadsheet_id} onChange={e => setCfg({ ...cfg, spreadsheet_id: e.target.value })} />
+            <p className="text-[11px] text-muted-foreground mt-1">Found in the sheet URL: <code>/spreadsheets/d/&lt;ID&gt;/edit</code></p>
+          </div>
+          <div>
+            <Label className="text-xs">Sheet (tab) name</Label>
+            <Input value={cfg.sheet_name} onChange={e => setCfg({ ...cfg, sheet_name: e.target.value })} />
+          </div>
+          <div>
+            <Label className="text-xs">Target pipeline stage</Label>
+            <Input value={cfg.target_stage_name} onChange={e => setCfg({ ...cfg, target_stage_name: e.target.value })} />
+          </div>
+          <div>
+            <Label className="text-xs">Header row #</Label>
+            <Input type="number" min={1} value={cfg.header_row} onChange={e => setCfg({ ...cfg, header_row: parseInt(e.target.value) || 1 })} />
+          </div>
+          <div>
+            <Label className="text-xs">Tag</Label>
+            <Input value={cfg.source_tag} onChange={e => setCfg({ ...cfg, source_tag: e.target.value })} />
+          </div>
+          <div>
+            <Label className="text-xs">Source label</Label>
+            <Input value={cfg.source_label} onChange={e => setCfg({ ...cfg, source_label: e.target.value })} />
+          </div>
+        </div>
+        <div className="flex items-center justify-between pt-2 border-t">
+          <div className="flex items-center gap-2">
+            <Switch checked={cfg.is_active} onCheckedChange={v => setCfg({ ...cfg, is_active: v })} />
+            <span className="text-xs">{cfg.is_active ? "Auto-sync on" : "Auto-sync off"}</span>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Last sync: {cfg.last_synced_at ? new Date(cfg.last_synced_at).toLocaleString() : "never"}
+            {" · "}Last batch: {cfg.last_imported_count}
+            {cfg.last_error && <span className="text-destructive ml-2">Error: {cfg.last_error}</span>}
+          </div>
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={syncNow} disabled={syncing}>
+            <Play className="w-4 h-4 mr-2" />{syncing ? "Syncing…" : "Sync now"}
+          </Button>
+          <Button size="sm" onClick={save}><Save className="w-4 h-4 mr-2" />Save</Button>
+        </div>
+      </Card>
     </div>
   );
 }

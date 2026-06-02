@@ -1272,6 +1272,81 @@ export type Database = {
         }
         Relationships: []
       }
+      sheet_lead_imports: {
+        Row: {
+          client_name: string | null
+          created_at: string
+          deal_id: string | null
+          id: string
+          phone_digits: string
+          sheet_name: string
+          spreadsheet_id: string
+        }
+        Insert: {
+          client_name?: string | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          phone_digits: string
+          sheet_name: string
+          spreadsheet_id: string
+        }
+        Update: {
+          client_name?: string | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          phone_digits?: string
+          sheet_name?: string
+          spreadsheet_id?: string
+        }
+        Relationships: []
+      }
+      sheet_lead_sync_config: {
+        Row: {
+          header_row: number
+          id: number
+          is_active: boolean
+          last_error: string | null
+          last_imported_count: number
+          last_synced_at: string | null
+          sheet_name: string
+          source_label: string
+          source_tag: string
+          spreadsheet_id: string
+          target_stage_name: string
+          updated_at: string
+        }
+        Insert: {
+          header_row?: number
+          id?: number
+          is_active?: boolean
+          last_error?: string | null
+          last_imported_count?: number
+          last_synced_at?: string | null
+          sheet_name?: string
+          source_label?: string
+          source_tag?: string
+          spreadsheet_id: string
+          target_stage_name?: string
+          updated_at?: string
+        }
+        Update: {
+          header_row?: number
+          id?: number
+          is_active?: boolean
+          last_error?: string | null
+          last_imported_count?: number
+          last_synced_at?: string | null
+          sheet_name?: string
+          source_label?: string
+          source_tag?: string
+          spreadsheet_id?: string
+          target_stage_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sms_campaign_recipients: {
         Row: {
           campaign_id: string
