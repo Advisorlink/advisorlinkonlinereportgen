@@ -2,6 +2,20 @@ import { supabase } from "@/integrations/supabase/client";
 import type { ClientInputs } from "@/lib/calc";
 
 const clean = (value?: string | null) => (value ?? "").trim();
+const normaliseEmail = (value?: string | null) => clean(value).toLowerCase();
+const phoneDigits = (value?: string | null) => clean(value).replace(/\D+/g, "");
+
+function isSameClient(existing: { client_name?: string | null; email?: string | null; inputs?: Record<string, unknown> | null }, inputs: ClientInputs) {
+  const nextEmail = normaliseEmail(inputs.clientEmail);
+  const oldEmail = normaliseEmail(existing.email || (existing.inputs?.clientEmail as string | undefined));
+  if (nextEmail && oldEmail) return nextEmail === oldEmail;
+
+  const nextPhone = phoneDigits(inputs.clientPhone);
+  const oldPhone = phoneDigits(existing.inputs?.clientPhone as string | undefined);
+  if (nextPhone.length >= 8 && oldPhone.length >= 8) return nextPhone.slice(-9) === oldPhone.slice(-9);
+
+  return clean(existing.client_name).toLowerCase() === clean(inputs.clientName).toLowerCase();
+}
 
 function splitName(fullName: string) {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -124,7 +138,17 @@ export async function saveClientReportSnapshot(opts: {
     ...(opts.pdfPath !== undefined ? { pdf_path: opts.pdfPath } : {}),
   };
 
-  const saved = opts.reportId
+  let shouldUpdate = false;
+  if (opts.reportId) {
+    const { data: existing } = await supabase
+      .from("reports")
+      .select("id, client_name, email, inputs")
+      .eq("id", opts.reportId)
+      .maybeSingle();
+    shouldUpdate = !!existing && isSameClient(existing as any, opts.inputs);
+  }
+
+  const saved = shouldUpdate && opts.reportId
     ? await supabase.from("reports").update(reportPayload as never).eq("id", opts.reportId).select("id").single()
     : await supabase.from("reports").insert({ ...reportPayload, user_id: opts.userId } as never).select("id").single();
 

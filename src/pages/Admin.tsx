@@ -68,14 +68,32 @@ export default function Admin() {
     return { ...DEFAULT_INPUTS, ...saved, clientName: saved.clientName || r.client_name } as ClientInputs;
   };
 
+  const isRecoveredPdfOnly = (r: ReportRow) => Boolean((r.inputs as Record<string, unknown> | null)?.recoveredPdfOnly && r.pdf_path);
+
+  const openStoredPdf = async (r: ReportRow) => {
+    if (!r.pdf_path) return false;
+    const { data, error } = await supabase.storage.from("client-reports").createSignedUrl(r.pdf_path, 60 * 10);
+    if (error || !data?.signedUrl) {
+      toast.error("Could not open the recovered PDF");
+      return false;
+    }
+    window.open(data.signedUrl, "_blank");
+    return true;
+  };
+
   const editReport = (r: ReportRow) => {
+    if (isRecoveredPdfOnly(r)) {
+      toast.info("This restored report opens as the original PDF only.");
+      return;
+    }
     setInputs(resolveInputs(r));
     setEditingReportId(r.id);
     toast.success(`Editing ${r.client_name}`, { description: "Make your changes and click Save." });
     nav("/");
   };
 
-  const openViewReport = (r: ReportRow) => {
+  const openViewReport = async (r: ReportRow) => {
+    if (isRecoveredPdfOnly(r) && await openStoredPdf(r)) return;
     setViewReportData(r);
     // Try to enter fullscreen on the modal container after it mounts
     setTimeout(() => {
@@ -141,6 +159,11 @@ export default function Admin() {
     // Always regenerate from saved inputs so every report (including older ones)
     // uses the current report design rather than the PDF that was stored at creation time.
     setPdfBusyId(r.id);
+    if (isRecoveredPdfOnly(r)) {
+      await openStoredPdf(r);
+      setPdfBusyId(null);
+      return;
+    }
     setPdfStageInputs(resolveInputs(r));
     try {
       await new Promise(requestAnimationFrame);
@@ -275,7 +298,14 @@ export default function Admin() {
       let pdfBlob: Blob | null = null;
       // Always regenerate the PDF from saved inputs so emailed reports use the
       // current design rather than the (potentially out-of-date) stored PDF.
-      if (shouldAttachPdf) {
+      if (shouldAttachPdf && isRecoveredPdfOnly(r) && r.pdf_path) {
+        const { data, error } = await supabase.storage.from("client-reports").createSignedUrl(r.pdf_path, 60 * 10);
+        if (error || !data?.signedUrl) throw new Error("Could not load the recovered PDF");
+        pdfBlob = await fetch(data.signedUrl).then((res) => {
+          if (!res.ok) throw new Error("Could not download the recovered PDF");
+          return res.blob();
+        });
+      } else if (shouldAttachPdf) {
         setPdfStageInputs(resolveInputs(r));
         await new Promise(requestAnimationFrame);
         await new Promise(requestAnimationFrame);

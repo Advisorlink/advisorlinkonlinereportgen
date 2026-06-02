@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { uploadClientDocumentSubmission } from "@/lib/client-document-upload";
 import {
   Shield, Lock, Camera, Upload, CheckCircle2, FileText,
   Image as ImageIcon, ChevronRight, Loader2, X, ShieldCheck,
@@ -212,29 +212,16 @@ export default function StatementUpload() {
     setSubmitting(true);
     setProgress(5);
     try {
-      const slug = client.email.toLowerCase().replace(/[^a-z0-9]/g, "-");
-      const folder = `${slug}/${Date.now()}`;
       const total = captured.length;
       let count = 0;
       for (const item of captured) {
-        const ext = item.file.name.split(".").pop() || (item.method === "pdf" ? "pdf" : "jpg");
-        const path = `${folder}/statement_${item.id}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("client-documents")
-          .upload(path, item.file, { contentType: item.file.type, upsert: false });
-        if (upErr) throw upErr;
-        const { error: dbErr } = await supabase.from("client_documents").insert({
-          client_name: client.fullName,
-          client_email: client.email,
-          document_type: "statement",
-          file_path: path,
-          file_name: item.file.name,
-          file_size: item.file.size,
-          mime_type: item.file.type,
-          consent_given: true,
+        await uploadClientDocumentSubmission({
+          clientName: client.fullName,
+          clientEmail: client.email,
+          documentType: "statement",
           notes: `Method: ${item.method}`,
+          file: item.file,
         });
-        if (dbErr) throw dbErr;
         count += 1;
         setProgress(Math.round((count / total) * 100));
       }
