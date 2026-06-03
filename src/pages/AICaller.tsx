@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CRMLayout } from "@/components/CRMLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, FileText, Users, BarChart3, ScrollText, PhoneCall, Mic, PhoneMissed } from "lucide-react";
+import { Phone, FileText, Users, BarChart3, ScrollText, PhoneCall, Mic, PhoneMissed, LineChart } from "lucide-react";
 import { AICallerDashboard } from "@/components/ai-caller/AICallerDashboard";
 import { AICallerScripts } from "@/components/ai-caller/AICallerScripts";
 import { AICallerCampaigns } from "@/components/ai-caller/AICallerCampaigns";
@@ -10,6 +10,7 @@ import { AICallerCallLogs } from "@/components/ai-caller/AICallerCallLogs";
 import { AICallerPhoneNumbers } from "@/components/ai-caller/AICallerPhoneNumbers";
 import { AICallerVoices } from "@/components/ai-caller/AICallerVoices";
 import { AICallerOutcomes } from "@/components/ai-caller/AICallerOutcomes";
+import { AICallerAnalytics } from "@/components/ai-caller/AICallerAnalytics";
 
 const AI_CALLER_ACTIVE_TAB_KEY = "ai-caller-active-tab";
 
@@ -26,6 +27,7 @@ export default function AICaller() {
 
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+    { id: "analytics", label: "Analytics", icon: LineChart },
     { id: "scripts", label: "Scripts", icon: FileText },
     { id: "campaigns", label: "Campaigns", icon: Phone },
     { id: "leads", label: "Leads", icon: Users },
@@ -75,6 +77,7 @@ export default function AICaller() {
           </TabsList>
 
           <TabsContent value="dashboard"><AICallerDashboard onNavigate={handleTabChange} /></TabsContent>
+          <TabsContent value="analytics"><AICallerAnalytics /></TabsContent>
           <TabsContent value="scripts"><AICallerScripts /></TabsContent>
           <TabsContent value="campaigns"><AICallerCampaigns /></TabsContent>
           <TabsContent value="leads"><AICallerLeads /></TabsContent>

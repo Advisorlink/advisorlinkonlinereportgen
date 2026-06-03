@@ -24,7 +24,7 @@ export function AICallerCampaigns() {
   const [name, setName] = useState("");
   const [scriptId, setScriptId] = useState("");
   const [phoneNumberId, setPhoneNumberId] = useState("");
-  const [contacts, setContacts] = useState<{ name: string; phone: string; email: string }[]>([]);
+  const [contacts, setContacts] = useState<{ name: string; phone: string; email: string; duplicate?: boolean; dupReason?: string }[]>([]);
   const [starting, setStarting] = useState<string | null>(null);
 
   // Pacing settings (per campaign)
@@ -137,8 +137,54 @@ export function AICallerCampaigns() {
       toast.error("No valid contacts found. Check that phone numbers are present.");
       return;
     }
-    setContacts(parsed);
-    toast.success(`Parsed ${parsed.length} contacts`);
+    const checked = await checkDuplicates(parsed);
+    setContacts(checked);
+    const dupCount = checked.filter(c => c.duplicate).length;
+    if (dupCount > 0) {
+      toast.warning(`Parsed ${parsed.length} contacts — ${dupCount} already contacted before`, {
+        description: "Review the list below. Click 'Remove duplicates' to skip them.",
+      });
+    } else {
+      toast.success(`Parsed ${parsed.length} contacts — no duplicates found`);
+    }
+  }
+
+  // Check against all existing AI caller contacts + pipeline deals (cross-campaign dedup)
+  async function checkDuplicates(items: { name: string; phone: string; email: string }[]): Promise<{ name: string; phone: string; email: string; duplicate?: boolean; dupReason?: string }[]> {
+    const phones = Array.from(new Set(items.map(c => c.phone).filter(Boolean)));
+    if (phones.length === 0) return items;
+    // Build last-9-digits index for fuzzy match
+    const digitsOf = (p: string) => p.replace(/\D/g, "").slice(-9);
+    const lookup = new Map<string, { reason: string }>();
+
+    // 1) Already in any AI caller campaign (excluding current campaign on edit)
+    const aiQuery = supabase.from("ai_caller_contacts").select("phone, campaign_id");
+    const { data: existingAi } = await aiQuery;
+    (existingAi || []).forEach((row: any) => {
+      if (editingCampaign && row.campaign_id === editingCampaign.id) return;
+      const d = digitsOf(row.phone || "");
+      if (d) lookup.set(d, { reason: "Already in another campaign" });
+    });
+
+    // 2) Already in pipeline (any stage)
+    const { data: deals } = await supabase.from("pipeline_deals").select("client_phone, stage_id");
+    (deals || []).forEach((row: any) => {
+      const d = digitsOf(row.client_phone || "");
+      if (d && !lookup.has(d)) lookup.set(d, { reason: "Already in pipeline" });
+    });
+
+    return items.map(c => {
+      const d = digitsOf(c.phone);
+      const hit = d ? lookup.get(d) : undefined;
+      return hit ? { ...c, duplicate: true, dupReason: hit.reason } : c;
+    });
+  }
+
+  function removeDuplicates() {
+    const before = contacts.length;
+    const cleaned = contacts.filter(c => !c.duplicate);
+    setContacts(cleaned);
+    toast.success(`Removed ${before - cleaned.length} duplicates`);
   }
 
   function addManualContact() {
@@ -450,7 +496,7 @@ export function AICallerCampaigns() {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Contacts ({contacts.length})</Label>
+                  <Label>Contacts ({contacts.length}){contacts.some(c => c.duplicate) && <span className="ml-2 text-xs text-amber-400">· {contacts.filter(c => c.duplicate).length} duplicates</span>}</Label>
                   <div className="flex gap-2">
                     <input
                       ref={fileRef}
@@ -465,19 +511,27 @@ export function AICallerCampaigns() {
                     <Button type="button" variant="outline" size="sm" onClick={addManualContact} className="gap-1">
                       <Plus className="w-3 h-3" /> Add
                     </Button>
+                    {contacts.some(c => c.duplicate) && (
+                      <Button type="button" variant="destructive" size="sm" onClick={removeDuplicates} className="gap-1">
+                        <Trash2 className="w-3 h-3" /> Remove duplicates
+                      </Button>
+                    )}
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">CSV or Excel. Recognised columns: First Name, Surname (or Name), Phone/Mobile, Email. Australian numbers auto-normalise to +61.</p>
+                <p className="text-xs text-muted-foreground">CSV or Excel. Recognised columns: First Name, Surname (or Name), Phone/Mobile, Email. Australian numbers auto-normalise to +61. Duplicates are checked against existing campaigns and the pipeline.</p>
                 {contacts.length > 0 && (
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {contacts.map((c, i) => (
-                      <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-2">
-                        <Input
-                          value={c.name}
-                          onChange={e => { const n = [...contacts]; n[i].name = e.target.value; setContacts(n); }}
-                          placeholder="Name"
-                          className="text-xs"
-                        />
+                      <div key={i} className={`grid grid-cols-[1fr_1fr_auto] gap-2 ${c.duplicate ? "bg-amber-500/5 border border-amber-500/20 rounded p-1" : ""}`}>
+                        <div>
+                          <Input
+                            value={c.name}
+                            onChange={e => { const n = [...contacts]; n[i].name = e.target.value; setContacts(n); }}
+                            placeholder="Name"
+                            className="text-xs"
+                          />
+                          {c.duplicate && <p className="text-[10px] text-amber-400 mt-1 ml-1">⚠ {c.dupReason}</p>}
+                        </div>
                         <Input
                           value={c.phone}
                           onChange={e => { const n = [...contacts]; n[i].phone = e.target.value; setContacts(n); }}
