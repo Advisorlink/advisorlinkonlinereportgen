@@ -309,14 +309,14 @@ serve(async (req) => {
                 body: JSON.stringify({
                   voicemailDetection,
                   voicemailMessage: "",
-                  endCallOnVoicemail: true,
+                  voicemailMessage: "",
                   firstMessageMode: "assistant-waits-for-user",
                   // Silent-pickup fallback: if the human picks up but doesn't
                   // say anything within 4 seconds, prompt them once or twice
                   // so the AI doesn't sit awkwardly silent.
                   messagePlan: {
                     idleMessages: ["Hello? Are you there?"],
-                    idleTimeoutSeconds: 4,
+                    idleTimeoutSeconds: 5,
                     idleMessageMaxSpokenCount: 2,
                   },
                 }),
@@ -480,10 +480,10 @@ After all questions have been asked (or if the client wants to end early), go st
           machineDetectionSilenceTimeout: 5000,
         },
         voicemailMessage: "",
-        endCallOnVoicemail: true,
+        voicemailMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
-          idleTimeoutSeconds: 4,
+          idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
         },
         responseDelaySeconds: 0.3,
@@ -1247,10 +1247,10 @@ After all questions have been asked (or if the client wants to end early), go st
           machineDetectionSilenceTimeout: 5000,
         },
         voicemailMessage: "",
-        endCallOnVoicemail: true,
+        voicemailMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
-          idleTimeoutSeconds: 4,
+          idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
         },
         responseDelaySeconds: 0.3,
@@ -1712,10 +1712,10 @@ After all questions have been asked (or if the caller wants to end early), go st
           machineDetectionSilenceTimeout: 5000,
         },
         voicemailMessage: "",
-        endCallOnVoicemail: true,
+        voicemailMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
-          idleTimeoutSeconds: 4,
+          idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
         },
         responseDelaySeconds: 0.3,
