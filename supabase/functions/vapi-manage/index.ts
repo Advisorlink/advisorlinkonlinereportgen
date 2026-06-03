@@ -1248,6 +1248,11 @@ After all questions have been asked (or if the client wants to end early), go st
         },
         voicemailMessage: "",
         endCallOnVoicemail: true,
+        messagePlan: {
+          idleMessages: ["Hello? Are you there?"],
+          idleTimeoutSeconds: 4,
+          idleMessageMaxSpokenCount: 2,
+        },
         responseDelaySeconds: 0.3,
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
