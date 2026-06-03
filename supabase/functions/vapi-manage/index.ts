@@ -262,11 +262,24 @@ serve(async (req) => {
     if (action === "refresh-voicemail-config") {
       // PATCH every existing Vapi assistant to add machine-detection / voicemail config,
       // leaving every other setting untouched.
+      // Aggressive multi-signal voicemail detection. We use Twilio's AMD
+      // (analyses call audio before bridging) tuned to wait until the
+      // greeting ends, then layer Vapi's beep classifier on top. The
+      // assistant NEVER speaks first (firstMessageMode below), and we hang
+      // up immediately if anything looks like a machine.
       const voicemailDetection = {
         provider: "twilio",
-        voicemailDetectionTypes: ["machine_end_beep", "machine_end_silence"],
         enabled: true,
-        machineDetectionTimeout: 15,
+        voicemailDetectionTypes: [
+          "machine_end_beep",
+          "machine_end_silence",
+          "machine_end_other",
+          "unknown",
+        ],
+        machineDetectionTimeout: 30,
+        machineDetectionSpeechThreshold: 2400,
+        machineDetectionSpeechEndThreshold: 1500,
+        machineDetectionSilenceTimeout: 5000,
       };
 
       const listRes = await fetch(`${VAPI_BASE}/assistant?limit=1000`, {
@@ -296,6 +309,8 @@ serve(async (req) => {
                 body: JSON.stringify({
                   voicemailDetection,
                   voicemailMessage: "",
+                  endCallOnVoicemail: true,
+                  firstMessageMode: "assistant-waits-for-user",
                 }),
               });
               if (patchRes.status === 429) {
@@ -444,11 +459,20 @@ After all questions have been asked (or if the client wants to end early), go st
         silenceTimeoutSeconds: 30,
         voicemailDetection: {
           provider: "twilio",
-          voicemailDetectionTypes: ["machine_end_beep", "machine_end_silence"],
           enabled: true,
-          machineDetectionTimeout: 15,
+          voicemailDetectionTypes: [
+            "machine_end_beep",
+            "machine_end_silence",
+            "machine_end_other",
+            "unknown",
+          ],
+          machineDetectionTimeout: 30,
+          machineDetectionSpeechThreshold: 2400,
+          machineDetectionSpeechEndThreshold: 1500,
+          machineDetectionSilenceTimeout: 5000,
         },
         voicemailMessage: "",
+        endCallOnVoicemail: true,
         responseDelaySeconds: 0.3,
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1197,11 +1221,20 @@ After all questions have been asked (or if the client wants to end early), go st
         silenceTimeoutSeconds: 30,
         voicemailDetection: {
           provider: "twilio",
-          voicemailDetectionTypes: ["machine_end_beep", "machine_end_silence"],
           enabled: true,
-          machineDetectionTimeout: 15,
+          voicemailDetectionTypes: [
+            "machine_end_beep",
+            "machine_end_silence",
+            "machine_end_other",
+            "unknown",
+          ],
+          machineDetectionTimeout: 30,
+          machineDetectionSpeechThreshold: 2400,
+          machineDetectionSpeechEndThreshold: 1500,
+          machineDetectionSilenceTimeout: 5000,
         },
         voicemailMessage: "",
+        endCallOnVoicemail: true,
         responseDelaySeconds: 0.3,
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1648,11 +1681,21 @@ After all questions have been asked (or if the caller wants to end early), go st
         silenceTimeoutSeconds: 30,
         voicemailDetection: {
           provider: "twilio",
-          voicemailDetectionTypes: ["machine_end_beep", "machine_end_silence"],
           enabled: true,
-          machineDetectionTimeout: 15,
+          voicemailDetectionTypes: [
+            "machine_end_beep",
+            "machine_end_silence",
+            "machine_end_other",
+            "unknown",
+          ],
+          machineDetectionTimeout: 30,
+          machineDetectionSpeechThreshold: 2400,
+          machineDetectionSpeechEndThreshold: 1500,
+          machineDetectionSilenceTimeout: 5000,
         },
         voicemailMessage: "",
+        endCallOnVoicemail: true,
+
         
         responseDelaySeconds: 0.3,
         backgroundSound: (script as any).background_sound_enabled
