@@ -311,6 +311,14 @@ serve(async (req) => {
                   voicemailMessage: "",
                   endCallOnVoicemail: true,
                   firstMessageMode: "assistant-waits-for-user",
+                  // Silent-pickup fallback: if the human picks up but doesn't
+                  // say anything within 4 seconds, prompt them once or twice
+                  // so the AI doesn't sit awkwardly silent.
+                  messagePlan: {
+                    idleMessages: ["Hello? Are you there?"],
+                    idleTimeoutSeconds: 4,
+                    idleMessageMaxSpokenCount: 2,
+                  },
                 }),
               });
               if (patchRes.status === 429) {
@@ -473,6 +481,11 @@ After all questions have been asked (or if the client wants to end early), go st
         },
         voicemailMessage: "",
         endCallOnVoicemail: true,
+        messagePlan: {
+          idleMessages: ["Hello? Are you there?"],
+          idleTimeoutSeconds: 4,
+          idleMessageMaxSpokenCount: 2,
+        },
         responseDelaySeconds: 0.3,
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1235,6 +1248,11 @@ After all questions have been asked (or if the client wants to end early), go st
         },
         voicemailMessage: "",
         endCallOnVoicemail: true,
+        messagePlan: {
+          idleMessages: ["Hello? Are you there?"],
+          idleTimeoutSeconds: 4,
+          idleMessageMaxSpokenCount: 2,
+        },
         responseDelaySeconds: 0.3,
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1695,8 +1713,11 @@ After all questions have been asked (or if the caller wants to end early), go st
         },
         voicemailMessage: "",
         endCallOnVoicemail: true,
-
-        
+        messagePlan: {
+          idleMessages: ["Hello? Are you there?"],
+          idleTimeoutSeconds: 4,
+          idleMessageMaxSpokenCount: 2,
+        },
         responseDelaySeconds: 0.3,
         backgroundSound: (script as any).background_sound_enabled
           ? (script as any).background_sound || "office"
