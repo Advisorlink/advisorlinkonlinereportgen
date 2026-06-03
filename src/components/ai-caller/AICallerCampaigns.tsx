@@ -137,8 +137,54 @@ export function AICallerCampaigns() {
       toast.error("No valid contacts found. Check that phone numbers are present.");
       return;
     }
-    setContacts(parsed);
-    toast.success(`Parsed ${parsed.length} contacts`);
+    const checked = await checkDuplicates(parsed);
+    setContacts(checked);
+    const dupCount = checked.filter(c => c.duplicate).length;
+    if (dupCount > 0) {
+      toast.warning(`Parsed ${parsed.length} contacts — ${dupCount} already contacted before`, {
+        description: "Review the list below. Click 'Remove duplicates' to skip them.",
+      });
+    } else {
+      toast.success(`Parsed ${parsed.length} contacts — no duplicates found`);
+    }
+  }
+
+  // Check against all existing AI caller contacts + pipeline deals (cross-campaign dedup)
+  async function checkDuplicates(items: { name: string; phone: string; email: string }[]) {
+    const phones = Array.from(new Set(items.map(c => c.phone).filter(Boolean)));
+    if (phones.length === 0) return items;
+    // Build last-9-digits index for fuzzy match
+    const digitsOf = (p: string) => p.replace(/\D/g, "").slice(-9);
+    const lookup = new Map<string, { reason: string }>();
+
+    // 1) Already in any AI caller campaign (excluding current campaign on edit)
+    const aiQuery = supabase.from("ai_caller_contacts").select("phone, campaign_id");
+    const { data: existingAi } = await aiQuery;
+    (existingAi || []).forEach((row: any) => {
+      if (editingCampaign && row.campaign_id === editingCampaign.id) return;
+      const d = digitsOf(row.phone || "");
+      if (d) lookup.set(d, { reason: "Already in another campaign" });
+    });
+
+    // 2) Already in pipeline (any stage)
+    const { data: deals } = await supabase.from("pipeline_deals").select("client_phone, stage_id");
+    (deals || []).forEach((row: any) => {
+      const d = digitsOf(row.client_phone || "");
+      if (d && !lookup.has(d)) lookup.set(d, { reason: "Already in pipeline" });
+    });
+
+    return items.map(c => {
+      const d = digitsOf(c.phone);
+      const hit = d ? lookup.get(d) : undefined;
+      return hit ? { ...c, duplicate: true, dupReason: hit.reason } : c;
+    });
+  }
+
+  function removeDuplicates() {
+    const before = contacts.length;
+    const cleaned = contacts.filter(c => !c.duplicate);
+    setContacts(cleaned);
+    toast.success(`Removed ${before - cleaned.length} duplicates`);
   }
 
   function addManualContact() {
