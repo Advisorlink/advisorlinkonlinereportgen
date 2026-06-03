@@ -77,6 +77,7 @@ export default function AICaller() {
           </TabsList>
 
           <TabsContent value="dashboard"><AICallerDashboard onNavigate={handleTabChange} /></TabsContent>
+          <TabsContent value="analytics"><AICallerAnalytics /></TabsContent>
           <TabsContent value="scripts"><AICallerScripts /></TabsContent>
           <TabsContent value="campaigns"><AICallerCampaigns /></TabsContent>
           <TabsContent value="leads"><AICallerLeads /></TabsContent>
