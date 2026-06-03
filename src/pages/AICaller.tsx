@@ -27,6 +27,7 @@ export default function AICaller() {
 
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+    { id: "analytics", label: "Analytics", icon: LineChart },
     { id: "scripts", label: "Scripts", icon: FileText },
     { id: "campaigns", label: "Campaigns", icon: Phone },
     { id: "leads", label: "Leads", icon: Users },
