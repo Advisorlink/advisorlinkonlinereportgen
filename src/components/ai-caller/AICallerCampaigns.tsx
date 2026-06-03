@@ -150,7 +150,7 @@ export function AICallerCampaigns() {
   }
 
   // Check against all existing AI caller contacts + pipeline deals (cross-campaign dedup)
-  async function checkDuplicates(items: { name: string; phone: string; email: string }[]) {
+  async function checkDuplicates(items: { name: string; phone: string; email: string }[]): Promise<{ name: string; phone: string; email: string; duplicate?: boolean; dupReason?: string }[]> {
     const phones = Array.from(new Set(items.map(c => c.phone).filter(Boolean)));
     if (phones.length === 0) return items;
     // Build last-9-digits index for fuzzy match
