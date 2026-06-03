@@ -496,7 +496,7 @@ export function AICallerCampaigns() {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Contacts ({contacts.length})</Label>
+                  <Label>Contacts ({contacts.length}){contacts.some(c => c.duplicate) && <span className="ml-2 text-xs text-amber-400">· {contacts.filter(c => c.duplicate).length} duplicates</span>}</Label>
                   <div className="flex gap-2">
                     <input
                       ref={fileRef}
@@ -511,19 +511,27 @@ export function AICallerCampaigns() {
                     <Button type="button" variant="outline" size="sm" onClick={addManualContact} className="gap-1">
                       <Plus className="w-3 h-3" /> Add
                     </Button>
+                    {contacts.some(c => c.duplicate) && (
+                      <Button type="button" variant="destructive" size="sm" onClick={removeDuplicates} className="gap-1">
+                        <Trash2 className="w-3 h-3" /> Remove duplicates
+                      </Button>
+                    )}
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">CSV or Excel. Recognised columns: First Name, Surname (or Name), Phone/Mobile, Email. Australian numbers auto-normalise to +61.</p>
+                <p className="text-xs text-muted-foreground">CSV or Excel. Recognised columns: First Name, Surname (or Name), Phone/Mobile, Email. Australian numbers auto-normalise to +61. Duplicates are checked against existing campaigns and the pipeline.</p>
                 {contacts.length > 0 && (
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {contacts.map((c, i) => (
-                      <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-2">
-                        <Input
-                          value={c.name}
-                          onChange={e => { const n = [...contacts]; n[i].name = e.target.value; setContacts(n); }}
-                          placeholder="Name"
-                          className="text-xs"
-                        />
+                      <div key={i} className={`grid grid-cols-[1fr_1fr_auto] gap-2 ${c.duplicate ? "bg-amber-500/5 border border-amber-500/20 rounded p-1" : ""}`}>
+                        <div>
+                          <Input
+                            value={c.name}
+                            onChange={e => { const n = [...contacts]; n[i].name = e.target.value; setContacts(n); }}
+                            placeholder="Name"
+                            className="text-xs"
+                          />
+                          {c.duplicate && <p className="text-[10px] text-amber-400 mt-1 ml-1">⚠ {c.dupReason}</p>}
+                        </div>
                         <Input
                           value={c.phone}
                           onChange={e => { const n = [...contacts]; n[i].phone = e.target.value; setContacts(n); }}
