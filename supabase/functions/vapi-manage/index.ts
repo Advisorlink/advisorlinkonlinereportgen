@@ -309,7 +309,6 @@ serve(async (req) => {
                 body: JSON.stringify({
                   voicemailDetection,
                   voicemailMessage: "",
-                  voicemailMessage: "",
                   firstMessageMode: "assistant-waits-for-user",
                   // Silent-pickup fallback: if the human picks up but doesn't
                   // say anything within 4 seconds, prompt them once or twice
@@ -479,7 +478,6 @@ After all questions have been asked (or if the client wants to end early), go st
           machineDetectionSpeechEndThreshold: 1500,
           machineDetectionSilenceTimeout: 5000,
         },
-        voicemailMessage: "",
         voicemailMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
@@ -1247,7 +1245,6 @@ After all questions have been asked (or if the client wants to end early), go st
           machineDetectionSilenceTimeout: 5000,
         },
         voicemailMessage: "",
-        voicemailMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
           idleTimeoutSeconds: 5,
@@ -1711,7 +1708,6 @@ After all questions have been asked (or if the caller wants to end early), go st
           machineDetectionSpeechEndThreshold: 1500,
           machineDetectionSilenceTimeout: 5000,
         },
-        voicemailMessage: "",
         voicemailMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
