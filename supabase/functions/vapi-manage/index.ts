@@ -309,6 +309,8 @@ serve(async (req) => {
                 body: JSON.stringify({
                   voicemailDetection,
                   voicemailMessage: "",
+                  endCallOnVoicemail: true,
+                  firstMessageMode: "assistant-waits-for-user",
                 }),
               });
               if (patchRes.status === 429) {
