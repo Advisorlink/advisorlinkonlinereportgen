@@ -24,7 +24,7 @@ export function AICallerCampaigns() {
   const [name, setName] = useState("");
   const [scriptId, setScriptId] = useState("");
   const [phoneNumberId, setPhoneNumberId] = useState("");
-  const [contacts, setContacts] = useState<{ name: string; phone: string; email: string }[]>([]);
+  const [contacts, setContacts] = useState<{ name: string; phone: string; email: string; duplicate?: boolean; dupReason?: string }[]>([]);
   const [starting, setStarting] = useState<string | null>(null);
 
   // Pacing settings (per campaign)
