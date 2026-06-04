@@ -337,15 +337,28 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 function NumInput({ v, on }: { v: number; on: (n: number) => void }) {
-  return <Input type="number" value={Number.isFinite(v) ? v : 0} onChange={e => on(parseFloat(e.target.value) || 0)} />;
+  return (
+    <Input
+      type="number"
+      inputMode="decimal"
+      value={Number.isFinite(v) && v !== 0 ? v : ""}
+      onChange={e => {
+        const s = e.target.value;
+        on(s === "" ? 0 : parseFloat(s) || 0);
+      }}
+    />
+  );
 }
 function PctInput({ v, on }: { v: number; on: (n: number) => void }) {
   return (
     <div className="relative">
       <Input
-        type="number" step="0.1"
-        value={Number.isFinite(v) ? +(v * 100).toFixed(2) : 0}
-        onChange={e => on((parseFloat(e.target.value) || 0) / 100)}
+        type="number" step="0.1" inputMode="decimal"
+        value={Number.isFinite(v) && v !== 0 ? +(v * 100).toFixed(2) : ""}
+        onChange={e => {
+          const s = e.target.value;
+          on(s === "" ? 0 : (parseFloat(s) || 0) / 100);
+        }}
       />
       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
     </div>

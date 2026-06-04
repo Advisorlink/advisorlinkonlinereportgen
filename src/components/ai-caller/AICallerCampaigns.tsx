@@ -450,13 +450,21 @@ export function AICallerCampaigns() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-xs">Max calls / hour</Label>
-                    <Input type="number" min={1} max={500} value={callsPerHour}
-                      onChange={e => setCallsPerHour(Math.max(1, parseInt(e.target.value) || 1))} />
+                    <Input type="number" min={1} max={500}
+                      value={callsPerHour || ""}
+                      onChange={e => {
+                        const s = e.target.value;
+                        setCallsPerHour(s === "" ? 1 : Math.max(1, parseInt(s) || 1));
+                      }} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">Gap between calls (sec)</Label>
-                    <Input type="number" min={0} max={3600} value={minGapSeconds}
-                      onChange={e => setMinGapSeconds(Math.max(0, parseInt(e.target.value) || 0))} />
+                    <Input type="number" min={0} max={3600}
+                      value={minGapSeconds || ""}
+                      onChange={e => {
+                        const s = e.target.value;
+                        setMinGapSeconds(s === "" ? 0 : Math.max(0, parseInt(s) || 0));
+                      }} />
                     <p className="text-[10px] text-muted-foreground">Starts when the previous call ends.</p>
                   </div>
                   <div className="space-y-1">

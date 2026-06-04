@@ -571,7 +571,7 @@ export function AICallerScripts() {
                 </div>
                 <div className="space-y-2">
                   <Label>Max Call Duration (seconds)</Label>
-                  <Input type="number" value={maxDuration} onChange={e => setMaxDuration(Number(e.target.value))} min={60} max={1800} />
+                  <Input type="number" value={maxDuration || ""} onChange={e => { const s = e.target.value; setMaxDuration(s === "" ? 0 : Number(s)); }} min={60} max={1800} />
                 </div>
               </div>
 
