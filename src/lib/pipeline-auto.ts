@@ -3,16 +3,28 @@ import { supabase } from "@/integrations/supabase/client";
 /**
  * Moves (or creates) a pipeline deal into the given stage by name.
  * Matches existing deals by email or phone (case-insensitive, normalised).
+ * Optional extraFields are applied to the matched deal (or new deal) so
+ * report data like super_fund_name, super_balance, age etc. is persisted
+ * onto the client profile.
  */
 export async function moveDealToStage(stageName: string, opts: {
   clientName: string;
   clientEmail?: string | null;
   clientPhone?: string | null;
+  extraFields?: Record<string, unknown>;
 }) {
   try {
     const name = (opts.clientName || "").trim() || "Unnamed client";
     const email = (opts.clientEmail || "").trim().toLowerCase() || null;
     const phoneDigits = (opts.clientPhone || "").replace(/\D+/g, "");
+
+    // Strip undefined/null/blank entries so we never overwrite real data with blanks.
+    const cleanedExtra: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(opts.extraFields ?? {})) {
+      if (v === undefined || v === null) continue;
+      if (typeof v === "string" && !v.trim()) continue;
+      cleanedExtra[k] = typeof v === "string" ? v.trim() : v;
+    }
 
     const { data: stage } = await supabase
       .from("pipeline_stages")
@@ -21,8 +33,6 @@ export async function moveDealToStage(stageName: string, opts: {
       .maybeSingle();
     if (!stage?.id) return;
 
-    // 2. Find ALL existing deals matching by email, phone, or name (case-insensitive)
-    //    so duplicates across stages (e.g. one still in "New Lead") all get moved.
     const matchIds = new Set<string>();
 
     if (email) {
@@ -45,7 +55,6 @@ export async function moveDealToStage(stageName: string, opts: {
       });
     }
 
-    // Fallback: match by exact (case-insensitive) client_name when no email/phone hit
     if (matchIds.size === 0 && name && name !== "Unnamed client") {
       const { data } = await supabase
         .from("pipeline_deals")
@@ -55,12 +64,18 @@ export async function moveDealToStage(stageName: string, opts: {
     }
 
     if (matchIds.size > 0) {
+      const update: Record<string, unknown> = {
+        stage_id: stage.id,
+        updated_at: new Date().toISOString(),
+        ...cleanedExtra,
+      };
+      if (email) update.client_email = email;
+      if (opts.clientPhone && opts.clientPhone.trim()) update.client_phone = opts.clientPhone;
       await supabase
         .from("pipeline_deals")
-        .update({ stage_id: stage.id, updated_at: new Date().toISOString() } as never)
+        .update(update as never)
         .in("id", Array.from(matchIds));
     } else {
-    // Get max position in target stage so it lands at the bottom
       const { data: maxRow } = await supabase
         .from("pipeline_deals")
         .select("position")
@@ -75,11 +90,10 @@ export async function moveDealToStage(stageName: string, opts: {
         client_phone: opts.clientPhone || null,
         stage_id: stage.id,
         position: nextPos,
+        ...cleanedExtra,
       } as never);
     }
 
-
-    // Fire workflow trigger for stage change
     try {
       await supabase.functions.invoke("workflow-trigger", {
         body: {
@@ -95,7 +109,6 @@ export async function moveDealToStage(stageName: string, opts: {
     } catch (e) {
       console.warn("workflow trigger failed", e);
     }
-
   } catch (e) {
     console.error("moveDealToStage failed", e);
   }
