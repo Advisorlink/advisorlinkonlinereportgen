@@ -23,6 +23,20 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
+import type { ClientInputs } from "@/lib/calc";
+
+function dealExtraFieldsFromInputs(inputs: ClientInputs): Record<string, unknown> {
+  const fundNames = [inputs.fundName?.trim(), ...((inputs.additionalFunds ?? []).map(f => f.fundName?.trim()).filter(Boolean) as string[])]
+    .filter((s): s is string => !!s);
+  const totalBalance = (inputs.superBalance || 0) +
+    (inputs.additionalFunds ?? []).reduce((s, f) => s + (f.superBalance || 0), 0);
+  return {
+    super_fund_name: fundNames.join(", ") || null,
+    super_balance: totalBalance > 0 ? totalBalance : null,
+    age: inputs.age ? String(inputs.age) : null,
+  };
+}
+
 export default function Index() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -232,6 +246,7 @@ export default function Index() {
       clientName: inputs.clientName,
       clientEmail: clientEmail,
       clientPhone: inputs.clientPhone,
+      extraFields: dealExtraFieldsFromInputs(inputs),
     });
     toast.success(editingReportId ? "Client report updated" : "Client added to reports list");
   };
@@ -297,6 +312,7 @@ export default function Index() {
       clientName: inputs.clientName,
       clientEmail: clientEmail,
       clientPhone: inputs.clientPhone,
+      extraFields: dealExtraFieldsFromInputs(inputs),
     });
     toast.success("Workflow started & PDF exported");
   };
