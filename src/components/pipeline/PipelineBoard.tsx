@@ -357,7 +357,6 @@ export function PipelineBoard() {
           source: "AI Caller",
           tags: ["AI Caller"],
           notes: null,
-          position: 0,
         });
         if (l.transcript_summary && cleanPhone) {
           summariesByPhone.set(cleanPhone, l.transcript_summary);
@@ -370,16 +369,16 @@ export function PipelineBoard() {
         return;
       }
 
-      // Shift existing New Lead deals down
-      const newLeadDeals = deals.filter((d) => d.stage_id === newLeadStage.id);
-      await Promise.all(
-        newLeadDeals.map((d) =>
-          supabase.from("pipeline_deals").update({ position: d.position + toInsert.length }).eq("id", d.id)
-        )
-      );
-
-      // Assign positions 0..n-1
-      toInsert.forEach((d, i) => (d.position = i));
+      // Append at the bottom of the New Lead stage so older leads stay at the top
+      const { data: maxRow } = await supabase
+        .from("pipeline_deals")
+        .select("position")
+        .eq("stage_id", newLeadStage.id)
+        .order("position", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      let nextPos = (maxRow?.position ?? -1) + 1;
+      toInsert.forEach((d) => (d.position = nextPos++));
       const { data: inserted, error: insErr } = await supabase
         .from("pipeline_deals")
         .insert(toInsert)
