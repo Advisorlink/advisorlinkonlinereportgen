@@ -60,7 +60,7 @@ export async function moveDealToStage(stageName: string, opts: {
         .update({ stage_id: stage.id, updated_at: new Date().toISOString() } as never)
         .in("id", Array.from(matchIds));
     } else {
-      // Get max position in target stage so it lands at the bottom
+    // Get max position in target stage so it lands at the bottom
       const { data: maxRow } = await supabase
         .from("pipeline_deals")
         .select("position")

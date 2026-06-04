@@ -122,24 +122,25 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Find min position so new rows can be placed above existing ones without a heavy bulk shift
-    const { data: minRow } = await admin
+    // Find max position so new rows are appended at the bottom, preserving
+    // the sheet order (top of sheet → top of column) and keeping older
+    // leads above newer ones so you call the oldest inquiries first.
+    const { data: maxRow } = await admin
       .from("pipeline_deals")
       .select("position")
       .eq("stage_id", stage.id)
-      .order("position", { ascending: true })
+      .order("position", { ascending: false })
       .limit(1)
       .maybeSingle();
-    let nextPos = ((minRow as { position?: number } | null)?.position ?? 0) - 1;
+    let nextPos = ((maxRow as { position?: number } | null)?.position ?? -1) + 1;
     let imports = 0;
 
     const toInsert: Array<Record<string, unknown>> = [];
     const trackInsert: Array<Record<string, unknown>> = [];
 
-    // Iterate from bottom of sheet upward so the most-recently-added sheet row
-    // (assumed to be at the bottom) gets inserted first and ends up at the very
-    // top of the New Lead column, with older entries fading down beneath it.
-    for (let i = rows.length - 1; i >= 0; i--) {
+    // Iterate top-to-bottom so the sheet order is preserved in the pipeline.
+    // The first row in the sheet lands at the top; later rows trail beneath.
+    for (let i = headerIdx + 1; i < rows.length; i++) {
       if (i === headerIdx) continue;
       const row = rows[i];
       if (!row || row.length === 0) continue;
@@ -168,7 +169,7 @@ Deno.serve(async (req) => {
         client_name: name,
         client_phone: phone,
         stage_id: stage.id,
-        position: nextPos--,
+        position: nextPos++,
         tags: [cfg.source_tag],
         source: cfg.source_label,
         age: idxAge >= 0 ? (row[idxAge] ?? "").toString() || null : null,
