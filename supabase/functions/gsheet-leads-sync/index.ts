@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
         client_name: name,
         client_phone: phone,
         stage_id: stage.id,
-        position: nextPos--,
+        position: nextPos++,
         tags: [cfg.source_tag],
         source: cfg.source_label,
         age: idxAge >= 0 ? (row[idxAge] ?? "").toString() || null : null,
