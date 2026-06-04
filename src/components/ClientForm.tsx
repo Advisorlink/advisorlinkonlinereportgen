@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2, ExternalLink, FileText, Plus, Trash2, BarChart3 } from "lucide-react";
 import { useClientInputs } from "@/hooks/useClientInputs";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 function prettyDomain(url: string): string {
   try {
@@ -84,6 +86,55 @@ export function ClientForm({ value, onChange }: { value: ClientInputs; onChange:
     }
 
     onChange(next);
+
+    // If the AI detected MORE funds beyond the primary one, fire a follow-up
+    // lookup for each so every fund's figures auto-fill.
+    const extras = Array.isArray(r.additionalFunds) ? (r.additionalFunds as Array<Record<string, unknown>>) : [];
+    if (extras.length > 0) {
+      void fetchAdditionalFunds(next, extras);
+    }
+  };
+
+  const fetchAdditionalFunds = async (
+    base: ClientInputs,
+    extras: Array<Record<string, unknown>>,
+  ) => {
+    toast.info(`Looking up ${extras.length} additional fund${extras.length > 1 ? "s" : ""}…`);
+    const newFunds: FundEntry[] = [];
+    for (const extra of extras) {
+      const fundName = typeof extra.fundName === "string" ? extra.fundName.trim() : "";
+      if (!fundName) continue;
+      const modelLabel = typeof extra.modelLabel === "string" ? extra.modelLabel.trim() : "";
+      const balance = typeof extra.superBalance === "number" ? extra.superBalance : 0;
+      const query = [fundName, modelLabel, base.age ? `age ${base.age}` : "", balance ? `$${balance} balance` : ""]
+        .filter(Boolean).join(", ");
+      try {
+        const { data, error } = await supabase.functions.invoke("lookup-fund", { body: { query } });
+        if (error) throw error;
+        const r = (data?.data ?? {}) as Record<string, unknown>;
+        const entry: FundEntry = {
+          fundName: (typeof r.fundName === "string" && r.fundName.trim()) || fundName,
+          modelLabel: (typeof r.modelLabel === "string" && r.modelLabel.trim()) || modelLabel,
+          superBalance: balance,
+          growthAssetsPct: typeof r.growthAssetsPct === "number" ? r.growthAssetsPct : 0.7,
+          grossReturn: typeof r.grossReturn === "number" ? r.grossReturn : 0,
+          adminFeeFlat: typeof r.adminFeeFlat === "number" ? r.adminFeeFlat : 0,
+          adminFeePct: typeof r.adminFeePct === "number" ? r.adminFeePct : 0,
+          investmentRiskProfile: typeof r.investmentRiskProfile === "string" ? r.investmentRiskProfile : "",
+        };
+        newFunds.push(entry);
+      } catch (e) {
+        console.warn("Additional fund lookup failed", fundName, e);
+        newFunds.push({
+          fundName, modelLabel, superBalance: balance,
+          growthAssetsPct: 0.7, grossReturn: 0, adminFeeFlat: 0, adminFeePct: 0, investmentRiskProfile: "",
+        });
+      }
+    }
+    if (newFunds.length) {
+      onChange({ ...base, additionalFunds: [...(base.additionalFunds ?? []), ...newFunds] });
+      toast.success(`Added ${newFunds.length} fund${newFunds.length > 1 ? "s" : ""} to the report.`);
+    }
   };
 
   const handleSearch = () => runLookup(lookupText, applyLookupResult);
@@ -337,15 +388,28 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 function NumInput({ v, on }: { v: number; on: (n: number) => void }) {
-  return <Input type="number" value={Number.isFinite(v) ? v : 0} onChange={e => on(parseFloat(e.target.value) || 0)} />;
+  return (
+    <Input
+      type="number"
+      inputMode="decimal"
+      value={Number.isFinite(v) && v !== 0 ? v : ""}
+      onChange={e => {
+        const s = e.target.value;
+        on(s === "" ? 0 : parseFloat(s) || 0);
+      }}
+    />
+  );
 }
 function PctInput({ v, on }: { v: number; on: (n: number) => void }) {
   return (
     <div className="relative">
       <Input
-        type="number" step="0.1"
-        value={Number.isFinite(v) ? +(v * 100).toFixed(2) : 0}
-        onChange={e => on((parseFloat(e.target.value) || 0) / 100)}
+        type="number" step="0.1" inputMode="decimal"
+        value={Number.isFinite(v) && v !== 0 ? +(v * 100).toFixed(2) : ""}
+        onChange={e => {
+          const s = e.target.value;
+          on(s === "" ? 0 : (parseFloat(s) || 0) / 100);
+        }}
       />
       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
     </div>

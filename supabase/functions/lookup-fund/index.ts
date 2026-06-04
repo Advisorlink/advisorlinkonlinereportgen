@@ -445,6 +445,7 @@ Rules:
 - Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages — do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
 - Return up to 7 URLs: matching finder.com.au/super-funds page(s) FIRST, then official fund pages by recency (newest ${CURRENT_YEAR} first, then ${PREV_YEAR}, then PDS/Investment Guide as last resort). The URLs must be real lookup results or pages clearly reached from real lookup results.
 - Also parse the client's personal details from the free-text input.
+- MULTIPLE FUNDS: If the input mentions MORE THAN ONE super fund (e.g. "AustralianSuper Balanced $80k AND HostPlus Indexed $50k"), set the PRIMARY fields (fundName, modelLabel, superBalance) to the FIRST fund only, and list EVERY remaining fund in the additionalFunds array with its fundName, modelLabel and superBalance. Do not skip any fund the user mentioned.
 
 Frequencies must be exactly "Weekly", "Monthly", or "Annually".
 Convert "k" → thousands, "m" → millions; strip $ and commas.`;
@@ -480,6 +481,21 @@ const STEP1_TOOL = [{
           items: { type: "string" },
           description:
             "Up to 6 real official fund URLs found by Gemini 3 lookup, performance/returns pages first.",
+        },
+        additionalFunds: {
+          type: "array",
+          description:
+            "If the client mentions MORE THAN ONE super fund, list every ADDITIONAL fund (after the primary one). For each, include the fund name, the allocated investment option, and the balance in that fund if mentioned. Leave this empty when only one fund is mentioned.",
+          items: {
+            type: "object",
+            properties: {
+              fundName: { type: "string" },
+              modelLabel: { type: ["string", "null"] },
+              superBalance: { type: ["number", "null"] },
+            },
+            required: ["fundName"],
+            additionalProperties: false,
+          },
         },
         notes: { type: "string" },
       },
@@ -756,6 +772,9 @@ Deno.serve(async (req) => {
       sourceUrls: pages.map((p) => p.url),
       returnEvidenceText: figures.returnEvidenceText ?? null,
       scrapedPageCount: pages.length,
+      additionalFunds: Array.isArray((step1 as { additionalFunds?: unknown }).additionalFunds)
+        ? (step1 as { additionalFunds: unknown[] }).additionalFunds
+        : [],
     };
 
     lookupCache.set(cacheKey, { data, expiresAt: Date.now() + CACHE_MS });
