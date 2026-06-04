@@ -445,6 +445,7 @@ Rules:
 - Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages — do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
 - Return up to 7 URLs: matching finder.com.au/super-funds page(s) FIRST, then official fund pages by recency (newest ${CURRENT_YEAR} first, then ${PREV_YEAR}, then PDS/Investment Guide as last resort). The URLs must be real lookup results or pages clearly reached from real lookup results.
 - Also parse the client's personal details from the free-text input.
+- MULTIPLE FUNDS: If the input mentions MORE THAN ONE super fund (e.g. "AustralianSuper Balanced $80k AND HostPlus Indexed $50k"), set the PRIMARY fields (fundName, modelLabel, superBalance) to the FIRST fund only, and list EVERY remaining fund in the additionalFunds array with its fundName, modelLabel and superBalance. Do not skip any fund the user mentioned.
 
 Frequencies must be exactly "Weekly", "Monthly", or "Annually".
 Convert "k" → thousands, "m" → millions; strip $ and commas.`;
