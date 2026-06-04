@@ -481,6 +481,21 @@ const STEP1_TOOL = [{
           description:
             "Up to 6 real official fund URLs found by Gemini 3 lookup, performance/returns pages first.",
         },
+        additionalFunds: {
+          type: "array",
+          description:
+            "If the client mentions MORE THAN ONE super fund, list every ADDITIONAL fund (after the primary one). For each, include the fund name, the allocated investment option, and the balance in that fund if mentioned. Leave this empty when only one fund is mentioned.",
+          items: {
+            type: "object",
+            properties: {
+              fundName: { type: "string" },
+              modelLabel: { type: ["string", "null"] },
+              superBalance: { type: ["number", "null"] },
+            },
+            required: ["fundName"],
+            additionalProperties: false,
+          },
+        },
         notes: { type: "string" },
       },
       required: ["fundName", "modelLabel", "sourceUrls"],
@@ -756,6 +771,9 @@ Deno.serve(async (req) => {
       sourceUrls: pages.map((p) => p.url),
       returnEvidenceText: figures.returnEvidenceText ?? null,
       scrapedPageCount: pages.length,
+      additionalFunds: Array.isArray((step1 as { additionalFunds?: unknown }).additionalFunds)
+        ? (step1 as { additionalFunds: unknown[] }).additionalFunds
+        : [],
     };
 
     lookupCache.set(cacheKey, { data, expiresAt: Date.now() + CACHE_MS });
