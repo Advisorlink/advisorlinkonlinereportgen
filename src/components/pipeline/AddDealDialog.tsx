@@ -38,14 +38,22 @@ export function AddDealDialog({ open, onOpenChange, stageId, stages, onDealAdded
     if (!form.client_name.trim()) return;
     setSaving(true);
 
-    const { data: maxRow } = await supabase
+    // Brand-new manual deals appear at the TOP of the chosen stage.
+    // Shift existing deals in this stage down by 1, then insert at position 0.
+    const { data: existing } = await supabase
       .from("pipeline_deals")
-      .select("position")
-      .eq("stage_id", effectiveStage)
-      .order("position", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const nextPos = (maxRow?.position ?? -1) + 1;
+      .select("id, position")
+      .eq("stage_id", effectiveStage);
+    if (existing && existing.length) {
+      await Promise.all(
+        existing.map((d: any) =>
+          supabase
+            .from("pipeline_deals")
+            .update({ position: (d.position ?? 0) + 1 })
+            .eq("id", d.id)
+        )
+      );
+    }
 
     const { error } = await supabase.from("pipeline_deals").insert({
       stage_id: effectiveStage,
@@ -54,7 +62,7 @@ export function AddDealDialog({ open, onOpenChange, stageId, stages, onDealAdded
       client_phone: form.client_phone.trim() || null,
       value: form.value ? parseFloat(form.value) : null,
       notes: form.notes.trim() || null,
-      position: nextPos,
+      position: 0,
     });
 
     setSaving(false);
