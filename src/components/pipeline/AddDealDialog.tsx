@@ -38,6 +38,15 @@ export function AddDealDialog({ open, onOpenChange, stageId, stages, onDealAdded
     if (!form.client_name.trim()) return;
     setSaving(true);
 
+    const { data: maxRow } = await supabase
+      .from("pipeline_deals")
+      .select("position")
+      .eq("stage_id", effectiveStage)
+      .order("position", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const nextPos = (maxRow?.position ?? -1) + 1;
+
     const { error } = await supabase.from("pipeline_deals").insert({
       stage_id: effectiveStage,
       client_name: form.client_name.trim(),
@@ -45,7 +54,7 @@ export function AddDealDialog({ open, onOpenChange, stageId, stages, onDealAdded
       client_phone: form.client_phone.trim() || null,
       value: form.value ? parseFloat(form.value) : null,
       notes: form.notes.trim() || null,
-      position: 0,
+      position: nextPos,
     });
 
     setSaving(false);
