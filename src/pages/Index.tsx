@@ -61,6 +61,7 @@ export default function Index() {
         clientName: inputs.clientName,
         clientEmail: clientEmail,
         clientPhone: inputs.clientPhone,
+        extraFields: dealExtraFieldsFromInputs(inputs),
       });
       toast.success(editingReportId ? "Report updated" : "Client report saved", {
         description: editingReportId
