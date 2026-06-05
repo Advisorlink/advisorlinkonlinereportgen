@@ -61,7 +61,7 @@ export default function Index() {
         reportId: editingReportId,
         inputs,
         summary,
-        research: lookup?.result ?? null,
+        research: { text: lookup?.text ?? "", result: lookup?.result ?? null },
         source: "Report Generator",
       });
       if (savedId) setEditingReportId(savedId);
