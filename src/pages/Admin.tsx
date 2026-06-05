@@ -88,6 +88,12 @@ export default function Admin() {
       return;
     }
     setInputs(resolveInputs(r));
+    const research = (r.research && typeof r.research === "object" ? r.research : {}) as Record<string, unknown>;
+    const savedText = typeof research.text === "string" ? research.text as string : "";
+    const savedResult = (research.result && typeof research.result === "object")
+      ? research.result as Record<string, unknown>
+      : (research && !("text" in research) && !("result" in research) ? research : null);
+    setLookup({ text: savedText, result: savedResult });
     setEditingReportId(r.id);
     toast.success(`Editing ${r.client_name}`, { description: "Make your changes and click Save." });
     nav("/");
