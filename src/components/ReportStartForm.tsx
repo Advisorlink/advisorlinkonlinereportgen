@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { celebrate } from "@/lib/celebration";
 import { useAuth } from "@/hooks/useAuth";
 import { saveClientReportSnapshot } from "@/lib/report-persistence";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sparkles, DollarSign, Landmark, Target, TrendingUp, Cake, PiggyBank,
   Plus, Trash2, Wand2, ArrowRight,
