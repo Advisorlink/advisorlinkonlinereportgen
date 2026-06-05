@@ -26,6 +26,7 @@ interface ReportRow {
   client_name: string;
   inputs: Record<string, unknown> | null;
   summary: Record<string, unknown> | null;
+  research?: Record<string, unknown> | null;
   created_at: string;
   pdf_path: string | null;
   email_sent_at: string | null;
@@ -53,7 +54,7 @@ export default function Admin() {
   const [searchParams, setSearchParams] = useSearchParams();
   const clientFilter = searchParams.get("client") || "";
   const { profile, loading } = useAuth();
-  const { setInputs, setEditingReportId } = useClientInputs();
+  const { setInputs, setLookup, setEditingReportId } = useClientInputs();
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportSearch, setReportSearch] = useState(clientFilter);
   const [busy, setBusy] = useState(false);
@@ -87,6 +88,12 @@ export default function Admin() {
       return;
     }
     setInputs(resolveInputs(r));
+    const research = (r.research && typeof r.research === "object" ? r.research : {}) as Record<string, unknown>;
+    const savedText = typeof research.text === "string" ? research.text as string : "";
+    const savedResult = (research.result && typeof research.result === "object")
+      ? research.result as Record<string, unknown>
+      : (research && !("text" in research) && !("result" in research) ? research : null);
+    setLookup({ text: savedText, result: savedResult });
     setEditingReportId(r.id);
     toast.success(`Editing ${r.client_name}`, { description: "Make your changes and click Save." });
     nav("/");
