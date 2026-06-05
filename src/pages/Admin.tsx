@@ -26,6 +26,7 @@ interface ReportRow {
   client_name: string;
   inputs: Record<string, unknown> | null;
   summary: Record<string, unknown> | null;
+  research?: Record<string, unknown> | null;
   created_at: string;
   pdf_path: string | null;
   email_sent_at: string | null;
