@@ -122,24 +122,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Find max position so new rows are appended at the bottom, preserving
-    // the sheet order (top of sheet → top of column) and keeping older
-    // leads above newer ones so you call the oldest inquiries first.
-    const { data: maxRow } = await admin
-      .from("pipeline_deals")
-      .select("position")
-      .eq("stage_id", stage.id)
-      .order("position", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    let nextPos = ((maxRow as { position?: number } | null)?.position ?? -1) + 1;
+    // New rows from the sheet always land at the TOP of the column.
+    // We collect them first, then assign positions 0..N-1 in sheet order
+    // and shift existing deals down by N below.
     let imports = 0;
 
     const toInsert: Array<Record<string, unknown>> = [];
     const trackInsert: Array<Record<string, unknown>> = [];
 
-    // Iterate top-to-bottom so the sheet order is preserved in the pipeline.
-    // The first row in the sheet lands at the top; later rows trail beneath.
+    // Iterate top-to-bottom so the sheet order is preserved within the new batch.
     for (let i = headerIdx + 1; i < rows.length; i++) {
       if (i === headerIdx) continue;
       const row = rows[i];
@@ -172,7 +163,9 @@ Deno.serve(async (req) => {
         client_name: name,
         client_phone: phone,
         stage_id: stage.id,
-        position: nextPos++,
+        // position is assigned after the loop so the whole batch lands on top.
+        position: 0,
+
         tags: [cfg.source_tag],
         source: cfg.source_label,
         age: idxAge >= 0 ? (row[idxAge] ?? "").toString() || null : null,
@@ -193,6 +186,26 @@ Deno.serve(async (req) => {
     }
 
     if (toInsert.length > 0) {
+      const N = toInsert.length;
+      // Shift all existing deals in this stage down by N so the new batch
+      // can occupy positions 0..N-1 at the top of the column.
+      const { data: existingDeals } = await admin
+        .from("pipeline_deals")
+        .select("id, position")
+        .eq("stage_id", stage.id);
+      if (existingDeals && existingDeals.length) {
+        await Promise.all(
+          (existingDeals as { id: string; position: number | null }[]).map((d) =>
+            admin
+              .from("pipeline_deals")
+              .update({ position: (d.position ?? 0) + N })
+              .eq("id", d.id)
+          )
+        );
+      }
+      // Assign positions in sheet order — sheet top → pipeline top of batch.
+      toInsert.forEach((row, idx) => { row.position = idx; });
+
       const { data: inserted, error: insErr } = await admin
         .from("pipeline_deals")
         .insert(toInsert)
