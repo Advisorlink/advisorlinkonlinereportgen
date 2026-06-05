@@ -186,6 +186,26 @@ Deno.serve(async (req) => {
     }
 
     if (toInsert.length > 0) {
+      const N = toInsert.length;
+      // Shift all existing deals in this stage down by N so the new batch
+      // can occupy positions 0..N-1 at the top of the column.
+      const { data: existingDeals } = await admin
+        .from("pipeline_deals")
+        .select("id, position")
+        .eq("stage_id", stage.id);
+      if (existingDeals && existingDeals.length) {
+        await Promise.all(
+          (existingDeals as { id: string; position: number | null }[]).map((d) =>
+            admin
+              .from("pipeline_deals")
+              .update({ position: (d.position ?? 0) + N })
+              .eq("id", d.id)
+          )
+        );
+      }
+      // Assign positions in sheet order — sheet top → pipeline top of batch.
+      toInsert.forEach((row, idx) => { row.position = idx; });
+
       const { data: inserted, error: insErr } = await admin
         .from("pipeline_deals")
         .insert(toInsert)
