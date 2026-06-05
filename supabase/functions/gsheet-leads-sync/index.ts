@@ -148,7 +148,10 @@ Deno.serve(async (req) => {
       const phoneRaw = (row[idxPhone] ?? "").toString().trim();
       const d = digits(phoneRaw);
       if (!name || d.length < 6) continue;
-      if (imported.has(d)) continue;
+      // NOTE: intentionally do NOT skip on historical sheet_lead_imports
+      // tracking — only skip if the lead currently exists in pipeline_deals
+      // (existingTails check below). This allows leads that were deleted from
+      // the pipeline to be re-imported when the sheet is synced again.
       const tail = d.slice(-9);
       if (tail && existingTails.has(tail)) {
         trackInsert.push({
