@@ -263,7 +263,7 @@ export default function Index() {
       reportId: editingReportId,
       inputs,
       summary,
-      research: lookup?.result ?? null,
+      research: { text: lookup?.text ?? "", result: lookup?.result ?? null },
       pdfPath,
       source: "Report Generator",
     });
