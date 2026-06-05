@@ -94,6 +94,65 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefill.clientName, prefill.clientFirstName, prefill.clientLastName, prefill.clientEmail, prefill.clientPhone, prefill.superFundName, prefill.superBalance, prefill.age]);
 
+  // Rehydrate the entire form from this client's most recent saved report so
+  // the form stays "filled in" between visits to their profile.
+  useEffect(() => {
+    if (!user) return;
+    const email = (prefill.clientEmail ?? "").trim().toLowerCase();
+    const phone = (prefill.clientPhone ?? "").replace(/\D+/g, "");
+    if (!email && phone.length < 8) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        let q = supabase.from("reports").select("inputs").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1);
+        if (email) q = q.ilike("email", email);
+        const { data } = await q;
+        let row = (data as Array<{ inputs: Record<string, unknown> | null }> | null)?.[0];
+        if (!row && phone.length >= 8) {
+          const tail = phone.slice(-9);
+          const { data: all } = await supabase
+            .from("reports")
+            .select("inputs, created_at")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(50);
+          row = (all as Array<{ inputs: Record<string, unknown> | null }> | null)?.find((r) => {
+            const p = String((r.inputs as Record<string, unknown> | null)?.clientPhone ?? "").replace(/\D+/g, "");
+            return p && p.slice(-9) === tail;
+          });
+        }
+        if (cancelled || !row?.inputs) return;
+        const ip = row.inputs as Partial<ClientInputs> & { investmentOptions?: InvestmentOption[] };
+        const fmt = (v: unknown) => (v == null || v === "" || v === 0 ? "" : String(v));
+        if (ip.annualIncome != null) setAnnualIncome(fmt(ip.annualIncome));
+        if (ip.fundName) setSuperFundName(ip.fundName);
+        if (ip.superBalance != null) setSuperBalance(fmt(ip.superBalance));
+        if (ip.age != null) setAge(fmt(ip.age));
+        if (ip.retirementAge != null) setRetirementAge(fmt(ip.retirementAge) || "67");
+        if (ip.modelLabel) setPrimaryOption(ip.modelLabel);
+        if (ip.goalBalance != null) setGoalBalance(fmt(ip.goalBalance));
+        if (ip.desiredIncomeAmount != null) setDesiredIncomeAmount(fmt(ip.desiredIncomeAmount));
+        if (ip.desiredIncomeFrequency) setDesiredIncomeFrequency(ip.desiredIncomeFrequency);
+        if (ip.personalContributionAmount && ip.personalContributionAmount > 0) {
+          setMakesContrib("yes");
+          setContribAmount(fmt(ip.personalContributionAmount));
+          if (ip.personalContributionFrequency) setContribFrequency(ip.personalContributionFrequency);
+          if (ip.personalContributionType) setContribType(ip.personalContributionType);
+        }
+        if (Array.isArray(ip.investmentOptions) && ip.investmentOptions.length) {
+          setOptions(ip.investmentOptions.map((o) => ({
+            name: o.name ?? "",
+            allocationPct: o.allocationPct != null ? String(Math.round(o.allocationPct * 100)) : "",
+          })));
+        }
+      } catch (e) {
+        console.warn("Form rehydrate failed", e);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, prefill.clientEmail, prefill.clientPhone]);
+
   // Keep the fund-lookup search box in sync with the form so the user can
   // just hit Search without retyping. Include all context the lookup might use:
   // super fund + investment option, age, super balance, state, income, etc.
