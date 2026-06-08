@@ -120,6 +120,11 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
   const [progressSaving, setProgressSaving] = useState<string | null>(null);
   const [bookOpen, setBookOpen] = useState(false);
   const [clientDocs, setClientDocs] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<DealTask[]>([]);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDue, setNewTaskDue] = useState("");
+  const [newTaskPhone, setNewTaskPhone] = useState(DEFAULT_REMINDER_PHONE);
+  const [addingTask, setAddingTask] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
