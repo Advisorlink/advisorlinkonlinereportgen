@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
     let gcalEventId: string | null = null;
     try {
       const ev = {
-        summary: `${settings.meeting_title} with ${clientName}`,
+        summary: `${clientName} — ${settings.meeting_title}`,
         description: `${settings.meeting_description}\n\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone || "n/a"}\n${notes ? `Notes: ${notes}\n` : ""}\nMeeting link: ${meetingLink}\nReschedule: ${appBaseUrl()}/reschedule/${booking.reschedule_token}\nCancel: ${appBaseUrl()}/cancel/${booking.cancel_token}`,
         start: { dateTime: start.toISOString(), timeZone: settings.timezone },
         end: { dateTime: end.toISOString(), timeZone: settings.timezone },
@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
         uid: `${booking.id}@advisorlinkonline.com.au`,
         start, end,
         tz: settings.timezone,
-        summary: `${settings.meeting_title} with ${clientName}`,
+        summary: `${clientName} — ${settings.meeting_title}`,
         description: `Strategy call with Travis Seckold.\nJoin: ${meetingLink}\nReschedule: ${rescheduleLink}\nCancel: ${cancelLink}`,
         location: meetingLink,
         organizerEmail: settings.host_email || "travis@advisorlinkonline.com.au",
