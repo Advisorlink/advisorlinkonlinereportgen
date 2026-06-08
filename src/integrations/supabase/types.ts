@@ -635,6 +635,56 @@ export type Database = {
         }
         Relationships: []
       }
+      deal_tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          deal_id: string
+          due_at: string
+          id: string
+          reminder_error: string | null
+          reminder_phone: string
+          reminder_sent_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          deal_id: string
+          due_at: string
+          id?: string
+          reminder_error?: string | null
+          reminder_phone: string
+          reminder_sent_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          deal_id?: string
+          due_at?: string
+          id?: string
+          reminder_error?: string | null
+          reminder_phone?: string
+          reminder_sent_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_tasks_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "pipeline_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       device_tokens: {
         Row: {
           created_at: string
