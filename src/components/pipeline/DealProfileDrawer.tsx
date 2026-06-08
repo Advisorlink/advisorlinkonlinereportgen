@@ -79,11 +79,9 @@ function localInputToIso(v: string): string {
   // v like "2026-06-08T14:30"; new Date interprets as local
   return new Date(v).toISOString();
 }
-// Convert ISO -> value suitable for <input type="datetime-local">
-function isoToLocalInput(iso: string): string {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+// Convert a `datetime-local` input value (no tz) to an ISO string in the local tz
+function localInputToIso(v: string): string {
+  return new Date(v).toISOString();
 }
 
 interface DealProfileDrawerProps {
