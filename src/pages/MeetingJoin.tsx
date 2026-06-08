@@ -408,12 +408,15 @@ export default function MeetingJoin() {
         )}
         <p className="text-white/30 text-[10px] text-center pb-2 fullscreen-hide">You are viewing your consultant's screen</p>
       </div>
+      </>
     );
   }
 
   // ----- Ended -----
   if (status === "ended") {
     return (
+      <>
+      <MeetingJoinHelmet />
       <div className="min-h-screen min-h-[100dvh] relative flex flex-col">
         <div className="absolute inset-0 -z-10">
           <img src={heroImg} alt="" className="w-full h-full object-cover" />
