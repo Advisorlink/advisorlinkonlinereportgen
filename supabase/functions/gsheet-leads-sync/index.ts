@@ -92,13 +92,20 @@ Deno.serve(async (req) => {
     const idxEmployment = col("employment");
     const idxComments = col("comments");
 
-    // Already-imported phone digits
+    // Already-imported phone digits (and those previously deleted from the pipeline —
+    // we never want to re-import a lead the user has deleted)
     const { data: existingImports } = await admin
       .from("sheet_lead_imports")
-      .select("phone_digits")
+      .select("phone_digits, deleted_at")
       .eq("spreadsheet_id", cfg.spreadsheet_id)
       .eq("sheet_name", cfg.sheet_name);
     const imported = new Set<string>((existingImports ?? []).map((r: { phone_digits: string }) => r.phone_digits));
+    const deletedTails = new Set<string>(
+      (existingImports ?? [])
+        .filter((r: { deleted_at: string | null }) => !!r.deleted_at)
+        .map((r: { phone_digits: string }) => r.phone_digits.slice(-9))
+        .filter((t: string) => t.length >= 9)
+    );
 
     // Existing pipeline phones (last 9 digits match) — paginate to bypass 1000-row default
     const existingTails = new Set<string>();
@@ -139,19 +146,11 @@ Deno.serve(async (req) => {
       const phoneRaw = (row[idxPhone] ?? "").toString().trim();
       const d = digits(phoneRaw);
       if (!name || d.length < 6) continue;
-      // NOTE: intentionally do NOT skip on historical sheet_lead_imports
-      // tracking — only skip if the lead currently exists in pipeline_deals
-      // (existingTails check below). This allows leads that were deleted from
-      // the pipeline to be re-imported when the sheet is synced again.
+      // Skip if the lead currently exists in pipeline_deals OR has been
+      // deleted from the pipeline previously (deletedTails). Deleted leads
+      // must NEVER come back automatically.
       const tail = d.slice(-9);
-      if (tail && existingTails.has(tail)) {
-        trackInsert.push({
-          spreadsheet_id: cfg.spreadsheet_id,
-          sheet_name: cfg.sheet_name,
-          phone_digits: d,
-          client_name: name,
-          deal_id: null,
-        });
+      if (tail && (existingTails.has(tail) || deletedTails.has(tail))) {
         continue;
       }
 
