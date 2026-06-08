@@ -42,6 +42,7 @@ export default function Calendar() {
       timezone: settings.timezone,
       meeting_duration_minutes: settings.meeting_duration_minutes,
       buffer_minutes: settings.buffer_minutes,
+      slot_interval_minutes: settings.slot_interval_minutes,
       min_notice_hours: settings.min_notice_hours,
       max_days_ahead: settings.max_days_ahead,
       max_per_day: settings.max_per_day,
