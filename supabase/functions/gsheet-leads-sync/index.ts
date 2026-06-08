@@ -92,13 +92,20 @@ Deno.serve(async (req) => {
     const idxEmployment = col("employment");
     const idxComments = col("comments");
 
-    // Already-imported phone digits
+    // Already-imported phone digits (and those previously deleted from the pipeline —
+    // we never want to re-import a lead the user has deleted)
     const { data: existingImports } = await admin
       .from("sheet_lead_imports")
-      .select("phone_digits")
+      .select("phone_digits, deleted_at")
       .eq("spreadsheet_id", cfg.spreadsheet_id)
       .eq("sheet_name", cfg.sheet_name);
     const imported = new Set<string>((existingImports ?? []).map((r: { phone_digits: string }) => r.phone_digits));
+    const deletedTails = new Set<string>(
+      (existingImports ?? [])
+        .filter((r: { deleted_at: string | null }) => !!r.deleted_at)
+        .map((r: { phone_digits: string }) => r.phone_digits.slice(-9))
+        .filter((t: string) => t.length >= 9)
+    );
 
     // Existing pipeline phones (last 9 digits match) — paginate to bypass 1000-row default
     const existingTails = new Set<string>();
