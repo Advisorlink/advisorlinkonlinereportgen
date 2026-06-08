@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,25 @@ import { Maximize2, Monitor, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import logoSvg from "@/assets/logo.svg";
 import heroImg from "@/assets/meeting-hero.jpg";
+import meetingPreview from "@/assets/meeting-join-preview.png.asset.json";
+
+const MEETING_PREVIEW_URL = `https://report.advisorlinkonline.com.au${meetingPreview.url}`;
+const MEETING_TITLE = "Join Your Advisor Link Online Meeting";
+const MEETING_DESCRIPTION = "Connect with your advisor in a secure, encrypted video meeting.";
+
+const MeetingJoinHelmet = () => (
+  <Helmet>
+    <title>{MEETING_TITLE}</title>
+    <meta name="description" content={MEETING_DESCRIPTION} />
+    <meta property="og:title" content={MEETING_TITLE} />
+    <meta property="og:description" content={MEETING_DESCRIPTION} />
+    <meta property="og:image" content={MEETING_PREVIEW_URL} />
+    <meta property="og:url" content="https://report.advisorlinkonline.com.au/meeting/join" />
+    <meta name="twitter:title" content={MEETING_TITLE} />
+    <meta name="twitter:description" content={MEETING_DESCRIPTION} />
+    <meta name="twitter:image" content={MEETING_PREVIEW_URL} />
+  </Helmet>
+);
 
 const iceServers = [
   { urls: "stun:stun.l.google.com:19302" },
@@ -325,6 +345,8 @@ export default function MeetingJoin() {
   // ----- Connected / viewing screen share -----
   if (status === "connected") {
     return (
+      <>
+      <MeetingJoinHelmet />
       <div ref={viewingRef} className="min-h-screen min-h-[100dvh] bg-black flex flex-col relative">
         <header className="px-4 py-3 bg-black/80 backdrop-blur-sm flex items-center justify-between shrink-0 fullscreen-hide">
           <img src={logoSvg} alt="Advisor Link Online" className="h-7 sm:h-8" />
@@ -386,12 +408,15 @@ export default function MeetingJoin() {
         )}
         <p className="text-white/30 text-[10px] text-center pb-2 fullscreen-hide">You are viewing your consultant's screen</p>
       </div>
+      </>
     );
   }
 
   // ----- Ended -----
   if (status === "ended") {
     return (
+      <>
+      <MeetingJoinHelmet />
       <div className="min-h-screen min-h-[100dvh] relative flex flex-col">
         <div className="absolute inset-0 -z-10">
           <img src={heroImg} alt="" className="w-full h-full object-cover" />
@@ -417,11 +442,14 @@ export default function MeetingJoin() {
         </main>
         <Footer />
       </div>
+      </>
     );
   }
 
   // ----- Idle / Connecting / Waiting (main landing) -----
   return (
+    <>
+    <MeetingJoinHelmet />
     <div className="min-h-screen min-h-[100dvh] relative flex flex-col">
       {/* Background */}
       <div className="absolute inset-0 -z-10">
@@ -493,6 +521,7 @@ export default function MeetingJoin() {
 
       <Footer />
     </div>
+    </>
   );
 }
 
