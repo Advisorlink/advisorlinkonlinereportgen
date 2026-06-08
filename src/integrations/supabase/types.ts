@@ -464,6 +464,7 @@ export type Database = {
           meeting_link: string | null
           meeting_title: string
           min_notice_hours: number
+          slot_interval_minutes: number
           slug: string
           timezone: string
           updated_at: string
@@ -483,6 +484,7 @@ export type Database = {
           meeting_link?: string | null
           meeting_title?: string
           min_notice_hours?: number
+          slot_interval_minutes?: number
           slug?: string
           timezone?: string
           updated_at?: string
@@ -502,6 +504,7 @@ export type Database = {
           meeting_link?: string | null
           meeting_title?: string
           min_notice_hours?: number
+          slot_interval_minutes?: number
           slug?: string
           timezone?: string
           updated_at?: string
