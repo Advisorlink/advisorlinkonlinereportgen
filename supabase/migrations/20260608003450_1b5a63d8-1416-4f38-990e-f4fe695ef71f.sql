@@ -1,0 +1,2 @@
+UPDATE public.ai_caller_contacts SET call_status='pending', call_attempts=0, last_called_at=NULL, vapi_call_id=NULL WHERE id='88fb2401-c848-410c-91d2-1fbad7be801f';
+UPDATE public.ai_caller_campaigns SET status='active', completed_at=NULL, last_call_finished_at=NULL WHERE id='09f9c488-ab99-4d95-a9a5-c5d63368643c';
