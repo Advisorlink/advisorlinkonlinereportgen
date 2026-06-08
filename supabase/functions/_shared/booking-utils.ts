@@ -89,6 +89,7 @@ export function generateSlotsForDate(
   weekly: WeeklyAvailability,
   meetingMinutes: number,
   bufferMinutes: number,
+  slotIntervalMinutes?: number,
 ): Date[] {
   const [y, m, d] = localDateYmd.split("-").map(Number);
   // Determine day-of-week in host tz (use noon to be safe re: DST edges).
@@ -100,7 +101,7 @@ export function generateSlotsForDate(
   const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   const dowIdx = days.indexOf(dayName);
   const windows = weekly[String(dowIdx)] || [];
-  const step = meetingMinutes + bufferMinutes;
+  const step = slotIntervalMinutes ?? (meetingMinutes + bufferMinutes);
   const slots: Date[] = [];
   for (const w of windows) {
     const [sh, sm] = w.start.split(":").map(Number);

@@ -42,6 +42,7 @@ export default function Calendar() {
       timezone: settings.timezone,
       meeting_duration_minutes: settings.meeting_duration_minutes,
       buffer_minutes: settings.buffer_minutes,
+      slot_interval_minutes: settings.slot_interval_minutes,
       min_notice_hours: settings.min_notice_hours,
       max_days_ahead: settings.max_days_ahead,
       max_per_day: settings.max_per_day,
@@ -151,9 +152,10 @@ export default function Calendar() {
                   <div><Label>Meeting title</Label><Input value={settings.meeting_title} onChange={(e) => setSettings({...settings, meeting_title: e.target.value})}/></div>
                   <div><Label>Meeting link (your screen-share)</Label><Input value={settings.meeting_link ?? ""} placeholder="https://..." onChange={(e) => setSettings({...settings, meeting_link: e.target.value})}/></div>
                   <div><Label>Timezone</Label><Input value={settings.timezone} onChange={(e) => setSettings({...settings, timezone: e.target.value})}/></div>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-5 gap-2">
                     <div><Label>Length (min)</Label><Input type="number" value={settings.meeting_duration_minutes} onChange={(e) => setSettings({...settings, meeting_duration_minutes: +e.target.value})}/></div>
                     <div><Label>Buffer</Label><Input type="number" value={settings.buffer_minutes} onChange={(e) => setSettings({...settings, buffer_minutes: +e.target.value})}/></div>
+                    <div><Label>Slot interval</Label><Input type="number" value={settings.slot_interval_minutes ?? 30} onChange={(e) => setSettings({...settings, slot_interval_minutes: +e.target.value})}/></div>
                     <div><Label>Min notice (h)</Label><Input type="number" value={settings.min_notice_hours} onChange={(e) => setSettings({...settings, min_notice_hours: +e.target.value})}/></div>
                     <div><Label>Max/day</Label><Input type="number" value={settings.max_per_day} onChange={(e) => setSettings({...settings, max_per_day: +e.target.value})}/></div>
                   </div>
