@@ -200,7 +200,7 @@ export async function sendGmail(to: string, subject: string, html: string, ics?:
     const icsB64 = btoa(unescape(encodeURIComponent(ics.content)));
     message = [
       `To: ${to}`,
-      `Subject: ${subject}`,
+      `Subject: ${encodedSubject}`,
       `MIME-Version: 1.0`,
       `Content-Type: multipart/mixed; boundary="${boundary}"`,
       ``,
