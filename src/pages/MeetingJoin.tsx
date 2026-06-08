@@ -345,6 +345,8 @@ export default function MeetingJoin() {
   // ----- Connected / viewing screen share -----
   if (status === "connected") {
     return (
+      <>
+      <MeetingJoinHelmet />
       <div ref={viewingRef} className="min-h-screen min-h-[100dvh] bg-black flex flex-col relative">
         <header className="px-4 py-3 bg-black/80 backdrop-blur-sm flex items-center justify-between shrink-0 fullscreen-hide">
           <img src={logoSvg} alt="Advisor Link Online" className="h-7 sm:h-8" />
