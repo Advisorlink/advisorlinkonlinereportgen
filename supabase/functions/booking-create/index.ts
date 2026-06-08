@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
     let gcalEventId: string | null = null;
     try {
       const ev = {
-        summary: `${settings.meeting_title} with ${clientName}`,
+        summary: `${clientName} — ${settings.meeting_title}`,
         description: `${settings.meeting_description}\n\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone || "n/a"}\n${notes ? `Notes: ${notes}\n` : ""}\nMeeting link: ${meetingLink}\nReschedule: ${appBaseUrl()}/reschedule/${booking.reschedule_token}\nCancel: ${appBaseUrl()}/cancel/${booking.cancel_token}`,
         start: { dateTime: start.toISOString(), timeZone: settings.timezone },
         end: { dateTime: end.toISOString(), timeZone: settings.timezone },
