@@ -1277,6 +1277,7 @@ export type Database = {
           client_name: string | null
           created_at: string
           deal_id: string | null
+          deleted_at: string | null
           id: string
           phone_digits: string
           sheet_name: string
@@ -1286,6 +1287,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           deal_id?: string | null
+          deleted_at?: string | null
           id?: string
           phone_digits: string
           sheet_name: string
@@ -1295,6 +1297,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           deal_id?: string | null
+          deleted_at?: string | null
           id?: string
           phone_digits?: string
           sheet_name?: string
