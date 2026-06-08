@@ -154,6 +154,24 @@ async function tickCampaign(supabase: any, campaign: any) {
 
   if (!callRes.ok) {
     const errText = await callRes.text();
+    console.error("VAPI call failed", {
+      status: callRes.status,
+      body: errText,
+      assistantId,
+      phoneNumberId,
+      to: normalizeAUPhone(contact.phone),
+      campaignId: campaign.id,
+      contactId: contact.id,
+    });
+    // Persist the error onto the call log so it's visible in the UI.
+    await supabase.from("ai_caller_call_logs").insert({
+      campaign_id: campaign.id,
+      contact_id: contact.id,
+      status: "failed",
+      started_at: new Date().toISOString(),
+      ended_at: new Date().toISOString(),
+      error_message: `VAPI ${callRes.status}: ${errText}`.slice(0, 2000),
+    });
     // Mark contact failed so we move on.
     await supabase
       .from("ai_caller_contacts")
