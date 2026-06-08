@@ -222,7 +222,7 @@ export async function sendGmail(to: string, subject: string, html: string, ics?:
   } else {
     message = [
       `To: ${to}`,
-      `Subject: ${subject}`,
+      `Subject: ${encodedSubject}`,
       `MIME-Version: 1.0`,
       `Content-Type: text/html; charset="UTF-8"`,
       ``,
