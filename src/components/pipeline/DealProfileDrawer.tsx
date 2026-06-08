@@ -150,8 +150,55 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
       setOriginalStageId(deal.stage_id);
       fetchNotes(deal.id);
       fetchClientDocs(deal.client_email, deal.client_phone);
+      fetchTasks(deal.id);
     }
   }, [deal]);
+
+  const fetchTasks = useCallback(async (dealId: string) => {
+    const { data } = await supabase
+      .from("deal_tasks" as any)
+      .select("*")
+      .eq("deal_id", dealId)
+      .order("due_at", { ascending: true });
+    setTasks((data as any) || []);
+  }, []);
+
+  const handleAddTask = async () => {
+    if (!deal || !newTaskTitle.trim() || !newTaskDue || !newTaskPhone.trim()) {
+      toast({ title: "Title, due time and phone are required", variant: "destructive" });
+      return;
+    }
+    setAddingTask(true);
+    const { error } = await supabase.from("deal_tasks" as any).insert({
+      deal_id: deal.id,
+      title: newTaskTitle.trim(),
+      due_at: localInputToIso(newTaskDue),
+      reminder_phone: newTaskPhone.trim(),
+    });
+    setAddingTask(false);
+    if (error) {
+      toast({ title: "Couldn't add task", description: error.message, variant: "destructive" });
+    } else {
+      setNewTaskTitle("");
+      setNewTaskDue("");
+      fetchTasks(deal.id);
+      toast({ title: "Task scheduled" });
+    }
+  };
+
+  const handleToggleTask = async (t: DealTask) => {
+    const completed = !t.completed_at;
+    await supabase
+      .from("deal_tasks" as any)
+      .update({ completed_at: completed ? new Date().toISOString() : null })
+      .eq("id", t.id);
+    if (deal) fetchTasks(deal.id);
+  };
+
+  const handleDeleteTask = async (id: string) => {
+    await supabase.from("deal_tasks" as any).delete().eq("id", id);
+    if (deal) fetchTasks(deal.id);
+  };
 
   const fetchClientDocs = useCallback(async (email?: string | null, phone?: string | null) => {
     const e = (email || "").trim().toLowerCase();
