@@ -61,6 +61,30 @@ type DealNote = {
   created_by: string | null;
   created_at: string;
 };
+type DealTask = {
+  id: string;
+  deal_id: string;
+  title: string;
+  due_at: string;
+  reminder_phone: string;
+  reminder_sent_at: string | null;
+  reminder_error: string | null;
+  completed_at: string | null;
+};
+
+const DEFAULT_REMINDER_PHONE = "0401082755";
+
+// Convert a `datetime-local` input value (no tz) to an ISO string in the local tz
+function localInputToIso(v: string): string {
+  // v like "2026-06-08T14:30"; new Date interprets as local
+  return new Date(v).toISOString();
+}
+// Convert ISO -> value suitable for <input type="datetime-local">
+function isoToLocalInput(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 interface DealProfileDrawerProps {
   deal: Deal | null;
