@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, DollarSign, Tag, StickyNote,
   MessageSquare, Save, Loader2, Clock, Send, Trash2, Landmark, ArrowLeft,
-  ListChecks, Check, CalendarPlus, FileText, ExternalLink,
+  ListChecks, Check, CalendarPlus, FileText, ExternalLink, Bell, Plus,
 } from "lucide-react";
 import { BookAppointmentDialog } from "@/components/booking/BookAppointmentDialog";
 
@@ -61,6 +61,24 @@ type DealNote = {
   created_by: string | null;
   created_at: string;
 };
+type DealTask = {
+  id: string;
+  deal_id: string;
+  title: string;
+  due_at: string;
+  reminder_phone: string;
+  reminder_sent_at: string | null;
+  reminder_error: string | null;
+  completed_at: string | null;
+};
+
+const DEFAULT_REMINDER_PHONE = "0401082755";
+
+// Convert a `datetime-local` input value (no tz) to an ISO string in the local tz
+function localInputToIso(v: string): string {
+  // v like "2026-06-08T14:30"; new Date interprets as local
+  return new Date(v).toISOString();
+}
 
 interface DealProfileDrawerProps {
   deal: Deal | null;
@@ -96,6 +114,11 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
   const [progressSaving, setProgressSaving] = useState<string | null>(null);
   const [bookOpen, setBookOpen] = useState(false);
   const [clientDocs, setClientDocs] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<DealTask[]>([]);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDue, setNewTaskDue] = useState("");
+  const [newTaskPhone, setNewTaskPhone] = useState(DEFAULT_REMINDER_PHONE);
+  const [addingTask, setAddingTask] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -121,8 +144,55 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
       setOriginalStageId(deal.stage_id);
       fetchNotes(deal.id);
       fetchClientDocs(deal.client_email, deal.client_phone);
+      fetchTasks(deal.id);
     }
   }, [deal]);
+
+  const fetchTasks = useCallback(async (dealId: string) => {
+    const { data } = await supabase
+      .from("deal_tasks" as any)
+      .select("*")
+      .eq("deal_id", dealId)
+      .order("due_at", { ascending: true });
+    setTasks((data as any) || []);
+  }, []);
+
+  const handleAddTask = async () => {
+    if (!deal || !newTaskTitle.trim() || !newTaskDue || !newTaskPhone.trim()) {
+      toast({ title: "Title, due time and phone are required", variant: "destructive" });
+      return;
+    }
+    setAddingTask(true);
+    const { error } = await supabase.from("deal_tasks" as any).insert({
+      deal_id: deal.id,
+      title: newTaskTitle.trim(),
+      due_at: localInputToIso(newTaskDue),
+      reminder_phone: newTaskPhone.trim(),
+    });
+    setAddingTask(false);
+    if (error) {
+      toast({ title: "Couldn't add task", description: error.message, variant: "destructive" });
+    } else {
+      setNewTaskTitle("");
+      setNewTaskDue("");
+      fetchTasks(deal.id);
+      toast({ title: "Task scheduled" });
+    }
+  };
+
+  const handleToggleTask = async (t: DealTask) => {
+    const completed = !t.completed_at;
+    await supabase
+      .from("deal_tasks" as any)
+      .update({ completed_at: completed ? new Date().toISOString() : null })
+      .eq("id", t.id);
+    if (deal) fetchTasks(deal.id);
+  };
+
+  const handleDeleteTask = async (id: string) => {
+    await supabase.from("deal_tasks" as any).delete().eq("id", id);
+    if (deal) fetchTasks(deal.id);
+  };
 
   const fetchClientDocs = useCallback(async (email?: string | null, phone?: string | null) => {
     const e = (email || "").trim().toLowerCase();
@@ -456,6 +526,106 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
             </div>
           </div>
 
+          {/* Tasks & reminders */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+                <Bell className="w-3.5 h-3.5" /> Tasks & SMS Reminders
+              </h3>
+              <span className="text-[11px] text-muted-foreground">{tasks.filter(t => !t.completed_at).length} open</span>
+            </div>
+
+            <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+              <Input
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                placeholder='e.g. Call Peter about super rollover'
+                className="text-sm"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Due</Label>
+                  <Input
+                    type="datetime-local"
+                    value={newTaskDue}
+                    onChange={(e) => setNewTaskDue(e.target.value)}
+                    className="text-sm mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">SMS to</Label>
+                  <Input
+                    value={newTaskPhone}
+                    onChange={(e) => setNewTaskPhone(e.target.value)}
+                    placeholder="0401082755"
+                    className="text-sm mt-1"
+                  />
+                </div>
+              </div>
+              <Button
+                size="sm"
+                onClick={handleAddTask}
+                disabled={addingTask || !newTaskTitle.trim() || !newTaskDue}
+                className="w-full gap-1.5"
+              >
+                {addingTask ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                Add Task
+              </Button>
+            </div>
+
+            {tasks.length === 0 ? (
+              <p className="text-xs text-muted-foreground/60 text-center py-2">No tasks yet</p>
+            ) : (
+              <div className="space-y-1.5">
+                {tasks.map((t) => {
+                  const due = new Date(t.due_at);
+                  const overdue = !t.completed_at && !t.reminder_sent_at && due.getTime() < Date.now();
+                  return (
+                    <div
+                      key={t.id}
+                      className={`group flex items-start gap-2 rounded-lg border px-2.5 py-2 text-sm ${
+                        t.completed_at
+                          ? "bg-muted/30 border-border opacity-60"
+                          : overdue
+                            ? "bg-destructive/5 border-destructive/30"
+                            : "bg-background border-border"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handleToggleTask(t)}
+                        className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                          t.completed_at ? "bg-emerald-500 border-emerald-500 text-white" : "border-muted-foreground/40 hover:border-foreground"
+                        }`}
+                      >
+                        {t.completed_at && <Check className="w-3 h-3" />}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm ${t.completed_at ? "line-through" : ""}`}>{t.title}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                          <Clock className="w-2.5 h-2.5" />
+                          {due.toLocaleString("en-AU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          <span>·</span>
+                          <Bell className="w-2.5 h-2.5" />
+                          {t.reminder_sent_at ? "SMS sent" : t.reminder_error ? "Send failed" : `SMS to ${t.reminder_phone}`}
+                        </p>
+                        {t.reminder_error && (
+                          <p className="text-[10px] text-destructive mt-0.5 truncate">{t.reminder_error}</p>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTask(t.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
 
           <div className="space-y-3">
