@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
         uid: `${booking.id}@advisorlinkonline.com.au`,
         start, end,
         tz: settings.timezone,
-        summary: `${settings.meeting_title} with ${clientName}`,
+        summary: `${clientName} — ${settings.meeting_title}`,
         description: `Strategy call with Travis Seckold.\nJoin: ${meetingLink}\nReschedule: ${rescheduleLink}\nCancel: ${cancelLink}`,
         location: meetingLink,
         organizerEmail: settings.host_email || "travis@advisorlinkonline.com.au",
