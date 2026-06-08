@@ -48,6 +48,10 @@ verify_jwt = false
 [functions.setup-new-twilio-number]
 verify_jwt = false
 
+[functions.deal-task-reminders]
+verify_jwt = false
+
+
 
 
 
