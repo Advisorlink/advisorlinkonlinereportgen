@@ -442,11 +442,14 @@ export default function MeetingJoin() {
         </main>
         <Footer />
       </div>
+      </>
     );
   }
 
   // ----- Idle / Connecting / Waiting (main landing) -----
   return (
+    <>
+    <MeetingJoinHelmet />
     <div className="min-h-screen min-h-[100dvh] relative flex flex-col">
       {/* Background */}
       <div className="absolute inset-0 -z-10">
