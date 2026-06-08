@@ -79,10 +79,6 @@ function localInputToIso(v: string): string {
   // v like "2026-06-08T14:30"; new Date interprets as local
   return new Date(v).toISOString();
 }
-// Convert a `datetime-local` input value (no tz) to an ISO string in the local tz
-function localInputToIso(v: string): string {
-  return new Date(v).toISOString();
-}
 
 interface DealProfileDrawerProps {
   deal: Deal | null;
