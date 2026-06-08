@@ -183,9 +183,11 @@ export function appBaseUrl(): string {
 export interface IcsAttachment { filename: string; content: string; }
 
 export async function sendGmail(to: string, subject: string, html: string, ics?: IcsAttachment) {
-  // Strip em/en dashes from outgoing copy (subject + body).
-  subject = subject.replace(/[—–]/g, "-");
-  html = html.replace(/[—–]/g, "-");
+  // Strip em/en dashes and normalize narrow/no-break spaces to regular spaces.
+  subject = subject.replace(/[—–]/g, "-").replace(/[\u202F\u00A0\u2009]/g, " ");
+  html = html.replace(/[—–]/g, "-").replace(/[\u202F\u00A0\u2009]/g, " ");
+  // RFC 2047 encode the subject so non-ASCII chars don't display as mojibake.
+  const encodedSubject = `=?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=`;
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
   const gmailKey = Deno.env.get("GOOGLE_MAIL_API_KEY");
   if (!lovableKey || !gmailKey) {
@@ -198,7 +200,7 @@ export async function sendGmail(to: string, subject: string, html: string, ics?:
     const icsB64 = btoa(unescape(encodeURIComponent(ics.content)));
     message = [
       `To: ${to}`,
-      `Subject: ${subject}`,
+      `Subject: ${encodedSubject}`,
       `MIME-Version: 1.0`,
       `Content-Type: multipart/mixed; boundary="${boundary}"`,
       ``,
@@ -220,7 +222,7 @@ export async function sendGmail(to: string, subject: string, html: string, ics?:
   } else {
     message = [
       `To: ${to}`,
-      `Subject: ${subject}`,
+      `Subject: ${encodedSubject}`,
       `MIME-Version: 1.0`,
       `Content-Type: text/html; charset="UTF-8"`,
       ``,
