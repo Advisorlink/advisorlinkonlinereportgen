@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,25 @@ import { Maximize2, Monitor, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import logoSvg from "@/assets/logo.svg";
 import heroImg from "@/assets/meeting-hero.jpg";
+import meetingPreview from "@/assets/meeting-join-preview.png.asset.json";
+
+const MEETING_PREVIEW_URL = `https://report.advisorlinkonline.com.au${meetingPreview.url}`;
+const MEETING_TITLE = "Join Your Advisor Link Online Meeting";
+const MEETING_DESCRIPTION = "Connect with your advisor in a secure, encrypted video meeting.";
+
+const MeetingJoinHelmet = () => (
+  <Helmet>
+    <title>{MEETING_TITLE}</title>
+    <meta name="description" content={MEETING_DESCRIPTION} />
+    <meta property="og:title" content={MEETING_TITLE} />
+    <meta property="og:description" content={MEETING_DESCRIPTION} />
+    <meta property="og:image" content={MEETING_PREVIEW_URL} />
+    <meta property="og:url" content="https://report.advisorlinkonline.com.au/meeting/join" />
+    <meta name="twitter:title" content={MEETING_TITLE} />
+    <meta name="twitter:description" content={MEETING_DESCRIPTION} />
+    <meta name="twitter:image" content={MEETING_PREVIEW_URL} />
+  </Helmet>
+);
 
 const iceServers = [
   { urls: "stun:stun.l.google.com:19302" },
