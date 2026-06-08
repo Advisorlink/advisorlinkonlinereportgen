@@ -41,8 +41,9 @@ Deno.serve(async (req) => {
       dayList.push(ymd);
     }
     const allSlots: Date[] = [];
+    const slotIntervalMin = settings.slot_interval_minutes ?? 30;
     for (const ymd of dayList) {
-      const slots = generateSlotsForDate(ymd, hostTz, settings.weekly_availability, meetingMin, bufferMin);
+      const slots = generateSlotsForDate(ymd, hostTz, settings.weekly_availability, meetingMin, bufferMin, slotIntervalMin);
       for (const s of slots) {
         if (s.getTime() >= minStart.getTime()) allSlots.push(s);
       }
