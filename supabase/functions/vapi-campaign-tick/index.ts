@@ -158,7 +158,7 @@ async function tickCampaign(supabase: any, campaign: any) {
       body: JSON.stringify(callPayload),
     });
 
-  if (!callRes.ok) {
+    if (!callRes.ok) {
     const errText = await callRes.text();
     console.error("VAPI call failed", {
       status: callRes.status,
@@ -192,10 +192,11 @@ async function tickCampaign(supabase: any, campaign: any) {
       .from("ai_caller_campaigns")
       .update({ last_call_finished_at: new Date().toISOString() })
       .eq("id", campaign.id);
-    return { campaignId: campaign.id, contactId: contact.id, error: errText };
-  }
+      results.push({ contactId: contact.id, error: errText });
+      continue;
+    }
 
-  const call = await callRes.json();
+    const call = await callRes.json();
 
   await supabase.from("ai_caller_call_logs").insert({
     campaign_id: campaign.id,
@@ -215,7 +216,10 @@ async function tickCampaign(supabase: any, campaign: any) {
     })
     .eq("id", contact.id);
 
-  return { campaignId: campaign.id, dialed: contact.id, callId: call.id };
+    results.push({ contactId: contact.id, callId: call.id });
+  }
+
+  return { campaignId: campaign.id, dialed: results.filter((r) => r.callId).length, results };
 }
 
 Deno.serve(async (req) => {
