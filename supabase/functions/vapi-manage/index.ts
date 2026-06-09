@@ -680,9 +680,9 @@ After all questions have been asked (or if the client wants to end early), go st
     }
 
     if (action === "list-phone-numbers") {
-      // Serve from short-lived cache to avoid Vapi 429 rate limits
+      // Serve from cache (5 min) to avoid Vapi 429 rate limits
       const now = Date.now();
-      if (phoneNumbersCache && now - phoneNumbersCache.at < 30_000) {
+      if (phoneNumbersCache && now - phoneNumbersCache.at < 5 * 60_000) {
         return new Response(
           JSON.stringify({ phoneNumbers: phoneNumbersCache.data }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -691,25 +691,33 @@ After all questions have been asked (or if the client wants to end early), go st
       // Retry with backoff on 429
       let vapiRes: Response | null = null;
       let errText = "";
-      for (let attempt = 0; attempt < 4; attempt++) {
+      for (let attempt = 0; attempt < 5; attempt++) {
         vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
           headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
         });
         if (vapiRes.ok) break;
-        errText = await vapiRes.text();
+        errText = await vapiRes.text().catch(() => "");
         if (vapiRes.status !== 429) break;
-        await new Promise((r) => setTimeout(r, 500 * Math.pow(2, attempt)));
+        await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt)));
       }
       if (!vapiRes || !vapiRes.ok) {
-        // If we have stale cache, serve it instead of failing
+        // Serve stale cache if available
         if (phoneNumbersCache) {
           return new Response(
             JSON.stringify({ phoneNumbers: phoneNumbersCache.data, stale: true }),
             { headers: { ...corsHeaders, "Content-Type": "application/json" } },
           );
         }
-        throw new Error(
-          `Vapi list phone numbers failed [${vapiRes?.status}]: ${errText}`,
+        // On rate-limit with no cache, return empty list + warning (don't 500 / blank-screen)
+        const isRate = vapiRes?.status === 429;
+        return new Response(
+          JSON.stringify({
+            phoneNumbers: [],
+            warning: isRate
+              ? "Vapi is rate-limiting requests. Please try again in a minute."
+              : `Vapi error [${vapiRes?.status}]: ${errText}`,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
       const phoneNumbers = await vapiRes.json();
