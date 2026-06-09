@@ -2,9 +2,9 @@
 // Runs every minute via pg_cron. For every active campaign:
 //   - Skip if outside the configured daily window / active days (campaign tz).
 //   - Skip if the per-hour cap has been reached in the last 60 min.
-//   - Skip if a call is currently in flight for this campaign.
+//   - Fill available call slots up to the configured concurrent-call limit.
 //   - Skip if the gap since the last call ended hasn't elapsed.
-//   - Otherwise: dial ONE pending contact.
+//   - Otherwise: dial pending contacts up to the campaign limits.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
@@ -74,22 +74,26 @@ async function tickCampaign(supabase: any, campaign: any) {
     .select("id", { count: "exact", head: true })
     .eq("campaign_id", campaign.id)
     .gte("started_at", hourAgo);
-  if ((lastHourCount ?? 0) >= (campaign.calls_per_hour ?? 50)) {
+  const hourlyRemaining = Math.max(0, (campaign.calls_per_hour ?? 50) - (lastHourCount ?? 0));
+  if (hourlyRemaining <= 0) {
     return { campaignId: campaign.id, skipped: "hourly-cap" };
   }
 
-  // In-flight call? (initiated/ringing/in-progress with no ended_at)
+  // In-flight calls? Keep dialling only until this campaign's concurrent limit is full.
   const { count: inFlight } = await supabase
     .from("ai_caller_call_logs")
     .select("id", { count: "exact", head: true })
     .eq("campaign_id", campaign.id)
     .is("ended_at", null);
-  if ((inFlight ?? 0) > 0) {
-    return { campaignId: campaign.id, skipped: "in-flight" };
+  const maxConcurrent = Math.max(1, campaign.max_concurrent_calls ?? 1);
+  const availableSlots = Math.max(0, maxConcurrent - (inFlight ?? 0));
+  if (availableSlots <= 0) {
+    return { campaignId: campaign.id, skipped: "concurrent-limit", inFlight, maxConcurrent };
   }
 
-  // Gap since the previous call finished.
-  if (campaign.last_call_finished_at) {
+  // Gap since the previous call finished. If calls are already in-flight, keep
+  // filling open slots; otherwise wait before starting the next batch.
+  if ((inFlight ?? 0) === 0 && campaign.last_call_finished_at) {
     const since = Date.now() - new Date(campaign.last_call_finished_at).getTime();
     if (since < (campaign.min_gap_seconds ?? 180) * 1000) {
       return { campaignId: campaign.id, skipped: "gap" };
@@ -103,7 +107,7 @@ async function tickCampaign(supabase: any, campaign: any) {
     .eq("campaign_id", campaign.id)
     .eq("call_status", "pending")
     .order("created_at", { ascending: true })
-    .limit(1);
+    .limit(Math.min(availableSlots, hourlyRemaining));
 
   if (!contacts || contacts.length === 0) {
     // Nothing left to dial — mark complete.
@@ -117,42 +121,60 @@ async function tickCampaign(supabase: any, campaign: any) {
     return { campaignId: campaign.id, skipped: "completed" };
   }
 
-  const contact = contacts[0];
   const assistantId = campaign.vapi_assistant_id;
   const phoneNumberId = campaign.phone_number_id;
   if (!assistantId || !phoneNumberId) {
     return { campaignId: campaign.id, error: "missing-assistant-or-phone" };
   }
 
-  // Split the contact's name so scripts can greet them via
-  // {{first_name}} / {{name}} placeholders in the assistant's first message.
-  const fullName = (contact.name || "").trim();
-  const firstName = fullName.split(/\s+/)[0] || fullName;
+  const results: any[] = [];
+  for (const contact of contacts) {
+    const reservedAt = new Date().toISOString();
+    const { data: reserved } = await supabase
+      .from("ai_caller_contacts")
+      .update({
+        call_status: "calling",
+        call_attempts: (contact.call_attempts || 0) + 1,
+        last_called_at: reservedAt,
+      })
+      .eq("id", contact.id)
+      .eq("call_status", "pending")
+      .select("id")
+      .maybeSingle();
+    if (!reserved) {
+      results.push({ contactId: contact.id, skipped: "already-reserved" });
+      continue;
+    }
 
-  const callPayload = {
-    assistantId,
-    customer: { number: normalizeAUPhone(contact.phone), name: fullName || undefined },
-    phoneNumberId,
-    assistantOverrides: {
-      variableValues: {
-        name: fullName,
-        first_name: firstName,
-        full_name: fullName,
+    // Split the contact's name so scripts can greet them via
+    // {{first_name}} / {{name}} placeholders in the assistant's first message.
+    const fullName = (contact.name || "").trim();
+    const firstName = fullName.split(/\s+/)[0] || fullName;
+
+    const callPayload = {
+      assistantId,
+      customer: { number: normalizeAUPhone(contact.phone), name: fullName || undefined },
+      phoneNumberId,
+      assistantOverrides: {
+        variableValues: {
+          name: fullName,
+          first_name: firstName,
+          full_name: fullName,
+        },
       },
-    },
-    metadata: { contactId: contact.id, campaignId: campaign.id },
-  };
+      metadata: { contactId: contact.id, campaignId: campaign.id },
+    };
 
-  const callRes = await fetch(`${VAPI_BASE}/call/phone`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${VAPI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(callPayload),
-  });
+    const callRes = await fetch(`${VAPI_BASE}/call/phone`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${VAPI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(callPayload),
+    });
 
-  if (!callRes.ok) {
+    if (!callRes.ok) {
     const errText = await callRes.text();
     console.error("VAPI call failed", {
       status: callRes.status,
@@ -177,8 +199,7 @@ async function tickCampaign(supabase: any, campaign: any) {
       .from("ai_caller_contacts")
       .update({
         call_status: "failed",
-        last_called_at: new Date().toISOString(),
-        call_attempts: (contact.call_attempts || 0) + 1,
+        last_called_at: reservedAt,
       })
       .eq("id", contact.id);
     // Treat as a finished call for pacing purposes.
@@ -186,10 +207,11 @@ async function tickCampaign(supabase: any, campaign: any) {
       .from("ai_caller_campaigns")
       .update({ last_call_finished_at: new Date().toISOString() })
       .eq("id", campaign.id);
-    return { campaignId: campaign.id, contactId: contact.id, error: errText };
-  }
+      results.push({ contactId: contact.id, error: errText });
+      continue;
+    }
 
-  const call = await callRes.json();
+    const call = await callRes.json();
 
   await supabase.from("ai_caller_call_logs").insert({
     campaign_id: campaign.id,
@@ -203,13 +225,15 @@ async function tickCampaign(supabase: any, campaign: any) {
     .from("ai_caller_contacts")
     .update({
       call_status: "calling",
-      call_attempts: (contact.call_attempts || 0) + 1,
-      last_called_at: new Date().toISOString(),
+      last_called_at: reservedAt,
       vapi_call_id: call.id,
     })
     .eq("id", contact.id);
 
-  return { campaignId: campaign.id, dialed: contact.id, callId: call.id };
+    results.push({ contactId: contact.id, callId: call.id });
+  }
+
+  return { campaignId: campaign.id, dialed: results.filter((r) => r.callId).length, results };
 }
 
 Deno.serve(async (req) => {

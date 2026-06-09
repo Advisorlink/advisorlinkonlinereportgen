@@ -117,6 +117,7 @@ export type Database = {
           id: string
           last_call_finished_at: string | null
           leads_generated: number
+          max_concurrent_calls: number
           min_gap_seconds: number
           name: string
           phone_number_id: string | null
@@ -142,6 +143,7 @@ export type Database = {
           id?: string
           last_call_finished_at?: string | null
           leads_generated?: number
+          max_concurrent_calls?: number
           min_gap_seconds?: number
           name: string
           phone_number_id?: string | null
@@ -167,6 +169,7 @@ export type Database = {
           id?: string
           last_call_finished_at?: string | null
           leads_generated?: number
+          max_concurrent_calls?: number
           min_gap_seconds?: number
           name?: string
           phone_number_id?: string | null

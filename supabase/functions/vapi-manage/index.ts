@@ -281,6 +281,7 @@ serve(async (req) => {
         machineDetectionSpeechEndThreshold: 1500,
         machineDetectionSilenceTimeout: 5000,
       };
+      const voicemailRule = 'If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.';
 
       const listRes = await fetch(`${VAPI_BASE}/assistant?limit=1000`, {
         headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
@@ -300,6 +301,11 @@ serve(async (req) => {
           while (!done && attempt < 6) {
             attempt++;
             try {
+              const existingMessages = Array.isArray(a.model?.messages) ? a.model.messages : [];
+              const patchedMessages = existingMessages.map((msg: any) => {
+                if (msg?.role !== "system" || typeof msg?.content !== "string" || msg.content.includes(voicemailRule)) return msg;
+                return { ...msg, content: msg.content.replace("CORE RULES:\n", `CORE RULES:\n- ${voicemailRule}\n`) };
+              });
               const patchRes = await fetch(`${VAPI_BASE}/assistant/${a.id}`, {
                 method: "PATCH",
                 headers: {
@@ -307,8 +313,10 @@ serve(async (req) => {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
+                  ...(patchedMessages.length > 0 ? { model: { ...a.model, messages: patchedMessages } } : {}),
                   voicemailDetection,
                   voicemailMessage: "",
+                  endCallMessage: "",
                   firstMessageMode: "assistant-waits-for-user",
                   // Silent-pickup fallback: if the human picks up but doesn't
                   // say anything within 4 seconds, prompt them once or twice
@@ -399,6 +407,7 @@ HONESTY ABOUT BEING AI:
 
 CORE RULES:
 - Follow the script instructions above as your primary guide.
+- If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.
 - After your opening message, wait for the client to respond before continuing.
 - If follow-up statements are provided below, deliver them naturally after the client responds to your greeting.
 - Then ask each question one at a time, waiting for a response before moving on.
@@ -479,6 +488,7 @@ After all questions have been asked (or if the client wants to end early), go st
           machineDetectionSilenceTimeout: 5000,
         },
         voicemailMessage: "",
+        endCallMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
           idleTimeoutSeconds: 5,
@@ -679,7 +689,7 @@ After all questions have been asked (or if the client wants to end early), go st
         .from("ai_caller_contacts")
         .update({
           call_status: "calling",
-          call_attempts: supabase.rpc ? 1 : 1,
+          call_attempts: 1,
           last_called_at: new Date().toISOString(),
           vapi_call_id: call.id,
         })
@@ -1165,6 +1175,7 @@ HONESTY ABOUT BEING AI:
 
 CORE RULES:
 - Follow the script instructions above as your primary guide.
+- If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.
 - After your opening message, wait for the client to respond before continuing.
 - If follow-up statements are provided below, deliver them naturally after the client responds to your greeting.
 - Then ask each question one at a time, waiting for a response before moving on.
@@ -1245,6 +1256,7 @@ After all questions have been asked (or if the client wants to end early), go st
           machineDetectionSilenceTimeout: 5000,
         },
         voicemailMessage: "",
+        endCallMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
           idleTimeoutSeconds: 5,
@@ -1636,6 +1648,7 @@ HONESTY ABOUT BEING AI:
 
 CORE RULES:
 - Follow the script instructions above as your primary guide.
+- If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.
 - After your greeting, wait for the caller to respond before continuing.
 - If follow-up statements are provided below, deliver them naturally after the caller responds.
 - Then ask each question one at a time, waiting for a response before moving on.
@@ -1709,6 +1722,7 @@ After all questions have been asked (or if the caller wants to end early), go st
           machineDetectionSilenceTimeout: 5000,
         },
         voicemailMessage: "",
+        endCallMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
           idleTimeoutSeconds: 5,

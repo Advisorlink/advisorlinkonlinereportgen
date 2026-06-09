@@ -29,6 +29,7 @@ export function AICallerCampaigns() {
 
   // Pacing settings (per campaign)
   const [callsPerHour, setCallsPerHour] = useState(50);
+  const [maxConcurrentCalls, setMaxConcurrentCalls] = useState(1);
   const [minGapSeconds, setMinGapSeconds] = useState(180);
   const [dailyStart, setDailyStart] = useState("09:00");
   const [dailyEnd, setDailyEnd] = useState("17:00");
@@ -200,6 +201,7 @@ export function AICallerCampaigns() {
   function pacingPayload() {
     return {
       calls_per_hour: callsPerHour,
+      max_concurrent_calls: maxConcurrentCalls,
       min_gap_seconds: minGapSeconds,
       daily_start_time: dailyStart,
       daily_end_time: dailyEnd,
@@ -251,6 +253,7 @@ export function AICallerCampaigns() {
     setPhoneNumberId("");
     setContacts([]);
     setCallsPerHour(50);
+    setMaxConcurrentCalls(1);
     setMinGapSeconds(180);
     setDailyStart("09:00");
     setDailyEnd("17:00");
@@ -263,6 +266,7 @@ export function AICallerCampaigns() {
     setScriptId(campaign.script_id);
     setPhoneNumberId(campaign.phone_number_id || "");
     setCallsPerHour(campaign.calls_per_hour ?? 50);
+    setMaxConcurrentCalls(campaign.max_concurrent_calls ?? 1);
     setMinGapSeconds(campaign.min_gap_seconds ?? 180);
     setDailyStart((campaign.daily_start_time || "09:00").slice(0, 5));
     setDailyEnd((campaign.daily_end_time || "17:00").slice(0, 5));
@@ -455,6 +459,15 @@ export function AICallerCampaigns() {
                       onChange={e => {
                         const s = e.target.value;
                         setCallsPerHour(s === "" ? 1 : Math.max(1, parseInt(s) || 1));
+                      }} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Calls at same time</Label>
+                    <Input type="number" min={1} max={50}
+                      value={maxConcurrentCalls || ""}
+                      onChange={e => {
+                        const s = e.target.value;
+                        setMaxConcurrentCalls(s === "" ? 1 : Math.min(50, Math.max(1, parseInt(s) || 1)));
                       }} />
                   </div>
                   <div className="space-y-1">
@@ -654,7 +667,7 @@ export function AICallerCampaigns() {
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Gauge className="w-3 h-3" />
-                          {c.calls_per_hour ?? 50}/hr · {Math.round((c.min_gap_seconds ?? 180) / 60)} min gap
+                          {c.calls_per_hour ?? 50}/hr · {c.max_concurrent_calls ?? 1} at once · {Math.round((c.min_gap_seconds ?? 180) / 60)} min gap
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
