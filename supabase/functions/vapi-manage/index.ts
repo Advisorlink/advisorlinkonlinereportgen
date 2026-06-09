@@ -677,16 +677,40 @@ After all questions have been asked (or if the client wants to end early), go st
     }
 
     if (action === "list-phone-numbers") {
-      const vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
-        headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
-      });
-      if (!vapiRes.ok) {
-        const errText = await vapiRes.text();
+      // Serve from short-lived cache to avoid Vapi 429 rate limits
+      const now = Date.now();
+      if (phoneNumbersCache && now - phoneNumbersCache.at < 30_000) {
+        return new Response(
+          JSON.stringify({ phoneNumbers: phoneNumbersCache.data }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      // Retry with backoff on 429
+      let vapiRes: Response | null = null;
+      let errText = "";
+      for (let attempt = 0; attempt < 4; attempt++) {
+        vapiRes = await fetch(`${VAPI_BASE}/phone-number`, {
+          headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
+        });
+        if (vapiRes.ok) break;
+        errText = await vapiRes.text();
+        if (vapiRes.status !== 429) break;
+        await new Promise((r) => setTimeout(r, 500 * Math.pow(2, attempt)));
+      }
+      if (!vapiRes || !vapiRes.ok) {
+        // If we have stale cache, serve it instead of failing
+        if (phoneNumbersCache) {
+          return new Response(
+            JSON.stringify({ phoneNumbers: phoneNumbersCache.data, stale: true }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
         throw new Error(
-          `Vapi list phone numbers failed [${vapiRes.status}]: ${errText}`,
+          `Vapi list phone numbers failed [${vapiRes?.status}]: ${errText}`,
         );
       }
       const phoneNumbers = await vapiRes.json();
+      phoneNumbersCache = { at: now, data: phoneNumbers };
       return new Response(JSON.stringify({ phoneNumbers }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
