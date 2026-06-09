@@ -29,6 +29,7 @@ export function AICallerCampaigns() {
 
   // Pacing settings (per campaign)
   const [callsPerHour, setCallsPerHour] = useState(50);
+  const [maxConcurrentCalls, setMaxConcurrentCalls] = useState(1);
   const [minGapSeconds, setMinGapSeconds] = useState(180);
   const [dailyStart, setDailyStart] = useState("09:00");
   const [dailyEnd, setDailyEnd] = useState("17:00");
@@ -200,6 +201,7 @@ export function AICallerCampaigns() {
   function pacingPayload() {
     return {
       calls_per_hour: callsPerHour,
+      max_concurrent_calls: maxConcurrentCalls,
       min_gap_seconds: minGapSeconds,
       daily_start_time: dailyStart,
       daily_end_time: dailyEnd,
@@ -251,6 +253,7 @@ export function AICallerCampaigns() {
     setPhoneNumberId("");
     setContacts([]);
     setCallsPerHour(50);
+    setMaxConcurrentCalls(1);
     setMinGapSeconds(180);
     setDailyStart("09:00");
     setDailyEnd("17:00");
