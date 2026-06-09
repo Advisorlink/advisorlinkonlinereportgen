@@ -326,20 +326,20 @@ serve(async (req) => {
                     idleTimeoutSeconds: 5,
                     idleMessageMaxSpokenCount: 2,
                   },
-                  responseDelaySeconds: 0.6,
+                  responseDelaySeconds: 0.2,
                   startSpeakingPlan: {
-                    waitSeconds: 1.2,
-                    smartEndpointingPlan: { provider: "livekit", waitFunction: "2000 + 8000 * sqrt(x)" },
+                    waitSeconds: 0.4,
+                    smartEndpointingPlan: { provider: "livekit", waitFunction: "200 + 8000 * sqrt(x)" },
                     transcriptionEndpointingPlan: {
-                      onPunctuationSeconds: 0.4,
-                      onNoPunctuationSeconds: 1.6,
-                      onNumberSeconds: 0.7,
+                      onPunctuationSeconds: 0.1,
+                      onNoPunctuationSeconds: 1.0,
+                      onNumberSeconds: 0.5,
                     },
                   },
                   stopSpeakingPlan: {
-                    numWords: 4,
+                    numWords: 2,
                     voiceSeconds: 0.3,
-                    backoffSeconds: 1.2,
+                    backoffSeconds: 0.8,
                   },
                 }),
               });
@@ -511,20 +511,20 @@ After all questions have been asked (or if the client wants to end early), go st
           idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
         },
-        responseDelaySeconds: 0.6,
+        responseDelaySeconds: 0.2,
         startSpeakingPlan: {
-          waitSeconds: 1.2,
-          smartEndpointingPlan: { provider: "livekit", waitFunction: "2000 + 8000 * sqrt(x)" },
+          waitSeconds: 0.4,
+          smartEndpointingPlan: { provider: "livekit", waitFunction: "200 + 8000 * sqrt(x)" },
           transcriptionEndpointingPlan: {
-            onPunctuationSeconds: 0.4,
-            onNoPunctuationSeconds: 1.6,
-            onNumberSeconds: 0.7,
+            onPunctuationSeconds: 0.1,
+            onNoPunctuationSeconds: 1.0,
+            onNumberSeconds: 0.5,
           },
         },
         stopSpeakingPlan: {
-          numWords: 4,
+          numWords: 2,
           voiceSeconds: 0.3,
-          backoffSeconds: 1.2,
+          backoffSeconds: 0.8,
         },
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1295,20 +1295,20 @@ After all questions have been asked (or if the client wants to end early), go st
           idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
         },
-        responseDelaySeconds: 0.6,
+        responseDelaySeconds: 0.2,
         startSpeakingPlan: {
-          waitSeconds: 1.2,
-          smartEndpointingPlan: { provider: "livekit", waitFunction: "2000 + 8000 * sqrt(x)" },
+          waitSeconds: 0.4,
+          smartEndpointingPlan: { provider: "livekit", waitFunction: "200 + 8000 * sqrt(x)" },
           transcriptionEndpointingPlan: {
-            onPunctuationSeconds: 0.4,
-            onNoPunctuationSeconds: 1.6,
-            onNumberSeconds: 0.7,
+            onPunctuationSeconds: 0.1,
+            onNoPunctuationSeconds: 1.0,
+            onNumberSeconds: 0.5,
           },
         },
         stopSpeakingPlan: {
-          numWords: 4,
+          numWords: 2,
           voiceSeconds: 0.3,
-          backoffSeconds: 1.2,
+          backoffSeconds: 0.8,
         },
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1777,20 +1777,20 @@ After all questions have been asked (or if the caller wants to end early), go st
           idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
         },
-        responseDelaySeconds: 0.6,
+        responseDelaySeconds: 0.2,
         startSpeakingPlan: {
-          waitSeconds: 1.2,
-          smartEndpointingPlan: { provider: "livekit", waitFunction: "2000 + 8000 * sqrt(x)" },
+          waitSeconds: 0.4,
+          smartEndpointingPlan: { provider: "livekit", waitFunction: "200 + 8000 * sqrt(x)" },
           transcriptionEndpointingPlan: {
-            onPunctuationSeconds: 0.4,
-            onNoPunctuationSeconds: 1.6,
-            onNumberSeconds: 0.7,
+            onPunctuationSeconds: 0.1,
+            onNoPunctuationSeconds: 1.0,
+            onNumberSeconds: 0.5,
           },
         },
         stopSpeakingPlan: {
-          numWords: 4,
+          numWords: 2,
           voiceSeconds: 0.3,
-          backoffSeconds: 1.2,
+          backoffSeconds: 0.8,
         },
         backgroundSound: (script as any).background_sound_enabled
           ? (script as any).background_sound || "office"
