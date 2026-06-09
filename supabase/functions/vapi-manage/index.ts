@@ -262,25 +262,10 @@ serve(async (req) => {
     if (action === "refresh-voicemail-config") {
       // PATCH every existing Vapi assistant to add machine-detection / voicemail config,
       // leaving every other setting untouched.
-      // Aggressive multi-signal voicemail detection. We use Twilio's AMD
-      // (analyses call audio before bridging) tuned to wait until the
-      // greeting ends, then layer Vapi's beep classifier on top. The
-      // assistant NEVER speaks first (firstMessageMode below), and we hang
-      // up immediately if anything looks like a machine.
-      const voicemailDetection = {
-        provider: "twilio",
-        enabled: true,
-        voicemailDetectionTypes: [
-          "machine_end_beep",
-          "machine_end_silence",
-          "machine_end_other",
-          "unknown",
-        ],
-        machineDetectionTimeout: 30,
-        machineDetectionSpeechThreshold: 2400,
-        machineDetectionSpeechEndThreshold: 1500,
-        machineDetectionSilenceTimeout: 5000,
-      };
+      // Keep the assistant responsive on pickup. Twilio AMD can hold audio
+      // before the assistant is bridged, causing a human "hello" to be missed.
+      // We disable it and rely on wait-for-user + the voicemail prompt rule.
+      const voicemailDetection = { provider: "twilio", enabled: false };
       const voicemailRule = 'If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.';
 
       const listRes = await fetch(`${VAPI_BASE}/assistant?limit=1000`, {
@@ -318,6 +303,9 @@ serve(async (req) => {
                   voicemailMessage: "",
                   endCallMessage: "",
                   firstMessageMode: "assistant-waits-for-user",
+                  responseDelaySeconds: null,
+                  startSpeakingPlan: null,
+                  stopSpeakingPlan: null,
                   // Silent-pickup fallback: if the human picks up but doesn't
                   // say anything within 4 seconds, prompt them once or twice
                   // so the AI doesn't sit awkwardly silent.
@@ -325,21 +313,6 @@ serve(async (req) => {
                     idleMessages: ["Hello? Are you there?"],
                     idleTimeoutSeconds: 5,
                     idleMessageMaxSpokenCount: 2,
-                  },
-                  responseDelaySeconds: 0.2,
-                  startSpeakingPlan: {
-                    waitSeconds: 0.4,
-                    smartEndpointingPlan: { provider: "livekit", waitFunction: "200 + 8000 * sqrt(x)" },
-                    transcriptionEndpointingPlan: {
-                      onPunctuationSeconds: 0.1,
-                      onNoPunctuationSeconds: 1.0,
-                      onNumberSeconds: 0.5,
-                    },
-                  },
-                  stopSpeakingPlan: {
-                    numWords: 2,
-                    voiceSeconds: 0.3,
-                    backoffSeconds: 0.8,
                   },
                 }),
               });
@@ -490,41 +463,13 @@ After all questions have been asked (or if the client wants to end early), go st
         recordingEnabled: true,
         maxDurationSeconds: script.max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
-        voicemailDetection: {
-          provider: "twilio",
-          enabled: true,
-          voicemailDetectionTypes: [
-            "machine_end_beep",
-            "machine_end_silence",
-            "machine_end_other",
-            "unknown",
-          ],
-          machineDetectionTimeout: 30,
-          machineDetectionSpeechThreshold: 2400,
-          machineDetectionSpeechEndThreshold: 1500,
-          machineDetectionSilenceTimeout: 5000,
-        },
+        voicemailDetection: { provider: "twilio", enabled: false },
         voicemailMessage: "",
         endCallMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
           idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
-        },
-        responseDelaySeconds: 0.2,
-        startSpeakingPlan: {
-          waitSeconds: 0.4,
-          smartEndpointingPlan: { provider: "livekit", waitFunction: "200 + 8000 * sqrt(x)" },
-          transcriptionEndpointingPlan: {
-            onPunctuationSeconds: 0.1,
-            onNoPunctuationSeconds: 1.0,
-            onNumberSeconds: 0.5,
-          },
-        },
-        stopSpeakingPlan: {
-          numWords: 2,
-          voiceSeconds: 0.3,
-          backoffSeconds: 0.8,
         },
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1274,41 +1219,13 @@ After all questions have been asked (or if the client wants to end early), go st
         recordingEnabled: true,
         maxDurationSeconds: script.max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
-        voicemailDetection: {
-          provider: "twilio",
-          enabled: true,
-          voicemailDetectionTypes: [
-            "machine_end_beep",
-            "machine_end_silence",
-            "machine_end_other",
-            "unknown",
-          ],
-          machineDetectionTimeout: 30,
-          machineDetectionSpeechThreshold: 2400,
-          machineDetectionSpeechEndThreshold: 1500,
-          machineDetectionSilenceTimeout: 5000,
-        },
+        voicemailDetection: { provider: "twilio", enabled: false },
         voicemailMessage: "",
         endCallMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
           idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
-        },
-        responseDelaySeconds: 0.2,
-        startSpeakingPlan: {
-          waitSeconds: 0.4,
-          smartEndpointingPlan: { provider: "livekit", waitFunction: "200 + 8000 * sqrt(x)" },
-          transcriptionEndpointingPlan: {
-            onPunctuationSeconds: 0.1,
-            onNoPunctuationSeconds: 1.0,
-            onNumberSeconds: 0.5,
-          },
-        },
-        stopSpeakingPlan: {
-          numWords: 2,
-          voiceSeconds: 0.3,
-          backoffSeconds: 0.8,
         },
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
@@ -1756,41 +1673,13 @@ After all questions have been asked (or if the caller wants to end early), go st
         recordingEnabled: true,
         maxDurationSeconds: (script as any).max_duration_seconds || 300,
         silenceTimeoutSeconds: 30,
-        voicemailDetection: {
-          provider: "twilio",
-          enabled: true,
-          voicemailDetectionTypes: [
-            "machine_end_beep",
-            "machine_end_silence",
-            "machine_end_other",
-            "unknown",
-          ],
-          machineDetectionTimeout: 30,
-          machineDetectionSpeechThreshold: 2400,
-          machineDetectionSpeechEndThreshold: 1500,
-          machineDetectionSilenceTimeout: 5000,
-        },
+        voicemailDetection: { provider: "twilio", enabled: false },
         voicemailMessage: "",
         endCallMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
           idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
-        },
-        responseDelaySeconds: 0.2,
-        startSpeakingPlan: {
-          waitSeconds: 0.4,
-          smartEndpointingPlan: { provider: "livekit", waitFunction: "200 + 8000 * sqrt(x)" },
-          transcriptionEndpointingPlan: {
-            onPunctuationSeconds: 0.1,
-            onNoPunctuationSeconds: 1.0,
-            onNumberSeconds: 0.5,
-          },
-        },
-        stopSpeakingPlan: {
-          numWords: 2,
-          voiceSeconds: 0.3,
-          backoffSeconds: 0.8,
         },
         backgroundSound: (script as any).background_sound_enabled
           ? (script as any).background_sound || "office"
