@@ -326,6 +326,21 @@ serve(async (req) => {
                     idleTimeoutSeconds: 5,
                     idleMessageMaxSpokenCount: 2,
                   },
+                  responseDelaySeconds: 0.6,
+                  startSpeakingPlan: {
+                    waitSeconds: 1.2,
+                    smartEndpointingPlan: { provider: "livekit", waitFunction: "2000 + 8000 * sqrt(x)" },
+                    transcriptionEndpointingPlan: {
+                      onPunctuationSeconds: 0.4,
+                      onNoPunctuationSeconds: 1.6,
+                      onNumberSeconds: 0.7,
+                    },
+                  },
+                  stopSpeakingPlan: {
+                    numWords: 4,
+                    voiceSeconds: 0.3,
+                    backoffSeconds: 1.2,
+                  },
                 }),
               });
               if (patchRes.status === 429) {
@@ -429,9 +444,11 @@ ACCURACY WITH NAMES, EMAILS & NUMBERS:
 - Say numbers naturally as words. Say "twenty-four to forty-eight hours" NOT "24 to 48 hours". Say "three hundred thousand" NOT "$300,000".
 - If you're unsure about ANY detail other than email, just ask them to repeat it. Better to double-check than get it wrong.
 
-PACING:
+PACING & LISTENING:
+- ALWAYS let the client finish their sentence completely before you speak. NEVER cut them off, talk over them, or start your reply while they are still talking — even if you think you know what they're about to say. Wait for a clear pause.
+- If they pause mid-sentence to think (um, uh, "let me see"), stay quiet and give them time. Only respond once they've clearly finished their thought.
 - After the client says hello or introduces themselves for the FIRST time, pause for a brief moment before you start speaking. Don't jump in immediately — let them finish. Take a breath, then respond naturally.
-- After that first exchange, respond QUICKLY. Once they answer your greeting (e.g. "Good thanks", "Yeah not bad"), jump straight in with your next line — no awkward pauses. Keep the conversation flowing at a natural, brisk pace.
+- After that first exchange, keep the pace natural but unhurried — a brief beat after they finish, then reply. Never rush them and never overlap their voice.
 
 ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the client is willing — but paraphrase them naturally, don't read them word-for-word):
@@ -494,7 +511,21 @@ After all questions have been asked (or if the client wants to end early), go st
           idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
         },
-        responseDelaySeconds: 0.3,
+        responseDelaySeconds: 0.6,
+        startSpeakingPlan: {
+          waitSeconds: 1.2,
+          smartEndpointingPlan: { provider: "livekit", waitFunction: "2000 + 8000 * sqrt(x)" },
+          transcriptionEndpointingPlan: {
+            onPunctuationSeconds: 0.4,
+            onNoPunctuationSeconds: 1.6,
+            onNumberSeconds: 0.7,
+          },
+        },
+        stopSpeakingPlan: {
+          numWords: 4,
+          voiceSeconds: 0.3,
+          backoffSeconds: 1.2,
+        },
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
           : undefined,
@@ -1197,9 +1228,11 @@ ACCURACY WITH NAMES, EMAILS & NUMBERS:
 - Say numbers naturally as words. Say "twenty-four to forty-eight hours" NOT "24 to 48 hours". Say "three hundred thousand" NOT "$300,000".
 - If you're unsure about ANY detail other than email, just ask them to repeat it. Better to double-check than get it wrong.
 
-PACING:
+PACING & LISTENING:
+- ALWAYS let the client finish their sentence completely before you speak. NEVER cut them off, talk over them, or start your reply while they are still talking — even if you think you know what they're about to say. Wait for a clear pause.
+- If they pause mid-sentence to think (um, uh, "let me see"), stay quiet and give them time. Only respond once they've clearly finished their thought.
 - After the client says hello or introduces themselves for the FIRST time, pause for a brief moment before you start speaking. Don't jump in immediately — let them finish. Take a breath, then respond naturally.
-- After that first exchange, respond QUICKLY. Once they answer your greeting (e.g. "Good thanks", "Yeah not bad"), jump straight in with your next line — no awkward pauses. Keep the conversation flowing at a natural, brisk pace.
+- After that first exchange, keep the pace natural but unhurried — a brief beat after they finish, then reply. Never rush them and never overlap their voice.
 
 ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the client is willing — but paraphrase them naturally, don't read them word-for-word):
@@ -1262,7 +1295,21 @@ After all questions have been asked (or if the client wants to end early), go st
           idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
         },
-        responseDelaySeconds: 0.3,
+        responseDelaySeconds: 0.6,
+        startSpeakingPlan: {
+          waitSeconds: 1.2,
+          smartEndpointingPlan: { provider: "livekit", waitFunction: "2000 + 8000 * sqrt(x)" },
+          transcriptionEndpointingPlan: {
+            onPunctuationSeconds: 0.4,
+            onNoPunctuationSeconds: 1.6,
+            onNumberSeconds: 0.7,
+          },
+        },
+        stopSpeakingPlan: {
+          numWords: 4,
+          voiceSeconds: 0.3,
+          backoffSeconds: 1.2,
+        },
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
           : undefined,
@@ -1670,9 +1717,11 @@ ACCURACY WITH NAMES, EMAILS & NUMBERS:
 - Say numbers naturally as words. Say "twenty-four to forty-eight hours" NOT "24 to 48 hours". Say "three hundred thousand" NOT "$300,000".
 - If you're unsure about ANY detail other than email, just ask them to repeat it. Better to double-check than get it wrong.
 
-PACING:
+PACING & LISTENING:
+- ALWAYS let the caller finish their sentence completely before you speak. NEVER cut them off, talk over them, or start your reply while they are still talking — even if you think you know what they're about to say. Wait for a clear pause.
+- If they pause mid-sentence to think (um, uh, "let me see"), stay quiet and give them time. Only respond once they've clearly finished their thought.
 - After the caller says hello or introduces themselves for the FIRST time, pause for a brief moment before you start speaking. Don't jump in immediately — let them finish. Take a breath, then respond naturally.
-- After that first exchange, respond QUICKLY. Once they answer your greeting (e.g. "Good thanks", "Yeah not bad"), jump straight in with your next line — no awkward pauses. Keep the conversation flowing at a natural, brisk pace.
+- After that first exchange, keep the pace natural but unhurried — a brief beat after they finish, then reply. Never rush them and never overlap their voice.
 
 ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the caller is willing — but paraphrase them naturally, don't read them word-for-word):
@@ -1728,7 +1777,21 @@ After all questions have been asked (or if the caller wants to end early), go st
           idleTimeoutSeconds: 5,
           idleMessageMaxSpokenCount: 2,
         },
-        responseDelaySeconds: 0.3,
+        responseDelaySeconds: 0.6,
+        startSpeakingPlan: {
+          waitSeconds: 1.2,
+          smartEndpointingPlan: { provider: "livekit", waitFunction: "2000 + 8000 * sqrt(x)" },
+          transcriptionEndpointingPlan: {
+            onPunctuationSeconds: 0.4,
+            onNoPunctuationSeconds: 1.6,
+            onNumberSeconds: 0.7,
+          },
+        },
+        stopSpeakingPlan: {
+          numWords: 4,
+          voiceSeconds: 0.3,
+          backoffSeconds: 1.2,
+        },
         backgroundSound: (script as any).background_sound_enabled
           ? (script as any).background_sound || "office"
           : undefined,
