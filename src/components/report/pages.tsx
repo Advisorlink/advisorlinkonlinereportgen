@@ -461,22 +461,36 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           </div>
           {/* Combined weighted summary */}
           <div className="grid grid-cols-2 gap-4 mb-5">
-            <SectionCard title="Combined / weighted" icon="✦">
-              <Row label="Total balance" value={fmtMoney(total)} />
-              <Row label="Weighted growth assets" value={fmtPct(wGrowth, 0)} />
-              <Row label="Weighted 5-year return" value={fmtPct(wReturn)} />
-              <Row label="Risk profile (weighted)" value={s.riskProfile} />
-            </SectionCard>
-            <SectionCard title="Comparison scenario" icon="◉">
-              <Row label="Scenario" value="Aligned to risk profile" />
-              <Row label="Risk profile" value={s.riskProfile} />
-              <Row label="Net return (current +2.5%)" value={fmtPct(s.comparisonReturn)} />
-              <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
-              <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
-              <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
-              <Row label="Optional annual advice fee" value="1.76%" />
-              <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(total))} />
-            </SectionCard>
+            <div className="flex flex-col gap-2">
+              <SectionCard title="Combined / weighted" icon="✦">
+                <Row label="Total balance" value={fmtMoney(total)} />
+                <Row label="Weighted growth assets" value={fmtPct(wGrowth, 0)} />
+                <Row label="Weighted 5-year return" value={fmtPct(wReturn)} />
+                <Row label="Risk profile (weighted)" value={s.riskProfile} />
+              </SectionCard>
+              <div className="rounded-lg border border-border bg-secondary/40 px-3 py-2">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Projected at age {s.retirementAge}</div>
+                <div className="text-lg font-bold text-navy tabular-nums leading-tight">{fmtMoney(s.projectedExisting)}</div>
+                <div className="text-[9px] text-muted-foreground italic">after fees and market corrections</div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <SectionCard title="Comparison scenario" icon="◉">
+                <Row label="Scenario" value="Aligned to risk profile" />
+                <Row label="Risk profile" value={s.riskProfile} />
+                <Row label="Net return (current +2.5%)" value={fmtPct(s.comparisonReturn)} />
+                <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
+                <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
+                <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
+                <Row label="Optional annual advice fee" value="1.76%" />
+                <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(total))} />
+              </SectionCard>
+              <div className="rounded-lg border border-cyan/40 bg-cyan/10 px-3 py-2">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-cyan">Projected at age {s.retirementAge}</div>
+                <div className="text-lg font-bold text-cyan tabular-nums leading-tight">{fmtMoney(s.projectedComparison)}</div>
+                <div className="text-[9px] text-muted-foreground italic">after fees and market corrections</div>
+              </div>
+            </div>
           </div>
         </>
       ) : (
