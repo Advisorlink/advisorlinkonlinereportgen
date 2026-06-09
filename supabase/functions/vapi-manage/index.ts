@@ -262,25 +262,10 @@ serve(async (req) => {
     if (action === "refresh-voicemail-config") {
       // PATCH every existing Vapi assistant to add machine-detection / voicemail config,
       // leaving every other setting untouched.
-      // Aggressive multi-signal voicemail detection. We use Twilio's AMD
-      // (analyses call audio before bridging) tuned to wait until the
-      // greeting ends, then layer Vapi's beep classifier on top. The
-      // assistant NEVER speaks first (firstMessageMode below), and we hang
-      // up immediately if anything looks like a machine.
-      const voicemailDetection = {
-        provider: "twilio",
-        enabled: true,
-        voicemailDetectionTypes: [
-          "machine_end_beep",
-          "machine_end_silence",
-          "machine_end_other",
-          "unknown",
-        ],
-        machineDetectionTimeout: 30,
-        machineDetectionSpeechThreshold: 2400,
-        machineDetectionSpeechEndThreshold: 1500,
-        machineDetectionSilenceTimeout: 5000,
-      };
+      // Keep the assistant responsive on pickup. Twilio AMD can hold audio
+      // before the assistant is bridged, causing a human "hello" to be missed.
+      // We disable it and rely on wait-for-user + the voicemail prompt rule.
+      const voicemailDetection = { provider: "twilio", enabled: false };
       const voicemailRule = 'If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.';
 
       const listRes = await fetch(`${VAPI_BASE}/assistant?limit=1000`, {
@@ -325,21 +310,6 @@ serve(async (req) => {
                     idleMessages: ["Hello? Are you there?"],
                     idleTimeoutSeconds: 5,
                     idleMessageMaxSpokenCount: 2,
-                  },
-                  responseDelaySeconds: 0.2,
-                  startSpeakingPlan: {
-                    waitSeconds: 0.4,
-                    smartEndpointingPlan: { provider: "livekit", waitFunction: "200 + 8000 * sqrt(x)" },
-                    transcriptionEndpointingPlan: {
-                      onPunctuationSeconds: 0.1,
-                      onNoPunctuationSeconds: 1.0,
-                      onNumberSeconds: 0.5,
-                    },
-                  },
-                  stopSpeakingPlan: {
-                    numWords: 2,
-                    voiceSeconds: 0.3,
-                    backoffSeconds: 0.8,
                   },
                 }),
               });
