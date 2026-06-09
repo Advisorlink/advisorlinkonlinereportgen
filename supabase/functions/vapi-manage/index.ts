@@ -308,6 +308,7 @@ serve(async (req) => {
       // We disable it and rely on wait-for-user + the voicemail prompt rule.
       const voicemailDetection = { provider: "twilio", enabled: false };
       const voicemailRule = 'If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.';
+      const answerAccuracyRule = ANSWER_ACCURACY_RULE;
 
       const listRes = await fetch(`${VAPI_BASE}/assistant?limit=1000`, {
         headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
@@ -329,8 +330,15 @@ serve(async (req) => {
             try {
               const existingMessages = Array.isArray(a.model?.messages) ? a.model.messages : [];
               const patchedMessages = existingMessages.map((msg: any) => {
-                if (msg?.role !== "system" || typeof msg?.content !== "string" || msg.content.includes(voicemailRule)) return msg;
-                return { ...msg, content: msg.content.replace("CORE RULES:\n", `CORE RULES:\n- ${voicemailRule}\n`) };
+                if (msg?.role !== "system" || typeof msg?.content !== "string") return msg;
+                let content = msg.content;
+                if (!content.includes(voicemailRule)) {
+                  content = content.replace("CORE RULES:\n", `CORE RULES:\n- ${voicemailRule}\n`);
+                }
+                if (!content.includes(answerAccuracyRule)) {
+                  content = content.replace("CORE RULES:\n", `CORE RULES:\n- ${answerAccuracyRule}\n`);
+                }
+                return { ...msg, content };
               });
               const patchRes = await fetch(`${VAPI_BASE}/assistant/${a.id}`, {
                 method: "PATCH",
@@ -347,6 +355,7 @@ serve(async (req) => {
                   responseDelaySeconds: null,
                   startSpeakingPlan: null,
                   stopSpeakingPlan: null,
+                  transcriber: AU_TRANSCRIBER_CONFIG,
                   // Silent-pickup fallback: if the human picks up but doesn't
                   // say anything within 4 seconds, prompt them once or twice
                   // so the AI doesn't sit awkwardly silent.
