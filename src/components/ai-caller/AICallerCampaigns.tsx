@@ -667,7 +667,7 @@ export function AICallerCampaigns() {
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Gauge className="w-3 h-3" />
-                          {c.calls_per_hour ?? 50}/hr · {Math.round((c.min_gap_seconds ?? 180) / 60)} min gap
+                          {c.calls_per_hour ?? 50}/hr · {c.max_concurrent_calls ?? 1} at once · {Math.round((c.min_gap_seconds ?? 180) / 60)} min gap
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
