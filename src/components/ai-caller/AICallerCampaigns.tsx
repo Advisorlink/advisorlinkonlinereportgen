@@ -266,6 +266,7 @@ export function AICallerCampaigns() {
     setScriptId(campaign.script_id);
     setPhoneNumberId(campaign.phone_number_id || "");
     setCallsPerHour(campaign.calls_per_hour ?? 50);
+    setMaxConcurrentCalls(campaign.max_concurrent_calls ?? 1);
     setMinGapSeconds(campaign.min_gap_seconds ?? 180);
     setDailyStart((campaign.daily_start_time || "09:00").slice(0, 5));
     setDailyEnd((campaign.daily_end_time || "17:00").slice(0, 5));
@@ -458,6 +459,15 @@ export function AICallerCampaigns() {
                       onChange={e => {
                         const s = e.target.value;
                         setCallsPerHour(s === "" ? 1 : Math.max(1, parseInt(s) || 1));
+                      }} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Calls at same time</Label>
+                    <Input type="number" min={1} max={50}
+                      value={maxConcurrentCalls || ""}
+                      onChange={e => {
+                        const s = e.target.value;
+                        setMaxConcurrentCalls(s === "" ? 1 : Math.min(50, Math.max(1, parseInt(s) || 1)));
                       }} />
                   </div>
                   <div className="space-y-1">
