@@ -281,6 +281,7 @@ serve(async (req) => {
         machineDetectionSpeechEndThreshold: 1500,
         machineDetectionSilenceTimeout: 5000,
       };
+      const voicemailRule = 'If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.';
 
       const listRes = await fetch(`${VAPI_BASE}/assistant?limit=1000`, {
         headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
@@ -300,6 +301,11 @@ serve(async (req) => {
           while (!done && attempt < 6) {
             attempt++;
             try {
+              const existingMessages = Array.isArray(a.model?.messages) ? a.model.messages : [];
+              const patchedMessages = existingMessages.map((msg: any) => {
+                if (msg?.role !== "system" || typeof msg?.content !== "string" || msg.content.includes(voicemailRule)) return msg;
+                return { ...msg, content: msg.content.replace("CORE RULES:\n", `CORE RULES:\n- ${voicemailRule}\n`) };
+              });
               const patchRes = await fetch(`${VAPI_BASE}/assistant/${a.id}`, {
                 method: "PATCH",
                 headers: {
@@ -307,6 +313,7 @@ serve(async (req) => {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
+                  ...(patchedMessages.length > 0 ? { model: { ...a.model, messages: patchedMessages } } : {}),
                   voicemailDetection,
                   voicemailMessage: "",
                   endCallMessage: "",
