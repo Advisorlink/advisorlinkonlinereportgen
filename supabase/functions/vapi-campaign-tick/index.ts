@@ -2,9 +2,9 @@
 // Runs every minute via pg_cron. For every active campaign:
 //   - Skip if outside the configured daily window / active days (campaign tz).
 //   - Skip if the per-hour cap has been reached in the last 60 min.
-//   - Skip if a call is currently in flight for this campaign.
+//   - Fill available call slots up to the configured concurrent-call limit.
 //   - Skip if the gap since the last call ended hasn't elapsed.
-//   - Otherwise: dial ONE pending contact.
+//   - Otherwise: dial pending contacts up to the campaign limits.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
@@ -74,22 +74,26 @@ async function tickCampaign(supabase: any, campaign: any) {
     .select("id", { count: "exact", head: true })
     .eq("campaign_id", campaign.id)
     .gte("started_at", hourAgo);
-  if ((lastHourCount ?? 0) >= (campaign.calls_per_hour ?? 50)) {
+  const hourlyRemaining = Math.max(0, (campaign.calls_per_hour ?? 50) - (lastHourCount ?? 0));
+  if (hourlyRemaining <= 0) {
     return { campaignId: campaign.id, skipped: "hourly-cap" };
   }
 
-  // In-flight call? (initiated/ringing/in-progress with no ended_at)
+  // In-flight calls? Keep dialling only until this campaign's concurrent limit is full.
   const { count: inFlight } = await supabase
     .from("ai_caller_call_logs")
     .select("id", { count: "exact", head: true })
     .eq("campaign_id", campaign.id)
     .is("ended_at", null);
-  if ((inFlight ?? 0) > 0) {
-    return { campaignId: campaign.id, skipped: "in-flight" };
+  const maxConcurrent = Math.max(1, campaign.max_concurrent_calls ?? 1);
+  const availableSlots = Math.max(0, maxConcurrent - (inFlight ?? 0));
+  if (availableSlots <= 0) {
+    return { campaignId: campaign.id, skipped: "concurrent-limit", inFlight, maxConcurrent };
   }
 
-  // Gap since the previous call finished.
-  if (campaign.last_call_finished_at) {
+  // Gap since the previous call finished. If calls are already in-flight, keep
+  // filling open slots; otherwise wait before starting the next batch.
+  if ((inFlight ?? 0) === 0 && campaign.last_call_finished_at) {
     const since = Date.now() - new Date(campaign.last_call_finished_at).getTime();
     if (since < (campaign.min_gap_seconds ?? 180) * 1000) {
       return { campaignId: campaign.id, skipped: "gap" };
@@ -103,7 +107,7 @@ async function tickCampaign(supabase: any, campaign: any) {
     .eq("campaign_id", campaign.id)
     .eq("call_status", "pending")
     .order("created_at", { ascending: true })
-    .limit(1);
+    .limit(Math.min(availableSlots, hourlyRemaining));
 
   if (!contacts || contacts.length === 0) {
     // Nothing left to dial — mark complete.
