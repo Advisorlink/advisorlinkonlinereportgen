@@ -682,7 +682,7 @@ After all questions have been asked (or if the client wants to end early), go st
         .from("ai_caller_contacts")
         .update({
           call_status: "calling",
-          call_attempts: supabase.rpc ? 1 : 1,
+          call_attempts: 1,
           last_called_at: new Date().toISOString(),
           vapi_call_id: call.id,
         })
