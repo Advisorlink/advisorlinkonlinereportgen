@@ -326,6 +326,21 @@ serve(async (req) => {
                     idleTimeoutSeconds: 5,
                     idleMessageMaxSpokenCount: 2,
                   },
+                  responseDelaySeconds: 0.6,
+                  startSpeakingPlan: {
+                    waitSeconds: 1.2,
+                    smartEndpointingPlan: { provider: "livekit", waitFunction: "2000 + 8000 * sqrt(x)" },
+                    transcriptionEndpointingPlan: {
+                      onPunctuationSeconds: 0.4,
+                      onNoPunctuationSeconds: 1.6,
+                      onNumberSeconds: 0.7,
+                    },
+                  },
+                  stopSpeakingPlan: {
+                    numWords: 4,
+                    voiceSeconds: 0.3,
+                    backoffSeconds: 1.2,
+                  },
                 }),
               });
               if (patchRes.status === 429) {
