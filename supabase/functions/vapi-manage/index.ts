@@ -10,6 +10,9 @@ const corsHeaders = {
 const VAPI_BASE = "https://api.vapi.ai";
 const TWILIO_GATEWAY = "https://connector-gateway.lovable.dev/twilio";
 
+// In-memory cache for Vapi phone-number listing to avoid 429 rate limits
+let phoneNumbersCache: { at: number; data: unknown } | null = null;
+
 // Normalize Australian phone numbers to E.164 format
 function normalizeAUPhone(phone: string): string {
   let cleaned = phone.replace(/[\s\-\(\)]/g, "");
