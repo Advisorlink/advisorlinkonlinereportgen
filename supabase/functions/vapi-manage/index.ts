@@ -13,6 +13,44 @@ const TWILIO_GATEWAY = "https://connector-gateway.lovable.dev/twilio";
 // In-memory cache for Vapi phone-number listing to avoid 429 rate limits
 let phoneNumbersCache: { at: number; data: unknown } | null = null;
 
+const SUPER_FUND_KEYWORDS = [
+  "AustralianSuper:5",
+  "Australian Super:5",
+  "Hostplus:4",
+  "Host Plus:4",
+  "REST Super:4",
+  "Aware Super:4",
+  "UniSuper:4",
+  "CBUS:4",
+  "Cbus Super:4",
+  "HESTA:4",
+  "Australian Retirement Trust:4",
+  "QSuper:4",
+  "CareSuper:3",
+  "Spirit Super:3",
+  "Vision Super:3",
+  "TelstraSuper:3",
+  "Mercer Super:3",
+  "MLC:3",
+  "AMP:3",
+  "IOOF:3",
+  "Netwealth:3",
+  "Macquarie:3",
+  "Colonial First State:3",
+  "BT Super:3",
+];
+
+const AU_TRANSCRIBER_CONFIG = {
+  provider: "deepgram",
+  model: "nova-3",
+  language: "en-AU",
+  smartFormat: true,
+  keywords: SUPER_FUND_KEYWORDS,
+};
+
+const ANSWER_ACCURACY_RULE =
+  "For super fund names and other factual answers, repeat back the EXACT words you heard from the client. Never substitute a different common fund name. If you are not completely sure, ask a quick confirmation like: \"Sorry, did you say AustralianSuper?\" Do not save or acknowledge the answer until they confirm.";
+
 // Normalize Australian phone numbers to E.164 format
 function normalizeAUPhone(phone: string): string {
   let cleaned = phone.replace(/[\s\-\(\)]/g, "");
