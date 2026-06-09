@@ -13,6 +13,44 @@ const TWILIO_GATEWAY = "https://connector-gateway.lovable.dev/twilio";
 // In-memory cache for Vapi phone-number listing to avoid 429 rate limits
 let phoneNumbersCache: { at: number; data: unknown } | null = null;
 
+const SUPER_FUND_KEYWORDS = [
+  "AustralianSuper:5",
+  "Australian Super:5",
+  "Hostplus:4",
+  "Host Plus:4",
+  "REST Super:4",
+  "Aware Super:4",
+  "UniSuper:4",
+  "CBUS:4",
+  "Cbus Super:4",
+  "HESTA:4",
+  "Australian Retirement Trust:4",
+  "QSuper:4",
+  "CareSuper:3",
+  "Spirit Super:3",
+  "Vision Super:3",
+  "TelstraSuper:3",
+  "Mercer Super:3",
+  "MLC:3",
+  "AMP:3",
+  "IOOF:3",
+  "Netwealth:3",
+  "Macquarie:3",
+  "Colonial First State:3",
+  "BT Super:3",
+];
+
+const AU_TRANSCRIBER_CONFIG = {
+  provider: "deepgram",
+  model: "nova-3",
+  language: "en-AU",
+  smartFormat: true,
+  keywords: SUPER_FUND_KEYWORDS,
+};
+
+const ANSWER_ACCURACY_RULE =
+  "For super fund names and other factual answers, repeat back the EXACT words you heard from the client. Never substitute a different common fund name. If you are not completely sure, ask a quick confirmation like: \"Sorry, did you say AustralianSuper?\" Do not save or acknowledge the answer until they confirm.";
+
 // Normalize Australian phone numbers to E.164 format
 function normalizeAUPhone(phone: string): string {
   let cleaned = phone.replace(/[\s\-\(\)]/g, "");
@@ -270,6 +308,7 @@ serve(async (req) => {
       // We disable it and rely on wait-for-user + the voicemail prompt rule.
       const voicemailDetection = { provider: "twilio", enabled: false };
       const voicemailRule = 'If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.';
+      const answerAccuracyRule = ANSWER_ACCURACY_RULE;
 
       const listRes = await fetch(`${VAPI_BASE}/assistant?limit=1000`, {
         headers: { Authorization: `Bearer ${VAPI_API_KEY}` },
@@ -291,8 +330,15 @@ serve(async (req) => {
             try {
               const existingMessages = Array.isArray(a.model?.messages) ? a.model.messages : [];
               const patchedMessages = existingMessages.map((msg: any) => {
-                if (msg?.role !== "system" || typeof msg?.content !== "string" || msg.content.includes(voicemailRule)) return msg;
-                return { ...msg, content: msg.content.replace("CORE RULES:\n", `CORE RULES:\n- ${voicemailRule}\n`) };
+                if (msg?.role !== "system" || typeof msg?.content !== "string") return msg;
+                let content = msg.content;
+                if (!content.includes(voicemailRule)) {
+                  content = content.replace("CORE RULES:\n", `CORE RULES:\n- ${voicemailRule}\n`);
+                }
+                if (!content.includes(answerAccuracyRule)) {
+                  content = content.replace("CORE RULES:\n", `CORE RULES:\n- ${answerAccuracyRule}\n`);
+                }
+                return { ...msg, content };
               });
               const patchRes = await fetch(`${VAPI_BASE}/assistant/${a.id}`, {
                 method: "PATCH",
@@ -309,6 +355,7 @@ serve(async (req) => {
                   responseDelaySeconds: null,
                   startSpeakingPlan: null,
                   stopSpeakingPlan: null,
+                  transcriber: AU_TRANSCRIBER_CONFIG,
                   // Silent-pickup fallback: if the human picks up but doesn't
                   // say anything within 4 seconds, prompt them once or twice
                   // so the AI doesn't sit awkwardly silent.
@@ -399,6 +446,7 @@ HONESTY ABOUT BEING AI:
 CORE RULES:
 - Follow the script instructions above as your primary guide.
 - If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.
+- ${ANSWER_ACCURACY_RULE}
 - After your opening message, wait for the client to respond before continuing.
 - If follow-up statements are provided below, deliver them naturally after the client responds to your greeting.
 - Then ask each question one at a time, waiting for a response before moving on.
@@ -477,11 +525,7 @@ After all questions have been asked (or if the client wants to end early), go st
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
           : undefined,
-        transcriber: {
-          provider: "deepgram",
-          model: "nova-2",
-          language: "en-AU",
-        },
+        transcriber: AU_TRANSCRIBER_CONFIG,
         serverUrl: `${supabaseUrl}/functions/v1/vapi-webhook`,
       };
 
@@ -1187,6 +1231,7 @@ HONESTY ABOUT BEING AI:
 CORE RULES:
 - Follow the script instructions above as your primary guide.
 - If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.
+- ${ANSWER_ACCURACY_RULE}
 - After your opening message, wait for the client to respond before continuing.
 - If follow-up statements are provided below, deliver them naturally after the client responds to your greeting.
 - Then ask each question one at a time, waiting for a response before moving on.
@@ -1265,11 +1310,7 @@ After all questions have been asked (or if the client wants to end early), go st
         backgroundSound: script.background_sound_enabled
           ? script.background_sound || "office"
           : undefined,
-        transcriber: {
-          provider: "deepgram",
-          model: "nova-2",
-          language: "en-AU",
-        },
+        transcriber: AU_TRANSCRIBER_CONFIG,
         serverUrl: `${supabaseUrl}/functions/v1/vapi-webhook`,
       };
 
@@ -1648,6 +1689,7 @@ HONESTY ABOUT BEING AI:
 CORE RULES:
 - Follow the script instructions above as your primary guide.
 - If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.
+- ${ANSWER_ACCURACY_RULE}
 - After your greeting, wait for the caller to respond before continuing.
 - If follow-up statements are provided below, deliver them naturally after the caller responds.
 - Then ask each question one at a time, waiting for a response before moving on.
@@ -1719,7 +1761,7 @@ After all questions have been asked (or if the caller wants to end early), go st
         backgroundSound: (script as any).background_sound_enabled
           ? (script as any).background_sound || "office"
           : undefined,
-        transcriber: { provider: "deepgram", model: "nova-2", language: "en-AU" },
+        transcriber: AU_TRANSCRIBER_CONFIG,
         serverUrl: `${supabaseUrl}/functions/v1/vapi-webhook`,
       };
 
