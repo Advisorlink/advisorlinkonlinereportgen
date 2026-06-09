@@ -1168,6 +1168,7 @@ HONESTY ABOUT BEING AI:
 
 CORE RULES:
 - Follow the script instructions above as your primary guide.
+- If the first audio you hear sounds like voicemail, an answering machine, a recorded greeting, a beep, or "leave a message", do not leave any message and call the end_call function immediately.
 - After your opening message, wait for the client to respond before continuing.
 - If follow-up statements are provided below, deliver them naturally after the client responds to your greeting.
 - Then ask each question one at a time, waiting for a response before moving on.
@@ -1248,6 +1249,7 @@ After all questions have been asked (or if the client wants to end early), go st
           machineDetectionSilenceTimeout: 5000,
         },
         voicemailMessage: "",
+        endCallMessage: "",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
           idleTimeoutSeconds: 5,
