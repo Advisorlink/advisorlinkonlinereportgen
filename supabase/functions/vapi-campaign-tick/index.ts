@@ -129,6 +129,22 @@ async function tickCampaign(supabase: any, campaign: any) {
 
   const results: any[] = [];
   for (const contact of contacts) {
+    const reservedAt = new Date().toISOString();
+    const { data: reserved } = await supabase
+      .from("ai_caller_contacts")
+      .update({
+        call_status: "calling",
+        call_attempts: (contact.call_attempts || 0) + 1,
+        last_called_at: reservedAt,
+      })
+      .eq("id", contact.id)
+      .eq("call_status", "pending")
+      .select("id")
+      .maybeSingle();
+    if (!reserved) {
+      results.push({ contactId: contact.id, skipped: "already-reserved" });
+      continue;
+    }
 
     // Split the contact's name so scripts can greet them via
     // {{first_name}} / {{name}} placeholders in the assistant's first message.
@@ -183,8 +199,7 @@ async function tickCampaign(supabase: any, campaign: any) {
       .from("ai_caller_contacts")
       .update({
         call_status: "failed",
-        last_called_at: new Date().toISOString(),
-        call_attempts: (contact.call_attempts || 0) + 1,
+        last_called_at: reservedAt,
       })
       .eq("id", contact.id);
     // Treat as a finished call for pacing purposes.
@@ -210,8 +225,7 @@ async function tickCampaign(supabase: any, campaign: any) {
     .from("ai_caller_contacts")
     .update({
       call_status: "calling",
-      call_attempts: (contact.call_attempts || 0) + 1,
-      last_called_at: new Date().toISOString(),
+      last_called_at: reservedAt,
       vapi_call_id: call.id,
     })
     .eq("id", contact.id);
