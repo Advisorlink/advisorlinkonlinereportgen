@@ -121,40 +121,42 @@ async function tickCampaign(supabase: any, campaign: any) {
     return { campaignId: campaign.id, skipped: "completed" };
   }
 
-  const contact = contacts[0];
   const assistantId = campaign.vapi_assistant_id;
   const phoneNumberId = campaign.phone_number_id;
   if (!assistantId || !phoneNumberId) {
     return { campaignId: campaign.id, error: "missing-assistant-or-phone" };
   }
 
-  // Split the contact's name so scripts can greet them via
-  // {{first_name}} / {{name}} placeholders in the assistant's first message.
-  const fullName = (contact.name || "").trim();
-  const firstName = fullName.split(/\s+/)[0] || fullName;
+  const results: any[] = [];
+  for (const contact of contacts) {
 
-  const callPayload = {
-    assistantId,
-    customer: { number: normalizeAUPhone(contact.phone), name: fullName || undefined },
-    phoneNumberId,
-    assistantOverrides: {
-      variableValues: {
-        name: fullName,
-        first_name: firstName,
-        full_name: fullName,
+    // Split the contact's name so scripts can greet them via
+    // {{first_name}} / {{name}} placeholders in the assistant's first message.
+    const fullName = (contact.name || "").trim();
+    const firstName = fullName.split(/\s+/)[0] || fullName;
+
+    const callPayload = {
+      assistantId,
+      customer: { number: normalizeAUPhone(contact.phone), name: fullName || undefined },
+      phoneNumberId,
+      assistantOverrides: {
+        variableValues: {
+          name: fullName,
+          first_name: firstName,
+          full_name: fullName,
+        },
       },
-    },
-    metadata: { contactId: contact.id, campaignId: campaign.id },
-  };
+      metadata: { contactId: contact.id, campaignId: campaign.id },
+    };
 
-  const callRes = await fetch(`${VAPI_BASE}/call/phone`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${VAPI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(callPayload),
-  });
+    const callRes = await fetch(`${VAPI_BASE}/call/phone`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${VAPI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(callPayload),
+    });
 
   if (!callRes.ok) {
     const errText = await callRes.text();
