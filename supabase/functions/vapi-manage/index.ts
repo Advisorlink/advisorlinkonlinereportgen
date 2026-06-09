@@ -303,6 +303,9 @@ serve(async (req) => {
                   voicemailMessage: "",
                   endCallMessage: "",
                   firstMessageMode: "assistant-waits-for-user",
+                  responseDelaySeconds: null,
+                  startSpeakingPlan: null,
+                  stopSpeakingPlan: null,
                   // Silent-pickup fallback: if the human picks up but doesn't
                   // say anything within 4 seconds, prompt them once or twice
                   // so the AI doesn't sit awkwardly silent.
