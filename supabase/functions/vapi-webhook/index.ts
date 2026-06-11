@@ -252,6 +252,25 @@ async function routeDealToStage(
         .eq("id", row.id);
     }
   } else {
+    // Never re-create a deal for a lead the user has previously deleted /
+    // moved to Lost / Did Not Answer / Do Not Contact. The sheet-lead-imports
+    // table records this via deleted_at.
+    if (phoneDigits.length >= 6) {
+      const tail = phoneDigits.slice(-9);
+      const { data: deletedRows } = await supabase
+        .from("sheet_lead_imports")
+        .select("phone_digits, deleted_at")
+        .not("deleted_at", "is", null);
+      const isDeleted = (deletedRows || []).some(
+        (r: { phone_digits: string }) =>
+          r.phone_digits === phoneDigits || r.phone_digits.slice(-9) === tail,
+      );
+      if (isDeleted) {
+        console.log("routeDealToStage: skipping previously-deleted lead", phoneDigits);
+        return;
+      }
+    }
+
     const { data: stageRows } = await supabase
       .from("pipeline_deals")
       .select("id, position")
