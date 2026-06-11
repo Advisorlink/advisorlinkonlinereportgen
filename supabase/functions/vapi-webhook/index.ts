@@ -441,7 +441,18 @@ serve(async (req) => {
 
       // Create lead if we got meaningful data
       const hasExtractedData = Object.keys(extractedFields).length > 0;
-      const wasQualified = duration > 30 || hasExtractedData;
+      const wasQualified = duration > 30 || hasExtractedData || consentToContact;
+
+      // Qualification score is driven by the callback consent — if the client
+      // said "yes, have someone call me back", that's a 100% qualified lead
+      // regardless of whether we captured email or other fields. Otherwise
+      // fall back to a partial score based on how many fields were extracted.
+      const computeScore = () =>
+        consentToContact
+          ? 100
+          : hasExtractedData
+            ? Math.min(80, Object.keys(extractedFields).length * 20)
+            : 30;
 
       if (wasQualified) {
         if (contactId) {
@@ -464,9 +475,7 @@ serve(async (req) => {
               full_transcript: transcript,
               recording_url: recordingUrl || null,
               call_duration_seconds: Math.round(duration),
-              qualification_score: hasExtractedData
-                ? Math.min(100, Object.keys(extractedFields).length * 20)
-                : 30,
+              qualification_score: computeScore(),
               status: "new",
             });
 
@@ -491,9 +500,7 @@ serve(async (req) => {
             full_transcript: transcript,
             recording_url: recordingUrl || null,
             call_duration_seconds: Math.round(duration),
-            qualification_score: hasExtractedData
-              ? Math.min(100, Object.keys(extractedFields).length * 20)
-              : 30,
+            qualification_score: computeScore(),
             status: "new",
           });
         }
@@ -557,22 +564,17 @@ serve(async (req) => {
           noAnswerReasons.some((r) => endedReason.toLowerCase().includes(r)) ||
           duration < 8;
 
-        // A "fully qualified" call is one where the AI captured the full
-        // set of structured answers (qualification_score === 100). Those
-        // should always flow into New Lead even if the consent flag wasn't
-        // explicitly captured — completing the script is the strongest
-        // signal of interest we have.
-        const qualificationScore = Object.keys(extractedFields).length > 0
-          ? Math.min(100, Object.keys(extractedFields).length * 20)
-          : 0;
-        const fullyQualified = qualificationScore >= 100 && !!finalEmail;
+        // A lead is "qualified" (100%) if the client agreed to a callback.
+        // Email is no longer required — the script only asks for a callback
+        // commitment at the end, so consent alone routes them into New Lead.
+        const fullyQualified = consentToContact;
 
         let targetStage: string;
         let contactStatus: string;
         if (isNoAnswer) {
           targetStage = "Did Not Answer";
           contactStatus = "no_answer";
-        } else if (fullyQualified || (interested && finalEmail && consentToContact)) {
+        } else if (fullyQualified || (interested && consentToContact)) {
           targetStage = "New Lead";
           contactStatus = "qualified";
         } else {
