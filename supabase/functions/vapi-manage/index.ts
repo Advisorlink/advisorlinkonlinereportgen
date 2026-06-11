@@ -564,7 +564,7 @@ After all questions have been asked (or if the client wants to end early), go st
                 ]
               : undefined,
         },
-        voice: buildVoiceConfig(script, supabaseUrl),
+        voice: await buildVoiceConfig(script, supabaseUrl, VAPI_API_KEY),
         firstMessage: script.first_message || "Hi there, how are you today?",
         firstMessageMode: "assistant-waits-for-user",
         endCallFunctionEnabled: true,
@@ -1349,7 +1349,7 @@ After all questions have been asked (or if the client wants to end early), go st
                 ]
               : undefined,
         },
-        voice: buildVoiceConfig(script, supabaseUrl),
+        voice: await buildVoiceConfig(script, supabaseUrl, VAPI_API_KEY),
         firstMessage: script.first_message || "Hi there, how are you today?",
         firstMessageMode: "assistant-waits-for-user",
         endCallFunctionEnabled: true,
@@ -1801,7 +1801,7 @@ After all questions have been asked (or if the caller wants to end early), go st
             async: false,
           }] : undefined,
         },
-        voice: buildVoiceConfig(script as any, supabaseUrl),
+        voice: await buildVoiceConfig(script as any, supabaseUrl, VAPI_API_KEY),
         firstMessage: (script as any).first_message || "G'day! Thanks for calling Advisor Link. How can I help you today?",
         endCallFunctionEnabled: true,
         recordingEnabled: true,
