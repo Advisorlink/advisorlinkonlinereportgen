@@ -567,7 +567,7 @@ serve(async (req) => {
         // A lead is "qualified" (100%) if the client agreed to a callback.
         // Email is no longer required — the script only asks for a callback
         // commitment at the end, so consent alone routes them into New Lead.
-        const fullyQualified = consentToContact || (qualifiedTransfer === true);
+        const fullyQualified = consentToContact;
 
         let targetStage: string;
         let contactStatus: string;
