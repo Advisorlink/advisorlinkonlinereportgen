@@ -90,6 +90,56 @@ const VOICE_ID_MAP: Record<string, string> = {
 // ElevenLabs dashboard — do not silently swap to an American Vapi voice.
 const VAPI_VOICE_FALLBACKS: Record<string, string> = {};
 
+// Cache the Vapi 11labs credential ID across invocations in the same isolate
+let elevenLabsCredentialIdCache: string | null = null;
+
+async function ensureElevenLabsCredential(
+  vapiApiKey: string,
+): Promise<string | null> {
+  if (elevenLabsCredentialIdCache) return elevenLabsCredentialIdCache;
+  const elevenKey = Deno.env.get("ELEVENLABS_API_KEY");
+  if (!elevenKey) return null;
+  try {
+    const listRes = await fetch(`${VAPI_BASE}/credential`, {
+      headers: { Authorization: `Bearer ${vapiApiKey}` },
+    });
+    if (listRes.ok) {
+      const list = await listRes.json();
+      const existing = Array.isArray(list)
+        ? list.find((c: any) => c.provider === "11labs")
+        : null;
+      if (existing?.id) {
+        elevenLabsCredentialIdCache = existing.id;
+        return existing.id;
+      }
+    }
+    const createRes = await fetch(`${VAPI_BASE}/credential`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${vapiApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ provider: "11labs", apiKey: elevenKey }),
+    });
+    if (createRes.ok) {
+      const created = await createRes.json();
+      if (created?.id) {
+        elevenLabsCredentialIdCache = created.id;
+        return created.id;
+      }
+    } else {
+      console.log(
+        "ensureElevenLabsCredential create failed",
+        createRes.status,
+        (await createRes.text()).slice(0, 200),
+      );
+    }
+  } catch (e) {
+    console.log("ensureElevenLabsCredential error", e);
+  }
+  return null;
+}
+
 function resolveVoiceId(shortId: string | undefined): string {
   if (!shortId) return VOICE_ID_MAP.voice1;
   return VOICE_ID_MAP[shortId] || shortId;
@@ -100,12 +150,16 @@ function resolveVoiceProvider(provider: string | undefined): string {
   return provider;
 }
 
-function buildVoiceConfig(script: any, supabaseUrl: string) {
+async function buildVoiceConfig(
+  script: any,
+  supabaseUrl: string,
+  vapiApiKey: string,
+) {
   const provider = resolveVoiceProvider(script.voice_provider);
   const shortVoiceId = script.voice_id;
   const voiceId = resolveVoiceId(shortVoiceId);
 
-  return {
+  const config: Record<string, unknown> = {
     provider,
     voiceId,
     model: "eleven_turbo_v2_5",
@@ -113,6 +167,13 @@ function buildVoiceConfig(script: any, supabaseUrl: string) {
     inputMinCharacters: 10,
     fillerInjectionEnabled: false,
   };
+
+  if (provider === "11labs") {
+    const credentialId = await ensureElevenLabsCredential(vapiApiKey);
+    if (credentialId) config.credentialId = credentialId;
+  }
+
+  return config;
 }
 
 
@@ -503,7 +564,7 @@ After all questions have been asked (or if the client wants to end early), go st
                 ]
               : undefined,
         },
-        voice: buildVoiceConfig(script, supabaseUrl),
+        voice: await buildVoiceConfig(script, supabaseUrl, VAPI_API_KEY),
         firstMessage: script.first_message || "Hi there, how are you today?",
         firstMessageMode: "assistant-waits-for-user",
         endCallFunctionEnabled: true,
@@ -1288,7 +1349,7 @@ After all questions have been asked (or if the client wants to end early), go st
                 ]
               : undefined,
         },
-        voice: buildVoiceConfig(script, supabaseUrl),
+        voice: await buildVoiceConfig(script, supabaseUrl, VAPI_API_KEY),
         firstMessage: script.first_message || "Hi there, how are you today?",
         firstMessageMode: "assistant-waits-for-user",
         endCallFunctionEnabled: true,
@@ -1740,7 +1801,7 @@ After all questions have been asked (or if the caller wants to end early), go st
             async: false,
           }] : undefined,
         },
-        voice: buildVoiceConfig(script as any, supabaseUrl),
+        voice: await buildVoiceConfig(script as any, supabaseUrl, VAPI_API_KEY),
         firstMessage: (script as any).first_message || "G'day! Thanks for calling Advisor Link. How can I help you today?",
         endCallFunctionEnabled: true,
         recordingEnabled: true,
