@@ -176,7 +176,9 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
       setNewTaskTitle("");
       setNewTaskDue("");
       fetchTasks(deal.id);
-      toast({ title: "Task scheduled" });
+      toast({ title: "Task scheduled — moved to Tasks Due" });
+      // Refresh board so the deal visibly moves to the Tasks Due column
+      try { window.dispatchEvent(new CustomEvent("pipeline:refresh")); } catch { /* noop */ }
     }
   };
 
