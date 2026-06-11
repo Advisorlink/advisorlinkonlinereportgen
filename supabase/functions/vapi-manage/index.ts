@@ -411,7 +411,7 @@ serve(async (req) => {
                   ...(patchedMessages.length > 0 ? { model: { ...a.model, messages: patchedMessages } } : {}),
                   voicemailDetection,
                   voicemailMessage: "",
-                  endCallMessage: "",
+                  endCallMessage: "Thanks so much for your time today — someone from our team will reach out to you shortly. You have a great day. Bye for now.",
                   firstMessageMode: "assistant-waits-for-user",
                   responseDelaySeconds: null,
                   startSpeakingPlan: null,
@@ -515,7 +515,7 @@ CORE RULES:
 - Listen carefully to what the client says and respond appropriately — don't talk over them or ignore their answers.
 - As long as the client is engaged and willing, make sure you ask EVERY question listed below. Do not skip questions or rush to end the call early when the client is happy to chat.
 - Keep your responses short and concise — one or two sentences max before asking the next question.
-- When ending the call, deliver the CLOSING STATEMENTS exactly as written below, then immediately hang up. Do NOT improvise extra goodbyes like "one moment" or "bye" after the final closing line.
+- When ending the call, deliver the CLOSING STATEMENTS below in a WARM, friendly, unhurried tone — thank them for their time, let them know someone will reach out, and wish them a great day. Never end abruptly or rudely.
 
 INTEREST DETECTION:
 - Do NOT assume the client is uninterested just because they give short answers, sound unsure, or ask clarifying questions. These are totally normal.
@@ -539,7 +539,7 @@ ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the client is willing — but paraphrase them naturally, don't read them word-for-word):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 ${closingMsg}
-After all questions have been asked (or if the client wants to end early), go straight into the CLOSING STATEMENTS above. Say the final closing statement EXACTLY as written and then immediately end the call. Do NOT add "one moment", "okay", "bye", or any other words after the final closing statement — the closing statement IS the goodbye.`;
+After all questions have been asked (or if the client wants to end early), go into the CLOSING STATEMENTS above warmly and naturally. Always thank them, mention someone will reach out, and wish them a great day before hanging up. Never end the call abruptly or rudely.`;
 
       const assistantPayload: any = {
         name: (script.name || "Assistant").substring(0, 40),
@@ -577,7 +577,7 @@ After all questions have been asked (or if the client wants to end early), go st
         silenceTimeoutSeconds: 30,
         voicemailDetection: { provider: "twilio", enabled: false },
         voicemailMessage: "",
-        endCallMessage: "",
+        endCallMessage: "Thanks so much for your time today — someone from our team will reach out to you shortly. You have a great day. Bye for now.",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
           idleTimeoutSeconds: 5,
@@ -1300,7 +1300,7 @@ CORE RULES:
 - Listen carefully to what the client says and respond appropriately — don't talk over them or ignore their answers.
 - As long as the client is engaged and willing, make sure you ask EVERY question listed below. Do not skip questions or rush to end the call early when the client is happy to chat.
 - Keep your responses short and concise — one or two sentences max before asking the next question.
-- When ending the call, deliver the CLOSING STATEMENTS exactly as written below, then immediately hang up. Do NOT improvise extra goodbyes like "one moment" or "bye" after the final closing line.
+- When ending the call, deliver the CLOSING STATEMENTS below in a WARM, friendly, unhurried tone — thank them for their time, let them know someone will reach out, and wish them a great day. Never end abruptly or rudely.
 
 INTEREST DETECTION:
 - Do NOT assume the client is uninterested just because they give short answers, sound unsure, or ask clarifying questions. These are totally normal.
@@ -1324,7 +1324,7 @@ ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the client is willing — but paraphrase them naturally, don't read them word-for-word):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 ${closingMsg}
-After all questions have been asked (or if the client wants to end early), go straight into the CLOSING STATEMENTS above. Say the final closing statement EXACTLY as written and then immediately end the call. Do NOT add "one moment", "okay", "bye", or any other words after the final closing statement — the closing statement IS the goodbye.`;
+After all questions have been asked (or if the client wants to end early), go into the CLOSING STATEMENTS above warmly and naturally. Always thank them, mention someone will reach out, and wish them a great day before hanging up. Never end the call abruptly or rudely.`;
 
       const assistantPayload: any = {
         name: `${script.name} - Campaign`.substring(0, 40),
@@ -1362,7 +1362,7 @@ After all questions have been asked (or if the client wants to end early), go st
         silenceTimeoutSeconds: 30,
         voicemailDetection: { provider: "twilio", enabled: false },
         voicemailMessage: "",
-        endCallMessage: "",
+        endCallMessage: "Thanks so much for your time today — someone from our team will reach out to you shortly. You have a great day. Bye for now.",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
           idleTimeoutSeconds: 5,
@@ -1758,7 +1758,7 @@ CORE RULES:
 - Listen carefully to what the caller says and respond appropriately — don't talk over them or ignore their answers.
 - As long as the caller is engaged and willing, make sure you ask EVERY question listed below. Do not skip questions or rush to end the call early when the caller is happy to chat.
 - Keep your responses short and concise — one or two sentences max before asking the next question.
-- When ending the call, deliver the CLOSING STATEMENTS exactly as written below, then immediately hang up. Do NOT improvise extra goodbyes like "one moment" or "bye" after the final closing line.
+- When ending the call, deliver the CLOSING STATEMENTS below in a WARM, friendly, unhurried tone — thank them for their time, let them know someone will reach out, and wish them a great day. Never end abruptly or rudely.
 
 INTEREST DETECTION:
 - Do NOT assume the caller is uninterested just because they give short answers, sound unsure, or ask clarifying questions. These are totally normal.
@@ -1782,7 +1782,7 @@ ${secondMessage}
 QUESTIONS TO ASK (ask all of these in order, as long as the caller is willing — but paraphrase them naturally, don't read them word-for-word):
 ${questions.map((q: any, i: number) => `${i + 1}. ${q.question} (save their answer as "${q.fieldName}")`).join("\n")}
 ${closingMsg}
-After all questions have been asked (or if the caller wants to end early), go straight into the CLOSING STATEMENTS above. Say the final closing statement EXACTLY as written and then immediately end the call. Do NOT add "one moment", "okay", "bye", or any other words after the final closing statement — the closing statement IS the goodbye.`;
+After all questions have been asked (or if the caller wants to end early), go into the CLOSING STATEMENTS above warmly and naturally. Always thank them, mention someone will reach out, and wish them a great day before hanging up. Never end the call abruptly or rudely.`;
 
       const assistantPayload: any = {
         name: `${(script as any).name} - Inbound`.substring(0, 40),
@@ -1813,7 +1813,7 @@ After all questions have been asked (or if the caller wants to end early), go st
         silenceTimeoutSeconds: 30,
         voicemailDetection: { provider: "twilio", enabled: false },
         voicemailMessage: "",
-        endCallMessage: "",
+        endCallMessage: "Thanks so much for your time today — someone from our team will reach out to you shortly. You have a great day. Bye for now.",
         messagePlan: {
           idleMessages: ["Hello? Are you there?"],
           idleTimeoutSeconds: 5,
