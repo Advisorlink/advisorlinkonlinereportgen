@@ -84,12 +84,11 @@ const VOICE_ID_MAP: Record<string, string> = {
   voice7: "sclx1MZrNqboRcmLWoDb",
 };
 
-const VAPI_VOICE_FALLBACKS: Record<string, string> = {
-  voice4: "Elliot",
-  voice5: "Rohan",
-  voice6: "Zac",
-  voice7: "Dan",
-};
+// NOTE: We intentionally do NOT fall back to Vapi's built-in voices (Elliot, Rohan, Zac, Dan)
+// because those are American. Always use the ElevenLabs Australian community voices selected in
+// the Voices tab. If an ElevenLabs voice ID isn't in the workspace library, add it via the
+// ElevenLabs dashboard — do not silently swap to an American Vapi voice.
+const VAPI_VOICE_FALLBACKS: Record<string, string> = {};
 
 function resolveVoiceId(shortId: string | undefined): string {
   if (!shortId) return VOICE_ID_MAP.voice1;
@@ -106,20 +105,16 @@ function buildVoiceConfig(script: any, supabaseUrl: string) {
   const shortVoiceId = script.voice_id;
   const voiceId = resolveVoiceId(shortVoiceId);
 
-  if (provider === "11labs" && VAPI_VOICE_FALLBACKS[shortVoiceId]) {
-    return {
-      provider: "vapi",
-      voiceId: VAPI_VOICE_FALLBACKS[shortVoiceId],
-    };
-  }
-
   return {
     provider,
     voiceId,
+    model: "eleven_turbo_v2_5",
+    language: "en",
     inputMinCharacters: 10,
     fillerInjectionEnabled: false,
   };
 }
+
 
 function hasMeaningfulFields(
   fields: Record<string, unknown> | null | undefined,
