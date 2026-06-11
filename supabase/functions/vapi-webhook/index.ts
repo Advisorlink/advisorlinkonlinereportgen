@@ -564,22 +564,17 @@ serve(async (req) => {
           noAnswerReasons.some((r) => endedReason.toLowerCase().includes(r)) ||
           duration < 8;
 
-        // A "fully qualified" call is one where the AI captured the full
-        // set of structured answers (qualification_score === 100). Those
-        // should always flow into New Lead even if the consent flag wasn't
-        // explicitly captured — completing the script is the strongest
-        // signal of interest we have.
-        const qualificationScore = Object.keys(extractedFields).length > 0
-          ? Math.min(100, Object.keys(extractedFields).length * 20)
-          : 0;
-        const fullyQualified = qualificationScore >= 100 && !!finalEmail;
+        // A lead is "qualified" (100%) if the client agreed to a callback.
+        // Email is no longer required — the script only asks for a callback
+        // commitment at the end, so consent alone routes them into New Lead.
+        const fullyQualified = consentToContact || (qualifiedTransfer === true);
 
         let targetStage: string;
         let contactStatus: string;
         if (isNoAnswer) {
           targetStage = "Did Not Answer";
           contactStatus = "no_answer";
-        } else if (fullyQualified || (interested && finalEmail && consentToContact)) {
+        } else if (fullyQualified || (interested && consentToContact)) {
           targetStage = "New Lead";
           contactStatus = "qualified";
         } else {
