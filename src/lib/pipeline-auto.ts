@@ -18,6 +18,24 @@ export async function moveDealToStage(stageName: string, opts: {
     const email = (opts.clientEmail || "").trim().toLowerCase() || null;
     const phoneDigits = (opts.clientPhone || "").replace(/\D+/g, "");
 
+    if (phoneDigits.length >= 6) {
+      const phoneCandidates = new Set<string>([phoneDigits, phoneDigits.slice(-9)]);
+      if (phoneDigits.startsWith("0") && phoneDigits.length === 10) {
+        phoneCandidates.add(`61${phoneDigits.slice(1)}`);
+      }
+      if (phoneDigits.length === 9) {
+        phoneCandidates.add(`61${phoneDigits}`);
+      }
+
+      const { data: deletedImports } = await supabase
+        .from("sheet_lead_imports")
+        .select("phone_digits")
+        .not("deleted_at", "is", null)
+        .in("phone_digits", Array.from(phoneCandidates));
+
+      if ((deletedImports || []).length > 0) return;
+    }
+
     // Strip undefined/null/blank entries so we never overwrite real data with blanks.
     const cleanedExtra: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(opts.extraFields ?? {})) {
