@@ -13,31 +13,32 @@ const TWILIO_GATEWAY = "https://connector-gateway.lovable.dev/twilio";
 // In-memory cache for Vapi phone-number listing to avoid 429 rate limits
 let phoneNumbersCache: { at: number; data: unknown } | null = null;
 
+// Vapi requires single-word keywords (no spaces). Format: "word" or "word:boost".
 const SUPER_FUND_KEYWORDS = [
   "AustralianSuper:5",
-  "Australian Super:5",
   "Hostplus:4",
-  "Host Plus:4",
-  "REST Super:4",
-  "Aware Super:4",
+  "HostPlus:4",
+  "REST:4",
+  "RESTSuper:4",
+  "Aware:4",
+  "AwareSuper:4",
   "UniSuper:4",
   "CBUS:4",
-  "Cbus Super:4",
+  "Cbus:4",
   "HESTA:4",
-  "Australian Retirement Trust:4",
   "QSuper:4",
   "CareSuper:3",
-  "Spirit Super:3",
-  "Vision Super:3",
+  "SpiritSuper:3",
+  "VisionSuper:3",
   "TelstraSuper:3",
-  "Mercer Super:3",
+  "Mercer:3",
   "MLC:3",
   "AMP:3",
   "IOOF:3",
   "Netwealth:3",
   "Macquarie:3",
-  "Colonial First State:3",
-  "BT Super:3",
+  "Colonial:3",
+  "BT:3",
 ];
 
 const AU_TRANSCRIBER_CONFIG = {
