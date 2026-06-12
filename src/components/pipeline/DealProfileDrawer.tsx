@@ -147,8 +147,21 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
       fetchNotes(deal.id);
       fetchClientDocs(deal.client_email, deal.client_phone);
       fetchTasks(deal.id);
+      fetchActiveBooking(deal.id);
     }
   }, [deal]);
+
+  const fetchActiveBooking = useCallback(async (dealId: string) => {
+    const { data } = await supabase
+      .from("bookings")
+      .select("id, reschedule_token, start_at, client_timezone")
+      .eq("contact_id", dealId)
+      .in("status", ["booked", "rescheduled"])
+      .gte("start_at", new Date().toISOString())
+      .order("start_at", { ascending: true })
+      .limit(1);
+    setActiveBooking(((data as any) || [])[0] || null);
+  }, []);
 
   const fetchTasks = useCallback(async (dealId: string) => {
     const { data } = await supabase
