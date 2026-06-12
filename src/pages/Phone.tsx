@@ -56,7 +56,7 @@ function relativeTime(iso: string) {
 }
 
 export default function PhonePage() {
-  const { ready, registering, callerId, identity, bootstrap, dial, initialize } = useSoftphone();
+  const { ready, registering, callerId, identity, bootstrap, dial, initialize, availableNumbers, selectedCallerId, setSelectedCallerId } = useSoftphone();
   const [number, setNumber] = useState("");
   const [provisioning, setProvisioning] = useState(false);
   const [logs, setLogs] = useState<LogRow[]>([]);
