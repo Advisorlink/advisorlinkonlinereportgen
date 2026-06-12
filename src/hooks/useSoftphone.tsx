@@ -157,6 +157,36 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
   const [incoming, setIncoming] = useState<Call | null>(null);
   const [incomingMatch, setIncomingMatch] = useState<ContactMatch | null>(null);
   const [active, setActive] = useState<CallState | null>(null);
+  const [availableNumbers, setAvailableNumbers] = useState<TwilioNumberOption[]>([]);
+  const [selectedCallerId, setSelectedCallerIdState] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem(CALLER_ID_STORAGE_KEY);
+  });
+  const setSelectedCallerId = useCallback((n: string) => {
+    setSelectedCallerIdState(n);
+    try { window.localStorage.setItem(CALLER_ID_STORAGE_KEY, n); } catch { /* noop */ }
+  }, []);
+
+  // Load list of available Twilio numbers to choose from
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("sms_twilio_numbers")
+        .select("phone_number, friendly_name, provider, is_default")
+        .eq("provider", "twilio")
+        .order("is_default", { ascending: false });
+      if (cancelled) return;
+      const rows = ((data || []) as Array<{ phone_number: string; friendly_name: string | null }>);
+      setAvailableNumbers(rows);
+      setSelectedCallerIdState((curr) => {
+        if (curr && rows.some((r) => r.phone_number === curr)) return curr;
+        return rows[0]?.phone_number ?? null;
+      });
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
 
   const fetchToken = useCallback(async () => {
     const { data, error } = await supabase.functions.invoke("twilio-voice-token");
