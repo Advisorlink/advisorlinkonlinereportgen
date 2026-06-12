@@ -357,12 +357,15 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
     let lookupMeta = meta;
     if (!lookupMeta?.contactName) {
       const m = await lookupCaller(normalized);
-      lookupMeta = { contactName: m.name ?? undefined, contactId: m.contactId ?? undefined, dealId: m.dealId ?? undefined };
+      lookupMeta = { ...meta, contactName: m.name ?? undefined, contactId: m.contactId ?? undefined, dealId: m.dealId ?? undefined };
     }
-    const call = await device.connect({ params: { To: normalized } });
+    const fromNumber = meta?.fromNumber || selectedCallerId || "";
+    const params: Record<string, string> = { To: normalized };
+    if (fromNumber) params.CallerId = fromNumber;
+    const call = await device.connect({ params });
     attachCall(call, {
       direction: "outbound",
-      from: callerId || "",
+      from: fromNumber || callerId || "",
       to: normalized,
       contactName: lookupMeta?.contactName ?? null,
       contactId: lookupMeta?.contactId ?? null,
@@ -370,7 +373,8 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
       startedAt: Date.now(),
       status: "connecting",
     });
-  }, [attachCall, callerId, initialize]);
+  }, [attachCall, callerId, initialize, selectedCallerId]);
+
 
   const answer = useCallback(() => {
     if (!incoming) return;
