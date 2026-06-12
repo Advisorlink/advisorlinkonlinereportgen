@@ -113,6 +113,8 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
   const [progress, setProgress] = useState<string[]>([]);
   const [progressSaving, setProgressSaving] = useState<string | null>(null);
   const [bookOpen, setBookOpen] = useState(false);
+  const [rebookOpen, setRebookOpen] = useState(false);
+  const [activeBooking, setActiveBooking] = useState<{ id: string; reschedule_token: string; start_at: string; client_timezone: string } | null>(null);
   const [clientDocs, setClientDocs] = useState<any[]>([]);
   const [tasks, setTasks] = useState<DealTask[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState("");
