@@ -74,7 +74,8 @@ Deno.serve(async (req: Request) => {
   const To = (form.get("To") as string) || "";
   const CallSid = (form.get("CallSid") as string) || "";
   const CallStatus = (form.get("CallStatus") as string) || "";
-  console.log("twilio-voice:", { From, To, CallSid, CallStatus });
+  const CallerIdOverride = (form.get("CallerId") as string) || "";
+  console.log("twilio-voice:", { From, To, CallSid, CallStatus, CallerIdOverride });
 
   const supa = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -87,13 +88,23 @@ Deno.serve(async (req: Request) => {
     .eq("id", 1)
     .maybeSingle();
   const clientIdentity = cfg?.client_identity || "crm_user";
-  const callerId = cfg?.caller_id || "";
+  let callerId = cfg?.caller_id || "";
 
   // Outbound: browser → PSTN
   if (From.startsWith("client:")) {
     const normalizedTo = normalizePhoneNumber(To);
     if (!normalizedTo || !isE164(normalizedTo)) {
       return twiml("<Say>That phone number is not valid. Please use the full mobile number.</Say><Hangup/>");
+    }
+    // Allow the dialer to override the caller-id with any owned Twilio number
+    if (CallerIdOverride) {
+      const { data: owned } = await supa
+        .from("sms_twilio_numbers")
+        .select("phone_number")
+        .eq("phone_number", CallerIdOverride)
+        .eq("provider", "twilio")
+        .maybeSingle();
+      if (owned?.phone_number) callerId = owned.phone_number;
     }
     await supa.from("voice_call_logs").insert({
       call_sid: CallSid,
