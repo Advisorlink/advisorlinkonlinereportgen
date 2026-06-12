@@ -18,6 +18,8 @@ export type CallState = {
   isOnHold: boolean;
 };
 
+export type TwilioNumberOption = { phone_number: string; friendly_name: string | null };
+
 type Ctx = {
   ready: boolean;
   registering: boolean;
@@ -26,9 +28,12 @@ type Ctx = {
   incoming: Call | null;
   incomingMatch: ContactMatch | null;
   active: CallState | null;
+  availableNumbers: TwilioNumberOption[];
+  selectedCallerId: string | null;
+  setSelectedCallerId: (n: string) => void;
   initialize: () => Promise<void>;
   bootstrap: () => Promise<void>;
-  dial: (number: string, meta?: { contactName?: string; contactId?: string; dealId?: string }) => Promise<void>;
+  dial: (number: string, meta?: { contactName?: string; contactId?: string; dealId?: string; fromNumber?: string }) => Promise<void>;
   answer: () => void;
   reject: () => void;
   hangup: () => void;
@@ -38,6 +43,7 @@ type Ctx = {
 };
 
 const SoftphoneCtx = createContext<Ctx | null>(null);
+const CALLER_ID_STORAGE_KEY = "softphone:selectedCallerId";
 
 type ContactMatch = { name: string | null; contactId?: string | null; dealId?: string | null };
 
