@@ -108,44 +108,48 @@ export function BookAppointmentDialog({ open, onOpenChange, prefill, dealId, onB
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
             <CalIcon className="w-5 h-5 text-cyan" />
-            Book Appointment
+            {isRebook ? "Rebook Appointment" : "Book Appointment"}
           </DialogTitle>
           <DialogDescription className="text-white/60">
-            Pick a time and we'll send the client confirmation by email & SMS, add it to your Google Calendar, and update the pipeline.
+            {isRebook
+              ? "Pick a new time. The client gets an SMS and email confirming the new slot, the Google Calendar event updates, and reminders restart automatically."
+              : "Pick a time and we'll send the client confirmation by email & SMS, add it to your Google Calendar, and update the pipeline."}
           </DialogDescription>
         </DialogHeader>
 
         {done ? (
           <div className="py-10 text-center space-y-3">
             <CheckCircle2 className="w-12 h-12 text-cyan mx-auto" />
-            <h3 className="text-lg font-semibold">Booked!</h3>
+            <h3 className="text-lg font-semibold">{isRebook ? "Rebooked!" : "Booked!"}</h3>
             <p className="text-sm text-white/70">{done.dateStr} at {done.timeStr}</p>
             <Button onClick={() => onOpenChange(false)} className="bg-cyan text-navy hover:bg-cyan-glow">Close</Button>
           </div>
         ) : (
           <div className="space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs text-white/60">First name *</Label>
-                <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+            {!isRebook && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs text-white/60">First name *</Label>
+                  <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+                </div>
+                <div>
+                  <Label className="text-xs text-white/60">Last name</Label>
+                  <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+                </div>
+                <div>
+                  <Label className="text-xs text-white/60">Email *</Label>
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+                </div>
+                <div>
+                  <Label className="text-xs text-white/60">Phone</Label>
+                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+                </div>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs text-white/60">Notes</Label>
+                  <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="bg-white/5 border-white/10 text-white resize-none" />
+                </div>
               </div>
-              <div>
-                <Label className="text-xs text-white/60">Last name</Label>
-                <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-white/5 border-white/10 text-white" />
-              </div>
-              <div>
-                <Label className="text-xs text-white/60">Email *</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white/5 border-white/10 text-white" />
-              </div>
-              <div>
-                <Label className="text-xs text-white/60">Phone</Label>
-                <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-white/5 border-white/10 text-white" />
-              </div>
-              <div className="sm:col-span-2">
-                <Label className="text-xs text-white/60">Notes</Label>
-                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="bg-white/5 border-white/10 text-white resize-none" />
-              </div>
-            </div>
+            )}
 
             <BookingPicker
               onSelect={(iso, tz) => { setPickedIso(iso); setPickedTz(tz); }}
@@ -155,7 +159,7 @@ export function BookAppointmentDialog({ open, onOpenChange, prefill, dealId, onB
             <div className="flex justify-end gap-2 pt-2 border-t border-white/10">
               <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-white/70 hover:text-white hover:bg-white/10">Cancel</Button>
               <Button onClick={submit} disabled={!pickedIso || submitting} className="bg-cyan text-navy hover:bg-cyan-glow">
-                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm booking"}
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (isRebook ? "Confirm rebook" : "Confirm booking")}
               </Button>
             </div>
           </div>
