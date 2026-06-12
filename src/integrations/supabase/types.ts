@@ -1005,6 +1005,7 @@ export type Database = {
           client_name: string
           client_phone: string | null
           created_at: string
+          did_not_answer_count: number
           had_review_before: boolean | null
           id: string
           lost_reason_id: string | null
@@ -1012,6 +1013,7 @@ export type Database = {
           notes: string | null
           position: number
           progress_stages: string[]
+          return_to_next_call_at: string | null
           source: string | null
           stage_id: string
           state: string | null
@@ -1028,6 +1030,7 @@ export type Database = {
           client_name: string
           client_phone?: string | null
           created_at?: string
+          did_not_answer_count?: number
           had_review_before?: boolean | null
           id?: string
           lost_reason_id?: string | null
@@ -1035,6 +1038,7 @@ export type Database = {
           notes?: string | null
           position?: number
           progress_stages?: string[]
+          return_to_next_call_at?: string | null
           source?: string | null
           stage_id: string
           state?: string | null
@@ -1051,6 +1055,7 @@ export type Database = {
           client_name?: string
           client_phone?: string | null
           created_at?: string
+          did_not_answer_count?: number
           had_review_before?: boolean | null
           id?: string
           lost_reason_id?: string | null
@@ -1058,6 +1063,7 @@ export type Database = {
           notes?: string | null
           position?: number
           progress_stages?: string[]
+          return_to_next_call_at?: string | null
           source?: string | null
           stage_id?: string
           state?: string | null
@@ -2229,6 +2235,7 @@ export type Database = {
       }
       is_blocked: { Args: { _uid: string }; Returns: boolean }
       is_owner: { Args: { _uid: string }; Returns: boolean }
+      process_dna_returns: { Args: never; Returns: number }
       submit_esign_signature: {
         Args: { _field_index?: number; _signature_data: string; _token: string }
         Returns: string
