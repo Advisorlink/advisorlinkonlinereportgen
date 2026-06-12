@@ -19,6 +19,8 @@ interface Props {
   };
   dealId?: string | null;
   onBooked?: () => void;
+  /** When provided, the dialog rebooks (reschedules) the existing booking via this token. */
+  rescheduleToken?: string | null;
 }
 
 function splitName(full?: string | null): { first: string; last: string } {
@@ -28,7 +30,8 @@ function splitName(full?: string | null): { first: string; last: string } {
   return { first: parts[0], last: parts.slice(1).join(" ") };
 }
 
-export function BookAppointmentDialog({ open, onOpenChange, prefill, dealId, onBooked }: Props) {
+export function BookAppointmentDialog({ open, onOpenChange, prefill, dealId, onBooked, rescheduleToken }: Props) {
+  const isRebook = !!rescheduleToken;
   const init = splitName(prefill?.clientName);
   const [firstName, setFirstName] = useState(init.first);
   const [lastName, setLastName] = useState(init.last);
@@ -55,9 +58,28 @@ export function BookAppointmentDialog({ open, onOpenChange, prefill, dealId, onB
 
   const submit = async () => {
     if (!pickedIso) return toast.error("Pick a time first");
-    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-    if (!fullName || !email.trim()) return toast.error("Name and email required");
     setSubmitting(true);
+
+    if (isRebook) {
+      const { data, error } = await supabase.functions.invoke("booking-reschedule", {
+        body: { token: rescheduleToken, startAt: pickedIso },
+      });
+      setSubmitting(false);
+      if (error || (data && (data as any).error)) {
+        toast.error((data as any)?.error || error?.message || "Rebook failed");
+        return;
+      }
+      const d = data as any;
+      setDone({ dateStr: d.dateStr, timeStr: d.timeStr });
+      onBooked?.();
+      return;
+    }
+
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+    if (!fullName || !email.trim()) {
+      setSubmitting(false);
+      return toast.error("Name and email required");
+    }
     const { data, error } = await supabase.functions.invoke("booking-create", {
       body: {
         startAt: pickedIso,
