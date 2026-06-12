@@ -79,18 +79,19 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
 
   const [submitting, setSubmitting] = useState(false);
 
-  // Re-sync local fields when prefill changes (e.g. switching contacts)
+  // Re-sync local fields when prefill changes (e.g. switching contacts).
+  // IMPORTANT: assign unconditionally — if the new client has no saved super
+  // fund / balance / age, we must CLEAR those fields rather than keep the
+  // previous client's values bleeding through.
   useEffect(() => {
-    if (prefill.age != null && prefill.age !== "") setAge(String(prefill.age));
-    if (prefill.superFundName) setSuperFundName(prefill.superFundName);
-    if (prefill.superBalance != null && prefill.superBalance !== "") setSuperBalance(String(prefill.superBalance));
+    setAge(prefill.age != null && prefill.age !== "" ? String(prefill.age) : "");
+    setSuperFundName(prefill.superFundName ?? "");
+    setSuperBalance(prefill.superBalance != null && prefill.superBalance !== "" ? String(prefill.superBalance) : "");
     const s = splitName(prefill.clientName);
-    const nextFirst = prefill.clientFirstName ?? s.first;
-    const nextLast = prefill.clientLastName ?? s.last;
-    if (nextFirst) setFirstName(nextFirst);
-    if (nextLast) setLastName(nextLast);
-    if (prefill.clientEmail) setClientEmail(prefill.clientEmail);
-    if (prefill.clientPhone) setClientPhone(prefill.clientPhone);
+    setFirstName(prefill.clientFirstName ?? s.first ?? "");
+    setLastName(prefill.clientLastName ?? s.last ?? "");
+    setClientEmail(prefill.clientEmail ?? "");
+    setClientPhone(prefill.clientPhone ?? "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefill.clientName, prefill.clientFirstName, prefill.clientLastName, prefill.clientEmail, prefill.clientPhone, prefill.superFundName, prefill.superBalance, prefill.age]);
 
