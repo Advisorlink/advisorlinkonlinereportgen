@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
       try {
         await sendAndLogSms(supabase, {
           to: booking.client_phone,
-          body: `Hi ${booking.client_name.split(" ")[0]}, your call with Travis has been rescheduled to ${dateStr} at ${timeStr} (${tz}). Link: ${meetingLink}`,
+          body: `Hi ${booking.client_name.split(" ")[0]}, you've been rebooked in for ${dateStr} at ${timeStr} (${tz}) with Travis. We'll send you a reminder 24 hours before. Join here when it's time: ${meetingLink}`,
           clientName: booking.client_name,
           clientEmail: booking.client_email,
         });
