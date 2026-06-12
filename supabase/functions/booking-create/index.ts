@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
       return json({ error: "Failed to save booking" }, 500);
     }
 
-    // Update linked deal: add a note + mark presentation_booked milestone.
+    // Update linked deal: add a note, mark presentation_booked, and move to "Meeting Booked" stage.
     if (linkedDealId) {
       try {
         const dateLabel = formatInTz(start, tz, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
@@ -112,13 +112,24 @@ Deno.serve(async (req) => {
           content: `Appointment booked for ${dateLabel} (${tz}). Meeting link: ${meetingLink}`,
         });
         const { data: d } = await supabase
-          .from("pipeline_deals").select("progress_stages").eq("id", linkedDealId).single();
+          .from("pipeline_deals").select("progress_stages, stage_id").eq("id", linkedDealId).single();
         const cur: string[] = Array.isArray((d as any)?.progress_stages) ? (d as any).progress_stages : [];
-        if (!cur.includes("presentation_booked")) {
-          await supabase.from("pipeline_deals")
-            .update({ progress_stages: [...cur, "presentation_booked"] })
-            .eq("id", linkedDealId);
+        const nextProgress = cur.includes("presentation_booked") ? cur : [...cur, "presentation_booked"];
+
+        // Look up the "Meeting Booked" stage and move the deal there (unless it's in a closed-out stage).
+        const { data: mbStage } = await supabase
+          .from("pipeline_stages").select("id").eq("name", "Meeting Booked").maybeSingle();
+        const { data: curStage } = await supabase
+          .from("pipeline_stages").select("name").eq("id", (d as any)?.stage_id).maybeSingle();
+        const lockedStages = ["Won", "Lost", "Settled", "Do Not Contact"];
+        const shouldMove = mbStage?.id && !lockedStages.includes((curStage as any)?.name);
+
+        const updatePayload: Record<string, unknown> = { progress_stages: nextProgress };
+        if (shouldMove) {
+          updatePayload.stage_id = mbStage!.id;
+          updatePayload.position = 0;
         }
+        await supabase.from("pipeline_deals").update(updatePayload).eq("id", linkedDealId);
       } catch (e) { console.warn("deal link failed", e); }
     }
 
