@@ -113,6 +113,8 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
   const [progress, setProgress] = useState<string[]>([]);
   const [progressSaving, setProgressSaving] = useState<string | null>(null);
   const [bookOpen, setBookOpen] = useState(false);
+  const [rebookOpen, setRebookOpen] = useState(false);
+  const [activeBooking, setActiveBooking] = useState<{ id: string; reschedule_token: string; start_at: string; client_timezone: string } | null>(null);
   const [clientDocs, setClientDocs] = useState<any[]>([]);
   const [tasks, setTasks] = useState<DealTask[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -145,8 +147,21 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
       fetchNotes(deal.id);
       fetchClientDocs(deal.client_email, deal.client_phone);
       fetchTasks(deal.id);
+      fetchActiveBooking(deal.id);
     }
   }, [deal]);
+
+  const fetchActiveBooking = useCallback(async (dealId: string) => {
+    const { data } = await supabase
+      .from("bookings")
+      .select("id, reschedule_token, start_at, client_timezone")
+      .eq("contact_id", dealId)
+      .in("status", ["booked", "rescheduled"])
+      .gte("start_at", new Date().toISOString())
+      .order("start_at", { ascending: true })
+      .limit(1);
+    setActiveBooking(((data as any) || [])[0] || null);
+  }, []);
 
   const fetchTasks = useCallback(async (dealId: string) => {
     const { data } = await supabase
@@ -690,8 +705,29 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
             onOpenChange={setBookOpen}
             prefill={{ clientName: form.client_name, clientEmail: form.client_email, clientPhone: form.client_phone }}
             dealId={deal?.id || null}
-            onBooked={() => { onDealUpdated(); setBookOpen(false); }}
+            onBooked={() => { onDealUpdated(); setBookOpen(false); if (deal) fetchActiveBooking(deal.id); }}
           />
+
+          {activeBooking && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setRebookOpen(true)}
+                className="w-full gap-2 h-11 border-cyan/40 text-cyan hover:bg-cyan/10"
+              >
+                <CalendarPlus className="w-4 h-4" />
+                Rebook Appointment ({new Date(activeBooking.start_at).toLocaleString("en-AU", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true, timeZone: activeBooking.client_timezone })})
+              </Button>
+              <BookAppointmentDialog
+                open={rebookOpen}
+                onOpenChange={setRebookOpen}
+                prefill={{ clientName: form.client_name, clientEmail: form.client_email, clientPhone: form.client_phone }}
+                dealId={deal?.id || null}
+                rescheduleToken={activeBooking.reschedule_token}
+                onBooked={() => { onDealUpdated(); setRebookOpen(false); if (deal) fetchActiveBooking(deal.id); }}
+              />
+            </>
+          )}
 
 
 
