@@ -705,8 +705,29 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
             onOpenChange={setBookOpen}
             prefill={{ clientName: form.client_name, clientEmail: form.client_email, clientPhone: form.client_phone }}
             dealId={deal?.id || null}
-            onBooked={() => { onDealUpdated(); setBookOpen(false); }}
+            onBooked={() => { onDealUpdated(); setBookOpen(false); if (deal) fetchActiveBooking(deal.id); }}
           />
+
+          {activeBooking && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setRebookOpen(true)}
+                className="w-full gap-2 h-11 border-cyan/40 text-cyan hover:bg-cyan/10"
+              >
+                <CalendarPlus className="w-4 h-4" />
+                Rebook Appointment ({new Date(activeBooking.start_at).toLocaleString("en-AU", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true, timeZone: activeBooking.client_timezone })})
+              </Button>
+              <BookAppointmentDialog
+                open={rebookOpen}
+                onOpenChange={setRebookOpen}
+                prefill={{ clientName: form.client_name, clientEmail: form.client_email, clientPhone: form.client_phone }}
+                dealId={deal?.id || null}
+                rescheduleToken={activeBooking.reschedule_token}
+                onBooked={() => { onDealUpdated(); setRebookOpen(false); if (deal) fetchActiveBooking(deal.id); }}
+              />
+            </>
+          )}
 
 
 
