@@ -18,6 +18,8 @@ export type CallState = {
   isOnHold: boolean;
 };
 
+export type TwilioNumberOption = { phone_number: string; friendly_name: string | null };
+
 type Ctx = {
   ready: boolean;
   registering: boolean;
@@ -26,9 +28,12 @@ type Ctx = {
   incoming: Call | null;
   incomingMatch: ContactMatch | null;
   active: CallState | null;
+  availableNumbers: TwilioNumberOption[];
+  selectedCallerId: string | null;
+  setSelectedCallerId: (n: string) => void;
   initialize: () => Promise<void>;
   bootstrap: () => Promise<void>;
-  dial: (number: string, meta?: { contactName?: string; contactId?: string; dealId?: string }) => Promise<void>;
+  dial: (number: string, meta?: { contactName?: string; contactId?: string; dealId?: string; fromNumber?: string }) => Promise<void>;
   answer: () => void;
   reject: () => void;
   hangup: () => void;
@@ -38,6 +43,7 @@ type Ctx = {
 };
 
 const SoftphoneCtx = createContext<Ctx | null>(null);
+const CALLER_ID_STORAGE_KEY = "softphone:selectedCallerId";
 
 type ContactMatch = { name: string | null; contactId?: string | null; dealId?: string | null };
 
@@ -151,6 +157,36 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
   const [incoming, setIncoming] = useState<Call | null>(null);
   const [incomingMatch, setIncomingMatch] = useState<ContactMatch | null>(null);
   const [active, setActive] = useState<CallState | null>(null);
+  const [availableNumbers, setAvailableNumbers] = useState<TwilioNumberOption[]>([]);
+  const [selectedCallerId, setSelectedCallerIdState] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem(CALLER_ID_STORAGE_KEY);
+  });
+  const setSelectedCallerId = useCallback((n: string) => {
+    setSelectedCallerIdState(n);
+    try { window.localStorage.setItem(CALLER_ID_STORAGE_KEY, n); } catch { /* noop */ }
+  }, []);
+
+  // Load list of available Twilio numbers to choose from
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("sms_twilio_numbers")
+        .select("phone_number, friendly_name, provider, is_default")
+        .eq("provider", "twilio")
+        .order("is_default", { ascending: false });
+      if (cancelled) return;
+      const rows = ((data || []) as Array<{ phone_number: string; friendly_name: string | null }>);
+      setAvailableNumbers(rows);
+      setSelectedCallerIdState((curr) => {
+        if (curr && rows.some((r) => r.phone_number === curr)) return curr;
+        return rows[0]?.phone_number ?? null;
+      });
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
 
   const fetchToken = useCallback(async () => {
     const { data, error } = await supabase.functions.invoke("twilio-voice-token");
@@ -321,12 +357,15 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
     let lookupMeta = meta;
     if (!lookupMeta?.contactName) {
       const m = await lookupCaller(normalized);
-      lookupMeta = { contactName: m.name ?? undefined, contactId: m.contactId ?? undefined, dealId: m.dealId ?? undefined };
+      lookupMeta = { ...meta, contactName: m.name ?? undefined, contactId: m.contactId ?? undefined, dealId: m.dealId ?? undefined };
     }
-    const call = await device.connect({ params: { To: normalized } });
+    const fromNumber = meta?.fromNumber || selectedCallerId || "";
+    const params: Record<string, string> = { To: normalized };
+    if (fromNumber) params.CallerId = fromNumber;
+    const call = await device.connect({ params });
     attachCall(call, {
       direction: "outbound",
-      from: callerId || "",
+      from: fromNumber || callerId || "",
       to: normalized,
       contactName: lookupMeta?.contactName ?? null,
       contactId: lookupMeta?.contactId ?? null,
@@ -334,7 +373,8 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
       startedAt: Date.now(),
       status: "connecting",
     });
-  }, [attachCall, callerId, initialize]);
+  }, [attachCall, callerId, initialize, selectedCallerId]);
+
 
   const answer = useCallback(() => {
     if (!incoming) return;
@@ -421,8 +461,9 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<Ctx>(() => ({
     ready, registering, callerId, identity, incoming, incomingMatch, active,
+    availableNumbers, selectedCallerId, setSelectedCallerId,
     initialize, bootstrap, dial, answer, reject, hangup, toggleMute, toggleHold, sendDigit,
-  }), [ready, registering, callerId, identity, incoming, incomingMatch, active, initialize, bootstrap, dial, answer, reject, hangup, toggleMute, toggleHold, sendDigit]);
+  }), [ready, registering, callerId, identity, incoming, incomingMatch, active, availableNumbers, selectedCallerId, setSelectedCallerId, initialize, bootstrap, dial, answer, reject, hangup, toggleMute, toggleHold, sendDigit]);
 
   return <SoftphoneCtx.Provider value={value}>{children}</SoftphoneCtx.Provider>;
 }

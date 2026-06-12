@@ -56,7 +56,7 @@ function relativeTime(iso: string) {
 }
 
 export default function PhonePage() {
-  const { ready, registering, callerId, identity, bootstrap, dial, initialize } = useSoftphone();
+  const { ready, registering, callerId, identity, bootstrap, dial, initialize, availableNumbers, selectedCallerId, setSelectedCallerId } = useSoftphone();
   const [number, setNumber] = useState("");
   const [provisioning, setProvisioning] = useState(false);
   const [logs, setLogs] = useState<LogRow[]>([]);
@@ -197,6 +197,26 @@ export default function PhonePage() {
                     className="h-16 text-2xl font-mono text-center tracking-wider bg-white/5 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-cyan rounded-2xl"
                   />
                 </div>
+
+                {availableNumbers.length > 0 && (
+                  <div className="mb-5">
+                    <label className="block text-[10px] uppercase tracking-[0.2em] text-cyan/70 font-bold mb-2">
+                      Call from
+                    </label>
+                    <select
+                      value={selectedCallerId ?? ""}
+                      onChange={(e) => setSelectedCallerId(e.target.value)}
+                      className="w-full h-11 rounded-xl bg-white/5 border border-white/10 text-white font-mono text-sm px-3 focus:outline-none focus:border-cyan/50 focus:ring-1 focus:ring-cyan/40"
+                    >
+                      {availableNumbers.map((n) => (
+                        <option key={n.phone_number} value={n.phone_number} className="bg-[hsl(215_55%_12%)]">
+                          {n.phone_number}{n.friendly_name ? ` — ${n.friendly_name}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
 
                 <div className="grid grid-cols-3 gap-3 mb-5">
                   {KEYS.map(({ d, s }) => (
