@@ -461,8 +461,9 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<Ctx>(() => ({
     ready, registering, callerId, identity, incoming, incomingMatch, active,
+    availableNumbers, selectedCallerId, setSelectedCallerId,
     initialize, bootstrap, dial, answer, reject, hangup, toggleMute, toggleHold, sendDigit,
-  }), [ready, registering, callerId, identity, incoming, incomingMatch, active, initialize, bootstrap, dial, answer, reject, hangup, toggleMute, toggleHold, sendDigit]);
+  }), [ready, registering, callerId, identity, incoming, incomingMatch, active, availableNumbers, selectedCallerId, setSelectedCallerId, initialize, bootstrap, dial, answer, reject, hangup, toggleMute, toggleHold, sendDigit]);
 
   return <SoftphoneCtx.Provider value={value}>{children}</SoftphoneCtx.Provider>;
 }
