@@ -706,7 +706,7 @@ export default function Messages() {
                       )}
                       <div className={`flex items-center gap-1 mt-1 ${msg.direction === "outbound" ? "justify-end" : ""}`}>
                         <span className={`text-[10px] ${msg.direction === "outbound" ? "text-white/50" : "text-muted-foreground"}`}>
-                          {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          {new Date(msg.created_at).toLocaleString([], { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                         </span>
                         {msg.direction === "outbound" && statusIcon(msg.status)}
                         {(msg.status === "failed" || msg.status === "undelivered") && (
