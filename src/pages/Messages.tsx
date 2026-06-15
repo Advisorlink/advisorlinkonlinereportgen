@@ -712,7 +712,7 @@ export default function Messages() {
                           const ourNumber = msg.direction === "outbound" ? msg.from_number : msg.to_number;
                           if (!ourNumber) return null;
                           const match = smsNumbers.find((n) => n.phone_number === ourNumber);
-                          const label = match?.friendly_name || ourNumber;
+                          const label = ourNumber;
                           return (
                             <span
                               className={`text-[10px] px-1.5 py-0.5 rounded ${msg.direction === "outbound" ? "bg-white/15 text-white/80" : "bg-muted text-muted-foreground"}`}
