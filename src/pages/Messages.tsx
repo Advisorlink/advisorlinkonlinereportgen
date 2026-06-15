@@ -764,9 +764,25 @@ export default function Messages() {
                             </span>
                           );
                         })()}
-                        {msg.direction === "outbound" && statusIcon(msg.status)}
+                        {msg.direction === "outbound" && (
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded inline-flex items-center gap-1 ${
+                              msg.status === "delivered" ? "bg-cyan/20 text-cyan" :
+                              msg.status === "failed" || msg.status === "undelivered" ? "bg-destructive/20 text-destructive" :
+                              "bg-white/15 text-white/80"
+                            }`}
+                            title={(msg.status === "failed" || msg.status === "undelivered")
+                              ? decodeSmsError(msg.error_code, msg.error_message)
+                              : `Status: ${statusLabel(msg.status)}`}
+                          >
+                            {statusIcon(msg.status)}
+                            {statusLabel(msg.status)}
+                          </span>
+                        )}
                         {(msg.status === "failed" || msg.status === "undelivered") && (
-                          <span className="text-[10px] text-destructive ml-1">{msg.error_message || "Failed"}</span>
+                          <span className="text-[10px] text-destructive ml-1 w-full">
+                            {decodeSmsError(msg.error_code, msg.error_message)}
+                          </span>
                         )}
                       </div>
 
