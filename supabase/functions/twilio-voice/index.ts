@@ -116,7 +116,7 @@ Deno.serve(async (req: Request) => {
     const safeTo = xmlEscape(normalizedTo);
     const safeCaller = xmlEscape(callerId);
     return twiml(
-      `<Dial callerId="${safeCaller}" answerOnBridge="true" timeout="30"><Number>${safeTo}</Number></Dial>`,
+      `<Dial callerId="${safeCaller}" answerOnBridge="true" ringTone="au" timeout="30"><Number>${safeTo}</Number></Dial>`,
     );
   }
 
