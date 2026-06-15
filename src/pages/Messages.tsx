@@ -704,15 +704,30 @@ export default function Messages() {
                           ))}
                         </div>
                       )}
-                      <div className={`flex items-center gap-1 mt-1 ${msg.direction === "outbound" ? "justify-end" : ""}`}>
+                      <div className={`flex items-center gap-1 mt-1 flex-wrap ${msg.direction === "outbound" ? "justify-end" : ""}`}>
                         <span className={`text-[10px] ${msg.direction === "outbound" ? "text-white/50" : "text-muted-foreground"}`}>
                           {new Date(msg.created_at).toLocaleString([], { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                         </span>
+                        {(() => {
+                          const ourNumber = msg.direction === "outbound" ? msg.from_number : msg.to_number;
+                          if (!ourNumber) return null;
+                          const match = smsNumbers.find((n) => n.phone_number === ourNumber);
+                          const label = match?.friendly_name || ourNumber;
+                          return (
+                            <span
+                              className={`text-[10px] px-1.5 py-0.5 rounded ${msg.direction === "outbound" ? "bg-white/15 text-white/80" : "bg-muted text-muted-foreground"}`}
+                              title={msg.direction === "outbound" ? `Sent from ${ourNumber}` : `Received on ${ourNumber}`}
+                            >
+                              {msg.direction === "outbound" ? "from " : "to "}{label}
+                            </span>
+                          );
+                        })()}
                         {msg.direction === "outbound" && statusIcon(msg.status)}
                         {(msg.status === "failed" || msg.status === "undelivered") && (
                           <span className="text-[10px] text-destructive ml-1">{msg.error_message || "Failed"}</span>
                         )}
                       </div>
+
                     </div>
                   </div>
                 ))}
