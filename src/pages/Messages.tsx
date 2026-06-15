@@ -68,6 +68,48 @@ const statusIcon = (s: string) => {
   }
 };
 
+// Decode Twilio error codes into a human-readable reason, esp. blocks.
+const decodeSmsError = (code: string | null | undefined, fallback?: string | null): string => {
+  const c = String(code || "").trim();
+  const map: Record<string, string> = {
+    "21610": "Blocked — recipient replied STOP (opted out)",
+    "21611": "Blocked — number on carrier block list",
+    "21612": "Not reachable from your Twilio number",
+    "21614": "Invalid mobile number",
+    "30003": "Unreachable — handset off or out of coverage",
+    "30004": "Blocked by the recipient's carrier or device",
+    "30005": "Unknown destination handset",
+    "30006": "Landline or unreachable carrier",
+    "30007": "Blocked — carrier flagged as spam",
+    "30008": "Unknown error from carrier",
+    "30032": "Toll-free number not yet verified",
+    "30034": "A2P 10DLC registration required",
+    "30410": "Provider timeout / delivery unconfirmed",
+    "30450": "Blocked — duplicate message",
+    "30454": "Blocked — message content flagged",
+  };
+  if (map[c]) return map[c];
+  if (fallback) return fallback;
+  if (c) return `Failed (error ${c})`;
+  return "Failed";
+};
+
+const statusLabel = (s: string): string => {
+  switch (s) {
+    case "delivered": return "Delivered";
+    case "sent": return "Sent";
+    case "queued": return "Queued";
+    case "accepted": return "Accepted";
+    case "sending": return "Sending";
+    case "receiving": return "Receiving";
+    case "received": return "Received";
+    case "failed": return "Failed";
+    case "undelivered": return "Not delivered";
+    case "blocked": return "Blocked";
+    default: return s || "";
+  }
+};
+
 const formatTime = (d: string) => {
   const date = new Date(d);
   const now = new Date();
@@ -722,9 +764,25 @@ export default function Messages() {
                             </span>
                           );
                         })()}
-                        {msg.direction === "outbound" && statusIcon(msg.status)}
+                        {msg.direction === "outbound" && (
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded inline-flex items-center gap-1 ${
+                              msg.status === "delivered" ? "bg-cyan/20 text-cyan" :
+                              msg.status === "failed" || msg.status === "undelivered" ? "bg-destructive/20 text-destructive" :
+                              "bg-white/15 text-white/80"
+                            }`}
+                            title={(msg.status === "failed" || msg.status === "undelivered")
+                              ? decodeSmsError(msg.error_code, msg.error_message)
+                              : `Status: ${statusLabel(msg.status)}`}
+                          >
+                            {statusIcon(msg.status)}
+                            {statusLabel(msg.status)}
+                          </span>
+                        )}
                         {(msg.status === "failed" || msg.status === "undelivered") && (
-                          <span className="text-[10px] text-destructive ml-1">{msg.error_message || "Failed"}</span>
+                          <span className="text-[10px] text-destructive ml-1 w-full">
+                            {decodeSmsError(msg.error_code, msg.error_message)}
+                          </span>
                         )}
                       </div>
 
