@@ -125,6 +125,14 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Always clear per-deal state immediately when the deal changes so notes/tasks
+    // from a previously opened deal can't leak into a different one.
+    setNotes([]);
+    setNewNote("");
+    setTasks([]);
+    setClientDocs([]);
+    setActiveBooking(null);
+
     if (deal) {
       const d = deal as any;
       setForm({
@@ -149,7 +157,7 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
       fetchTasks(deal.id);
       fetchActiveBooking(deal.id);
     }
-  }, [deal]);
+  }, [deal?.id]);
 
   const fetchActiveBooking = useCallback(async (dealId: string) => {
     const { data } = await supabase
