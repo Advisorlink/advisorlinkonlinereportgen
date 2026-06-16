@@ -57,6 +57,8 @@ export function PipelineBoard() {
   const [view, setView] = useState<ViewFilter>("active");
   const [search, setSearch] = useState("");
   const [syncing, setSyncing] = useState(false);
+  const [selectedStageIds, setSelectedStageIds] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [pendingLost, setPendingLost] = useState<{
     dealId: string;
     targetStageId: string;
