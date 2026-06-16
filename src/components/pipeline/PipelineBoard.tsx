@@ -17,9 +17,12 @@ import { PipelineDealCard } from "./PipelineDealCard";
 import { AddDealDialog } from "./AddDealDialog";
 import { DealProfileDrawer } from "./DealProfileDrawer";
 import { LostReasonDialog } from "./LostReasonDialog";
-import { Kanban, Plus, DollarSign, Trophy, XCircle, Layers, Search, Sparkles } from "lucide-react";
+import { Kanban, Plus, DollarSign, Trophy, XCircle, Layers, Search, Sparkles, Filter, RotateCcw, Tag as TagIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
 type Stage = { id: string; name: string; color: string; position: number };
