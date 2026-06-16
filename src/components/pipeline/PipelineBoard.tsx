@@ -100,16 +100,30 @@ export function PipelineBoard() {
   }, [fetchData]);
 
   const visibleStages = useMemo(() => {
-    if (view === "all") return stages;
-    if (view === "won") return stages.filter(isWonStage);
-    if (view === "lost") return stages.filter(isLostStage);
-    return stages.filter((s) => !isWonStage(s) && !isLostStage(s));
-  }, [stages, view]);
+    let base: Stage[];
+    if (view === "all") base = stages;
+    else if (view === "won") base = stages.filter(isWonStage);
+    else if (view === "lost") base = stages.filter(isLostStage);
+    else base = stages.filter((s) => !isWonStage(s) && !isLostStage(s));
+    if (selectedStageIds.length) base = base.filter((s) => selectedStageIds.includes(s.id));
+    return base;
+  }, [stages, view, selectedStageIds]);
+
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    deals.forEach((d) => (d.tags || []).forEach((t) => t && set.add(t)));
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [deals]);
 
   const dealsInStage = (stageId: string) => {
     const q = search.trim().toLowerCase();
     return deals
       .filter((d) => d.stage_id === stageId)
+      .filter((d) => {
+        if (!selectedTags.length) return true;
+        const tags = (d.tags || []).map((t) => t.toLowerCase());
+        return selectedTags.some((t) => tags.includes(t.toLowerCase()));
+      })
       .filter((d) => {
         if (!q) return true;
         return (
@@ -121,6 +135,16 @@ export function PipelineBoard() {
       })
       .sort((a, b) => a.position - b.position);
   };
+
+  const resetFilters = () => {
+    setView("active");
+    setSearch("");
+    setSelectedStageIds([]);
+    setSelectedTags([]);
+  };
+
+  const filtersActive =
+    view !== "active" || !!search || selectedStageIds.length > 0 || selectedTags.length > 0;
 
   const totalValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
   const wonCount = deals.filter((d) => isWonStage(stages.find((s) => s.id === d.stage_id))).length;
