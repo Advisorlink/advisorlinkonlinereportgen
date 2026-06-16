@@ -17,9 +17,12 @@ import { PipelineDealCard } from "./PipelineDealCard";
 import { AddDealDialog } from "./AddDealDialog";
 import { DealProfileDrawer } from "./DealProfileDrawer";
 import { LostReasonDialog } from "./LostReasonDialog";
-import { Kanban, Plus, DollarSign, Trophy, XCircle, Layers, Search, Sparkles } from "lucide-react";
+import { Kanban, Plus, DollarSign, Trophy, XCircle, Layers, Search, Sparkles, Filter, RotateCcw, Tag as TagIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
 type Stage = { id: string; name: string; color: string; position: number };
@@ -54,6 +57,8 @@ export function PipelineBoard() {
   const [view, setView] = useState<ViewFilter>("active");
   const [search, setSearch] = useState("");
   const [syncing, setSyncing] = useState(false);
+  const [selectedStageIds, setSelectedStageIds] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [pendingLost, setPendingLost] = useState<{
     dealId: string;
     targetStageId: string;
@@ -95,16 +100,30 @@ export function PipelineBoard() {
   }, [fetchData]);
 
   const visibleStages = useMemo(() => {
-    if (view === "all") return stages;
-    if (view === "won") return stages.filter(isWonStage);
-    if (view === "lost") return stages.filter(isLostStage);
-    return stages.filter((s) => !isWonStage(s) && !isLostStage(s));
-  }, [stages, view]);
+    let base: Stage[];
+    if (view === "all") base = stages;
+    else if (view === "won") base = stages.filter(isWonStage);
+    else if (view === "lost") base = stages.filter(isLostStage);
+    else base = stages.filter((s) => !isWonStage(s) && !isLostStage(s));
+    if (selectedStageIds.length) base = base.filter((s) => selectedStageIds.includes(s.id));
+    return base;
+  }, [stages, view, selectedStageIds]);
+
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    deals.forEach((d) => (d.tags || []).forEach((t) => t && set.add(t)));
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [deals]);
 
   const dealsInStage = (stageId: string) => {
     const q = search.trim().toLowerCase();
     return deals
       .filter((d) => d.stage_id === stageId)
+      .filter((d) => {
+        if (!selectedTags.length) return true;
+        const tags = (d.tags || []).map((t) => t.toLowerCase());
+        return selectedTags.some((t) => tags.includes(t.toLowerCase()));
+      })
       .filter((d) => {
         if (!q) return true;
         return (
@@ -116,6 +135,16 @@ export function PipelineBoard() {
       })
       .sort((a, b) => a.position - b.position);
   };
+
+  const resetFilters = () => {
+    setView("active");
+    setSearch("");
+    setSelectedStageIds([]);
+    setSelectedTags([]);
+  };
+
+  const filtersActive =
+    view !== "active" || !!search || selectedStageIds.length > 0 || selectedTags.length > 0;
 
   const totalValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
   const wonCount = deals.filter((d) => isWonStage(stages.find((s) => s.id === d.stage_id))).length;
@@ -500,31 +529,147 @@ export function PipelineBoard() {
           />
         </div>
 
-        {/* Filter tabs */}
-        <div className="mt-3 sm:mt-4 flex items-center gap-1 sm:gap-1.5 bg-muted/40 p-1 rounded-xl w-fit max-w-full overflow-x-auto">
-          {filterTabs.map((t) => {
-            const Icon = t.icon;
-            const isActive = view === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => setView(t.id)}
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all shrink-0 ${
-                  isActive
-                    ? "bg-card shadow-sm text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? t.tone : ""}`} />
-                {t.label}
-                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                  isActive ? "bg-muted text-foreground" : "bg-background/60 text-muted-foreground"
-                }`}>
-                  {t.count}
-                </span>
-              </button>
-            );
-          })}
+        {/* Filter row */}
+        <div className="mt-3 sm:mt-4 flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1 sm:gap-1.5 bg-muted/40 p-1 rounded-xl w-fit max-w-full overflow-x-auto">
+            {filterTabs.map((t) => {
+              const Icon = t.icon;
+              const isActive = view === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setView(t.id)}
+                  className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all shrink-0 ${
+                    isActive
+                      ? "bg-card shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? t.tone : ""}`} />
+                  {t.label}
+                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                    isActive ? "bg-muted text-foreground" : "bg-background/60 text-muted-foreground"
+                  }`}>
+                    {t.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Stage filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                <Filter className="w-3.5 h-3.5" />
+                Stages
+                {selectedStageIds.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">
+                    {selectedStageIds.length}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-64 p-2 max-h-80 overflow-y-auto">
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <span className="text-xs font-semibold text-muted-foreground">Show only stages</span>
+                {selectedStageIds.length > 0 && (
+                  <button
+                    onClick={() => setSelectedStageIds([])}
+                    className="text-[11px] text-primary hover:underline"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className="space-y-0.5">
+                {stages.map((s) => {
+                  const checked = selectedStageIds.includes(s.id);
+                  return (
+                    <label
+                      key={s.id}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/60 cursor-pointer"
+                    >
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={(v) =>
+                          setSelectedStageIds((prev) =>
+                            v ? [...prev, s.id] : prev.filter((id) => id !== s.id)
+                          )
+                        }
+                      />
+                      <span className="text-sm">{s.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* Tag filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 gap-1.5" disabled={allTags.length === 0}>
+                <TagIcon className="w-3.5 h-3.5" />
+                Tags
+                {selectedTags.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">
+                    {selectedTags.length}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-64 p-2 max-h-80 overflow-y-auto">
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <span className="text-xs font-semibold text-muted-foreground">Show only tags</span>
+                {selectedTags.length > 0 && (
+                  <button
+                    onClick={() => setSelectedTags([])}
+                    className="text-[11px] text-primary hover:underline"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              {allTags.length === 0 ? (
+                <div className="px-2 py-3 text-xs text-muted-foreground">No tags yet</div>
+              ) : (
+                <div className="space-y-0.5">
+                  {allTags.map((t) => {
+                    const checked = selectedTags.includes(t);
+                    return (
+                      <label
+                        key={t}
+                        className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/60 cursor-pointer"
+                      >
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(v) =>
+                            setSelectedTags((prev) =>
+                              v ? [...prev, t] : prev.filter((x) => x !== t)
+                            )
+                          }
+                        />
+                        <span className="text-sm">{t}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
+
+          {filtersActive && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetFilters}
+              className="h-9 gap-1.5 text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset
+            </Button>
+          )}
         </div>
       </div>
 
