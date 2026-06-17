@@ -17,7 +17,7 @@ import { PipelineDealCard } from "./PipelineDealCard";
 import { AddDealDialog } from "./AddDealDialog";
 import { DealProfileDrawer } from "./DealProfileDrawer";
 import { LostReasonDialog } from "./LostReasonDialog";
-import { Kanban, Plus, DollarSign, Trophy, XCircle, Layers, Search, Sparkles, Filter, RotateCcw, Tag as TagIcon } from "lucide-react";
+import { Kanban, Plus, DollarSign, Trophy, XCircle, Layers, Search, Sparkles, Filter, RotateCcw, Tag as TagIcon, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
