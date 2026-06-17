@@ -127,6 +127,11 @@ export function PipelineBoard() {
         return selectedTags.some((t) => tags.includes(t.toLowerCase()));
       })
       .filter((d) => {
+        if (superFundFilter === "all") return true;
+        const hasFund = !!d.super_fund_name && d.super_fund_name.trim().length > 0;
+        return superFundFilter === "has" ? hasFund : !hasFund;
+      })
+      .filter((d) => {
         if (!q) return true;
         return (
           d.client_name?.toLowerCase().includes(q) ||
