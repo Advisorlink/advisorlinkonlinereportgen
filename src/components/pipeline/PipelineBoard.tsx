@@ -40,6 +40,7 @@ type Deal = {
   updated_at: string;
   lost_reason_id?: string | null;
   lost_reason_note?: string | null;
+  super_fund_name?: string | null;
 };
 
 type ViewFilter = "active" | "won" | "lost" | "all";
