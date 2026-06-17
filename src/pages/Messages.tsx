@@ -838,7 +838,7 @@ export default function Messages() {
                         <div className="p-2 border-b border-border">
                           <p className="text-xs font-semibold text-foreground">Quick Insert Template</p>
                         </div>
-                        <ScrollArea className="max-h-[250px]">
+                        <ScrollArea className="h-[300px]">
                           {templates.length === 0 ? (
                             <div className="p-4 text-center text-xs text-muted-foreground">No templates yet</div>
                           ) : (
