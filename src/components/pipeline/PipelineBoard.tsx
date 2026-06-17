@@ -60,6 +60,7 @@ export function PipelineBoard() {
   const [syncing, setSyncing] = useState(false);
   const [selectedStageIds, setSelectedStageIds] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [superFundFilter, setSuperFundFilter] = useState<"all" | "has" | "no">("all");
   const [pendingLost, setPendingLost] = useState<{
     dealId: string;
     targetStageId: string;
