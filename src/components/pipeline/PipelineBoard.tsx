@@ -667,6 +667,52 @@ export function PipelineBoard() {
             </PopoverContent>
           </Popover>
 
+          {/* Super Fund filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                <Landmark className="w-3.5 h-3.5" />
+                Super Fund
+                {superFundFilter !== "all" && (
+                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">
+                    {superFundFilter === "has" ? "Has" : "No"}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-56 p-2">
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <span className="text-xs font-semibold text-muted-foreground">Filter by super fund</span>
+                {superFundFilter !== "all" && (
+                  <button
+                    onClick={() => setSuperFundFilter("all")}
+                    className="text-[11px] text-primary hover:underline"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className="space-y-0.5">
+                {[
+                  { value: "all", label: "All deals" },
+                  { value: "has", label: "Has super fund" },
+                  { value: "no", label: "No super fund" },
+                ].map((opt) => (
+                  <label
+                    key={opt.value}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/60 cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={superFundFilter === opt.value}
+                      onCheckedChange={() => setSuperFundFilter(opt.value as any)}
+                    />
+                    <span className="text-sm">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+
           {filtersActive && (
             <Button
               variant="ghost"
