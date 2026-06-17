@@ -148,10 +148,11 @@ export function PipelineBoard() {
     setSearch("");
     setSelectedStageIds([]);
     setSelectedTags([]);
+    setSuperFundFilter("all");
   };
 
   const filtersActive =
-    view !== "active" || !!search || selectedStageIds.length > 0 || selectedTags.length > 0;
+    view !== "active" || !!search || selectedStageIds.length > 0 || selectedTags.length > 0 || superFundFilter !== "all";
 
   const totalValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
   const wonCount = deals.filter((d) => isWonStage(stages.find((s) => s.id === d.stage_id))).length;
