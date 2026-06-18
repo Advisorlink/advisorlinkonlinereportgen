@@ -476,19 +476,26 @@ export default function Messages() {
     if (!conv) return body;
     const c = conv.sms_contacts;
     const cf = (c.custom_fields || {}) as Record<string, unknown>;
-    const val = (v: unknown) => (v === null || v === undefined ? "" : String(v));
-    const reviewVal =
-      cf.had_review_before === true ? "Yes" : cf.had_review_before === false ? "No" : "";
+    const deal = (profileDeal || {}) as Record<string, unknown>;
+    const val = (v: unknown) => (v === null || v === undefined || v === "" ? "" : String(v));
+    // Prefer pipeline deal value, fall back to sms_contact custom fields
+    const pick = (dealKey: string, cfKey: string) => {
+      const dv = deal[dealKey];
+      if (dv !== null && dv !== undefined && dv !== "") return String(dv);
+      return val(cf[cfKey]);
+    };
+    const reviewRaw = deal.had_review_before ?? cf.had_review_before;
+    const reviewVal = reviewRaw === true ? "Yes" : reviewRaw === false ? "No" : "";
     return body
       .replace(/\{\{first_name\}\}/g, c.first_name || c.full_name.split(" ")[0] || "")
       .replace(/\{\{last_name\}\}/g, c.last_name || "")
       .replace(/\{\{full_name\}\}/g, c.full_name || "")
       .replace(/\{\{phone\}\}/g, c.phone || "")
       .replace(/\{\{email\}\}/g, c.email || "")
-      .replace(/\{\{age\}\}/g, val(cf.age))
-      .replace(/\{\{state\}\}/g, val(cf.state))
-      .replace(/\{\{super_fund_name\}\}/g, val(cf.super_fund_name))
-      .replace(/\{\{super_balance\}\}/g, val(cf.super_balance))
+      .replace(/\{\{age\}\}/g, pick("age", "age"))
+      .replace(/\{\{state\}\}/g, pick("state", "state"))
+      .replace(/\{\{super_fund_name\}\}/g, pick("super_fund_name", "super_fund_name"))
+      .replace(/\{\{super_balance\}\}/g, pick("super_balance", "super_balance"))
       .replace(/\{\{had_review_before\}\}/g, reviewVal)
       .replace(/\{\{lead_source\}\}/g, c.lead_source || "");
   };
