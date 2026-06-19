@@ -27,6 +27,15 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+function StackRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="py-2 border-b border-border last:border-0">
+      <div className="text-[11px] text-muted-foreground font-medium">{label}</div>
+      <div className="text-sm font-semibold text-navy mt-0.5 leading-snug">{value}</div>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* PAGE 1 - COVER                                                     */
 /* ------------------------------------------------------------------ */
