@@ -416,11 +416,11 @@ export function FundsPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="FUND DETAILS" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Current fund{hasMultiple ? "s" : ""} vs comparison</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Your current position & the impact of advice</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         {hasMultiple
-          ? "Combined view of all existing funds and the comparison scenario used throughout this report."
-          : "Side-by-side view of the existing fund settings and the comparison scenario used throughout this report."}
+          ? "Combined view of all your existing funds, alongside the projected impact of receiving licensed financial advice (not a comparison to another fund)."
+          : "Your existing fund settings, alongside the projected impact of receiving licensed financial advice (not a comparison to another fund)."}
       </p>
 
       {hasMultiple ? (
