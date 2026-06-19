@@ -487,8 +487,8 @@ export function FundsPage({ s }: { s: ReportSummary }) {
               <SectionCard title="With financial advice" icon="◉">
                 <StackRow label="Potential improvement" value="+2.5% p.a. on current trajectory" />
                 <StackRow label="How" value="Adviser recommendations (e.g. investment option changes, fund switch, active management)" />
-                <StackRow label="One-off advice fee" value={fmtMoney(6500)} />
-                <StackRow label="Ongoing advisory fee" value="1.76% p.a." />
+                <StackRow label="One-off advice fee" value={<>{fmtMoney(6500)} <span className="text-xs font-normal text-muted-foreground">— once off payment from super</span></>} />
+                <StackRow label="Ongoing advisory fee" value={<>1.76% p.a. <span className="text-xs font-normal text-muted-foreground">— optional ongoing fee</span></>} />
                 <StackRow label="Note" value="Not a comparison to another super fund — illustrates the impact of acting on licensed advice within or across your existing arrangements." />
               </SectionCard>
               <div className="rounded-lg border border-cyan/40 bg-cyan/10 px-3 py-2">
@@ -541,8 +541,8 @@ export function FundsPage({ s }: { s: ReportSummary }) {
             <SectionCard title="With financial advice" icon="◉">
               <StackRow label="Potential improvement" value="+2.5% p.a. on current trajectory" />
               <StackRow label="How" value="Adviser recommendations (e.g. investment option changes, fund switch, active management)" />
-              <StackRow label="One-off advice fee" value={fmtMoney(6500)} />
-              <StackRow label="Ongoing advisory fee" value="1.76% p.a." />
+              <StackRow label="One-off advice fee" value={<>{fmtMoney(6500)} <span className="text-xs font-normal text-muted-foreground">— once off payment from super</span></>} />
+              <StackRow label="Ongoing advisory fee" value={<>1.76% p.a. <span className="text-xs font-normal text-muted-foreground">— optional ongoing fee</span></>} />
               <StackRow label="Note" value="Not a comparison to another super fund — illustrates the impact of acting on licensed advice within or across your existing arrangements." />
             </SectionCard>
             <div className="rounded-lg border border-cyan/40 bg-cyan/10 px-3 py-2">
