@@ -529,15 +529,12 @@ export function FundsPage({ s }: { s: ReportSummary }) {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <SectionCard title="Comparison scenario" icon="◉">
-              <Row label="Scenario" value="Aligned to risk profile" />
-              <Row label="Risk profile" value={s.riskProfile} />
-              <Row label="Net return (current +2.5%)" value={fmtPct(s.comparisonReturn)} />
-              <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
-              <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
-              <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
-              <Row label="Optional annual advice fee" value="1.76%" />
-              <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(i.superBalance))} />
+            <SectionCard title="With financial advice" icon="◉">
+              <Row label="Potential improvement" value="+2.5% p.a. on current trajectory" />
+              <Row label="How" value="Adviser recommendations (e.g. investment option changes, fund switch, active management)" />
+              <Row label="One-off advice fee" value={fmtMoney(6500)} />
+              <Row label="Ongoing advisory fee" value="1.76% p.a." />
+              <Row label="Note" value="Not a comparison to another super fund — illustrates the impact of acting on licensed advice within or across your existing arrangements." />
             </SectionCard>
             <div className="rounded-lg border border-cyan/40 bg-cyan/10 px-3 py-2">
               <div className="text-[9px] font-bold uppercase tracking-wider text-cyan">Projected at age {s.retirementAge}</div>
