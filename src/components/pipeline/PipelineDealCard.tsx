@@ -136,7 +136,7 @@ export function PipelineDealCard({ deal, isOverlay, onDelete, onClick }: Pipelin
             const localNumber = deal.client_phone
               .replace(/\s+/g, "")
               .replace(/^\+61/, "0");
-            // Use tel: — UCOM Call (and most softphones) register as a
+            // Use tel: - UCOM Call (and most softphones) register as a
             // handler for the standard tel: scheme on Android. Set UCOM as
             // the default Phone app (Settings → Apps → Default apps → Phone)
             // so taps route there instead of the native dialer.

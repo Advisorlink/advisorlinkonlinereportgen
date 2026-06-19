@@ -11,7 +11,7 @@ export function ProtectedApp({ children }: { children: ReactNode }) {
   const { user, profile, loading, authError, refreshProfile } = useAuth();
   usePushNotifications();
 
-  // Domain lock — refuse to render on unauthorized hosts
+  // Domain lock - refuse to render on unauthorized hosts
   if (!isHostAllowed()) {
     return (
       <div className="min-h-screen grid place-items-center bg-navy text-navy-foreground p-6">
@@ -48,7 +48,7 @@ export function ProtectedApp({ children }: { children: ReactNode }) {
     );
   }
 
-  // User exists but profile hasn't loaded yet — keep waiting briefly instead of denying.
+  // User exists but profile hasn't loaded yet - keep waiting briefly instead of denying.
   if (!profile) {
     return <div className="min-h-screen grid place-items-center bg-secondary/40 text-sm text-muted-foreground">Verifying owner…</div>;
   }

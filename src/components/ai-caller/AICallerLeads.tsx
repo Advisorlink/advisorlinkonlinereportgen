@@ -338,7 +338,7 @@ export function AICallerLeads() {
                 <p className="text-sm font-bold text-foreground truncate">
                   {fc.value || (
                     <span className="text-muted-foreground/50 font-normal italic">
-                      —
+                      -
                     </span>
                   )}
                 </p>

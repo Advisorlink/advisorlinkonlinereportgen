@@ -691,7 +691,7 @@ export default function Admin() {
               <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur border-b border-border/60 mb-4">
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-cyan" />
-                  <span className="font-semibold text-sm">{viewReportData.client_name} — Report</span>
+                  <span className="font-semibold text-sm">{viewReportData.client_name} - Report</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button

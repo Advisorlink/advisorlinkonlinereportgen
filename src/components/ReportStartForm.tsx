@@ -80,7 +80,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
   const [submitting, setSubmitting] = useState(false);
 
   // Re-sync local fields when prefill changes (e.g. switching contacts).
-  // IMPORTANT: assign unconditionally — if the new client has no saved super
+  // IMPORTANT: assign unconditionally - if the new client has no saved super
   // fund / balance / age, we must CLEAR those fields rather than keep the
   // previous client's values bleeding through.
   useEffect(() => {
@@ -156,7 +156,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
     setGoalBalance("750,000");
     setDesiredIncomeAmount("1,200");
     setDesiredIncomeFrequency("Weekly");
-    toast.success("Sample data loaded — review then Generate Report");
+    toast.success("Sample data loaded - review then Generate Report");
   };
 
   const addOption = () =>
@@ -223,13 +223,13 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
           },
         });
         if (savedId) setEditingReportId(savedId);
-        toast.success("🎉 Report saved — opening the generator…");
+        toast.success("🎉 Report saved - opening the generator…");
       } catch (e) {
         console.error(e);
         toast.error("Report loaded, but it could not be saved yet.");
       }
     } else {
-      toast.success("🎉 Report inputs loaded — looking up fund details…");
+      toast.success("🎉 Report inputs loaded - looking up fund details…");
     }
     setTimeout(() => navigate("/"), 850);
   };
@@ -336,7 +336,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
             </div>
             {options.length === 0 && (
               <p className="text-[11px] text-muted-foreground/60 italic">
-                Optional — split balance across multiple options
+                Optional - split balance across multiple options
               </p>
             )}
             {options.map((opt, i) => (

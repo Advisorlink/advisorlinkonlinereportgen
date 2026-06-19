@@ -151,7 +151,7 @@ export function GoogleDriveFolderPicker({ open, onOpenChange, docIds, fileCount,
             <div className="min-w-0">
               <div className="text-sm font-medium truncate">{DEFAULT_FOLDER_NAME}</div>
               <div className="text-[11px] text-muted-foreground">
-                Type a subfolder name (e.g. client name) — we'll create it inside the default folder and send the files there. Leave blank to send straight to the default folder.
+                Type a subfolder name (e.g. client name) - we'll create it inside the default folder and send the files there. Leave blank to send straight to the default folder.
               </div>
             </div>
           </div>

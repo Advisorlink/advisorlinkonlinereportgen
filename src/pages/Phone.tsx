@@ -39,7 +39,7 @@ const KEYS: { d: string; s?: string }[] = [
 ];
 
 function formatDuration(s: number | null) {
-  if (!s) return "—";
+  if (!s) return "-";
   const m = Math.floor(s / 60);
   const sec = s % 60;
   return `${m}:${sec.toString().padStart(2, "0")}`;
@@ -210,7 +210,7 @@ export default function PhonePage() {
                     >
                       {availableNumbers.map((n) => (
                         <option key={n.phone_number} value={n.phone_number} className="bg-[hsl(215_55%_12%)]">
-                          {n.phone_number}{n.friendly_name ? ` — ${n.friendly_name}` : ""}
+                          {n.phone_number}{n.friendly_name ? ` - ${n.friendly_name}` : ""}
                         </option>
                       ))}
                     </select>

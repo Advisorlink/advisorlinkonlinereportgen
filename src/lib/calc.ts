@@ -82,7 +82,7 @@ export interface ClientInputs {
   grossReturn: number; // J25 (0.066)
   investmentRiskProfile?: string;
 
-  // Optional second account (R columns) — keep zeroed if not used
+  // Optional second account (R columns) - keep zeroed if not used
   secondBalance?: number; // R16
   secondGrowthPct?: number; // R18
   secondAdminFlat?: number; // S21
@@ -251,7 +251,7 @@ function isWithdrawalDipRow(rowOffsetFromStart: number): boolean {
 
 export interface YearRow { age: number; existing: number; comparison: number; }
 
-// Accumulation projection — current age → retirement age (B59..B98 logic)
+// Accumulation projection - current age → retirement age (B59..B98 logic)
 export function projectAccumulation(i: ClientInputs): YearRow[] {
   const startAge = Math.min(i.age, 67);
   const targetAge = i.retirementAge;
@@ -299,7 +299,7 @@ export function balancesAtRetirement(i: ClientInputs): { existing: number; compa
   return { existing: last.existing, comparison: last.comparison };
 }
 
-// Withdrawal phase — starts at retirement, runs until balance ≤ 0 (or age 100)
+// Withdrawal phase - starts at retirement, runs until balance ≤ 0 (or age 100)
 export function projectWithdrawal(i: ClientInputs): { existing: YearRow[]; comparison: YearRow[] } {
   const start = balancesAtRetirement(i);
   const annualWithdraw = annualDesiredIncome(i.desiredIncomeAmount, i.desiredIncomeFrequency);

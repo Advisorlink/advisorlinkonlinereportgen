@@ -401,7 +401,7 @@ export function MeetingHostProvider({ children }: { children: ReactNode }) {
     const newPaused = !screenSharePaused;
     videoTrack.enabled = !newPaused;
     setScreenSharePaused(newPaused);
-    toast.info(newPaused ? "Screen share paused — client sees last frame" : "Screen share resumed");
+    toast.info(newPaused ? "Screen share paused - client sees last frame" : "Screen share resumed");
   }, [screenSharePaused]);
 
   const value = useMemo<MeetingHostContextValue>(() => ({

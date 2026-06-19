@@ -134,7 +134,7 @@ export default function ESign() {
                 E-Sign Centre
               </h1>
               <p className="mt-1 text-muted-foreground max-w-lg">
-                Send, sign, and manage documents electronically — fast, secure, and paperless.
+                Send, sign, and manage documents electronically - fast, secure, and paperless.
               </p>
             </div>
           </div>

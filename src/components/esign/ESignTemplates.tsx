@@ -252,7 +252,7 @@ export function ESignTemplates({ onBack, onSelectTemplate }: Props) {
           </div>
           <h3 className="text-lg font-semibold text-foreground mb-1">No templates yet</h3>
           <p className="text-sm text-muted-foreground max-w-sm mb-6">
-            Create your first template by uploading a PDF — like a Pure ATC or TPA form — for quick reuse.
+            Create your first template by uploading a PDF - like a Pure ATC or TPA form - for quick reuse.
           </p>
           <Button
             onClick={() => setShowCreate(true)}

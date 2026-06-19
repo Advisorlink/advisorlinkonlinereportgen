@@ -201,7 +201,7 @@ export default function Presentations() {
                 <p className="text-xs text-navy-foreground/60 font-semibold uppercase tracking-wider">Active Meeting</p>
                 <p className="text-lg font-bold mt-1">{activeMeeting.client_name}</p>
                 <p className="text-xs text-navy-foreground/50 mt-1">
-                  {sharing ? "Your screen is live" : "Meeting room is ready — share your screen when you are ready"}
+                  {sharing ? "Your screen is live" : "Meeting room is ready - share your screen when you are ready"}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-6">
@@ -298,7 +298,7 @@ export default function Presentations() {
             </div>
 
             <p className="text-xs text-navy-foreground/50">
-              Share this link with your client: <span className="text-cyan font-medium break-all">{meetingJoinUrl}</span> — they'll enter the meeting ID to see your screen.
+              Share this link with your client: <span className="text-cyan font-medium break-all">{meetingJoinUrl}</span> - they'll enter the meeting ID to see your screen.
             </p>
           </div>
         )}

@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authError, setAuthError] = useState<string | null>(null);
 
   const loadProfile = async (uid: string): Promise<Profile | null> => {
-    // Retry a few times — the profile row is created by a trigger on signup
+    // Retry a few times - the profile row is created by a trigger on signup
     // and may briefly be unavailable on the very first login after claim.
     let lastError: string | null = null;
     setAuthError(null);
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
-        // Only reload profile if user changed — don't clear on token refreshes
+        // Only reload profile if user changed - don't clear on token refreshes
         setAuthError(null);
         setTimeout(() => {
           if (mounted) loadProfile(sess.user.id);
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    // Initial load — wait for profile before unblocking the UI
+    // Initial load - wait for profile before unblocking the UI
     (async () => {
       const { data: { session: s } } = await supabase.auth.getSession();
       if (!mounted) return;

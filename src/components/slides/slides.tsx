@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 
 /* ============================================================
-   DESIGN SYSTEM — premium private-wealth editorial (image-free)
+   DESIGN SYSTEM - premium private-wealth editorial (image-free)
    ============================================================ */
 
 const INK = "#0B1220";
@@ -210,7 +210,7 @@ function GoldFrameCorner({
   return <div style={styles} />;
 }
 
-/** Abstract editorial composition — concentric arcs + geometric shape (cover art) */
+/** Abstract editorial composition - concentric arcs + geometric shape (cover art) */
 function CoverArt() {
   return (
     <svg viewBox="0 0 680 800" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
@@ -269,7 +269,7 @@ function CoverArt() {
   );
 }
 
-/** Stylised analyst portrait — abstract bust illustration */
+/** Stylised analyst portrait - abstract bust illustration */
 function AnalystPortrait({ name = "Travis Seckold" }: { name?: string }) {
   return (
     <svg viewBox="0 0 620 760" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
@@ -398,7 +398,7 @@ function IndustryLandscape() {
         );
       })}
       <text x="40" y="44" fontFamily={SANS} fontSize="12" letterSpacing="5" fill={MUTED}>
-        FIG. 01 — THE LANDSCAPE
+        FIG. 01 - THE LANDSCAPE
       </text>
       <text x="40" y="710" fontFamily={SERIF} fontStyle="italic" fontSize="20" fill={GRAPHITE}>
         Industry &amp; Retail super funds
@@ -407,7 +407,7 @@ function IndustryLandscape() {
   );
 }
 
-/** SMSF — abstract pillar / control diagram */
+/** SMSF - abstract pillar / control diagram */
 function SMSFDiagram() {
   return (
     <svg viewBox="0 0 760 740" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
@@ -437,7 +437,7 @@ function SMSFDiagram() {
       ))}
       {/* trustee label */}
       <text x="380" y="100" textAnchor="middle" fontFamily={SANS} fontSize="12" letterSpacing="5" fill={MUTED}>
-        FIG. 02 — THE TRUSTEE
+        FIG. 02 - THE TRUSTEE
       </text>
       <text x="380" y="160" textAnchor="middle" fontFamily={SERIF} fontStyle="italic" fontSize="28" fill={INK}>
         You hold the keys.
@@ -449,13 +449,13 @@ function SMSFDiagram() {
   );
 }
 
-/** Actively managed — performance arc + portfolio rings */
+/** Actively managed - performance arc + portfolio rings */
 function ManagedDiagram() {
   return (
     <svg viewBox="0 0 760 740" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
       <rect width="760" height="740" fill="#fff" />
       <text x="40" y="44" fontFamily={SANS} fontSize="12" letterSpacing="5" fill={MUTED}>
-        FIG. 03 — THE PORTFOLIO
+        FIG. 03 - THE PORTFOLIO
       </text>
       {/* growth curve */}
       <g transform="translate(60,540)">
@@ -582,7 +582,7 @@ function ReviewsBadge() {
 }
 
 /* ============================================================
-   Slide 01 — Cover
+   Slide 01 - Cover
    ============================================================ */
 export function Slide01() {
   return (
@@ -600,7 +600,7 @@ export function Slide01() {
         </div>
 
         <p style={{ marginTop: 56, maxWidth: 760, fontSize: 26, lineHeight: 1.55, color: GRAPHITE }}>
-          A clear, no-pressure look at the three paths available for your superannuation —
+          A clear, no-pressure look at the three paths available for your superannuation -
           and which one is most likely to take you where you want to go.
         </p>
 
@@ -646,7 +646,7 @@ export function Slide01() {
           color: MUTED,
         }}
       >
-        Edition 01 — Your Retirement, Reconsidered
+        Edition 01 - Your Retirement, Reconsidered
       </div>
 
       <BottomBar page={1} />
@@ -655,7 +655,7 @@ export function Slide01() {
 }
 
 /* ============================================================
-   Slide 02 — Disclaimer + Analyst
+   Slide 02 - Disclaimer + Analyst
    ============================================================ */
 export function Slide02() {
   return (
@@ -732,7 +732,7 @@ export function Slide02() {
 }
 
 /* ============================================================
-   Slide 03 — Why Choose Us
+   Slide 03 - Why Choose Us
    ============================================================ */
 export function Slide03() {
   return (
@@ -766,12 +766,12 @@ export function Slide03() {
             kicker: "The Matching Guarantee",
             title: "Vetted, accredited, hand-picked.",
             body:
-              "Every adviser on our approved list is 100% FPA-accredited, fully vetted, and has passed our strict qualification process — so you only meet professionals worth your time.",
+              "Every adviser on our approved list is 100% FPA-accredited, fully vetted, and has passed our strict qualification process - so you only meet professionals worth your time.",
           },
           {
             num: "02",
             kicker: "Genuinely Free",
-            title: "No fee, no catch — really.",
+            title: "No fee, no catch - really.",
             body:
               "Advisory firms pay us a linking fee when we connect you, whether you proceed with their advice or not. You pay nothing out-of-pocket for the consultation, ever.",
           },
@@ -812,7 +812,7 @@ export function Slide03() {
 }
 
 /* ============================================================
-   Slides 4 / 5 / 6 — Options
+   Slides 4 / 5 / 6 - Options
    ============================================================ */
 function OptionSlide({
   page,
@@ -935,10 +935,10 @@ export function Slide04() {
       page={4}
       optionNumber="I"
       optionTitle={<>Industry &amp; Retail<br/><span style={{ fontStyle: "italic", color: GOLD }}>Super Funds</span></>}
-      subtitle="The default for most Australians — low-cost, hands-off, with limited control."
+      subtitle="The default for most Australians - low-cost, hands-off, with limited control."
       visual={<IndustryLandscape />}
       bullets={[
-        { type: "pro", text: "Members can choose from a variety of investment options — balanced, growth, conservative, high-growth and more." },
+        { type: "pro", text: "Members can choose from a variety of investment options - balanced, growth, conservative, high-growth and more." },
         { type: "pro", text: "Typically lower setup and maintenance costs." },
         { type: "pro", text: "Requires less time and effort, freeing you up to focus on other priorities." },
         { type: "con", text: "Tend to deliver lower long-term returns than some actively managed funds or SMSFs." },
@@ -954,11 +954,11 @@ export function Slide05() {
       page={5}
       optionNumber="II"
       optionTitle={<>Self Managed<br/><span style={{ fontStyle: "italic", color: GOLD }}>Super Fund</span></>}
-      subtitle="Maximum control and flexibility — for those who have the time, expertise, and appetite for it."
+      subtitle="Maximum control and flexibility - for those who have the time, expertise, and appetite for it."
       visual={<SMSFDiagram />}
       bullets={[
         { type: "pro", text: "Trustees have greater control over investment choices." },
-        { type: "pro", text: "Diversify into a wide range of assets — property, shares, collectibles." },
+        { type: "pro", text: "Diversify into a wide range of assets - property, shares, collectibles." },
         { type: "pro", text: "When run well, can outperform an industry or retail fund." },
         { type: "con", text: "Setting up and maintaining an SMSF can be expensive and extremely time-consuming." },
         { type: "con", text: "Demands ongoing time, attention, and trustee responsibility." },
@@ -988,7 +988,7 @@ export function Slide06() {
 }
 
 /* ============================================================
-   Slide 07 — Fees
+   Slide 07 - Fees
    ============================================================ */
 export function Slide07() {
   return (
@@ -1015,7 +1015,7 @@ export function Slide07() {
         </p>
         <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 14 }}>
           {[
-            { icon: <ShieldCheck size={18} />, text: "No conflicts — advisers don’t take commissions from product issuers." },
+            { icon: <ShieldCheck size={18} />, text: "No conflicts - advisers don’t take commissions from product issuers." },
             { icon: <UserCheck size={18} />, text: "Annual opt-in keeps you in control of ongoing services." },
           ].map((r, i) => (
             <div key={i} style={{ display: "flex", gap: 14, alignItems: "center", fontSize: 19, color: GRAPHITE }}>
@@ -1030,7 +1030,7 @@ export function Slide07() {
         {[
           { label: "One-Time Setup", tag: "Initial Advice Fee", pct: "3.3 – 4.4%", sub: "Paid from super, based on portfolio complexity" },
           { label: "Ongoing (Optional)", tag: "Annual Management", pct: "1.1 – 2.2%", sub: "For ongoing portfolio management and advice" },
-          { label: "Out-of-Pocket", tag: "Initial Consultation", pct: "Nil", sub: "We are paid by the advisory firm — you pay nothing", highlight: true },
+          { label: "Out-of-Pocket", tag: "Initial Consultation", pct: "Nil", sub: "We are paid by the advisory firm - you pay nothing", highlight: true },
         ].map((row, i) => (
           <div
             key={i}
@@ -1063,7 +1063,7 @@ export function Slide07() {
 }
 
 /* ============================================================
-   Slide 08 — Recognition (medal art, no photo)
+   Slide 08 - Recognition (medal art, no photo)
    ============================================================ */
 export function Slide08() {
   return (
@@ -1090,13 +1090,13 @@ export function Slide08() {
           </Display>
         </div>
         <div style={{ marginTop: 24, fontSize: 26, color: "rgba(255,255,255,0.7)", fontStyle: "italic", fontFamily: SERIF }}>
-          Official Judge — Independent Financial Adviser of the Year, 2025
+          Official Judge - Independent Financial Adviser of the Year, 2025
         </div>
 
         <div style={{ height: 1, background: "rgba(255,255,255,0.18)", margin: "44px 0" }} />
 
         <p style={{ fontSize: 22, lineHeight: 1.6, color: "rgba(255,255,255,0.82)", maxWidth: 700 }}>
-          Recognised by the industry’s peak body as a leading voice in independent financial advice — and a
+          Recognised by the industry’s peak body as a leading voice in independent financial advice - and a
           trusted set of eyes on the practices we recommend to our clients.
         </p>
 
@@ -1126,13 +1126,13 @@ export function Slide08() {
 }
 
 /* ============================================================
-   Slides 9–13 — Clarity Check
+   Slides 9–13 - Clarity Check
    ============================================================ */
 const CLARITY = [
   { n: "I",   t: "The difference between the three options" },
   { n: "II",  t: "What the next steps are with the adviser’s SOA" },
   { n: "III", t: "What the fees are and how they appear in the SOA" },
-  { n: "IV",  t: "If we can show better alternatives — are you open to change?" },
+  { n: "IV",  t: "If we can show better alternatives - are you open to change?" },
 ];
 
 export function SlideClipboards() {
@@ -1193,7 +1193,7 @@ export function SlideClipboards() {
 }
 
 /* ============================================================
-   Slide 14 — Review Completed
+   Slide 14 - Review Completed
    ============================================================ */
 export function Slide14() {
   return (
@@ -1241,7 +1241,7 @@ export function Slide14() {
 }
 
 /* ============================================================
-   Slide 15 — Pre-meeting checklist
+   Slide 15 - Pre-meeting checklist
    ============================================================ */
 export function Slide15() {
   const items = [
@@ -1266,7 +1266,7 @@ export function Slide15() {
         </div>
         <p style={{ marginTop: 32, fontSize: 22, color: GRAPHITE, lineHeight: 1.55, maxWidth: 700 }}>
           A short checklist to make your adviser meeting as productive as possible. Don&rsquo;t worry if you&rsquo;re
-          missing something — we&rsquo;ll help you track it down.
+          missing something - we&rsquo;ll help you track it down.
         </p>
 
         <div style={{ marginTop: 48, padding: "28px 36px", background: "#fff", borderLeft: `3px solid ${GOLD}`, borderRadius: 4 }}>
@@ -1340,7 +1340,7 @@ export function Slide15() {
 }
 
 /* ============================================================
-   Map — preserve 15-slide indexing
+   Map - preserve 15-slide indexing
    ============================================================ */
 export const SLIDES: React.ComponentType[] = [
   Slide01,

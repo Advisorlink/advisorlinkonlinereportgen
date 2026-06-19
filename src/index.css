@@ -133,7 +133,7 @@
   }
 }
 
-/* Glass card utility — adapts to theme */
+/* Glass card utility - adapts to theme */
 .glass-card {
   background: hsl(var(--card) / 0.85);
   backdrop-filter: blur(12px) saturate(180%);
@@ -185,7 +185,7 @@
 }
 .report-page:last-child { page-break-after: auto; }
 
-/* Scale the A4 preview down to fit its container width — prevents horizontal scrolling */
+/* Scale the A4 preview down to fit its container width - prevents horizontal scrolling */
 .report-preview {
   container-type: inline-size;
 }

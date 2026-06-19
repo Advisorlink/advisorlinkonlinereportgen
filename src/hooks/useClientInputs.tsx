@@ -74,7 +74,7 @@ export function ClientInputsProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (inFlightRef.current) {
-      toast.info("A search is already running — it will keep going in the background.");
+      toast.info("A search is already running - it will keep going in the background.");
       return inFlightRef.current;
     }
 

@@ -172,12 +172,12 @@ export function AICallerOutcomes() {
                       <td className="py-2.5 pr-4 text-muted-foreground">{c.phone}</td>
                       <td className="py-2.5 pr-4">
                         <Badge variant="secondary" className="font-normal">
-                          {campaigns[c.campaign_id]?.name || "—"}
+                          {campaigns[c.campaign_id]?.name || "-"}
                         </Badge>
                       </td>
                       <td className="py-2.5 pr-4 text-muted-foreground">{c.call_attempts}</td>
                       <td className="py-2.5 text-muted-foreground">
-                        {c.last_called_at ? new Date(c.last_called_at).toLocaleString("en-AU") : "—"}
+                        {c.last_called_at ? new Date(c.last_called_at).toLocaleString("en-AU") : "-"}
                       </td>
                     </tr>
                   ))}

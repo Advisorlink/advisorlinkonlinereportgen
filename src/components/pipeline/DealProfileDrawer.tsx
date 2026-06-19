@@ -199,7 +199,7 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
       setNewTaskTitle("");
       setNewTaskDue("");
       fetchTasks(deal.id);
-      toast({ title: "Task scheduled — moved to Tasks Due" });
+      toast({ title: "Task scheduled - moved to Tasks Due" });
       // Refresh board so the deal visibly moves to the Tasks Due column
       try { window.dispatchEvent(new CustomEvent("pipeline:refresh")); } catch { /* noop */ }
     }
@@ -759,7 +759,7 @@ export function DealProfileDrawer({ deal, stages, open, onOpenChange, onDealUpda
               <div>
                 <Label htmlFor="prof-review" className="text-xs">Reviewed Before?</Label>
                 <Select value={form.had_review_before} onValueChange={(v) => setForm((p) => ({ ...p, had_review_before: v as any }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="-" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="yes">Yes</SelectItem>
                     <SelectItem value="no">No</SelectItem>

@@ -121,7 +121,7 @@ export function AICallerCallLogs() {
                     {statusIcon[log.status] || statusIcon.initiated}
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        {log.ai_caller_contacts?.name || "Unknown"} — {log.ai_caller_contacts?.phone || "—"}
+                        {log.ai_caller_contacts?.name || "Unknown"} - {log.ai_caller_contacts?.phone || "-"}
                       </p>
                       <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
                         <span className="capitalize">{log.status}</span>

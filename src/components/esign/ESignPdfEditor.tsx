@@ -409,7 +409,7 @@ export function ESignPdfEditor({
         const { x, y, width, height } = toPdfRect(page, field);
 
         if (field.kind === "text" && field.source !== "acroform") {
-          // Only render text fields that have a value — skip empty ones entirely
+          // Only render text fields that have a value - skip empty ones entirely
           if (field.value) {
             page.drawRectangle({
               x,
@@ -705,7 +705,7 @@ function suggestedValue(name: string, clientData: Record<string, string>) {
     return clientData.dob || "";
   }
 
-  // Date-like field names — broad match for any field containing "date"
+  // Date-like field names - broad match for any field containing "date"
   if (/date/i.test(raw)) {
     return clientData.date || "";
   }

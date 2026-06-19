@@ -37,7 +37,7 @@ const UPLOAD_TYPE_LABELS: Record<UploadType, { label: string; description: strin
     label: "Statement Only",
     description: "Screenshot, photo, or PDF of a statement",
     subject: "Please send through your statement",
-    blurb: "Please use the secure link below to send through your statement — you can upload a screenshot, a photo, or a PDF. It only takes a minute and your information is encrypted.",
+    blurb: "Please use the secure link below to send through your statement - you can upload a screenshot, a photo, or a PDF. It only takes a minute and your information is encrypted.",
   },
   license_only: {
     label: "Photo ID Only",
@@ -119,7 +119,7 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
     const meta = UPLOAD_TYPE_LABELS[uploadType];
     setSubject(meta.subject);
     setEmailBody(`${greeting}\n\n${meta.blurb}\n\n${url}\n\nThanks,\n${advisorName}`);
-    setSmsBody(`${greeting} ${meta.blurb.replace(/Please use the secure link below to /, "").replace(/\.$/, "")} here: ${url} — ${advisorName}`);
+    setSmsBody(`${greeting} ${meta.blurb.replace(/Please use the secure link below to /, "").replace(/\.$/, "")} here: ${url} - ${advisorName}`);
   }, [name, advisorName, uploadType]);
 
 
@@ -226,7 +226,7 @@ export function SendUploadLinkDialog({ open, onOpenChange, prefill }: { open: bo
         const stamp = new Date().toISOString();
         await supabase
           .from("pipeline_deals")
-          .update({ notes: `Upload link sent ${stamp} via ${channel} — advisor: ${advisorName}` } as any)
+          .update({ notes: `Upload link sent ${stamp} via ${channel} - advisor: ${advisorName}` } as any)
           .eq("id", selected.id);
       }
 
