@@ -42,7 +42,7 @@ export default function BookPublic() {
       setResult(data.booking);
       setStep("done");
     } catch (e: any) {
-      toast.error(e.message || "Couldn't book — try another time");
+      toast.error(e.message || "Couldn't book - try another time");
     } finally {
       setBusy(false);
     }

@@ -220,7 +220,7 @@ export default function Index() {
     }
   };
 
-  /** Just save to client reports list — no GHL automation */
+  /** Just save to client reports list - no GHL automation */
   const handleAddToClientList = async () => {
     setShowWorkflowDialog(false);
     if (!user || !pendingExport.current) return;

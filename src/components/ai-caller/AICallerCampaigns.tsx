@@ -142,11 +142,11 @@ export function AICallerCampaigns() {
     setContacts(checked);
     const dupCount = checked.filter(c => c.duplicate).length;
     if (dupCount > 0) {
-      toast.warning(`Parsed ${parsed.length} contacts — ${dupCount} already contacted before`, {
+      toast.warning(`Parsed ${parsed.length} contacts - ${dupCount} already contacted before`, {
         description: "Review the list below. Click 'Remove duplicates' to skip them.",
       });
     } else {
-      toast.success(`Parsed ${parsed.length} contacts — no duplicates found`);
+      toast.success(`Parsed ${parsed.length} contacts - no duplicates found`);
     }
   }
 
@@ -314,7 +314,7 @@ export function AICallerCampaigns() {
         return;
       }
       toast.success(
-        `Campaign started — ${data.pendingContacts ?? "?"} pending. The paced ticker will dial within a minute.`
+        `Campaign started - ${data.pendingContacts ?? "?"} pending. The paced ticker will dial within a minute.`
       );
       load();
     } catch (e: any) {
@@ -374,7 +374,7 @@ export function AICallerCampaigns() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success("Campaign reset to draft — ready to start again");
+      toast.success("Campaign reset to draft - ready to start again");
       load();
     } catch (e: any) {
       toast.error(e.message || "Failed to reset campaign");
@@ -404,7 +404,7 @@ export function AICallerCampaigns() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Campaigns</h2>
-          <p className="text-sm text-muted-foreground">Paced auto-dialler — set the rules, the ticker handles the rest.</p>
+          <p className="text-sm text-muted-foreground">Paced auto-dialler - set the rules, the ticker handles the rest.</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetDialog(); else setDialogOpen(true); }}>
           <DialogTrigger asChild>

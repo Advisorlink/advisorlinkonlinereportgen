@@ -127,7 +127,7 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
       ref={containerRef}
       className={`relative flex flex-col bg-black ${isFullscreen ? "w-screen h-screen" : "rounded-xl overflow-hidden"}`}
     >
-      {/* Top bar — hidden by default, shows on hover */}
+      {/* Top bar - hidden by default, shows on hover */}
       <div
         className="absolute top-0 left-0 right-0 z-10 transition-opacity duration-300 opacity-0 hover:opacity-100"
       >
@@ -198,7 +198,7 @@ export function PresentationSlideshow({ clientName, meetingId, clientConnected, 
         </div>
       </div>
 
-      {/* Slide area — fixed 16:9 stage with scaled React slide */}
+      {/* Slide area - fixed 16:9 stage with scaled React slide */}
       <div
         className={`relative flex-1 flex items-center justify-center cursor-pointer select-none bg-black ${isFullscreen ? "w-full h-full" : "min-h-[300px] aspect-video"}`}
         onClick={handleClick}

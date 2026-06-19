@@ -206,7 +206,7 @@ export default function FactFind() {
         if (insErr) throw insErr;
         toast.success(`Fact Find saved to ${clientName}'s documents`);
       }
-      // Successfully saved — clear the auto-saved draft so we don't keep
+      // Successfully saved - clear the auto-saved draft so we don't keep
       // re-hydrating stale answers next time.
       editorRef.current?.clearDraft();
       try { localStorage.removeItem(headerDraftKey); } catch {}
@@ -226,7 +226,7 @@ export default function FactFind() {
             <h1 className="text-2xl font-bold">{editingDoc ? "Edit Fact Find" : "Fact Find"}</h1>
             <p className="text-sm text-muted-foreground">
               {editingDoc
-                ? `Editing ${editingDoc.file_name} — changes will replace the saved version in ${editingDoc.client_name}'s documents.`
+                ? `Editing ${editingDoc.file_name} - changes will replace the saved version in ${editingDoc.client_name}'s documents.`
                 : "Fill out the Pure Private Wealth Fact Find directly in the PDF below, then save it to the client's documents."}
             </p>
           </div>

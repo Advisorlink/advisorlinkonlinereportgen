@@ -1,4 +1,4 @@
-// Domain allowlist — refuses to render the app on any other host.
+// Domain allowlist - refuses to render the app on any other host.
 // Add custom domains here once configured.
 const ALLOWED_HOSTS = [
   "localhost",

@@ -79,6 +79,6 @@ function burstConfetti() {
 
 /** Trigger the full dopamine-hit celebration. */
 export function celebrate() {
-  // Sound intentionally muted — visual confetti only.
+  // Sound intentionally muted - visual confetti only.
   try { burstConfetti(); } catch {}
 }

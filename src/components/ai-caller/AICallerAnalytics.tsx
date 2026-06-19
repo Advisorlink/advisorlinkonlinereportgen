@@ -160,7 +160,7 @@ export function AICallerAnalytics() {
       return {
         id: c.id,
         name: c.name,
-        script: script?.name || "—",
+        script: script?.name || "-",
         calls: cLogs.length,
         answered: ans,
         answerRate: cLogs.length ? ans / cLogs.length : 0,
@@ -202,7 +202,7 @@ export function AICallerAnalytics() {
     const answerRate = totals.total ? totals.answered / totals.total : 0;
     if (totals.total >= 20) {
       if (answerRate < 0.15) recs.push({ kind: "warn", title: "Low answer rate", body: `Only ${Math.round(answerRate*100)}% of calls were answered. Try calling at different times, switching caller ID, or reducing call volume per hour to avoid being marked as spam.` });
-      else if (answerRate > 0.4) recs.push({ kind: "good", title: "Strong answer rate", body: `${Math.round(answerRate*100)}% pickup — your number reputation and timing are working. Consider scaling volume.` });
+      else if (answerRate > 0.4) recs.push({ kind: "good", title: "Strong answer rate", body: `${Math.round(answerRate*100)}% pickup - your number reputation and timing are working. Consider scaling volume.` });
     }
     // Best hour
     const bestHour = [...hourlyData].filter(h => h.calls >= 5).sort((a, b) => b.answerRate - a.answerRate)[0];
@@ -215,14 +215,14 @@ export function AICallerAnalytics() {
       const sorted = [...withVolume].sort((a, b) => b.leadRate - a.leadRate);
       const best = sorted[0]; const worst = sorted[sorted.length - 1];
       if (best.leadRate > worst.leadRate * 1.4) {
-        recs.push({ kind: "good", title: `Winning script: "${best.name}"`, body: `Converts ${Math.round(best.leadRate*100)}% of answered calls into leads — vs ${Math.round(worst.leadRate*100)}% for "${worst.name}". Route more volume to the winner.` });
+        recs.push({ kind: "good", title: `Winning script: "${best.name}"`, body: `Converts ${Math.round(best.leadRate*100)}% of answered calls into leads - vs ${Math.round(worst.leadRate*100)}% for "${worst.name}". Route more volume to the winner.` });
       }
     }
     // Avg talk time
     if (totals.avgTalk > 0 && totals.avgTalk < 30) {
-      recs.push({ kind: "warn", title: "Calls ending fast", body: `Average answered call is only ${fmtDur(totals.avgTalk)}. Prospects may be hanging up — review the opener and first 10 seconds.` });
+      recs.push({ kind: "warn", title: "Calls ending fast", body: `Average answered call is only ${fmtDur(totals.avgTalk)}. Prospects may be hanging up - review the opener and first 10 seconds.` });
     } else if (totals.avgTalk > 180) {
-      recs.push({ kind: "good", title: "Solid engagement", body: `Average talk time is ${fmtDur(totals.avgTalk)} — prospects are sticking around.` });
+      recs.push({ kind: "good", title: "Solid engagement", body: `Average talk time is ${fmtDur(totals.avgTalk)} - prospects are sticking around.` });
     }
     // Cost per lead
     if (totals.totalCost > 0 && totals.leadCount > 0) {
@@ -233,7 +233,7 @@ export function AICallerAnalytics() {
     if (totals.failed > 0 && totals.failed / Math.max(1, totals.total) > 0.05) {
       recs.push({ kind: "warn", title: "High failure rate", body: `${Math.round((totals.failed/totals.total)*100)}% of calls failed. Check number formatting and provider status.` });
     }
-    if (recs.length === 0) recs.push({ kind: "tip", title: "Not enough data yet", body: "Run more calls — recommendations sharpen once you have 20+ calls and 2+ scripts in rotation." });
+    if (recs.length === 0) recs.push({ kind: "tip", title: "Not enough data yet", body: "Run more calls - recommendations sharpen once you have 20+ calls and 2+ scripts in rotation." });
     return recs;
   }, [totals, hourlyData, scriptStats]);
 
@@ -430,7 +430,7 @@ export function AICallerAnalytics() {
                         <td className="p-3 text-right">{Math.round(c.leadRate * 100)}%</td>
                         <td className="p-3 text-right">{fmtDur(c.avgDur)}</td>
                         <td className="p-3 text-right">{fmtCost(c.cost)}</td>
-                        <td className="p-3 text-right">{c.leads ? fmtCost(c.cpl) : "—"}</td>
+                        <td className="p-3 text-right">{c.leads ? fmtCost(c.cpl) : "-"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -468,7 +468,7 @@ export function AICallerAnalytics() {
                         <td className="p-3 text-right">{Math.round(s.answerRate * 100)}%</td>
                         <td className="p-3 text-right">{s.leads}</td>
                         <td className="p-3 text-right">{Math.round(s.leadRate * 100)}%</td>
-                        <td className="p-3 text-right">{s.leads ? fmtCost(s.cpl) : "—"}</td>
+                        <td className="p-3 text-right">{s.leads ? fmtCost(s.cpl) : "-"}</td>
                         <td className="p-3 text-right">
                           {isWinner && <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30">Winner</Badge>}
                           {isLoser && <Badge className="bg-destructive/15 text-destructive border-destructive/30">Underperforming</Badge>}

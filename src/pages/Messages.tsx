@@ -72,21 +72,21 @@ const statusIcon = (s: string) => {
 const decodeSmsError = (code: string | null | undefined, fallback?: string | null): string => {
   const c = String(code || "").trim();
   const map: Record<string, string> = {
-    "21610": "Blocked — recipient replied STOP (opted out)",
-    "21611": "Blocked — number on carrier block list",
+    "21610": "Blocked - recipient replied STOP (opted out)",
+    "21611": "Blocked - number on carrier block list",
     "21612": "Not reachable from your Twilio number",
     "21614": "Invalid mobile number",
-    "30003": "Unreachable — handset off or out of coverage",
+    "30003": "Unreachable - handset off or out of coverage",
     "30004": "Blocked by the recipient's carrier or device",
     "30005": "Unknown destination handset",
     "30006": "Landline or unreachable carrier",
-    "30007": "Blocked — carrier flagged as spam",
+    "30007": "Blocked - carrier flagged as spam",
     "30008": "Unknown error from carrier",
     "30032": "Toll-free number not yet verified",
     "30034": "A2P 10DLC registration required",
     "30410": "Provider timeout / delivery unconfirmed",
-    "30450": "Blocked — duplicate message",
-    "30454": "Blocked — message content flagged",
+    "30450": "Blocked - duplicate message",
+    "30454": "Blocked - message content flagged",
   };
   if (map[c]) return map[c];
   if (fallback) return fallback;
@@ -622,7 +622,7 @@ export default function Messages() {
   return (
     <CRMLayout>
       <div className="flex h-[calc(100vh-2rem)] overflow-hidden rounded-xl border border-border bg-card shadow-card">
-        {/* LEFT — Conversation List */}
+        {/* LEFT - Conversation List */}
         <div className={`flex flex-col border-r border-border ${activeConv ? "hidden md:flex" : "flex"} w-full md:w-80 lg:w-96 shrink-0`}>
           <div className="p-4 border-b border-border space-y-3">
             <div className="flex items-center justify-between">
@@ -698,7 +698,7 @@ export default function Messages() {
           </ScrollArea>
         </div>
 
-        {/* CENTER — Chat Thread */}
+        {/* CENTER - Chat Thread */}
         {activeConv ? (
           <div className="flex-1 flex flex-col min-w-0">
             {/* Chat header */}
@@ -996,7 +996,7 @@ export default function Messages() {
           </div>
         )}
 
-        {/* Right-side contact panel removed — unified DealProfileDrawer below opens automatically */}
+        {/* Right-side contact panel removed - unified DealProfileDrawer below opens automatically */}
 
         {/* Unified Pipeline-style profile drawer */}
         <DealProfileDrawer
@@ -1262,7 +1262,7 @@ function ContactPanelContent({
             <div>
               <Label htmlFor="msg-review" className="text-[10px]">Reviewed Before?</Label>
               <Select value={form.had_review_before} onValueChange={(v) => setForm((p) => ({ ...p, had_review_before: v }))}>
-                <SelectTrigger className="mt-1 h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectTrigger className="mt-1 h-8 text-xs"><SelectValue placeholder="-" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="yes">Yes</SelectItem>
                   <SelectItem value="no">No</SelectItem>

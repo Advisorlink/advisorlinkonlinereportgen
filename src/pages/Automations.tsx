@@ -397,7 +397,7 @@ function SheetLeadSyncEditor() {
     setSyncing(false);
     if (error) { toast({ title: "Sync failed", description: error.message, variant: "destructive" }); return; }
     const imp = (data as { imported?: number } | null)?.imported ?? 0;
-    toast({ title: `Synced — ${imp} new lead${imp === 1 ? "" : "s"}` });
+    toast({ title: `Synced - ${imp} new lead${imp === 1 ? "" : "s"}` });
     load();
   };
 
@@ -466,10 +466,10 @@ function SheetLeadSyncEditor() {
 type Tpl = { id: string; kind: string; subject: string | null; body: string; is_active: boolean };
 
 const TPL_META: Record<string, { label: string; hasSubject: boolean; description: string }> = {
-  sms_confirmation: { label: "SMS — Booking confirmation", hasSubject: false, description: "Sent by SMS as soon as a client books." },
-  email_confirmation: { label: "Email — Booking confirmation", hasSubject: true, description: "Sent by email as soon as a client books." },
-  email_24h: { label: "Email — 24h reminder", hasSubject: true, description: "Sent ~24 hours before the call." },
-  email_1h: { label: "Email — 1h reminder", hasSubject: true, description: "Sent ~1 hour before the call." },
+  sms_confirmation: { label: "SMS - Booking confirmation", hasSubject: false, description: "Sent by SMS as soon as a client books." },
+  email_confirmation: { label: "Email - Booking confirmation", hasSubject: true, description: "Sent by email as soon as a client books." },
+  email_24h: { label: "Email - 24h reminder", hasSubject: true, description: "Sent ~24 hours before the call." },
+  email_1h: { label: "Email - 1h reminder", hasSubject: true, description: "Sent ~1 hour before the call." },
 };
 
 function BookingTemplatesEditor() {

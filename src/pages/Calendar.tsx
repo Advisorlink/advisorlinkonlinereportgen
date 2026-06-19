@@ -126,7 +126,7 @@ export default function Calendar() {
             </TabsList>
 
             <TabsContent value="bookings" className="space-y-2 mt-4">
-              {bookings.length === 0 && <p className="text-sm text-muted-foreground">No bookings yet — share your link to start receiving them.</p>}
+              {bookings.length === 0 && <p className="text-sm text-muted-foreground">No bookings yet - share your link to start receiving them.</p>}
               {bookings.map(b => (
                 <div key={b.id} className="rounded-xl border bg-card p-4 flex flex-col sm:flex-row sm:items-center gap-3">
                   <div className="flex-1">
@@ -138,7 +138,7 @@ export default function Calendar() {
                       {new Intl.DateTimeFormat("en-AU", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true, timeZone: b.client_timezone }).format(new Date(b.start_at))}
                       {" "}({b.client_timezone})
                     </div>
-                    <div className="text-xs text-muted-foreground">{b.client_email} · {b.client_phone ?? "—"}</div>
+                    <div className="text-xs text-muted-foreground">{b.client_email} · {b.client_phone ?? "-"}</div>
                   </div>
                 </div>
               ))}

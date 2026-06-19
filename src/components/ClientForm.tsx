@@ -464,7 +464,7 @@ function InvestmentOptionsSection({
         <div className="flex items-center gap-1.5">
           <BarChart3 className="w-3.5 h-3.5 text-cyan" />
           <span className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
-            {fundLabel} — Investment Options
+            {fundLabel} - Investment Options
           </span>
         </div>
         <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={addOption}>
@@ -481,7 +481,7 @@ function InvestmentOptionsSection({
         <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mb-2">
           <div className="flex items-center gap-1.5 mb-2">
             <span className="text-[11px] font-semibold text-foreground">
-              Primary — {primaryOptionLabel || "Original Option"}
+              Primary - {primaryOptionLabel || "Original Option"}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2">

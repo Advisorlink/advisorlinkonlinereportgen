@@ -496,7 +496,7 @@ export function AICallerPhoneNumbers() {
                       }}
                     >
                       {n.assistantId ? (
-                        <><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" /> Active — Change Script</>
+                        <><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" /> Active - Change Script</>
                       ) : (
                         "Assign Inbound Script"
                       )}

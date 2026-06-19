@@ -396,7 +396,7 @@ export function ESignNewRequest({ onBack, initialFile, initialFileName, prefillC
             <p className="text-sm text-muted-foreground mt-1">
               {isGuest
                 ? "Fill in the client information below"
-                : "Review and edit the pre-filled details — these will auto-fill the PDF"}
+                : "Review and edit the pre-filled details - these will auto-fill the PDF"}
             </p>
           </div>
 

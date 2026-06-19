@@ -35,8 +35,8 @@ type ClientDocument = {
 };
 
 const docTypeLabels: Record<string, string> = {
-  id_front: "ID — Front",
-  id_back: "ID — Back",
+  id_front: "ID - Front",
+  id_back: "ID - Back",
   license: "Driver's Licence",
   super_statement: "Super Statement",
   statement: "Statement",
@@ -45,7 +45,7 @@ const docTypeLabels: Record<string, string> = {
 };
 
 function formatBytes(bytes: number | null) {
-  if (!bytes) return "—";
+  if (!bytes) return "-";
   const kb = bytes / 1024;
   if (kb < 1024) return `${kb.toFixed(1)} KB`;
   return `${(kb / 1024).toFixed(2)} MB`;

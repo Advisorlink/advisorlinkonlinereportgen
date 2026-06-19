@@ -205,7 +205,7 @@ export function PipelineBoard() {
       .update({ stage_id: targetStageId, position: 0, ...extra })
       .eq("id", dealId);
 
-    // Best-effort shift others (ignore errors — UI already updated optimistically)
+    // Best-effort shift others (ignore errors - UI already updated optimistically)
     if (otherIds.length) {
       await Promise.all(
         otherIds.map((id) => {
