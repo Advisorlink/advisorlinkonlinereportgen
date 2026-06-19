@@ -416,11 +416,11 @@ export function FundsPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
       <PageHeader pageLabel="FUND DETAILS" />
-      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Current fund{hasMultiple ? "s" : ""} vs comparison</h2>
+      <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Your current position & the impact of advice</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
         {hasMultiple
-          ? "Combined view of all existing funds and the comparison scenario used throughout this report."
-          : "Side-by-side view of the existing fund settings and the comparison scenario used throughout this report."}
+          ? "Combined view of all your existing funds, alongside the projected impact of receiving licensed financial advice (not a comparison to another fund)."
+          : "Your existing fund settings, alongside the projected impact of receiving licensed financial advice (not a comparison to another fund)."}
       </p>
 
       {hasMultiple ? (
@@ -475,18 +475,15 @@ export function FundsPage({ s }: { s: ReportSummary }) {
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <SectionCard title="Comparison scenario" icon="◉">
-                <Row label="Scenario" value="Aligned to risk profile" />
-                <Row label="Risk profile" value={s.riskProfile} />
-                <Row label="Net return (current +2.5%)" value={fmtPct(s.comparisonReturn)} />
-                <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
-                <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
-                <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
-                <Row label="Optional annual advice fee" value="1.76%" />
-                <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(total))} />
+              <SectionCard title="With financial advice" icon="◉">
+                <Row label="Potential improvement" value="+2.5% p.a. on current trajectory" />
+                <Row label="How" value="Adviser recommendations (e.g. investment option changes, fund switch, active management)" />
+                <Row label="One-off advice fee" value={fmtMoney(6500)} />
+                <Row label="Ongoing advisory fee" value="1.76% p.a." />
+                <Row label="Note" value="Not a comparison to another super fund — illustrates the impact of acting on licensed advice within or across your existing arrangements." />
               </SectionCard>
               <div className="rounded-lg border border-cyan/40 bg-cyan/10 px-3 py-2">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-cyan">Projected at age {s.retirementAge}</div>
+                <div className="text-[9px] font-bold uppercase tracking-wider text-cyan">With advice — projected at age {s.retirementAge}</div>
                 <div className="text-lg font-bold text-cyan tabular-nums leading-tight">{fmtMoney(s.projectedComparison)}</div>
                 <div className="text-[9px] text-muted-foreground italic">after fees and market corrections</div>
               </div>
@@ -532,18 +529,15 @@ export function FundsPage({ s }: { s: ReportSummary }) {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <SectionCard title="Comparison scenario" icon="◉">
-              <Row label="Scenario" value="Aligned to risk profile" />
-              <Row label="Risk profile" value={s.riskProfile} />
-              <Row label="Net return (current +2.5%)" value={fmtPct(s.comparisonReturn)} />
-              <Row label="Admin fee - flat" value={fmtMoney(COMPARISON_ADMIN_FLAT)} />
-              <Row label="Admin fee - flat as % of balance" value={fmtPct(cmpAdminFlatPct, 2)} />
-              <Row label="Admin fee - tiered %" value={fmtPct(cmpAdminBalPct, 2)} />
-              <Row label="Optional annual advice fee" value="1.76%" />
-              <Row label="Once off service fee" value={fmtMoney(comparisonAdviceFee(i.superBalance))} />
+            <SectionCard title="With financial advice" icon="◉">
+              <Row label="Potential improvement" value="+2.5% p.a. on current trajectory" />
+              <Row label="How" value="Adviser recommendations (e.g. investment option changes, fund switch, active management)" />
+              <Row label="One-off advice fee" value={fmtMoney(6500)} />
+              <Row label="Ongoing advisory fee" value="1.76% p.a." />
+              <Row label="Note" value="Not a comparison to another super fund — illustrates the impact of acting on licensed advice within or across your existing arrangements." />
             </SectionCard>
             <div className="rounded-lg border border-cyan/40 bg-cyan/10 px-3 py-2">
-              <div className="text-[9px] font-bold uppercase tracking-wider text-cyan">Projected at age {s.retirementAge}</div>
+              <div className="text-[9px] font-bold uppercase tracking-wider text-cyan">With advice — projected at age {s.retirementAge}</div>
               <div className="text-lg font-bold text-cyan tabular-nums leading-tight">{fmtMoney(s.projectedComparison)}</div>
               <div className="text-[9px] text-muted-foreground italic">after fees and market corrections</div>
             </div>
