@@ -483,7 +483,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
                 <Row label="Note" value="Not a comparison to another super fund — illustrates the impact of acting on licensed advice within or across your existing arrangements." />
               </SectionCard>
               <div className="rounded-lg border border-cyan/40 bg-cyan/10 px-3 py-2">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-cyan">Projected at age {s.retirementAge}</div>
+                <div className="text-[9px] font-bold uppercase tracking-wider text-cyan">With advice — projected at age {s.retirementAge}</div>
                 <div className="text-lg font-bold text-cyan tabular-nums leading-tight">{fmtMoney(s.projectedComparison)}</div>
                 <div className="text-[9px] text-muted-foreground italic">after fees and market corrections</div>
               </div>
@@ -537,7 +537,7 @@ export function FundsPage({ s }: { s: ReportSummary }) {
               <Row label="Note" value="Not a comparison to another super fund — illustrates the impact of acting on licensed advice within or across your existing arrangements." />
             </SectionCard>
             <div className="rounded-lg border border-cyan/40 bg-cyan/10 px-3 py-2">
-              <div className="text-[9px] font-bold uppercase tracking-wider text-cyan">Projected at age {s.retirementAge}</div>
+              <div className="text-[9px] font-bold uppercase tracking-wider text-cyan">With advice — projected at age {s.retirementAge}</div>
               <div className="text-lg font-bold text-cyan tabular-nums leading-tight">{fmtMoney(s.projectedComparison)}</div>
               <div className="text-[9px] text-muted-foreground italic">after fees and market corrections</div>
             </div>
