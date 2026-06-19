@@ -539,11 +539,11 @@ export function FundsPage({ s }: { s: ReportSummary }) {
           </div>
           <div className="flex flex-col gap-2">
             <SectionCard title="With financial advice" icon="◉">
-              <Row label="Potential improvement" value="+2.5% p.a. on current trajectory" />
-              <Row label="How" value="Adviser recommendations (e.g. investment option changes, fund switch, active management)" />
-              <Row label="One-off advice fee" value={fmtMoney(6500)} />
-              <Row label="Ongoing advisory fee" value="1.76% p.a." />
-              <Row label="Note" value="Not a comparison to another super fund — illustrates the impact of acting on licensed advice within or across your existing arrangements." />
+              <StackRow label="Potential improvement" value="+2.5% p.a. on current trajectory" />
+              <StackRow label="How" value="Adviser recommendations (e.g. investment option changes, fund switch, active management)" />
+              <StackRow label="One-off advice fee" value={fmtMoney(6500)} />
+              <StackRow label="Ongoing advisory fee" value="1.76% p.a." />
+              <StackRow label="Note" value="Not a comparison to another super fund — illustrates the impact of acting on licensed advice within or across your existing arrangements." />
             </SectionCard>
             <div className="rounded-lg border border-cyan/40 bg-cyan/10 px-3 py-2">
               <div className="text-[9px] font-bold uppercase tracking-wider text-cyan">With advice — projected at age {s.retirementAge}</div>
