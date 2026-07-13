@@ -446,7 +446,99 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
         </div>
       </Page>
 
-      {/* ═════ 02 · EXECUTIVE SNAPSHOT ═════ */}
+      {/* ═════ 02 · ABOUT, WHAT TO EXPECT & FIRM DETAILS ═════ */}
+      <Page bleed>
+        <TopBand />
+        <div style={{ padding: "10mm 16mm 6mm 16mm", display: "flex", flexDirection: "column", minHeight: "calc(297mm - 24mm)" }}>
+          <PageHero
+            title="About this document"
+            subtitle="A summary of what you will find in the pages ahead, how to read it, and the firm behind the advice."
+          />
+
+          {/* What to expect */}
+          <Card className="mb-5">
+            <CardTitle icon="plus">What to expect</CardTitle>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              {[
+                { n: "01", t: "Executive snapshot", d: "Your personal details, targets and where your super sits today." },
+                { n: "02", t: "Your position and the impact of advice", d: "Current fund settings alongside the recommended strategy and fees." },
+                { n: "03", t: "Projection to retirement", d: "Year by year balance projection with realistic market corrections built in." },
+                { n: "04", t: "Retirement income view", d: "How long your money potentially lasts once you begin drawing an income." },
+                { n: "05", t: "Insurance comparison", d: "Existing cover benchmarked against a recommended replacement." },
+                { n: "06", t: "Fees and adviser notes", d: "Full fee breakdown and the reasoning behind each recommendation." },
+              ].map((s) => (
+                <div key={s.n} className="flex gap-3">
+                  <div style={{ ...serif, color: GOLD_DEEP, fontSize: 18, fontWeight: 700, lineHeight: 1, minWidth: 26 }}>{s.n}</div>
+                  <div>
+                    <div className="text-[11.5px] font-semibold" style={{ color: NAVY }}>{s.t}</div>
+                    <div className="text-[10.5px] leading-relaxed" style={{ color: "#475569" }}>{s.d}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Firm details */}
+          <Card tone="navy" className="mb-5">
+            <CardTitle icon="diamond" onDark>About Finance Direct</CardTitle>
+            <p className="text-[11px] leading-relaxed mb-4" style={{ color: "#E2E8F0" }}>
+              Finance Direct is a private wealth advisory firm helping Australians plan for retirement,
+              protect their families and grow their superannuation with confidence. Every strategy paper
+              is prepared by a qualified adviser using our own model portfolio research.
+            </p>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+              {[
+                ["Legal entity", FIRM.legal],
+                ["AFSL", FIRM.afsl.replace(/^AFSL\s*/, "")],
+                ["ABN", FIRM.abn.replace(/^ABN\s*/, "")],
+                ["Phone", FIRM.phone],
+                ["Email", FIRM.email],
+                ["Website", FIRM.web],
+                ["Address", FIRM.address],
+                ["Document reference", refNo],
+              ].map(([l, v]) => (
+                <div key={l} className="flex items-center justify-between py-1.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.10)" }}>
+                  <div className="text-[9.5px] uppercase tracking-[0.22em] font-semibold" style={{ color: GOLD_SOFT }}>{l}</div>
+                  <div className="text-[10.5px] text-right" style={{ color: "#F8FAFC", fontVariantNumeric: "tabular-nums" }}>{v}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Important information / disclaimer intro */}
+          <Card className="flex-1">
+            <CardTitle icon="check">Important information</CardTitle>
+            <div className="text-[10.5px] leading-relaxed space-y-2" style={{ color: "#334155" }}>
+              <p>
+                <b style={{ color: NAVY }}>General advice warning.</b> The information in this document
+                has been prepared by {FIRM.legal} ({FIRM.afsl}, {FIRM.abn}) and is general in nature.
+                It does not take into account your personal objectives, financial situation or needs.
+                Before acting on any recommendation, consider its appropriateness to your circumstances
+                and read the relevant Product Disclosure Statement (PDS) and Target Market Determination (TMD).
+              </p>
+              <p>
+                <b style={{ color: NAVY }}>Projections.</b> All figures are illustrative and assume
+                consistent contributions, a 2.5% inflation adjustment and periodic market corrections.
+                Past performance is not a reliable indicator of future performance.
+              </p>
+              <p>
+                <b style={{ color: NAVY }}>Insurance.</b> Where a replacement is recommended, your
+                existing cover should not be cancelled until new cover has been formally accepted by
+                the incoming insurer.
+              </p>
+              <p>
+                <b style={{ color: NAVY }}>Confidentiality.</b> This document has been prepared
+                exclusively for {clientName} and may not be reproduced or distributed without written
+                consent from {FIRM.legal}.
+              </p>
+            </div>
+          </Card>
+
+          <RunningFooter page={2} total={TOTAL_PAGES} date={today} />
+        </div>
+      </Page>
+
+      {/* ═════ 03 · EXECUTIVE SNAPSHOT ═════ */}
       <Page bleed>
         <TopBand />
         <div style={{ padding: "10mm 16mm 6mm 16mm", display: "flex", flexDirection: "column", minHeight: "calc(297mm - 22mm)" }}>
