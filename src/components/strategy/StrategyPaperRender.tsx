@@ -23,7 +23,7 @@ import {
   Area,
 } from "recharts";
 import coverImg from "@/assets/strategy-cover.jpg";
-import logoLightAsset from "@/assets/finance-direct-logo-official.png.asset.json";
+import logoLightAsset from "@/assets/finance-direct-logo-custom.png.asset.json";
 const logoUrl = logoLightAsset.url;
 
 // Renders the transparent Finance Direct logo tinted to any solid color via CSS mask.
