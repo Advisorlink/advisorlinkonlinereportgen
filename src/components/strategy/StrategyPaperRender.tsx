@@ -368,7 +368,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
     const seed = (clientName + data.clientDob).split("").reduce((a, c) => a + c.charCodeAt(0), 0);
     return `FD-${String(new Date().getFullYear()).slice(-2)}-${String(seed % 9999).padStart(4, "0")}`;
   }, [clientName, data.clientDob]);
-  const TOTAL_PAGES = 6;
+  const TOTAL_PAGES = 7;
 
   return (
     <div ref={ref} className="space-y-6" style={sans}>
@@ -630,7 +630,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </table>
           </Card>
 
-          <RunningFooter page={2} total={TOTAL_PAGES} date={today} />
+          <RunningFooter page={3} total={TOTAL_PAGES} date={today} />
         </div>
       </Page>
 
@@ -724,7 +724,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </Note>
           </div>
 
-          <RunningFooter page={3} total={TOTAL_PAGES} date={today} />
+          <RunningFooter page={4} total={TOTAL_PAGES} date={today} />
         </div>
       </Page>
 
@@ -838,7 +838,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </div>
           </Card>
 
-          <RunningFooter page={4} total={TOTAL_PAGES} date={today} />
+          <RunningFooter page={5} total={TOTAL_PAGES} date={today} />
         </div>
       </Page>
 
@@ -938,7 +938,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </div>
           </div>
 
-          <RunningFooter page={5} total={TOTAL_PAGES} date={today} />
+          <RunningFooter page={6} total={TOTAL_PAGES} date={today} />
         </div>
       </Page>
 
@@ -1030,7 +1030,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
           </p>
         </div>
 
-        <RunningFooter page={6} total={TOTAL_PAGES} date={today} />
+        <RunningFooter page={7} total={TOTAL_PAGES} date={today} />
       </Page>
     </div>
   );
