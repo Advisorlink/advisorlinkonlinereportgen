@@ -36,6 +36,7 @@ import ReschedulePublic from "./pages/ReschedulePublic.tsx";
 import CancelPublic from "./pages/CancelPublic.tsx";
 import Automations from "./pages/Automations.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Strategy from "./pages/Strategy.tsx";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,7 @@ const App = () => (
                   <Route path="/reschedule/:token" element={<ReschedulePublic />} />
                   <Route path="/cancel/:token" element={<CancelPublic />} />
                   <Route path="/automations" element={<ProtectedApp><Automations /></ProtectedApp>} />
+                  <Route path="/strategy" element={<ProtectedApp><Strategy /></ProtectedApp>} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <SoftphoneDock />

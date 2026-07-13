@@ -1,4 +1,4 @@
-import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall, ClipboardList, MessageSquare, Send, Sparkles, Kanban, Sun, Moon, ShieldCheck, Phone, CalendarDays, Workflow } from "lucide-react";
+import { BarChart3, FileText, Gift, Monitor, Settings, LogOut, FileSignature, PhoneCall, ClipboardList, MessageSquare, Send, Sparkles, Kanban, Sun, Moon, ShieldCheck, Phone, CalendarDays, Workflow, Target } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -26,6 +26,7 @@ const navItems = [
   { title: "Automations", url: "/automations", icon: Workflow, badge: "NEW", badgeColor: "gradient-accent" },
   { title: "SMS Hub", url: "/sms-hub", icon: Send },
   { title: "Report Generator", url: "/", icon: FileText },
+  { title: "Strategy Paper", url: "/strategy", icon: Target, badge: "NEW", badgeColor: "gradient-accent" },
   { title: "Fact Find", url: "/fact-find", icon: ClipboardList },
   { title: "E-Sign Docs", url: "/esign", icon: FileSignature },
   { title: "Documents", url: "/documents", icon: ShieldCheck, badge: "NEW", badgeColor: "gradient-accent" },
