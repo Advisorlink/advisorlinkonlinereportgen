@@ -35,8 +35,10 @@ const pctOr = (v: string): number => numOr(v) / 100;
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+    <div className="flex flex-col">
+      <Label className="text-[11px] font-medium text-muted-foreground leading-tight mb-1.5 min-h-[28px] flex items-end">
+        <span className="line-clamp-2">{label}</span>
+      </Label>
       {children}
     </div>
   );
@@ -249,7 +251,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
       {/* Personal */}
       <Card>
         <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold uppercase tracking-wide">Personal</CardTitle></CardHeader>
-        <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <CardContent className="grid grid-cols-2 gap-3">
           <Field label="Client name">
             <Input value={value.clientName} onChange={(e) => patch({ clientName: e.target.value })} placeholder="John Smith" />
           </Field>
@@ -288,7 +290,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
 
 
       {/* Super scenarios */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <ScenarioBlock
           title="Existing Scenario (Super)"
           tint="existing"
@@ -314,7 +316,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
       </div>
 
       {/* Insurance */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <InsuranceBlock title="Existing Insurance" tint="existing" ins={value.existingInsurance} onChange={(i) => patch({ existingInsurance: i })} />
         <InsuranceBlock title="Comparison Insurance" tint="comparison" ins={value.comparisonInsurance} onChange={(i) => patch({ comparisonInsurance: i })} />
       </div>
@@ -322,7 +324,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
       {/* Fees */}
       <Card>
         <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold uppercase tracking-wide">Advice & Implementation Fees</CardTitle></CardHeader>
-        <CardContent className="grid grid-cols-3 gap-3">
+        <CardContent className="grid grid-cols-2 gap-3">
           <Field label="Advice / implementation fee ($)">
             <NumInput value={value.fees.adviceFeeFlat} onChange={(v) => patch({ fees: { ...value.fees, adviceFeeFlat: v } })} />
           </Field>
