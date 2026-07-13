@@ -54,7 +54,7 @@ interface Props {
   data: StrategyPaperData;
 }
 
-/* Brand palette — deep navy + warm yellow gold */
+/* Brand palette , deep navy + warm yellow gold */
 const NAVY = "#0A1F4D";
 const NAVY_DEEP = "#050F2E";
 const NAVY_INK = "#081733";
@@ -239,7 +239,7 @@ function Card({ children, className = "", style, tone = "light" }:
   );
 }
 
-// Small stat pill (label / value / underline / sub) — aligned via fixed row heights
+// Small stat pill (label / value / underline / sub) , aligned via fixed row heights
 function MiniStat({ label, value, sub, accent = "navy" }:
   { label: string; value: React.ReactNode; sub?: React.ReactNode; accent?: "navy" | "gold" | "white" }) {
   const color = accent === "gold" ? GOLD_DEEP : accent === "white" ? "#FFFFFF" : NAVY;
@@ -312,7 +312,7 @@ function Stat({ label, value, sub, tone = "navy" }:
   );
 }
 
-/* Refined note — minimal, editorial. */
+/* Refined note , minimal, editorial. */
 function Note({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="py-3" style={{ borderTop: `1px solid ${RULE}` }}>
@@ -368,7 +368,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
     const seed = (clientName + data.clientDob).split("").reduce((a, c) => a + c.charCodeAt(0), 0);
     return `FD-${String(new Date().getFullYear()).slice(-2)}-${String(seed % 9999).padStart(4, "0")}`;
   }, [clientName, data.clientDob]);
-  const TOTAL_PAGES = 6;
+  const TOTAL_PAGES = 7;
 
   return (
     <div ref={ref} className="space-y-6" style={sans}>
@@ -385,7 +385,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
         <div className="relative flex flex-col justify-between"
           style={{ minHeight: "297mm", padding: "22mm 24mm", color: "#F8FAFC" }}>
 
-          {/* HEADER — horizontal logo, no white box */}
+          {/* HEADER , horizontal logo, no white box */}
           <div className="flex items-start justify-between">
             <GoldLogo height={44} color={GOLD} />
             <div className="text-right">
@@ -446,7 +446,99 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
         </div>
       </Page>
 
-      {/* ═════ 02 · EXECUTIVE SNAPSHOT ═════ */}
+      {/* ═════ 02 · ABOUT, WHAT TO EXPECT & FIRM DETAILS ═════ */}
+      <Page bleed>
+        <TopBand />
+        <div style={{ padding: "10mm 16mm 6mm 16mm", display: "flex", flexDirection: "column", minHeight: "calc(297mm - 24mm)" }}>
+          <PageHero
+            title="About this document"
+            subtitle="A summary of what you will find in the pages ahead, how to read it, and the firm behind the advice."
+          />
+
+          {/* What to expect */}
+          <Card className="mb-5">
+            <CardTitle icon="plus">What to expect</CardTitle>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              {[
+                { n: "01", t: "Executive snapshot", d: "Your personal details, targets and where your super sits today." },
+                { n: "02", t: "Your position and the impact of advice", d: "Current fund settings alongside the recommended strategy and fees." },
+                { n: "03", t: "Projection to retirement", d: "Year by year balance projection with realistic market corrections built in." },
+                { n: "04", t: "Retirement income view", d: "How long your money potentially lasts once you begin drawing an income." },
+                { n: "05", t: "Insurance comparison", d: "Existing cover benchmarked against a recommended replacement." },
+                { n: "06", t: "Fees and adviser notes", d: "Full fee breakdown and the reasoning behind each recommendation." },
+              ].map((s) => (
+                <div key={s.n} className="flex gap-3">
+                  <div style={{ ...serif, color: GOLD_DEEP, fontSize: 18, fontWeight: 700, lineHeight: 1, minWidth: 26 }}>{s.n}</div>
+                  <div>
+                    <div className="text-[11.5px] font-semibold" style={{ color: NAVY }}>{s.t}</div>
+                    <div className="text-[10.5px] leading-relaxed" style={{ color: "#475569" }}>{s.d}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Firm details */}
+          <Card tone="navy" className="mb-5">
+            <CardTitle icon="diamond" onDark>About Finance Direct</CardTitle>
+            <p className="text-[11px] leading-relaxed mb-4" style={{ color: "#E2E8F0" }}>
+              Finance Direct is a private wealth advisory firm helping Australians plan for retirement,
+              protect their families and grow their superannuation with confidence. Every strategy paper
+              is prepared by a qualified adviser using our own model portfolio research.
+            </p>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+              {[
+                ["Legal entity", FIRM.legal],
+                ["AFSL", FIRM.afsl.replace(/^AFSL\s*/, "")],
+                ["ABN", FIRM.abn.replace(/^ABN\s*/, "")],
+                ["Phone", FIRM.phone],
+                ["Email", FIRM.email],
+                ["Website", FIRM.web],
+                ["Address", FIRM.address],
+                ["Document reference", refNo],
+              ].map(([l, v]) => (
+                <div key={l} className="flex items-center justify-between py-1.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.10)" }}>
+                  <div className="text-[9.5px] uppercase tracking-[0.22em] font-semibold" style={{ color: GOLD_SOFT }}>{l}</div>
+                  <div className="text-[10.5px] text-right" style={{ color: "#F8FAFC", fontVariantNumeric: "tabular-nums" }}>{v}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Important information / disclaimer intro */}
+          <Card className="flex-1">
+            <CardTitle icon="check">Important information</CardTitle>
+            <div className="text-[10.5px] leading-relaxed space-y-2" style={{ color: "#334155" }}>
+              <p>
+                <b style={{ color: NAVY }}>General advice warning.</b> The information in this document
+                has been prepared by {FIRM.legal} ({FIRM.afsl}, {FIRM.abn}) and is general in nature.
+                It does not take into account your personal objectives, financial situation or needs.
+                Before acting on any recommendation, consider its appropriateness to your circumstances
+                and read the relevant Product Disclosure Statement (PDS) and Target Market Determination (TMD).
+              </p>
+              <p>
+                <b style={{ color: NAVY }}>Projections.</b> All figures are illustrative and assume
+                consistent contributions, a 2.5% inflation adjustment and periodic market corrections.
+                Past performance is not a reliable indicator of future performance.
+              </p>
+              <p>
+                <b style={{ color: NAVY }}>Insurance.</b> Where a replacement is recommended, your
+                existing cover should not be cancelled until new cover has been formally accepted by
+                the incoming insurer.
+              </p>
+              <p>
+                <b style={{ color: NAVY }}>Confidentiality.</b> This document has been prepared
+                exclusively for {clientName} and may not be reproduced or distributed without written
+                consent from {FIRM.legal}.
+              </p>
+            </div>
+          </Card>
+
+          <RunningFooter page={2} total={TOTAL_PAGES} date={today} />
+        </div>
+      </Page>
+
+      {/* ═════ 03 · EXECUTIVE SNAPSHOT ═════ */}
       <Page bleed>
         <TopBand />
         <div style={{ padding: "10mm 16mm 6mm 16mm", display: "flex", flexDirection: "column", minHeight: "calc(297mm - 22mm)" }}>
@@ -482,7 +574,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-[10.5px]" style={{ color: MUTE }}>Target progress</div>
                   <div className="text-[11px] font-semibold" style={{ color: GOLD_DEEP }}>
-                    {data.goalBalance > 0 ? `${((cmp.projectedBalance / data.goalBalance) * 100).toFixed(1)}%` : "—"}
+                    {data.goalBalance > 0 ? `${((cmp.projectedBalance / data.goalBalance) * 100).toFixed(1)}%` : "-"}
                   </div>
                 </div>
                 <ProgressBar pct={data.goalBalance > 0 ? (cmp.projectedBalance / data.goalBalance) * 100 : 0} />
@@ -538,7 +630,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </table>
           </Card>
 
-          <RunningFooter page={2} total={TOTAL_PAGES} date={today} />
+          <RunningFooter page={3} total={TOTAL_PAGES} date={today} />
         </div>
       </Page>
 
@@ -558,8 +650,8 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               <KVRow label="Investment option" value={data.existing.modelLabel} />
               <KVRow label="Risk profile" value={data.existing.riskProfile} />
               <KVRow label="5-year net return" value={fmtPct(data.existing.fiveYearReturn, 2)} />
-              <KVRow label="Admin fee — flat" value={fmtMoney(data.existing.adminFeeFlat)} />
-              <KVRow label="Admin fee — % of balance" value={fmtPct(data.existing.adminFeePct, 2)} last />
+              <KVRow label="Admin fee , flat" value={fmtMoney(data.existing.adminFeeFlat)} />
+              <KVRow label="Admin fee , % of balance" value={fmtPct(data.existing.adminFeePct, 2)} last />
               <div className="mt-4 p-3" style={{ background: "#F8FAFC", borderRadius: 8 }}>
                 <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>
                   Projected at age {data.retirementAge}
@@ -581,11 +673,11 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
               <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>One-off advice fee</div>
               <div className="mt-1 mb-3 text-[11px]" style={{ color: "#F1F5F9" }}>
-                <b style={{ color: "#FFFFFF" }}>{fmtMoney(data.fees.adviceFeeFlat)}</b> — once off payment from super
+                <b style={{ color: "#FFFFFF" }}>{fmtMoney(data.fees.adviceFeeFlat)}</b> , once off payment from super
               </div>
               <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>Ongoing advisory fee</div>
               <div className="mt-1 mb-3 text-[11px]" style={{ color: "#F1F5F9" }}>
-                <b style={{ color: "#FFFFFF" }}>{fmtPct(data.fees.annualAdvicePct, 2)} p.a.</b> — capped at {fmtMoney(data.fees.annualFeeCap)}
+                <b style={{ color: "#FFFFFF" }}>{fmtPct(data.fees.annualAdvicePct, 2)} p.a.</b> , capped at {fmtMoney(data.fees.annualFeeCap)}
               </div>
               <div className="mt-4 p-3" style={{ background: "rgba(232,184,64,0.15)", border: `1px solid ${GOLD}`, borderRadius: 8 }}>
                 <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>
@@ -632,7 +724,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </Note>
           </div>
 
-          <RunningFooter page={3} total={TOTAL_PAGES} date={today} />
+          <RunningFooter page={4} total={TOTAL_PAGES} date={today} />
         </div>
       </Page>
 
@@ -746,7 +838,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </div>
           </Card>
 
-          <RunningFooter page={4} total={TOTAL_PAGES} date={today} />
+          <RunningFooter page={5} total={TOTAL_PAGES} date={today} />
         </div>
       </Page>
 
@@ -783,7 +875,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
 
           <div className="grid grid-cols-2 gap-3 mb-4">
             <Card tone="navy">
-              <CardTitle icon="dot" onDark>Income sustainability — current</CardTitle>
+              <CardTitle icon="dot" onDark>Income sustainability , current</CardTitle>
               <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Money lasts to age</div>
               <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: "#FFFFFF", fontSize: 34, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 {ex.moneyNeverRunsOut ? "100+" : ex.ageMoneyLasts}
@@ -793,7 +885,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
             </Card>
             <Card tone="navy">
-              <CardTitle icon="dot" onDark>Income sustainability — comparison</CardTitle>
+              <CardTitle icon="dot" onDark>Income sustainability , comparison</CardTitle>
               <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Money lasts to age</div>
               <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: GOLD_SOFT, fontSize: 34, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 {cmp.moneyNeverRunsOut ? "100+" : cmp.ageMoneyLasts}
@@ -846,7 +938,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </div>
           </div>
 
-          <RunningFooter page={5} total={TOTAL_PAGES} date={today} />
+          <RunningFooter page={6} total={TOTAL_PAGES} date={today} />
         </div>
       </Page>
 
@@ -882,7 +974,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
           </tbody>
         </table>
 
-        {/* Research & Adviser Notes — proper section */}
+        {/* Research & Adviser Notes , proper section */}
         <SectionMark kicker="Adviser" title="Research & Notes" />
         <div className="p-5 mb-6" style={{ background: "#F8FAFC", borderLeft: `3px solid ${GOLD}` }}>
           {data.researchNotes ? (
@@ -938,7 +1030,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
           </p>
         </div>
 
-        <RunningFooter page={6} total={TOTAL_PAGES} date={today} />
+        <RunningFooter page={7} total={TOTAL_PAGES} date={today} />
       </Page>
     </div>
   );
