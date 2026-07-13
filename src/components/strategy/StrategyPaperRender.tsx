@@ -183,24 +183,28 @@ function TableHead() {
 
 /* ── AdvisorLink-style primitives ── */
 
-// Dark navy band across the top of interior pages with logo + decorative circle
+// Dark navy band across the top of interior pages with a bigger left-aligned logo.
+// The decorative gold "bubble" sits below the band as a soft background element on the page.
 function TopBand() {
   return (
-    <div className="relative w-full" style={{ background: NAVY_DEEP, height: "22mm" }}>
-      {/* decorative gold circle on right */}
-      <div className="absolute" style={{
-        right: "-12mm", top: "-8mm", width: "48mm", height: "48mm", borderRadius: "50%",
-        background: `radial-gradient(circle at 30% 30%, ${GOLD} 0%, ${GOLD_DEEP} 55%, transparent 75%)`,
-        opacity: 0.55,
-      }} />
-      <div className="absolute" style={{
-        right: "8mm", top: "10mm", width: "20mm", height: "20mm", borderRadius: "50%",
-        background: GOLD, opacity: 0.18,
-      }} />
+    <div className="relative w-full" style={{ background: NAVY_DEEP, height: "24mm" }}>
       <div className="absolute inset-0 flex items-center" style={{ padding: "0 16mm" }}>
-        <GoldLogo height={30} color="#F8FAFC" />
+        <GoldLogo height={44} color={GOLD} />
       </div>
+      {/* thin gold underline */}
+      <div className="absolute left-0 right-0" style={{ bottom: 0, height: 2, background: `linear-gradient(90deg, ${GOLD}, ${GOLD_SOFT}, transparent)` }} />
     </div>
+  );
+}
+
+// Big soft gold bubble that lives in the page background (not the header)
+function BackgroundBubble() {
+  return (
+    <div aria-hidden className="absolute pointer-events-none" style={{
+      right: "-40mm", top: "60mm", width: "160mm", height: "160mm", borderRadius: "50%",
+      background: `radial-gradient(circle at 35% 35%, ${GOLD_SOFT} 0%, ${GOLD} 45%, transparent 72%)`,
+      opacity: 0.10, filter: "blur(2px)", zIndex: 0,
+    }} />
   );
 }
 
