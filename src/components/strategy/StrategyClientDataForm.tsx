@@ -324,7 +324,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
       {/* Fees */}
       <Card>
         <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold uppercase tracking-wide">Advice & Implementation Fees</CardTitle></CardHeader>
-        <CardContent className="grid grid-cols-3 gap-3">
+        <CardContent className="grid grid-cols-2 gap-3">
           <Field label="Advice / implementation fee ($)">
             <NumInput value={value.fees.adviceFeeFlat} onChange={(v) => patch({ fees: { ...value.fees, adviceFeeFlat: v } })} />
           </Field>
