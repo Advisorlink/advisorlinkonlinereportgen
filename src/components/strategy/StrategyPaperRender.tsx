@@ -54,18 +54,18 @@ interface Props {
   data: StrategyPaperData;
 }
 
-/* Brand palette */
-const NAVY = "#0B1B3B";
-const NAVY_DEEP = "#050F26";
-const NAVY_INK = "#0A1830";
-const GOLD = "#C9A24C";
-const GOLD_SOFT = "#E5C87A";
-const GOLD_DEEP = "#8A6E2A";
+/* Brand palette — deep navy + warm yellow gold */
+const NAVY = "#0A1F4D";
+const NAVY_DEEP = "#050F2E";
+const NAVY_INK = "#081733";
+const GOLD = "#E8B840";        // primary yellow-gold
+const GOLD_SOFT = "#F5D26A";   // light yellow-gold
+const GOLD_DEEP = "#B8891E";   // darker warm gold (for text on light)
 const INK = "#0F172A";
 const MUTE = "#64748B";
 const RULE = "#E2E8F0";
 const EXISTING = "#94A3B8";
-const COMPARISON = "#C9A24C";
+const COMPARISON = "#E8B840";
 
 const FIRM = {
   name: "Finance Direct",
@@ -160,7 +160,7 @@ function Row({ label, existing, comparison, highlight }:
         style={{
           borderColor: RULE,
           color: highlight ? GOLD_DEEP : NAVY,
-          background: highlight ? "rgba(201,162,76,0.10)" : "rgba(11,27,59,0.02)",
+          background: highlight ? "rgba(232,184,64,0.10)" : "rgba(11,27,59,0.02)",
         }}>{comparison}</td>
     </tr>
   );
@@ -183,24 +183,28 @@ function TableHead() {
 
 /* ── AdvisorLink-style primitives ── */
 
-// Dark navy band across the top of interior pages with logo + decorative circle
+// Dark navy band across the top of interior pages with a bigger left-aligned logo.
+// The decorative gold "bubble" sits below the band as a soft background element on the page.
 function TopBand() {
   return (
-    <div className="relative w-full" style={{ background: NAVY_DEEP, height: "22mm" }}>
-      {/* decorative gold circle on right */}
-      <div className="absolute" style={{
-        right: "-12mm", top: "-8mm", width: "48mm", height: "48mm", borderRadius: "50%",
-        background: `radial-gradient(circle at 30% 30%, ${GOLD} 0%, ${GOLD_DEEP} 55%, transparent 75%)`,
-        opacity: 0.55,
-      }} />
-      <div className="absolute" style={{
-        right: "8mm", top: "10mm", width: "20mm", height: "20mm", borderRadius: "50%",
-        background: GOLD, opacity: 0.18,
-      }} />
+    <div className="relative w-full" style={{ background: NAVY_DEEP, height: "24mm" }}>
       <div className="absolute inset-0 flex items-center" style={{ padding: "0 16mm" }}>
-        <GoldLogo height={30} color="#F8FAFC" />
+        <GoldLogo height={44} color={GOLD} />
       </div>
+      {/* thin gold underline */}
+      <div className="absolute left-0 right-0" style={{ bottom: 0, height: 2, background: `linear-gradient(90deg, ${GOLD}, ${GOLD_SOFT}, transparent)` }} />
     </div>
+  );
+}
+
+// Big soft gold bubble that lives in the page background (not the header)
+function BackgroundBubble() {
+  return (
+    <div aria-hidden className="absolute pointer-events-none" style={{
+      right: "-40mm", top: "60mm", width: "160mm", height: "160mm", borderRadius: "50%",
+      background: `radial-gradient(circle at 35% 35%, ${GOLD_SOFT} 0%, ${GOLD} 45%, transparent 72%)`,
+      opacity: 0.10, filter: "blur(2px)", zIndex: 0,
+    }} />
   );
 }
 
@@ -223,8 +227,8 @@ function PageHero({ title, subtitle }: { title: string; subtitle?: string }) {
 // Rounded card container
 function Card({ children, className = "", style, tone = "light" }:
   { children: React.ReactNode; className?: string; style?: React.CSSProperties; tone?: "light" | "gold" | "navy" }) {
-  const bg = tone === "gold" ? "rgba(201,162,76,0.08)" : tone === "navy" ? NAVY_DEEP : "#FFFFFF";
-  const border = tone === "gold" ? "rgba(201,162,76,0.35)" : tone === "navy" ? NAVY_DEEP : RULE;
+  const bg = tone === "gold" ? "rgba(232,184,64,0.08)" : tone === "navy" ? NAVY_DEEP : "#FFFFFF";
+  const border = tone === "gold" ? "rgba(232,184,64,0.35)" : tone === "navy" ? NAVY_DEEP : RULE;
   return (
     <div className={className} style={{
       background: bg, border: `1px solid ${border}`, borderRadius: 10, padding: "14px 16px",
@@ -235,30 +239,32 @@ function Card({ children, className = "", style, tone = "light" }:
   );
 }
 
-// Small stat pill (label / value / underline / sub)
+// Small stat pill (label / value / underline / sub) — aligned via fixed row heights
 function MiniStat({ label, value, sub, accent = "navy" }:
-  { label: string; value: React.ReactNode; sub?: React.ReactNode; accent?: "navy" | "gold" }) {
-  const color = accent === "gold" ? GOLD_DEEP : NAVY;
-  const underline = accent === "gold" ? GOLD : NAVY;
+  { label: string; value: React.ReactNode; sub?: React.ReactNode; accent?: "navy" | "gold" | "white" }) {
+  const color = accent === "gold" ? GOLD_DEEP : accent === "white" ? "#FFFFFF" : NAVY;
+  const underline = accent === "gold" ? GOLD : accent === "white" ? GOLD : NAVY;
+  const labelColor = accent === "white" ? "rgba(255,255,255,0.7)" : MUTE;
+  const subColor = accent === "white" ? "rgba(255,255,255,0.75)" : MUTE;
   return (
-    <div className="flex flex-col">
-      <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>{label}</div>
-      <div className="mt-2" style={{ ...serif, fontSize: 24, fontWeight: 600, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+    <div className="flex flex-col" style={{ minHeight: 78 }}>
+      <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: labelColor, minHeight: 22, lineHeight: "11px" }}>{label}</div>
+      <div style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 22, fontWeight: 700, color, lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em", minHeight: 22 }}>
         {value}
       </div>
-      <div style={{ height: 2, width: 22, background: underline, marginTop: 6, borderRadius: 2, opacity: 0.6 }} />
-      {sub && <div className="text-[9.5px] mt-1.5" style={{ color: MUTE }}>{sub}</div>}
+      <div style={{ height: 2, width: 22, background: underline, marginTop: 6, borderRadius: 2, opacity: 0.7 }} />
+      <div className="text-[9.5px] mt-1.5" style={{ color: subColor, minHeight: 12 }}>{sub || "\u00A0"}</div>
     </div>
   );
 }
 
 // Card heading with diamond/dot bullet
-function CardTitle({ children, icon = "diamond" }: { children: React.ReactNode; icon?: "diamond" | "dot" | "plus" | "check" }) {
+function CardTitle({ children, icon = "diamond", onDark }: { children: React.ReactNode; icon?: "diamond" | "dot" | "plus" | "check"; onDark?: boolean }) {
   const glyph = icon === "diamond" ? "◆" : icon === "plus" ? "✦" : icon === "check" ? "✓" : "●";
   return (
     <div className="flex items-center gap-2 mb-3">
       <span style={{ color: GOLD, fontSize: 12 }}>{glyph}</span>
-      <span style={{ ...serif, color: NAVY, fontSize: 15, fontWeight: 600 }}>{children}</span>
+      <span style={{ ...serif, color: onDark ? "#FFFFFF" : NAVY, fontSize: 15, fontWeight: 600 }}>{children}</span>
     </div>
   );
 }
@@ -563,30 +569,30 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
             </Card>
 
-            <Card tone="gold">
-              <CardTitle icon="dot">With financial advice</CardTitle>
-              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Potential improvement</div>
-              <div className="mt-1 mb-3" style={{ ...serif, color: NAVY, fontSize: 18, fontWeight: 600 }}>
+            <Card tone="navy">
+              <CardTitle icon="dot" onDark>With financial advice</CardTitle>
+              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>Potential improvement</div>
+              <div className="mt-1 mb-3" style={{ ...serif, color: "#FFFFFF", fontSize: 18, fontWeight: 600 }}>
                 +{((data.comparison.fiveYearReturn - data.existing.fiveYearReturn) * 100).toFixed(2)}% p.a. on current trajectory
               </div>
-              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>How</div>
-              <div className="mt-1 mb-3 text-[11px]" style={{ color: NAVY }}>
+              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>How</div>
+              <div className="mt-1 mb-3 text-[11px]" style={{ color: "#F1F5F9" }}>
                 Reallocate from {data.existing.modelLabel} to {data.comparison.modelLabel}, and switch to {data.comparison.fundName || "the firm model portfolio"}.
               </div>
-              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>One-off advice fee</div>
-              <div className="mt-1 mb-3 text-[11px]" style={{ color: NAVY }}>
-                <b>{fmtMoney(data.fees.adviceFeeFlat)}</b> — once off payment from super
+              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>One-off advice fee</div>
+              <div className="mt-1 mb-3 text-[11px]" style={{ color: "#F1F5F9" }}>
+                <b style={{ color: "#FFFFFF" }}>{fmtMoney(data.fees.adviceFeeFlat)}</b> — once off payment from super
               </div>
-              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Ongoing advisory fee</div>
-              <div className="mt-1 mb-3 text-[11px]" style={{ color: NAVY }}>
-                <b>{fmtPct(data.fees.annualAdvicePct, 2)} p.a.</b> — capped at {fmtMoney(data.fees.annualFeeCap)}
+              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>Ongoing advisory fee</div>
+              <div className="mt-1 mb-3 text-[11px]" style={{ color: "#F1F5F9" }}>
+                <b style={{ color: "#FFFFFF" }}>{fmtPct(data.fees.annualAdvicePct, 2)} p.a.</b> — capped at {fmtMoney(data.fees.annualFeeCap)}
               </div>
-              <div className="mt-4 p-3" style={{ background: "rgba(255,255,255,0.7)", borderRadius: 8 }}>
-                <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_DEEP }}>
+              <div className="mt-4 p-3" style={{ background: "rgba(232,184,64,0.15)", border: `1px solid ${GOLD}`, borderRadius: 8 }}>
+                <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>
                   Recommended · Projected at age {data.retirementAge}
                 </div>
-                <div className="mt-1" style={{ ...serif, color: GOLD_DEEP, fontSize: 22, fontWeight: 600 }}>{fmtMoney(cmp.projectedBalance)}</div>
-                <div className="text-[9.5px] mt-1 italic" style={{ color: MUTE }}>after fees and market corrections</div>
+                <div className="mt-1" style={{ ...serif, color: GOLD_SOFT, fontSize: 22, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{fmtMoney(cmp.projectedBalance)}</div>
+                <div className="text-[9.5px] mt-1 italic" style={{ color: "rgba(255,255,255,0.7)" }}>after fees and market corrections</div>
               </div>
             </Card>
           </div>
@@ -649,7 +655,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
                 <span className="text-[9px] uppercase tracking-[0.25em]" style={{ color: "#CBD5E1" }}>Current</span>
                 <span className="text-[13px] font-semibold" style={{ color: "#F8FAFC" }}>{fmtPct(data.existing.fiveYearReturn, 2)}</span>
               </div>
-              <div style={{ width: 1, height: 16, background: "rgba(201,162,76,0.6)" }} />
+              <div style={{ width: 1, height: 16, background: "rgba(232,184,64,0.6)" }} />
               <div className="flex items-center gap-2">
                 <span className="text-[9px] uppercase tracking-[0.25em]" style={{ color: GOLD_SOFT }}>Comparison</span>
                 <span className="text-[13px] font-semibold" style={{ color: GOLD_SOFT }}>{fmtPct(data.comparison.fiveYearReturn, 2)}</span>
@@ -657,7 +663,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </div>
           </div>
 
-          <div className="p-3 mb-4 text-[10.5px] leading-relaxed" style={{ background: "rgba(201,162,76,0.08)", borderRadius: 8, color: "#334155" }}>
+          <div className="p-3 mb-4 text-[10.5px] leading-relaxed" style={{ background: "rgba(232,184,64,0.08)", borderRadius: 8, color: "#334155" }}>
             <b style={{ color: NAVY }}>Illustration only:</b> the comparison figures below show what the recommended
             strategy could mean for balance at retirement, keeping the same risk profile and contribution pattern.
             Past performance is not indicative of future performance.
@@ -695,7 +701,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </ResponsiveContainer>
             </div>
             <div className="flex justify-center mt-2">
-              <div className="px-6 py-3 text-center" style={{ background: "rgba(201,162,76,0.10)", borderRadius: 8 }}>
+              <div className="px-6 py-3 text-center" style={{ background: "rgba(232,184,64,0.10)", borderRadius: 8 }}>
                 <div className="text-[9.5px] uppercase tracking-[0.3em] font-semibold" style={{ color: MUTE }}>
                   After fees and market corrections
                 </div>
@@ -712,7 +718,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             <div className="grid grid-cols-3 gap-3">
               <div className="p-3" style={{ background: "#F8FAFC", borderRadius: 8 }}>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(201,162,76,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>%</div>
+                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(232,184,64,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>%</div>
                   <div className="text-[10px] uppercase tracking-[0.25em] font-semibold" style={{ color: NAVY }}>Inflation</div>
                 </div>
                 <div className="text-[10.5px] leading-relaxed" style={{ color: "#334155" }}>
@@ -721,7 +727,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
               <div className="p-3" style={{ background: "#F8FAFC", borderRadius: 8 }}>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(201,162,76,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>↗</div>
+                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(232,184,64,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>↗</div>
                   <div className="text-[10px] uppercase tracking-[0.25em] font-semibold" style={{ color: NAVY }}>Performance</div>
                 </div>
                 <div className="text-[10.5px] leading-relaxed" style={{ color: "#334155" }}>
@@ -730,7 +736,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
               <div className="p-3" style={{ background: "#F8FAFC", borderRadius: 8 }}>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(201,162,76,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>!</div>
+                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(232,184,64,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>!</div>
                   <div className="text-[10px] uppercase tracking-[0.25em] font-semibold" style={{ color: NAVY }}>Market crash</div>
                 </div>
                 <div className="text-[10.5px] leading-relaxed" style={{ color: "#334155" }}>
@@ -776,42 +782,42 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
           </Card>
 
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <Card>
-              <CardTitle icon="dot">Income sustainability — current</CardTitle>
-              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Money lasts to age</div>
-              <div className="mt-2" style={{ ...serif, color: NAVY, fontSize: 34, fontWeight: 600, lineHeight: 1 }}>
+            <Card tone="navy">
+              <CardTitle icon="dot" onDark>Income sustainability — current</CardTitle>
+              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Money lasts to age</div>
+              <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: "#FFFFFF", fontSize: 34, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 {ex.moneyNeverRunsOut ? "100+" : ex.ageMoneyLasts}
               </div>
-              <div className="text-[10.5px] mt-1" style={{ color: GOLD_DEEP, fontWeight: 600 }}>
+              <div className="text-[10.5px] mt-1" style={{ color: GOLD_SOFT, fontWeight: 600 }}>
                 {ex.moneyNeverRunsOut ? "Fully funded" : `${Math.max(0, ex.ageMoneyLasts - data.retirementAge)} years of income`}
               </div>
             </Card>
-            <Card tone="gold">
-              <CardTitle icon="dot">Income sustainability — comparison</CardTitle>
-              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Money lasts to age</div>
-              <div className="mt-2" style={{ ...serif, color: GOLD_DEEP, fontSize: 34, fontWeight: 600, lineHeight: 1 }}>
+            <Card tone="navy">
+              <CardTitle icon="dot" onDark>Income sustainability — comparison</CardTitle>
+              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Money lasts to age</div>
+              <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: GOLD_SOFT, fontSize: 34, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 {cmp.moneyNeverRunsOut ? "100+" : cmp.ageMoneyLasts}
               </div>
-              <div className="text-[10.5px] mt-1" style={{ color: GOLD_DEEP, fontWeight: 600 }}>
+              <div className="text-[10.5px] mt-1" style={{ color: GOLD_SOFT, fontWeight: 600 }}>
                 {cmp.moneyNeverRunsOut ? "Fully funded" : `${Math.max(0, cmp.ageMoneyLasts - data.retirementAge)} years of income`}
               </div>
             </Card>
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <Card>
-              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Additional retirement income</div>
-              <div className="mt-2" style={{ ...serif, color: GOLD_DEEP, fontSize: 26, fontWeight: 600 }}>
+            <Card tone="navy">
+              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Additional retirement income</div>
+              <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: GOLD_SOFT, fontSize: 26, fontWeight: 700, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 +{fmtMoney(Math.abs(incomeUplift))}
               </div>
-              <div className="text-[10px] mt-1" style={{ color: MUTE }}>Extra income provided over retirement</div>
+              <div className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.7)" }}>Extra income provided over retirement</div>
             </Card>
-            <Card>
-              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Additional years of income</div>
-              <div className="mt-2" style={{ ...serif, color: GOLD_DEEP, fontSize: 26, fontWeight: 600 }}>
+            <Card tone="navy">
+              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Additional years of income</div>
+              <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: GOLD_SOFT, fontSize: 26, fontWeight: 700, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 +{Math.max(0, (cmp.moneyNeverRunsOut ? 100 : cmp.ageMoneyLasts) - (ex.moneyNeverRunsOut ? 100 : ex.ageMoneyLasts))} yrs
               </div>
-              <div className="text-[10px] mt-1" style={{ color: MUTE }}>Longer your money lasts</div>
+              <div className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.7)" }}>Longer your money lasts</div>
             </Card>
           </div>
 

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Download, Save, Loader2, FileText, Users, Sparkles } from "lucide-react";
+import { Download, Save, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -83,7 +82,6 @@ export default function Strategy() {
     } catch { /* ignore */ }
     return DEFAULT_STRATEGY;
   });
-  const [tab, setTab] = useState("client");
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [paperId, setPaperId] = useState<string | null>(null);
@@ -159,16 +157,16 @@ export default function Strategy() {
 
   return (
     <div className="min-h-screen bg-muted/20">
-      <div className="max-w-[1400px] mx-auto p-4 md:p-6">
+      <div className="max-w-[1800px] mx-auto p-4 md:p-6">
         {/* Brand header */}
-        <div className="mb-5 flex items-center justify-between rounded-lg border bg-card px-5 py-3 shadow-sm">
+        <div className="mb-4 flex items-center justify-between rounded-lg border bg-card px-5 py-3 shadow-sm">
           <div className="flex items-center gap-4">
             <div
               aria-label="Finance Direct"
               style={{
                 height: 36,
                 width: 36 * LOGO_ASPECT,
-                backgroundColor: "#C9A24C",
+                backgroundColor: "#E8B840",
                 WebkitMaskImage: `url(${LOGO_URL})`,
                 maskImage: `url(${LOGO_URL})`,
                 WebkitMaskRepeat: "no-repeat",
@@ -184,49 +182,46 @@ export default function Strategy() {
               <div className="text-[11px] text-muted-foreground">Private wealth advisory document</div>
             </div>
           </div>
-          <div className="text-xs text-muted-foreground hidden sm:block">
-            AFSL 552 108 · Private Wealth
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div>
-            <h1 className="text-2xl font-bold">Strategy Paper</h1>
-            <p className="text-sm text-muted-foreground">Financial advice strategy document. Uses the same calc engine as the Super Health Check.</p>
-          </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={() => { setData(SAMPLE_STRATEGY); setTab("client"); toast.success("Sample data loaded"); }}>
+            <Button variant="secondary" size="sm" onClick={() => { setData(SAMPLE_STRATEGY); toast.success("Sample data loaded"); }}>
               <Sparkles className="w-4 h-4 mr-2" />
-              Auto-fill (test)
+              Auto-fill
             </Button>
-            <Button variant="outline" onClick={save} disabled={saving}>
+            <Button variant="outline" size="sm" onClick={save} disabled={saving}>
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
               Save
             </Button>
-            <Button onClick={downloadPDF} disabled={exporting}>
+            <Button size="sm" onClick={downloadPDF} disabled={exporting}>
               {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
               Download PDF
             </Button>
           </div>
-
         </div>
 
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList>
-            <TabsTrigger value="client"><Users className="w-4 h-4 mr-2" />Client Data</TabsTrigger>
-            <TabsTrigger value="paper"><FileText className="w-4 h-4 mr-2" />Strategy Paper</TabsTrigger>
-          </TabsList>
+        {/* Split layout: client data on the left, live paper preview on the right */}
+        <div className="grid gap-4" style={{ gridTemplateColumns: "minmax(420px, 42%) 1fr" }}>
+          <div className="rounded-lg border bg-card shadow-sm overflow-hidden flex flex-col" style={{ height: "calc(100vh - 140px)" }}>
+            <div className="px-5 py-3 border-b bg-muted/30">
+              <div className="text-sm font-semibold">Client Data</div>
+              <div className="text-[11px] text-muted-foreground">Edits update the paper on the right in real time.</div>
+            </div>
+            <div className="flex-1 overflow-auto p-5">
+              <StrategyClientDataForm value={data} onChange={setData} />
+            </div>
+          </div>
 
-          <TabsContent value="client" className="mt-4">
-            <StrategyClientDataForm value={data} onChange={setData} />
-          </TabsContent>
-
-          <TabsContent value="paper" className="mt-4">
-            <div className="overflow-auto">
+          <div className="rounded-lg border bg-card shadow-sm overflow-hidden flex flex-col" style={{ height: "calc(100vh - 140px)" }}>
+            <div className="px-5 py-3 border-b bg-muted/30 flex items-center justify-between">
+              <div>
+                <div className="text-sm font-semibold">Strategy Paper</div>
+                <div className="text-[11px] text-muted-foreground">Live preview · A4 pages</div>
+              </div>
+            </div>
+            <div className="flex-1 overflow-auto p-4 report-preview bg-muted/10">
               <StrategyPaperRender ref={paperRef} data={data} />
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </div>
     </div>
   );
