@@ -133,7 +133,7 @@ function RunningFooter({ page, total, date }: { page: number; total: number; dat
   );
 }
 
-/* Refined section header — no huge Roman numeral, kicker + gold rule + title */
+/* Refined section header */
 function SectionMark({ kicker, title }: { kicker: string; title: string }) {
   return (
     <div className="mb-5">
@@ -181,12 +181,113 @@ function TableHead() {
   );
 }
 
+/* ── AdvisorLink-style primitives ── */
+
+// Dark navy band across the top of interior pages with logo + decorative circle
+function TopBand() {
+  return (
+    <div className="relative w-full" style={{ background: NAVY_DEEP, height: "22mm" }}>
+      {/* decorative gold circle on right */}
+      <div className="absolute" style={{
+        right: "-12mm", top: "-8mm", width: "48mm", height: "48mm", borderRadius: "50%",
+        background: `radial-gradient(circle at 30% 30%, ${GOLD} 0%, ${GOLD_DEEP} 55%, transparent 75%)`,
+        opacity: 0.55,
+      }} />
+      <div className="absolute" style={{
+        right: "8mm", top: "10mm", width: "20mm", height: "20mm", borderRadius: "50%",
+        background: GOLD, opacity: 0.18,
+      }} />
+      <div className="absolute inset-0 flex items-center" style={{ padding: "0 16mm" }}>
+        <GoldLogo height={30} color="#F8FAFC" />
+      </div>
+    </div>
+  );
+}
+
+// Page hero: title + subtitle (like "Executive snapshot / Personal details…")
+function PageHero({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="mb-5">
+      <h2 style={{ ...serif, color: NAVY, letterSpacing: "-0.02em" }} className="text-[30px] font-semibold leading-[1.05]">
+        {title}
+      </h2>
+      {subtitle && (
+        <p className="text-[11.5px] leading-relaxed mt-2 max-w-[170mm]" style={{ color: "#475569" }}>
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// Rounded card container
+function Card({ children, className = "", style, tone = "light" }:
+  { children: React.ReactNode; className?: string; style?: React.CSSProperties; tone?: "light" | "gold" | "navy" }) {
+  const bg = tone === "gold" ? "rgba(201,162,76,0.08)" : tone === "navy" ? NAVY_DEEP : "#FFFFFF";
+  const border = tone === "gold" ? "rgba(201,162,76,0.35)" : tone === "navy" ? NAVY_DEEP : RULE;
+  return (
+    <div className={className} style={{
+      background: bg, border: `1px solid ${border}`, borderRadius: 10, padding: "14px 16px",
+      ...style,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+// Small stat pill (label / value / underline / sub)
+function MiniStat({ label, value, sub, accent = "navy" }:
+  { label: string; value: React.ReactNode; sub?: React.ReactNode; accent?: "navy" | "gold" }) {
+  const color = accent === "gold" ? GOLD_DEEP : NAVY;
+  const underline = accent === "gold" ? GOLD : NAVY;
+  return (
+    <div className="flex flex-col">
+      <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>{label}</div>
+      <div className="mt-2" style={{ ...serif, fontSize: 24, fontWeight: 600, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+        {value}
+      </div>
+      <div style={{ height: 2, width: 22, background: underline, marginTop: 6, borderRadius: 2, opacity: 0.6 }} />
+      {sub && <div className="text-[9.5px] mt-1.5" style={{ color: MUTE }}>{sub}</div>}
+    </div>
+  );
+}
+
+// Card heading with diamond/dot bullet
+function CardTitle({ children, icon = "diamond" }: { children: React.ReactNode; icon?: "diamond" | "dot" | "plus" | "check" }) {
+  const glyph = icon === "diamond" ? "◆" : icon === "plus" ? "✦" : icon === "check" ? "✓" : "●";
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <span style={{ color: GOLD, fontSize: 12 }}>{glyph}</span>
+      <span style={{ ...serif, color: NAVY, fontSize: 15, fontWeight: 600 }}>{children}</span>
+    </div>
+  );
+}
+
+// Row inside a card: label left, value right, thin bottom rule
+function KVRow({ label, value, last }: { label: React.ReactNode; value: React.ReactNode; last?: boolean }) {
+  return (
+    <div className="flex items-center justify-between py-2" style={{ borderBottom: last ? "none" : `1px solid ${RULE}` }}>
+      <div className="text-[10.5px]" style={{ color: MUTE }}>{label}</div>
+      <div className="text-[11px] font-semibold text-right" style={{ color: NAVY }}>{value}</div>
+    </div>
+  );
+}
+
+// Gold progress bar
+function ProgressBar({ pct }: { pct: number }) {
+  const p = Math.max(0, Math.min(100, pct));
+  return (
+    <div style={{ background: "#E7ECF3", borderRadius: 999, height: 8, overflow: "hidden" }}>
+      <div style={{ width: `${p}%`, height: "100%", background: `linear-gradient(90deg, ${GOLD_DEEP}, ${GOLD})`, borderRadius: 999 }} />
+    </div>
+  );
+}
+
 function Stat({ label, value, sub, tone = "navy" }:
   { label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: "navy" | "gold" | "muted" }) {
   const color = tone === "gold" ? GOLD_DEEP : tone === "muted" ? "#334155" : NAVY;
   return (
     <div className="flex flex-col">
-      {/* Fixed-height label area so every value in a row starts on the same baseline */}
       <div
         className="text-[9px] uppercase tracking-[0.25em] font-semibold whitespace-nowrap overflow-hidden text-ellipsis"
         style={{ color: MUTE, minHeight: 24, lineHeight: "12px" }}
@@ -205,7 +306,7 @@ function Stat({ label, value, sub, tone = "navy" }:
   );
 }
 
-/* Refined note — minimal, editorial. No more colored pill boxes. */
+/* Refined note — minimal, editorial. */
 function Note({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="py-3" style={{ borderTop: `1px solid ${RULE}` }}>
