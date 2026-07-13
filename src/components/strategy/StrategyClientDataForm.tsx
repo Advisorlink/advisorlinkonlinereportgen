@@ -290,7 +290,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
 
 
       {/* Super scenarios */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <ScenarioBlock
           title="Existing Scenario (Super)"
           tint="existing"
@@ -316,7 +316,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
       </div>
 
       {/* Insurance */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <InsuranceBlock title="Existing Insurance" tint="existing" ins={value.existingInsurance} onChange={(i) => patch({ existingInsurance: i })} />
         <InsuranceBlock title="Comparison Insurance" tint="comparison" ins={value.comparisonInsurance} onChange={(i) => patch({ comparisonInsurance: i })} />
       </div>
