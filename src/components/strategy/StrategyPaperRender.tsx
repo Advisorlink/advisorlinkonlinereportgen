@@ -54,18 +54,18 @@ interface Props {
   data: StrategyPaperData;
 }
 
-/* Brand palette */
-const NAVY = "#0B1B3B";
-const NAVY_DEEP = "#050F26";
-const NAVY_INK = "#0A1830";
-const GOLD = "#C9A24C";
-const GOLD_SOFT = "#E5C87A";
-const GOLD_DEEP = "#8A6E2A";
+/* Brand palette — deep navy + warm yellow gold */
+const NAVY = "#0A1F4D";
+const NAVY_DEEP = "#050F2E";
+const NAVY_INK = "#081733";
+const GOLD = "#E8B840";        // primary yellow-gold
+const GOLD_SOFT = "#F5D26A";   // light yellow-gold
+const GOLD_DEEP = "#B8891E";   // darker warm gold (for text on light)
 const INK = "#0F172A";
 const MUTE = "#64748B";
 const RULE = "#E2E8F0";
 const EXISTING = "#94A3B8";
-const COMPARISON = "#C9A24C";
+const COMPARISON = "#E8B840";
 
 const FIRM = {
   name: "Finance Direct",
