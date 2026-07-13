@@ -267,7 +267,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
 
           {/* HEADER — horizontal logo, no white box */}
           <div className="flex items-start justify-between">
-            <img src={logoLight} alt={FIRM.name} style={{ height: 42, width: "auto" }} />
+            <GoldLogo height={44} color={GOLD} />
             <div className="text-right">
               <div className="text-[8.5px] uppercase tracking-[0.35em]" style={{ color: "#CBD5E1" }}>Private & Confidential</div>
               <div className="text-[8.5px] uppercase tracking-[0.35em] mt-1" style={{ color: GOLD_SOFT }}>Doc No. {refNo}</div>
@@ -761,7 +761,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
             </div>
             <div className="text-right">
-              <img src={logoLight} alt={FIRM.name} style={{ height: 30, width: "auto", marginLeft: "auto" }} />
+              <div style={{ display: "flex", justifyContent: "flex-end" }}><GoldLogo height={28} color={GOLD_SOFT} /></div>
               <div className="text-[9px] mt-2" style={{ color: "#CBD5E1" }}>{FIRM.phone}</div>
             </div>
           </div>
