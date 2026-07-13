@@ -336,14 +336,114 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
         </CardContent>
       </Card>
 
-      {/* Notes */}
-      <Card>
-        <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold uppercase tracking-wide">Research Notes</CardTitle></CardHeader>
-        <CardContent>
-          <Textarea rows={4} placeholder="e.g. Due to medical history, retaining existing insurance is the recommended option."
-            value={value.researchNotes} onChange={(e) => patch({ researchNotes: e.target.value })} />
-        </CardContent>
-      </Card>
+      {/* AI-generated commentary */}
+      <AINotesCard value={value} onChange={onChange} />
     </div>
   );
 }
+
+function AINotesCard({ value, onChange }: Props) {
+  const [busy, setBusy] = useState(false);
+  const patch = (p: Partial<StrategyPaperData>) => onChange({ ...value, ...p });
+
+  const generate = async () => {
+    if (!value.clientName || !value.clientDob) {
+      toast.error("Add the client's name and date of birth first");
+      return;
+    }
+    setBusy(true);
+    try {
+      const ex = runScenario(value, value.existing);
+      const cmp = runScenario(value, value.comparison);
+      const uplift = cmp.projectedBalance - ex.projectedBalance;
+      const upliftPct = ex.projectedBalance > 0 ? (uplift / ex.projectedBalance) * 100 : 0;
+      const incomeUplift = cmp.totalIncome - ex.totalIncome;
+      const age = ageFromDob(value.clientDob);
+      const yearsToRet = Math.max(0, value.retirementAge - age);
+
+      const { data, error } = await supabase.functions.invoke("strategy-generate-notes", {
+        body: {
+          clientName: value.clientName,
+          age,
+          retirementAge: value.retirementAge,
+          yearsToRet,
+          annualIncome: value.annualIncome,
+          desiredIncomeAmount: value.desiredIncomeAmount,
+          desiredIncomeFrequency: value.desiredIncomeFrequency,
+          goalBalance: value.goalBalance,
+          existing: value.existing,
+          comparison: value.comparison,
+          existingInsurance: value.existingInsurance,
+          comparisonInsurance: value.comparisonInsurance,
+          ex: {
+            projectedBalance: ex.projectedBalance,
+            totalIncome: ex.totalIncome,
+            ageMoneyLasts: ex.ageMoneyLasts,
+            moneyNeverRunsOut: ex.moneyNeverRunsOut,
+          },
+          cmp: {
+            projectedBalance: cmp.projectedBalance,
+            totalIncome: cmp.totalIncome,
+            ageMoneyLasts: cmp.ageMoneyLasts,
+            moneyNeverRunsOut: cmp.moneyNeverRunsOut,
+          },
+          uplift,
+          upliftPct,
+          incomeUplift,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      patch({
+        aiObservation: data.observation || "",
+        aiKeyInsight: data.keyInsight || "",
+        aiPatternExisting: data.patternExisting || "",
+        aiCompoundingRecommended: data.compoundingRecommended || "",
+        researchNotes: data.researchNotes || value.researchNotes,
+      });
+      toast.success("AI notes generated");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Generation failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Card className="border-2 border-amber-200 dark:border-amber-900/50 bg-gradient-to-br from-amber-50/60 to-transparent dark:from-amber-950/20">
+      <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-amber-600" />
+          Notes
+        </CardTitle>
+        <Button size="sm" onClick={generate} disabled={busy} className="bg-amber-600 hover:bg-amber-700 text-white">
+          {busy ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+          {busy ? "Generating…" : "AI · Generate notes"}
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-xs text-muted-foreground">
+          Click <b>AI · Generate notes</b> to write all five narrative fields below based on the client's actual numbers. Each field is editable, so you can refine anything before exporting.
+        </p>
+        <Field label="Observation (Return vs Fee panel)">
+          <Textarea rows={3} value={value.aiObservation ?? ""} onChange={(e) => patch({ aiObservation: e.target.value })} placeholder="Short observation about the fund return and fee comparison." />
+        </Field>
+        <Field label="Key insight (Accumulation page)">
+          <Textarea rows={3} value={value.aiKeyInsight ?? ""} onChange={(e) => patch({ aiKeyInsight: e.target.value })} placeholder="The single most important compounding insight for this client." />
+        </Field>
+        <Field label="Pattern to watch (Existing arrangement)">
+          <Textarea rows={4} value={value.aiPatternExisting ?? ""} onChange={(e) => patch({ aiPatternExisting: e.target.value })} placeholder="Longevity risk and drawdown pressure under the existing setup." />
+        </Field>
+        <Field label="Compounding effect (Recommended arrangement)">
+          <Textarea rows={4} value={value.aiCompoundingRecommended ?? ""} onChange={(e) => patch({ aiCompoundingRecommended: e.target.value })} placeholder="What the extra capital enables in retirement." />
+        </Field>
+        <Field label="Adviser research notes">
+          <Textarea rows={5} value={value.researchNotes} onChange={(e) => patch({ researchNotes: e.target.value })}
+            placeholder="Rationale behind the recommendation, including insurance restructure reasoning." />
+        </Field>
+      </CardContent>
+    </Card>
+  );
+}
+
