@@ -162,7 +162,22 @@ export default function Strategy() {
         {/* Brand header */}
         <div className="mb-5 flex items-center justify-between rounded-lg border bg-card px-5 py-3 shadow-sm">
           <div className="flex items-center gap-4">
-            <img src={logoImg} alt="Finance Direct" className="h-9 w-auto" />
+            <div
+              aria-label="Finance Direct"
+              style={{
+                height: 36,
+                width: 36 * 4.22,
+                backgroundColor: "#C9A24C",
+                WebkitMaskImage: `url(${LOGO_URL})`,
+                maskImage: `url(${LOGO_URL})`,
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+                WebkitMaskSize: "contain",
+                maskSize: "contain",
+                WebkitMaskPosition: "left center",
+                maskPosition: "left center",
+              }}
+            />
             <div className="hidden md:block pl-4 border-l">
               <div className="text-sm font-medium">Strategy Paper Generator</div>
               <div className="text-[11px] text-muted-foreground">Private wealth advisory document</div>
