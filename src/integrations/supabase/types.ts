@@ -1939,6 +1939,72 @@ export type Database = {
         }
         Relationships: []
       }
+      strategy_papers: {
+        Row: {
+          annual_income: number
+          client_dob: string | null
+          client_name: string
+          comparison_insurance: Json
+          comparison_scenario: Json
+          created_at: string
+          desired_income_amount: number
+          desired_income_frequency: string
+          existing_insurance: Json
+          existing_scenario: Json
+          fees: Json
+          goal_balance: number
+          id: string
+          personal_contribution_amount: number
+          personal_contribution_frequency: string
+          research_notes: string
+          retirement_age: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          annual_income?: number
+          client_dob?: string | null
+          client_name?: string
+          comparison_insurance?: Json
+          comparison_scenario?: Json
+          created_at?: string
+          desired_income_amount?: number
+          desired_income_frequency?: string
+          existing_insurance?: Json
+          existing_scenario?: Json
+          fees?: Json
+          goal_balance?: number
+          id?: string
+          personal_contribution_amount?: number
+          personal_contribution_frequency?: string
+          research_notes?: string
+          retirement_age?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          annual_income?: number
+          client_dob?: string | null
+          client_name?: string
+          comparison_insurance?: Json
+          comparison_scenario?: Json
+          created_at?: string
+          desired_income_amount?: number
+          desired_income_frequency?: string
+          existing_insurance?: Json
+          existing_scenario?: Json
+          fees?: Json
+          goal_balance?: number
+          id?: string
+          personal_contribution_amount?: number
+          personal_contribution_frequency?: string
+          research_notes?: string
+          retirement_age?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       twilio_voice_config: {
         Row: {
           api_key_secret: string | null
