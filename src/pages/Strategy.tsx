@@ -158,10 +158,24 @@ export default function Strategy() {
   return (
     <div className="min-h-screen bg-muted/20">
       <div className="max-w-[1400px] mx-auto p-4 md:p-6">
+        {/* Brand header */}
+        <div className="mb-5 flex items-center justify-between rounded-lg border bg-card px-5 py-3 shadow-sm">
+          <div className="flex items-center gap-4">
+            <img src={logoImg} alt="Finance Direct" className="h-12 w-auto" />
+            <div className="hidden md:block">
+              <div className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground font-semibold">Finance Direct</div>
+              <div className="text-sm font-medium">Strategy Paper Generator</div>
+            </div>
+          </div>
+          <div className="text-xs text-muted-foreground hidden sm:block">
+            AFSL 552 108 · Private Wealth
+          </div>
+        </div>
+
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h1 className="text-2xl font-bold">Strategy Paper</h1>
-            <p className="text-sm text-muted-foreground">Financial advice strategy document · uses the same calc engine as the Super Health Check.</p>
+            <p className="text-sm text-muted-foreground">Financial advice strategy document. Uses the same calc engine as the Super Health Check.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => { setData(SAMPLE_STRATEGY); setTab("client"); toast.success("Sample data loaded"); }}>
