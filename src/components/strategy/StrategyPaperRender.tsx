@@ -184,10 +184,22 @@ function Stat({ label, value, sub, tone = "navy" }:
   { label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: "navy" | "gold" | "muted" }) {
   const color = tone === "gold" ? GOLD_DEEP : tone === "muted" ? "#334155" : NAVY;
   return (
-    <div>
-      <div className="text-[9px] uppercase tracking-[0.3em] font-semibold" style={{ color: MUTE }}>{label}</div>
-      <div className="mt-1 text-[24px] font-semibold leading-tight" style={{ ...serif, color }}>{value}</div>
-      {sub && <div className="text-[10px] mt-1" style={{ color: MUTE }}>{sub}</div>}
+    <div className="flex flex-col">
+      {/* Fixed-height label area so every value in a row starts on the same baseline */}
+      <div
+        className="text-[9px] uppercase tracking-[0.25em] font-semibold whitespace-nowrap overflow-hidden text-ellipsis"
+        style={{ color: MUTE, minHeight: 24, lineHeight: "12px" }}
+        title={label}
+      >
+        {label}
+      </div>
+      <div
+        className="text-[24px] font-semibold leading-none tabular-nums"
+        style={{ ...serif, color, fontVariantNumeric: "tabular-nums" }}
+      >
+        {value}
+      </div>
+      {sub && <div className="text-[10px] mt-1 tabular-nums" style={{ color: MUTE, fontVariantNumeric: "tabular-nums" }}>{sub}</div>}
     </div>
   );
 }
