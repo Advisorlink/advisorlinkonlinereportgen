@@ -162,7 +162,11 @@ export default function Strategy() {
             <h1 className="text-2xl font-bold">Strategy Paper</h1>
             <p className="text-sm text-muted-foreground">Financial advice strategy document · uses the same calc engine as the Super Health Check.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={() => { setData(SAMPLE_STRATEGY); setTab("client"); toast.success("Sample data loaded"); }}>
+              <Sparkles className="w-4 h-4 mr-2" />
+              Auto-fill (test)
+            </Button>
             <Button variant="outline" onClick={save} disabled={saving}>
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
               Save
@@ -172,6 +176,7 @@ export default function Strategy() {
               Download PDF
             </Button>
           </div>
+
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
