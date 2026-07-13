@@ -112,12 +112,15 @@ export function ageFromDob(dob: string): number {
 
 // Convert a StrategyScenario into a ClientInputs object we can pass to the
 // existing calc engine. We put the whole balance in the "primary" fund and
-// leave the second-account slot empty.
+// leave the second-account slot empty. If a scenario doesn't have its own
+// balance (e.g. the comparison side left blank), fall back to the existing
+// balance so the comparison always projects from a meaningful starting point.
 export function scenarioToClientInputs(
   d: StrategyPaperData,
   s: StrategyScenario,
 ): ClientInputs {
   const age = ageFromDob(d.clientDob);
+  const balance = s.superBalance > 0 ? s.superBalance : d.existing.superBalance;
   return {
     clientName: d.clientName,
     age,
@@ -128,7 +131,7 @@ export function scenarioToClientInputs(
     annualIncome: d.annualIncome,
 
     fundName: s.fundName,
-    superBalance: s.superBalance,
+    superBalance: balance,
     modelLabel: s.modelLabel,
     growthAssetsPct: growthAssetsForProfile(s.riskProfile),
     adminFeeFlat: s.adminFeeFlat,

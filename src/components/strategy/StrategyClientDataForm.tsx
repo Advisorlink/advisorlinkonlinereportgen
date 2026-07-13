@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
 import {
   type StrategyPaperData,
   type StrategyScenario,
@@ -36,6 +37,64 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+/**
+ * Percentage input that lets the user freely clear/edit the field.
+ * Keeps a local string draft so typing "" or "1." doesn't get overwritten
+ * back to "0.00" (which is what the old controlled toFixed pattern did).
+ */
+function PctInput({ value, onChange }: { value: number; onChange: (pct: number) => void }) {
+  const [draft, setDraft] = useState<string>(value ? (value * 100).toFixed(2) : "");
+  useEffect(() => {
+    // Sync external changes (e.g. autofill, reset) but only when they don't
+    // match the current draft, so mid-typing doesn't get clobbered.
+    const parsed = draft === "" ? 0 : Number(draft.replace(/,/g, "")) / 100;
+    if (Math.abs(parsed - value) > 1e-9) {
+      setDraft(value ? (value * 100).toFixed(2) : "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+  return (
+    <Input
+      type="text"
+      inputMode="decimal"
+      value={draft}
+      placeholder="0.00"
+      onChange={(e) => {
+        const v = e.target.value;
+        setDraft(v);
+        onChange(pctOr(v));
+      }}
+    />
+  );
+}
+
+/**
+ * Number input that keeps a local string draft so clearing works naturally.
+ */
+function NumInput({ value, onChange, placeholder }: { value: number; onChange: (n: number) => void; placeholder?: string }) {
+  const [draft, setDraft] = useState<string>(value ? String(value) : "");
+  useEffect(() => {
+    const parsed = draft === "" ? 0 : numOr(draft);
+    if (parsed !== value) {
+      setDraft(value ? String(value) : "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+  return (
+    <Input
+      type="text"
+      inputMode="decimal"
+      value={draft}
+      placeholder={placeholder ?? "0"}
+      onChange={(e) => {
+        const v = e.target.value;
+        setDraft(v);
+        onChange(numOr(v));
+      }}
+    />
+  );
+}
+
 function ScenarioBlock({
   title,
   tint,
@@ -60,7 +119,7 @@ function ScenarioBlock({
           <Input value={scenario.fundName} onChange={(e) => onChange({ ...scenario, fundName: e.target.value })} />
         </Field>
         <Field label="Super balance ($)">
-          <Input type="text" inputMode="decimal" value={scenario.superBalance || ""} onChange={(e) => onChange({ ...scenario, superBalance: numOr(e.target.value) })} />
+          <NumInput value={scenario.superBalance} onChange={(v) => onChange({ ...scenario, superBalance: v })} />
         </Field>
         <Field label="Model / option label">
           <Input value={scenario.modelLabel} onChange={(e) => onChange({ ...scenario, modelLabel: e.target.value })} />
@@ -74,21 +133,21 @@ function ScenarioBlock({
           </Select>
         </Field>
         <Field label="# investment options">
-          <Input type="text" inputMode="decimal" value={scenario.numInvestmentOptions || ""} onChange={(e) => onChange({ ...scenario, numInvestmentOptions: numOr(e.target.value) })} />
+          <NumInput value={scenario.numInvestmentOptions} onChange={(v) => onChange({ ...scenario, numInvestmentOptions: v })} />
         </Field>
         <Field label="Admin fee (%)">
-          <Input type="text" inputMode="decimal" value={(scenario.adminFeePct * 100).toFixed(2)} onChange={(e) => onChange({ ...scenario, adminFeePct: pctOr(e.target.value) })} />
+          <PctInput value={scenario.adminFeePct} onChange={(v) => onChange({ ...scenario, adminFeePct: v })} />
         </Field>
         <Field label="Admin fee flat ($)">
-          <Input type="text" inputMode="decimal" value={scenario.adminFeeFlat || ""} onChange={(e) => onChange({ ...scenario, adminFeeFlat: numOr(e.target.value) })} />
+          <NumInput value={scenario.adminFeeFlat} onChange={(v) => onChange({ ...scenario, adminFeeFlat: v })} />
         </Field>
         {showAdviserFee && (
           <Field label="Existing adviser fee ($/yr)">
-            <Input type="text" inputMode="decimal" value={scenario.adviserFee || ""} onChange={(e) => onChange({ ...scenario, adviserFee: numOr(e.target.value) })} />
+            <NumInput value={scenario.adviserFee} onChange={(v) => onChange({ ...scenario, adviserFee: v })} />
           </Field>
         )}
         <Field label="5-yr avg return (%)">
-          <Input type="text" inputMode="decimal" value={(scenario.fiveYearReturn * 100).toFixed(2)} onChange={(e) => onChange({ ...scenario, fiveYearReturn: pctOr(e.target.value) })} />
+          <PctInput value={scenario.fiveYearReturn} onChange={(v) => onChange({ ...scenario, fiveYearReturn: v })} />
         </Field>
       </CardContent>
     </Card>
@@ -117,13 +176,13 @@ function InsuranceBlock({
           <Input value={ins.provider} onChange={(e) => onChange({ ...ins, provider: e.target.value })} />
         </Field>
         <Field label="Life cover ($)">
-          <Input type="text" inputMode="decimal" value={ins.lifeCover || ""} onChange={(e) => onChange({ ...ins, lifeCover: numOr(e.target.value) })} />
+          <NumInput value={ins.lifeCover} onChange={(v) => onChange({ ...ins, lifeCover: v })} />
         </Field>
         <Field label="TPD cover ($)">
-          <Input type="text" inputMode="decimal" value={ins.tpdCover || ""} onChange={(e) => onChange({ ...ins, tpdCover: numOr(e.target.value) })} />
+          <NumInput value={ins.tpdCover} onChange={(v) => onChange({ ...ins, tpdCover: v })} />
         </Field>
         <Field label="Income protection ($/month)">
-          <Input type="text" inputMode="decimal" value={ins.ipMonthly || ""} onChange={(e) => onChange({ ...ins, ipMonthly: numOr(e.target.value) })} />
+          <NumInput value={ins.ipMonthly} onChange={(v) => onChange({ ...ins, ipMonthly: v })} />
         </Field>
         <Field label="Waiting period">
           <Select value={ins.waitingPeriod} onValueChange={(v) => onChange({ ...ins, waitingPeriod: v as StrategyInsurance["waitingPeriod"] })}>
@@ -148,7 +207,7 @@ function InsuranceBlock({
           </Select>
         </Field>
         <Field label="Premium ($/yr)">
-          <Input type="text" inputMode="decimal" value={ins.premiumAnnual || ""} onChange={(e) => onChange({ ...ins, premiumAnnual: numOr(e.target.value) })} />
+          <NumInput value={ins.premiumAnnual} onChange={(v) => onChange({ ...ins, premiumAnnual: v })} />
         </Field>
         <Field label="Premium structure">
           <Select value={ins.structure} onValueChange={(v) => onChange({ ...ins, structure: v as StrategyInsurance["structure"] })}>
@@ -193,13 +252,13 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
             <Input type="date" value={value.clientDob} onChange={(e) => patch({ clientDob: e.target.value })} />
           </Field>
           <Field label={`Retirement age${computedAge ? ` · ${yearsToRet} yrs away` : ""}`}>
-            <Input type="text" inputMode="numeric" value={value.retirementAge || ""} onChange={(e) => patch({ retirementAge: numOr(e.target.value) })} />
+            <NumInput value={value.retirementAge} onChange={(v) => patch({ retirementAge: v })} />
           </Field>
           <Field label="Annual income ($)">
-            <Input type="text" inputMode="decimal" value={value.annualIncome || ""} onChange={(e) => patch({ annualIncome: numOr(e.target.value) })} />
+            <NumInput value={value.annualIncome} onChange={(v) => patch({ annualIncome: v })} />
           </Field>
           <Field label="Personal contribution ($)">
-            <Input type="text" inputMode="decimal" value={value.personalContributionAmount || ""} onChange={(e) => patch({ personalContributionAmount: numOr(e.target.value) })} />
+            <NumInput value={value.personalContributionAmount} onChange={(v) => patch({ personalContributionAmount: v })} />
           </Field>
           <Field label="Contribution frequency">
             <Select value={value.personalContributionFrequency} onValueChange={(v) => patch({ personalContributionFrequency: v as IncomeFrequency })}>
@@ -208,7 +267,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
             </Select>
           </Field>
           <Field label="Desired retirement income ($)">
-            <Input type="text" inputMode="decimal" value={value.desiredIncomeAmount || ""} onChange={(e) => patch({ desiredIncomeAmount: numOr(e.target.value) })} />
+            <NumInput value={value.desiredIncomeAmount} onChange={(v) => patch({ desiredIncomeAmount: v })} />
           </Field>
           <Field label="Income frequency">
             <Select value={value.desiredIncomeFrequency} onValueChange={(v) => patch({ desiredIncomeFrequency: v as IncomeFrequency })}>
@@ -217,7 +276,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
             </Select>
           </Field>
           <Field label="Retirement goal balance ($)">
-            <Input type="text" inputMode="decimal" value={value.goalBalance || ""} onChange={(e) => patch({ goalBalance: numOr(e.target.value) })} />
+            <NumInput value={value.goalBalance} onChange={(v) => patch({ goalBalance: v })} />
           </Field>
         </CardContent>
       </Card>
@@ -260,13 +319,13 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
         <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold uppercase tracking-wide">Advice & Implementation Fees</CardTitle></CardHeader>
         <CardContent className="grid grid-cols-3 gap-3">
           <Field label="Advice / implementation fee ($)">
-            <Input type="text" inputMode="decimal" value={value.fees.adviceFeeFlat || ""} onChange={(e) => patch({ fees: { ...value.fees, adviceFeeFlat: numOr(e.target.value) } })} />
+            <NumInput value={value.fees.adviceFeeFlat} onChange={(v) => patch({ fees: { ...value.fees, adviceFeeFlat: v } })} />
           </Field>
           <Field label="Annual advice fee (%)">
-            <Input type="text" inputMode="decimal" value={(value.fees.annualAdvicePct * 100).toFixed(2)} onChange={(e) => patch({ fees: { ...value.fees, annualAdvicePct: pctOr(e.target.value) } })} />
+            <PctInput value={value.fees.annualAdvicePct} onChange={(v) => patch({ fees: { ...value.fees, annualAdvicePct: v } })} />
           </Field>
           <Field label="Annual fee cap ($)">
-            <Input type="text" inputMode="decimal" value={value.fees.annualFeeCap || ""} onChange={(e) => patch({ fees: { ...value.fees, annualFeeCap: numOr(e.target.value) } })} />
+            <NumInput value={value.fees.annualFeeCap} onChange={(v) => patch({ fees: { ...value.fees, annualFeeCap: v } })} />
           </Field>
         </CardContent>
       </Card>

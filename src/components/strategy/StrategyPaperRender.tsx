@@ -24,8 +24,30 @@ import {
 } from "recharts";
 import coverImg from "@/assets/strategy-cover.jpg";
 import logoLightAsset from "@/assets/finance-direct-logo-official.png.asset.json";
-import logoDark from "@/assets/finance-direct-logo-dark.png";
-const logoLight = logoLightAsset.url;
+const logoUrl = logoLightAsset.url;
+
+// Renders the transparent Finance Direct logo tinted to any solid color via CSS mask.
+// Aspect ratio of the source PNG is ~4.22:1.
+function GoldLogo({ height, color }: { height: number; color: string }) {
+  return (
+    <div
+      aria-label="Finance Direct"
+      style={{
+        height,
+        width: height * 4.22,
+        backgroundColor: color,
+        WebkitMaskImage: `url(${logoUrl})`,
+        maskImage: `url(${logoUrl})`,
+        WebkitMaskRepeat: "no-repeat",
+        maskRepeat: "no-repeat",
+        WebkitMaskSize: "contain",
+        maskSize: "contain",
+        WebkitMaskPosition: "left center",
+        maskPosition: "left center",
+      }}
+    />
+  );
+}
 
 interface Props {
   data: StrategyPaperData;
@@ -85,7 +107,7 @@ function Page({
 function RunningHeader({ client, section }: { client: string; section: string }) {
   return (
     <div className="flex items-center justify-between pb-3 mb-5" style={{ borderBottom: `1px solid ${RULE}` }}>
-      <img src={logoDark} alt={FIRM.name} style={{ height: 22, width: "auto" }} />
+      <GoldLogo height={22} color={GOLD} />
       <div className="flex items-center gap-3 text-[9px] uppercase tracking-[0.3em]" style={{ color: MUTE }}>
         <span>{client || "Client"}</span>
         <span style={{ color: GOLD }}>·</span>
@@ -162,10 +184,22 @@ function Stat({ label, value, sub, tone = "navy" }:
   { label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: "navy" | "gold" | "muted" }) {
   const color = tone === "gold" ? GOLD_DEEP : tone === "muted" ? "#334155" : NAVY;
   return (
-    <div>
-      <div className="text-[9px] uppercase tracking-[0.3em] font-semibold" style={{ color: MUTE }}>{label}</div>
-      <div className="mt-1 text-[24px] font-semibold leading-tight" style={{ ...serif, color }}>{value}</div>
-      {sub && <div className="text-[10px] mt-1" style={{ color: MUTE }}>{sub}</div>}
+    <div className="flex flex-col">
+      {/* Fixed-height label area so every value in a row starts on the same baseline */}
+      <div
+        className="text-[9px] uppercase tracking-[0.25em] font-semibold whitespace-nowrap overflow-hidden text-ellipsis"
+        style={{ color: MUTE, minHeight: 24, lineHeight: "12px" }}
+        title={label}
+      >
+        {label}
+      </div>
+      <div
+        className="text-[24px] font-semibold leading-none tabular-nums"
+        style={{ ...serif, color, fontVariantNumeric: "tabular-nums" }}
+      >
+        {value}
+      </div>
+      {sub && <div className="text-[10px] mt-1 tabular-nums" style={{ color: MUTE, fontVariantNumeric: "tabular-nums" }}>{sub}</div>}
     </div>
   );
 }
@@ -245,7 +279,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
 
           {/* HEADER — horizontal logo, no white box */}
           <div className="flex items-start justify-between">
-            <img src={logoLight} alt={FIRM.name} style={{ height: 42, width: "auto" }} />
+            <GoldLogo height={44} color={GOLD} />
             <div className="text-right">
               <div className="text-[8.5px] uppercase tracking-[0.35em]" style={{ color: "#CBD5E1" }}>Private & Confidential</div>
               <div className="text-[8.5px] uppercase tracking-[0.35em] mt-1" style={{ color: GOLD_SOFT }}>Doc No. {refNo}</div>
@@ -739,7 +773,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
             </div>
             <div className="text-right">
-              <img src={logoLight} alt={FIRM.name} style={{ height: 30, width: "auto", marginLeft: "auto" }} />
+              <div style={{ display: "flex", justifyContent: "flex-end" }}><GoldLogo height={28} color={GOLD_SOFT} /></div>
               <div className="text-[9px] mt-2" style={{ color: "#CBD5E1" }}>{FIRM.phone}</div>
             </div>
           </div>

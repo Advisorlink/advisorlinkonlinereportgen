@@ -8,7 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { StrategyClientDataForm } from "@/components/strategy/StrategyClientDataForm";
 import { StrategyPaperRender } from "@/components/strategy/StrategyPaperRender";
 import { DEFAULT_STRATEGY, firmModelDefaults, type StrategyPaperData } from "@/lib/strategy-calc";
-import logoImg from "@/assets/finance-direct-logo-dark.png";
+import logoAsset from "@/assets/finance-direct-logo-official.png.asset.json";
+const LOGO_URL = logoAsset.url;
 
 const LOCAL_KEY = "strategy-paper:draft:v1";
 
@@ -161,7 +162,22 @@ export default function Strategy() {
         {/* Brand header */}
         <div className="mb-5 flex items-center justify-between rounded-lg border bg-card px-5 py-3 shadow-sm">
           <div className="flex items-center gap-4">
-            <img src={logoImg} alt="Finance Direct" className="h-9 w-auto" />
+            <div
+              aria-label="Finance Direct"
+              style={{
+                height: 36,
+                width: 36 * 4.22,
+                backgroundColor: "#C9A24C",
+                WebkitMaskImage: `url(${LOGO_URL})`,
+                maskImage: `url(${LOGO_URL})`,
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+                WebkitMaskSize: "contain",
+                maskSize: "contain",
+                WebkitMaskPosition: "left center",
+                maskPosition: "left center",
+              }}
+            />
             <div className="hidden md:block pl-4 border-l">
               <div className="text-sm font-medium">Strategy Paper Generator</div>
               <div className="text-[11px] text-muted-foreground">Private wealth advisory document</div>
