@@ -569,30 +569,30 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
             </Card>
 
-            <Card tone="gold">
-              <CardTitle icon="dot">With financial advice</CardTitle>
-              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Potential improvement</div>
-              <div className="mt-1 mb-3" style={{ ...serif, color: NAVY, fontSize: 18, fontWeight: 600 }}>
+            <Card tone="navy">
+              <CardTitle icon="dot" onDark>With financial advice</CardTitle>
+              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>Potential improvement</div>
+              <div className="mt-1 mb-3" style={{ ...serif, color: "#FFFFFF", fontSize: 18, fontWeight: 600 }}>
                 +{((data.comparison.fiveYearReturn - data.existing.fiveYearReturn) * 100).toFixed(2)}% p.a. on current trajectory
               </div>
-              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>How</div>
-              <div className="mt-1 mb-3 text-[11px]" style={{ color: NAVY }}>
+              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>How</div>
+              <div className="mt-1 mb-3 text-[11px]" style={{ color: "#F1F5F9" }}>
                 Reallocate from {data.existing.modelLabel} to {data.comparison.modelLabel}, and switch to {data.comparison.fundName || "the firm model portfolio"}.
               </div>
-              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>One-off advice fee</div>
-              <div className="mt-1 mb-3 text-[11px]" style={{ color: NAVY }}>
-                <b>{fmtMoney(data.fees.adviceFeeFlat)}</b> — once off payment from super
+              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>One-off advice fee</div>
+              <div className="mt-1 mb-3 text-[11px]" style={{ color: "#F1F5F9" }}>
+                <b style={{ color: "#FFFFFF" }}>{fmtMoney(data.fees.adviceFeeFlat)}</b> — once off payment from super
               </div>
-              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Ongoing advisory fee</div>
-              <div className="mt-1 mb-3 text-[11px]" style={{ color: NAVY }}>
-                <b>{fmtPct(data.fees.annualAdvicePct, 2)} p.a.</b> — capped at {fmtMoney(data.fees.annualFeeCap)}
+              <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>Ongoing advisory fee</div>
+              <div className="mt-1 mb-3 text-[11px]" style={{ color: "#F1F5F9" }}>
+                <b style={{ color: "#FFFFFF" }}>{fmtPct(data.fees.annualAdvicePct, 2)} p.a.</b> — capped at {fmtMoney(data.fees.annualFeeCap)}
               </div>
-              <div className="mt-4 p-3" style={{ background: "rgba(255,255,255,0.7)", borderRadius: 8 }}>
-                <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_DEEP }}>
+              <div className="mt-4 p-3" style={{ background: "rgba(232,184,64,0.15)", border: `1px solid ${GOLD}`, borderRadius: 8 }}>
+                <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>
                   Recommended · Projected at age {data.retirementAge}
                 </div>
-                <div className="mt-1" style={{ ...serif, color: GOLD_DEEP, fontSize: 22, fontWeight: 600 }}>{fmtMoney(cmp.projectedBalance)}</div>
-                <div className="text-[9.5px] mt-1 italic" style={{ color: MUTE }}>after fees and market corrections</div>
+                <div className="mt-1" style={{ ...serif, color: GOLD_SOFT, fontSize: 22, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{fmtMoney(cmp.projectedBalance)}</div>
+                <div className="text-[9.5px] mt-1 italic" style={{ color: "rgba(255,255,255,0.7)" }}>after fees and market corrections</div>
               </div>
             </Card>
           </div>
