@@ -1,15 +1,75 @@
 import { useEffect, useRef, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Download, Save, Loader2, FileText, Users } from "lucide-react";
+import { Download, Save, Loader2, FileText, Users, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { StrategyClientDataForm } from "@/components/strategy/StrategyClientDataForm";
 import { StrategyPaperRender } from "@/components/strategy/StrategyPaperRender";
-import { DEFAULT_STRATEGY, type StrategyPaperData } from "@/lib/strategy-calc";
+import { DEFAULT_STRATEGY, firmModelDefaults, type StrategyPaperData } from "@/lib/strategy-calc";
 
 const LOCAL_KEY = "strategy-paper:draft:v1";
+
+const SAMPLE_STRATEGY: StrategyPaperData = {
+  ...DEFAULT_STRATEGY,
+  clientName: "Sarah Thompson",
+  clientDob: "1980-06-15",
+  retirementAge: 65,
+  annualIncome: 145000,
+  personalContributionAmount: 5000,
+  personalContributionFrequency: "Annually",
+  desiredIncomeAmount: 75000,
+  desiredIncomeFrequency: "Annually",
+  goalBalance: 1200000,
+  existing: {
+    fundName: "AustralianSuper — Balanced",
+    superBalance: 285000,
+    modelLabel: "Balanced (Default)",
+    riskProfile: "Balanced",
+    numInvestmentOptions: 1,
+    adminFeePct: 0.0025,
+    adminFeeFlat: 117,
+    adviserFee: 0,
+    fiveYearReturn: 0.0712,
+  },
+  comparison: {
+    ...firmModelDefaults("Growth"),
+    fundName: "HUB24 — Firm Growth Model",
+    superBalance: 285000,
+  },
+  existingInsurance: {
+    provider: "AustralianSuper Group",
+    lifeCover: 250000,
+    tpdCover: 250000,
+    ipMonthly: 6000,
+    premiumAnnual: 1450,
+    waitingPeriod: "60 days",
+    benefitPeriod: "2 years",
+    structure: "Stepped",
+    type: "Indemnity",
+  },
+  comparisonInsurance: {
+    provider: "TAL Accelerated Protection",
+    lifeCover: 750000,
+    tpdCover: 750000,
+    ipMonthly: 9000,
+    premiumAnnual: 2180,
+    waitingPeriod: "90 days",
+    benefitPeriod: "To Age 65",
+    structure: "Level",
+    type: "Agreed Value",
+  },
+  fees: {
+    adviceFeeFlat: 3300,
+    annualAdvicePct: 0.0165,
+    annualFeeCap: 5000,
+  },
+  researchNotes:
+    "Recommendation based on firm growth model portfolio research (Nov 2025). The client's existing balanced default option carries a higher admin fee load and lower 5-yr average return than the firm's HUB24 growth model. Insurance uplifted to reflect mortgage obligations and dependants — moving from Indemnity to Agreed Value IP with To Age 65 benefit period materially improves protection quality.",
+};
+
+
 
 export default function Strategy() {
   const { user } = useAuth();
@@ -102,7 +162,11 @@ export default function Strategy() {
             <h1 className="text-2xl font-bold">Strategy Paper</h1>
             <p className="text-sm text-muted-foreground">Financial advice strategy document · uses the same calc engine as the Super Health Check.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={() => { setData(SAMPLE_STRATEGY); setTab("client"); toast.success("Sample data loaded"); }}>
+              <Sparkles className="w-4 h-4 mr-2" />
+              Auto-fill (test)
+            </Button>
             <Button variant="outline" onClick={save} disabled={saving}>
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
               Save
@@ -112,6 +176,7 @@ export default function Strategy() {
               Download PDF
             </Button>
           </div>
+
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
