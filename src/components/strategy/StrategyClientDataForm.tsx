@@ -177,6 +177,8 @@ function InsuranceBlock({
 
 export function StrategyClientDataForm({ value, onChange }: Props) {
   const patch = (p: Partial<StrategyPaperData>) => onChange({ ...value, ...p });
+  const computedAge = ageFromDob(value.clientDob);
+  const yearsToRet = Math.max(0, value.retirementAge - computedAge);
 
   return (
     <div className="space-y-6">
@@ -187,17 +189,17 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
           <Field label="Client name">
             <Input value={value.clientName} onChange={(e) => patch({ clientName: e.target.value })} placeholder="John Smith" />
           </Field>
-          <Field label="Date of birth">
+          <Field label={`Date of birth${computedAge ? ` · Age ${computedAge}` : ""}`}>
             <Input type="date" value={value.clientDob} onChange={(e) => patch({ clientDob: e.target.value })} />
           </Field>
-          <Field label="Retirement age">
-            <Input type="number" value={value.retirementAge || ""} onChange={(e) => patch({ retirementAge: numOr(e.target.value) })} />
+          <Field label={`Retirement age${computedAge ? ` · ${yearsToRet} yrs away` : ""}`}>
+            <Input type="text" inputMode="numeric" value={value.retirementAge || ""} onChange={(e) => patch({ retirementAge: numOr(e.target.value) })} />
           </Field>
           <Field label="Annual income ($)">
-            <Input type="number" value={value.annualIncome || ""} onChange={(e) => patch({ annualIncome: numOr(e.target.value) })} />
+            <Input type="text" inputMode="decimal" value={value.annualIncome || ""} onChange={(e) => patch({ annualIncome: numOr(e.target.value) })} />
           </Field>
           <Field label="Personal contribution ($)">
-            <Input type="number" value={value.personalContributionAmount || ""} onChange={(e) => patch({ personalContributionAmount: numOr(e.target.value) })} />
+            <Input type="text" inputMode="decimal" value={value.personalContributionAmount || ""} onChange={(e) => patch({ personalContributionAmount: numOr(e.target.value) })} />
           </Field>
           <Field label="Contribution frequency">
             <Select value={value.personalContributionFrequency} onValueChange={(v) => patch({ personalContributionFrequency: v as IncomeFrequency })}>
@@ -206,7 +208,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
             </Select>
           </Field>
           <Field label="Desired retirement income ($)">
-            <Input type="number" value={value.desiredIncomeAmount || ""} onChange={(e) => patch({ desiredIncomeAmount: numOr(e.target.value) })} />
+            <Input type="text" inputMode="decimal" value={value.desiredIncomeAmount || ""} onChange={(e) => patch({ desiredIncomeAmount: numOr(e.target.value) })} />
           </Field>
           <Field label="Income frequency">
             <Select value={value.desiredIncomeFrequency} onValueChange={(v) => patch({ desiredIncomeFrequency: v as IncomeFrequency })}>
@@ -215,10 +217,11 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
             </Select>
           </Field>
           <Field label="Retirement goal balance ($)">
-            <Input type="number" value={value.goalBalance || ""} onChange={(e) => patch({ goalBalance: numOr(e.target.value) })} />
+            <Input type="text" inputMode="decimal" value={value.goalBalance || ""} onChange={(e) => patch({ goalBalance: numOr(e.target.value) })} />
           </Field>
         </CardContent>
       </Card>
+
 
       {/* Super scenarios */}
       <div className="grid md:grid-cols-2 gap-4">
