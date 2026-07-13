@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
 import {
   type StrategyPaperData,
   type StrategyScenario,
@@ -33,6 +34,64 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
       {children}
     </div>
+  );
+}
+
+/**
+ * Percentage input that lets the user freely clear/edit the field.
+ * Keeps a local string draft so typing "" or "1." doesn't get overwritten
+ * back to "0.00" (which is what the old controlled toFixed pattern did).
+ */
+function PctInput({ value, onChange }: { value: number; onChange: (pct: number) => void }) {
+  const [draft, setDraft] = useState<string>(value ? (value * 100).toFixed(2) : "");
+  useEffect(() => {
+    // Sync external changes (e.g. autofill, reset) but only when they don't
+    // match the current draft, so mid-typing doesn't get clobbered.
+    const parsed = draft === "" ? 0 : Number(draft.replace(/,/g, "")) / 100;
+    if (Math.abs(parsed - value) > 1e-9) {
+      setDraft(value ? (value * 100).toFixed(2) : "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+  return (
+    <Input
+      type="text"
+      inputMode="decimal"
+      value={draft}
+      placeholder="0.00"
+      onChange={(e) => {
+        const v = e.target.value;
+        setDraft(v);
+        onChange(pctOr(v));
+      }}
+    />
+  );
+}
+
+/**
+ * Number input that keeps a local string draft so clearing works naturally.
+ */
+function NumInput({ value, onChange, placeholder }: { value: number; onChange: (n: number) => void; placeholder?: string }) {
+  const [draft, setDraft] = useState<string>(value ? String(value) : "");
+  useEffect(() => {
+    const parsed = draft === "" ? 0 : numOr(draft);
+    if (parsed !== value) {
+      setDraft(value ? String(value) : "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+  return (
+    <Input
+      type="text"
+      inputMode="decimal"
+      value={draft}
+      placeholder={placeholder ?? "0"}
+      onChange={(e) => {
+        const v = e.target.value;
+        setDraft(v);
+        onChange(numOr(v));
+      }}
+    />
   );
 }
 
