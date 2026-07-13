@@ -23,8 +23,9 @@ import {
   Area,
 } from "recharts";
 import coverImg from "@/assets/strategy-cover.jpg";
-import logoLight from "@/assets/finance-direct-logo-horizontal-light.png";
-import logoDark from "@/assets/finance-direct-logo-horizontal.png";
+import logoLightAsset from "@/assets/finance-direct-logo-official.png.asset.json";
+import logoDark from "@/assets/finance-direct-logo-dark.png";
+const logoLight = logoLightAsset.url;
 
 interface Props {
   data: StrategyPaperData;
