@@ -8,13 +8,14 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
-import { runScenario, employerSG, ageFromDob } from "@/lib/strategy-calc";
 import {
+  runScenario,
+  employerSG,
+  ageFromDob,
+  firmModelDefaults,
   type StrategyPaperData,
   type StrategyScenario,
   type StrategyInsurance,
-  firmModelDefaults,
-  ageFromDob,
 } from "@/lib/strategy-calc";
 import type { RiskProfile, IncomeFrequency } from "@/lib/calc";
 
