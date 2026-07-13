@@ -45,11 +45,11 @@ export default function Strategy() {
         desired_income_amount: data.desiredIncomeAmount,
         desired_income_frequency: data.desiredIncomeFrequency,
         goal_balance: data.goalBalance,
-        existing_scenario: data.existing as unknown as Record<string, unknown>,
-        comparison_scenario: data.comparison as unknown as Record<string, unknown>,
-        existing_insurance: data.existingInsurance as unknown as Record<string, unknown>,
-        comparison_insurance: data.comparisonInsurance as unknown as Record<string, unknown>,
-        fees: data.fees as unknown as Record<string, unknown>,
+        existing_scenario: JSON.parse(JSON.stringify(data.existing)),
+        comparison_scenario: JSON.parse(JSON.stringify(data.comparison)),
+        existing_insurance: JSON.parse(JSON.stringify(data.existingInsurance)),
+        comparison_insurance: JSON.parse(JSON.stringify(data.comparisonInsurance)),
+        fees: JSON.parse(JSON.stringify(data.fees)),
         research_notes: data.researchNotes,
       };
       if (paperId) {
