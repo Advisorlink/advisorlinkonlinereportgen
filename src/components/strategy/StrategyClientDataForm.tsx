@@ -35,8 +35,10 @@ const pctOr = (v: string): number => numOr(v) / 100;
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+    <div className="flex flex-col">
+      <Label className="text-[11px] font-medium text-muted-foreground leading-tight mb-1.5 min-h-[28px] flex items-end">
+        <span className="line-clamp-2">{label}</span>
+      </Label>
       {children}
     </div>
   );
