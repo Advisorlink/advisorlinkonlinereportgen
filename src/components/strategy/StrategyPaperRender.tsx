@@ -259,12 +259,12 @@ function MiniStat({ label, value, sub, accent = "navy" }:
 }
 
 // Card heading with diamond/dot bullet
-function CardTitle({ children, icon = "diamond" }: { children: React.ReactNode; icon?: "diamond" | "dot" | "plus" | "check" }) {
+function CardTitle({ children, icon = "diamond", onDark }: { children: React.ReactNode; icon?: "diamond" | "dot" | "plus" | "check"; onDark?: boolean }) {
   const glyph = icon === "diamond" ? "◆" : icon === "plus" ? "✦" : icon === "check" ? "✓" : "●";
   return (
     <div className="flex items-center gap-2 mb-3">
       <span style={{ color: GOLD, fontSize: 12 }}>{glyph}</span>
-      <span style={{ ...serif, color: NAVY, fontSize: 15, fontWeight: 600 }}>{children}</span>
+      <span style={{ ...serif, color: onDark ? "#FFFFFF" : NAVY, fontSize: 15, fontWeight: 600 }}>{children}</span>
     </div>
   );
 }
