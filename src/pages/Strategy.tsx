@@ -8,8 +8,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { StrategyClientDataForm } from "@/components/strategy/StrategyClientDataForm";
 import { StrategyPaperRender } from "@/components/strategy/StrategyPaperRender";
 import { DEFAULT_STRATEGY, firmModelDefaults, type StrategyPaperData } from "@/lib/strategy-calc";
-import logoAsset from "@/assets/finance-direct-logo-custom.png.asset.json";
+import logoAsset from "@/assets/finance-direct-logo-v2.png.asset.json";
 const LOGO_URL = logoAsset.url;
+const LOGO_ASPECT = 2.94;
 
 const LOCAL_KEY = "strategy-paper:draft:v1";
 
@@ -166,7 +167,7 @@ export default function Strategy() {
               aria-label="Finance Direct"
               style={{
                 height: 36,
-                width: 36 * 4.22,
+                width: 36 * LOGO_ASPECT,
                 backgroundColor: "#C9A24C",
                 WebkitMaskImage: `url(${LOGO_URL})`,
                 maskImage: `url(${LOGO_URL})`,
