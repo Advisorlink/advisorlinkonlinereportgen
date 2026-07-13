@@ -782,42 +782,42 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
           </Card>
 
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <Card>
-              <CardTitle icon="dot">Income sustainability — current</CardTitle>
-              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Money lasts to age</div>
-              <div className="mt-2" style={{ ...serif, color: NAVY, fontSize: 34, fontWeight: 600, lineHeight: 1 }}>
+            <Card tone="navy">
+              <CardTitle icon="dot" onDark>Income sustainability — current</CardTitle>
+              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Money lasts to age</div>
+              <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: "#FFFFFF", fontSize: 34, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 {ex.moneyNeverRunsOut ? "100+" : ex.ageMoneyLasts}
               </div>
-              <div className="text-[10.5px] mt-1" style={{ color: GOLD_DEEP, fontWeight: 600 }}>
+              <div className="text-[10.5px] mt-1" style={{ color: GOLD_SOFT, fontWeight: 600 }}>
                 {ex.moneyNeverRunsOut ? "Fully funded" : `${Math.max(0, ex.ageMoneyLasts - data.retirementAge)} years of income`}
               </div>
             </Card>
-            <Card tone="gold">
-              <CardTitle icon="dot">Income sustainability — comparison</CardTitle>
-              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Money lasts to age</div>
-              <div className="mt-2" style={{ ...serif, color: GOLD_DEEP, fontSize: 34, fontWeight: 600, lineHeight: 1 }}>
+            <Card tone="navy">
+              <CardTitle icon="dot" onDark>Income sustainability — comparison</CardTitle>
+              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Money lasts to age</div>
+              <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: GOLD_SOFT, fontSize: 34, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 {cmp.moneyNeverRunsOut ? "100+" : cmp.ageMoneyLasts}
               </div>
-              <div className="text-[10.5px] mt-1" style={{ color: GOLD_DEEP, fontWeight: 600 }}>
+              <div className="text-[10.5px] mt-1" style={{ color: GOLD_SOFT, fontWeight: 600 }}>
                 {cmp.moneyNeverRunsOut ? "Fully funded" : `${Math.max(0, cmp.ageMoneyLasts - data.retirementAge)} years of income`}
               </div>
             </Card>
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <Card>
-              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Additional retirement income</div>
-              <div className="mt-2" style={{ ...serif, color: GOLD_DEEP, fontSize: 26, fontWeight: 600 }}>
+            <Card tone="navy">
+              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Additional retirement income</div>
+              <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: GOLD_SOFT, fontSize: 26, fontWeight: 700, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 +{fmtMoney(Math.abs(incomeUplift))}
               </div>
-              <div className="text-[10px] mt-1" style={{ color: MUTE }}>Extra income provided over retirement</div>
+              <div className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.7)" }}>Extra income provided over retirement</div>
             </Card>
-            <Card>
-              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>Additional years of income</div>
-              <div className="mt-2" style={{ ...serif, color: GOLD_DEEP, fontSize: 26, fontWeight: 600 }}>
+            <Card tone="navy">
+              <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Additional years of income</div>
+              <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: GOLD_SOFT, fontSize: 26, fontWeight: 700, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 +{Math.max(0, (cmp.moneyNeverRunsOut ? 100 : cmp.ageMoneyLasts) - (ex.moneyNeverRunsOut ? 100 : ex.ageMoneyLasts))} yrs
               </div>
-              <div className="text-[10px] mt-1" style={{ color: MUTE }}>Longer your money lasts</div>
+              <div className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.7)" }}>Longer your money lasts</div>
             </Card>
           </div>
 
