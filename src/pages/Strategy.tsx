@@ -8,7 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { StrategyClientDataForm } from "@/components/strategy/StrategyClientDataForm";
 import { StrategyPaperRender } from "@/components/strategy/StrategyPaperRender";
 import { DEFAULT_STRATEGY, firmModelDefaults, type StrategyPaperData } from "@/lib/strategy-calc";
-import logoImg from "@/assets/finance-direct-logo-dark.png";
+import logoAsset from "@/assets/finance-direct-logo-official.png.asset.json";
+const LOGO_URL = logoAsset.url;
 
 const LOCAL_KEY = "strategy-paper:draft:v1";
 
