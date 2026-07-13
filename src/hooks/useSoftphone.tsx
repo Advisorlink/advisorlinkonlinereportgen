@@ -189,10 +189,19 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
 
 
   const fetchToken = useCallback(async () => {
+    // Guard: skip the call entirely if there's no valid session.
+    // A stale JWT (e.g. from the signing-key migration) would otherwise 401.
+    const { data: userData, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !userData?.user) {
+      // Clear the dead session so we stop retrying with it.
+      try { await supabase.auth.signOut({ scope: "local" }); } catch { /* noop */ }
+      throw new Error("Not signed in");
+    }
     const { data, error } = await supabase.functions.invoke("twilio-voice-token");
     if (error) throw error;
     return data as { token: string; identity: string; caller_id: string };
   }, []);
+
 
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scheduleReconnect = useCallback((delayMs = 1500) => {
