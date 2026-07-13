@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { StrategyClientDataForm } from "@/components/strategy/StrategyClientDataForm";
 import { StrategyPaperRender } from "@/components/strategy/StrategyPaperRender";
 import { DEFAULT_STRATEGY, firmModelDefaults, type StrategyPaperData } from "@/lib/strategy-calc";
-import logoImg from "@/assets/finance-direct-logo.png";
+import logoImg from "@/assets/finance-direct-logo-horizontal.png";
 
 const LOCAL_KEY = "strategy-paper:draft:v1";
 
@@ -161,10 +161,10 @@ export default function Strategy() {
         {/* Brand header */}
         <div className="mb-5 flex items-center justify-between rounded-lg border bg-card px-5 py-3 shadow-sm">
           <div className="flex items-center gap-4">
-            <img src={logoImg} alt="Finance Direct" className="h-12 w-auto" />
-            <div className="hidden md:block">
-              <div className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground font-semibold">Finance Direct</div>
+            <img src={logoImg} alt="Finance Direct" className="h-9 w-auto" />
+            <div className="hidden md:block pl-4 border-l">
               <div className="text-sm font-medium">Strategy Paper Generator</div>
+              <div className="text-[11px] text-muted-foreground">Private wealth advisory document</div>
             </div>
           </div>
           <div className="text-xs text-muted-foreground hidden sm:block">
