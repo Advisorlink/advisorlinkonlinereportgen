@@ -8,6 +8,7 @@ import {
   type StrategyScenario,
   type StrategyInsurance,
   firmModelDefaults,
+  ageFromDob,
 } from "@/lib/strategy-calc";
 import type { RiskProfile, IncomeFrequency } from "@/lib/calc";
 
@@ -59,7 +60,7 @@ function ScenarioBlock({
           <Input value={scenario.fundName} onChange={(e) => onChange({ ...scenario, fundName: e.target.value })} />
         </Field>
         <Field label="Super balance ($)">
-          <Input type="number" value={scenario.superBalance || ""} onChange={(e) => onChange({ ...scenario, superBalance: numOr(e.target.value) })} />
+          <Input type="text" inputMode="decimal" value={scenario.superBalance || ""} onChange={(e) => onChange({ ...scenario, superBalance: numOr(e.target.value) })} />
         </Field>
         <Field label="Model / option label">
           <Input value={scenario.modelLabel} onChange={(e) => onChange({ ...scenario, modelLabel: e.target.value })} />
@@ -73,21 +74,21 @@ function ScenarioBlock({
           </Select>
         </Field>
         <Field label="# investment options">
-          <Input type="number" value={scenario.numInvestmentOptions || ""} onChange={(e) => onChange({ ...scenario, numInvestmentOptions: numOr(e.target.value) })} />
+          <Input type="text" inputMode="decimal" value={scenario.numInvestmentOptions || ""} onChange={(e) => onChange({ ...scenario, numInvestmentOptions: numOr(e.target.value) })} />
         </Field>
         <Field label="Admin fee (%)">
-          <Input type="number" step="0.01" value={(scenario.adminFeePct * 100).toFixed(2)} onChange={(e) => onChange({ ...scenario, adminFeePct: pctOr(e.target.value) })} />
+          <Input type="text" inputMode="decimal" value={(scenario.adminFeePct * 100).toFixed(2)} onChange={(e) => onChange({ ...scenario, adminFeePct: pctOr(e.target.value) })} />
         </Field>
         <Field label="Admin fee flat ($)">
-          <Input type="number" value={scenario.adminFeeFlat || ""} onChange={(e) => onChange({ ...scenario, adminFeeFlat: numOr(e.target.value) })} />
+          <Input type="text" inputMode="decimal" value={scenario.adminFeeFlat || ""} onChange={(e) => onChange({ ...scenario, adminFeeFlat: numOr(e.target.value) })} />
         </Field>
         {showAdviserFee && (
           <Field label="Existing adviser fee ($/yr)">
-            <Input type="number" value={scenario.adviserFee || ""} onChange={(e) => onChange({ ...scenario, adviserFee: numOr(e.target.value) })} />
+            <Input type="text" inputMode="decimal" value={scenario.adviserFee || ""} onChange={(e) => onChange({ ...scenario, adviserFee: numOr(e.target.value) })} />
           </Field>
         )}
         <Field label="5-yr avg return (%)">
-          <Input type="number" step="0.01" value={(scenario.fiveYearReturn * 100).toFixed(2)} onChange={(e) => onChange({ ...scenario, fiveYearReturn: pctOr(e.target.value) })} />
+          <Input type="text" inputMode="decimal" value={(scenario.fiveYearReturn * 100).toFixed(2)} onChange={(e) => onChange({ ...scenario, fiveYearReturn: pctOr(e.target.value) })} />
         </Field>
       </CardContent>
     </Card>
@@ -116,13 +117,13 @@ function InsuranceBlock({
           <Input value={ins.provider} onChange={(e) => onChange({ ...ins, provider: e.target.value })} />
         </Field>
         <Field label="Life cover ($)">
-          <Input type="number" value={ins.lifeCover || ""} onChange={(e) => onChange({ ...ins, lifeCover: numOr(e.target.value) })} />
+          <Input type="text" inputMode="decimal" value={ins.lifeCover || ""} onChange={(e) => onChange({ ...ins, lifeCover: numOr(e.target.value) })} />
         </Field>
         <Field label="TPD cover ($)">
-          <Input type="number" value={ins.tpdCover || ""} onChange={(e) => onChange({ ...ins, tpdCover: numOr(e.target.value) })} />
+          <Input type="text" inputMode="decimal" value={ins.tpdCover || ""} onChange={(e) => onChange({ ...ins, tpdCover: numOr(e.target.value) })} />
         </Field>
         <Field label="Income protection ($/month)">
-          <Input type="number" value={ins.ipMonthly || ""} onChange={(e) => onChange({ ...ins, ipMonthly: numOr(e.target.value) })} />
+          <Input type="text" inputMode="decimal" value={ins.ipMonthly || ""} onChange={(e) => onChange({ ...ins, ipMonthly: numOr(e.target.value) })} />
         </Field>
         <Field label="Waiting period">
           <Select value={ins.waitingPeriod} onValueChange={(v) => onChange({ ...ins, waitingPeriod: v as StrategyInsurance["waitingPeriod"] })}>
@@ -147,7 +148,7 @@ function InsuranceBlock({
           </Select>
         </Field>
         <Field label="Premium ($/yr)">
-          <Input type="number" value={ins.premiumAnnual || ""} onChange={(e) => onChange({ ...ins, premiumAnnual: numOr(e.target.value) })} />
+          <Input type="text" inputMode="decimal" value={ins.premiumAnnual || ""} onChange={(e) => onChange({ ...ins, premiumAnnual: numOr(e.target.value) })} />
         </Field>
         <Field label="Premium structure">
           <Select value={ins.structure} onValueChange={(v) => onChange({ ...ins, structure: v as StrategyInsurance["structure"] })}>
@@ -176,6 +177,8 @@ function InsuranceBlock({
 
 export function StrategyClientDataForm({ value, onChange }: Props) {
   const patch = (p: Partial<StrategyPaperData>) => onChange({ ...value, ...p });
+  const computedAge = ageFromDob(value.clientDob);
+  const yearsToRet = Math.max(0, value.retirementAge - computedAge);
 
   return (
     <div className="space-y-6">
@@ -186,17 +189,17 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
           <Field label="Client name">
             <Input value={value.clientName} onChange={(e) => patch({ clientName: e.target.value })} placeholder="John Smith" />
           </Field>
-          <Field label="Date of birth">
+          <Field label={`Date of birth${computedAge ? ` · Age ${computedAge}` : ""}`}>
             <Input type="date" value={value.clientDob} onChange={(e) => patch({ clientDob: e.target.value })} />
           </Field>
-          <Field label="Retirement age">
-            <Input type="number" value={value.retirementAge || ""} onChange={(e) => patch({ retirementAge: numOr(e.target.value) })} />
+          <Field label={`Retirement age${computedAge ? ` · ${yearsToRet} yrs away` : ""}`}>
+            <Input type="text" inputMode="numeric" value={value.retirementAge || ""} onChange={(e) => patch({ retirementAge: numOr(e.target.value) })} />
           </Field>
           <Field label="Annual income ($)">
-            <Input type="number" value={value.annualIncome || ""} onChange={(e) => patch({ annualIncome: numOr(e.target.value) })} />
+            <Input type="text" inputMode="decimal" value={value.annualIncome || ""} onChange={(e) => patch({ annualIncome: numOr(e.target.value) })} />
           </Field>
           <Field label="Personal contribution ($)">
-            <Input type="number" value={value.personalContributionAmount || ""} onChange={(e) => patch({ personalContributionAmount: numOr(e.target.value) })} />
+            <Input type="text" inputMode="decimal" value={value.personalContributionAmount || ""} onChange={(e) => patch({ personalContributionAmount: numOr(e.target.value) })} />
           </Field>
           <Field label="Contribution frequency">
             <Select value={value.personalContributionFrequency} onValueChange={(v) => patch({ personalContributionFrequency: v as IncomeFrequency })}>
@@ -205,7 +208,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
             </Select>
           </Field>
           <Field label="Desired retirement income ($)">
-            <Input type="number" value={value.desiredIncomeAmount || ""} onChange={(e) => patch({ desiredIncomeAmount: numOr(e.target.value) })} />
+            <Input type="text" inputMode="decimal" value={value.desiredIncomeAmount || ""} onChange={(e) => patch({ desiredIncomeAmount: numOr(e.target.value) })} />
           </Field>
           <Field label="Income frequency">
             <Select value={value.desiredIncomeFrequency} onValueChange={(v) => patch({ desiredIncomeFrequency: v as IncomeFrequency })}>
@@ -214,10 +217,11 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
             </Select>
           </Field>
           <Field label="Retirement goal balance ($)">
-            <Input type="number" value={value.goalBalance || ""} onChange={(e) => patch({ goalBalance: numOr(e.target.value) })} />
+            <Input type="text" inputMode="decimal" value={value.goalBalance || ""} onChange={(e) => patch({ goalBalance: numOr(e.target.value) })} />
           </Field>
         </CardContent>
       </Card>
+
 
       {/* Super scenarios */}
       <div className="grid md:grid-cols-2 gap-4">
@@ -256,13 +260,13 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
         <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold uppercase tracking-wide">Advice & Implementation Fees</CardTitle></CardHeader>
         <CardContent className="grid grid-cols-3 gap-3">
           <Field label="Advice / implementation fee ($)">
-            <Input type="number" value={value.fees.adviceFeeFlat || ""} onChange={(e) => patch({ fees: { ...value.fees, adviceFeeFlat: numOr(e.target.value) } })} />
+            <Input type="text" inputMode="decimal" value={value.fees.adviceFeeFlat || ""} onChange={(e) => patch({ fees: { ...value.fees, adviceFeeFlat: numOr(e.target.value) } })} />
           </Field>
           <Field label="Annual advice fee (%)">
-            <Input type="number" step="0.01" value={(value.fees.annualAdvicePct * 100).toFixed(2)} onChange={(e) => patch({ fees: { ...value.fees, annualAdvicePct: pctOr(e.target.value) } })} />
+            <Input type="text" inputMode="decimal" value={(value.fees.annualAdvicePct * 100).toFixed(2)} onChange={(e) => patch({ fees: { ...value.fees, annualAdvicePct: pctOr(e.target.value) } })} />
           </Field>
           <Field label="Annual fee cap ($)">
-            <Input type="number" value={value.fees.annualFeeCap || ""} onChange={(e) => patch({ fees: { ...value.fees, annualFeeCap: numOr(e.target.value) } })} />
+            <Input type="text" inputMode="decimal" value={value.fees.annualFeeCap || ""} onChange={(e) => patch({ fees: { ...value.fees, annualFeeCap: numOr(e.target.value) } })} />
           </Field>
         </CardContent>
       </Card>
