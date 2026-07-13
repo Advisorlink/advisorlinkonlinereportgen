@@ -160,7 +160,7 @@ function Row({ label, existing, comparison, highlight }:
         style={{
           borderColor: RULE,
           color: highlight ? GOLD_DEEP : NAVY,
-          background: highlight ? "rgba(201,162,76,0.10)" : "rgba(11,27,59,0.02)",
+          background: highlight ? "rgba(232,184,64,0.10)" : "rgba(11,27,59,0.02)",
         }}>{comparison}</td>
     </tr>
   );
@@ -227,8 +227,8 @@ function PageHero({ title, subtitle }: { title: string; subtitle?: string }) {
 // Rounded card container
 function Card({ children, className = "", style, tone = "light" }:
   { children: React.ReactNode; className?: string; style?: React.CSSProperties; tone?: "light" | "gold" | "navy" }) {
-  const bg = tone === "gold" ? "rgba(201,162,76,0.08)" : tone === "navy" ? NAVY_DEEP : "#FFFFFF";
-  const border = tone === "gold" ? "rgba(201,162,76,0.35)" : tone === "navy" ? NAVY_DEEP : RULE;
+  const bg = tone === "gold" ? "rgba(232,184,64,0.08)" : tone === "navy" ? NAVY_DEEP : "#FFFFFF";
+  const border = tone === "gold" ? "rgba(232,184,64,0.35)" : tone === "navy" ? NAVY_DEEP : RULE;
   return (
     <div className={className} style={{
       background: bg, border: `1px solid ${border}`, borderRadius: 10, padding: "14px 16px",
@@ -655,7 +655,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
                 <span className="text-[9px] uppercase tracking-[0.25em]" style={{ color: "#CBD5E1" }}>Current</span>
                 <span className="text-[13px] font-semibold" style={{ color: "#F8FAFC" }}>{fmtPct(data.existing.fiveYearReturn, 2)}</span>
               </div>
-              <div style={{ width: 1, height: 16, background: "rgba(201,162,76,0.6)" }} />
+              <div style={{ width: 1, height: 16, background: "rgba(232,184,64,0.6)" }} />
               <div className="flex items-center gap-2">
                 <span className="text-[9px] uppercase tracking-[0.25em]" style={{ color: GOLD_SOFT }}>Comparison</span>
                 <span className="text-[13px] font-semibold" style={{ color: GOLD_SOFT }}>{fmtPct(data.comparison.fiveYearReturn, 2)}</span>
@@ -663,7 +663,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </div>
           </div>
 
-          <div className="p-3 mb-4 text-[10.5px] leading-relaxed" style={{ background: "rgba(201,162,76,0.08)", borderRadius: 8, color: "#334155" }}>
+          <div className="p-3 mb-4 text-[10.5px] leading-relaxed" style={{ background: "rgba(232,184,64,0.08)", borderRadius: 8, color: "#334155" }}>
             <b style={{ color: NAVY }}>Illustration only:</b> the comparison figures below show what the recommended
             strategy could mean for balance at retirement, keeping the same risk profile and contribution pattern.
             Past performance is not indicative of future performance.
@@ -701,7 +701,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </ResponsiveContainer>
             </div>
             <div className="flex justify-center mt-2">
-              <div className="px-6 py-3 text-center" style={{ background: "rgba(201,162,76,0.10)", borderRadius: 8 }}>
+              <div className="px-6 py-3 text-center" style={{ background: "rgba(232,184,64,0.10)", borderRadius: 8 }}>
                 <div className="text-[9.5px] uppercase tracking-[0.3em] font-semibold" style={{ color: MUTE }}>
                   After fees and market corrections
                 </div>
@@ -718,7 +718,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             <div className="grid grid-cols-3 gap-3">
               <div className="p-3" style={{ background: "#F8FAFC", borderRadius: 8 }}>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(201,162,76,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>%</div>
+                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(232,184,64,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>%</div>
                   <div className="text-[10px] uppercase tracking-[0.25em] font-semibold" style={{ color: NAVY }}>Inflation</div>
                 </div>
                 <div className="text-[10.5px] leading-relaxed" style={{ color: "#334155" }}>
@@ -727,7 +727,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
               <div className="p-3" style={{ background: "#F8FAFC", borderRadius: 8 }}>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(201,162,76,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>↗</div>
+                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(232,184,64,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>↗</div>
                   <div className="text-[10px] uppercase tracking-[0.25em] font-semibold" style={{ color: NAVY }}>Performance</div>
                 </div>
                 <div className="text-[10.5px] leading-relaxed" style={{ color: "#334155" }}>
@@ -736,7 +736,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
               <div className="p-3" style={{ background: "#F8FAFC", borderRadius: 8 }}>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(201,162,76,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>!</div>
+                  <div style={{ width: 20, height: 20, borderRadius: 999, background: "rgba(232,184,64,0.18)", color: GOLD_DEEP, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>!</div>
                   <div className="text-[10px] uppercase tracking-[0.25em] font-semibold" style={{ color: NAVY }}>Market crash</div>
                 </div>
                 <div className="text-[10.5px] leading-relaxed" style={{ color: "#334155" }}>
