@@ -10,7 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import {
   runScenario,
-  employerSG,
   ageFromDob,
   firmModelDefaults,
   type StrategyPaperData,
