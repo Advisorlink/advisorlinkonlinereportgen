@@ -23,7 +23,8 @@ import {
   Area,
 } from "recharts";
 import coverImg from "@/assets/strategy-cover.jpg";
-import logoImg from "@/assets/finance-direct-logo.png";
+import logoLight from "@/assets/finance-direct-logo-horizontal-light.png";
+import logoDark from "@/assets/finance-direct-logo-horizontal.png";
 
 interface Props {
   data: StrategyPaperData;
@@ -42,7 +43,6 @@ const RULE = "#E2E8F0";
 const EXISTING = "#94A3B8";
 const COMPARISON = "#C9A24C";
 
-/* Firm identity (make-believe) */
 const FIRM = {
   name: "Finance Direct",
   legal: "Finance Direct Pty Ltd",
@@ -67,7 +67,7 @@ function Page({
       style={{
         width: "210mm",
         minHeight: "297mm",
-        padding: bleed ? 0 : "16mm 16mm 14mm 16mm",
+        padding: bleed ? 0 : "14mm 16mm 12mm 16mm",
         background: "#ffffff",
         color: INK,
         display: bleed ? "block" : "flex",
@@ -81,27 +81,10 @@ function Page({
   );
 }
 
-function Monogram({ size = 28 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
-      <rect x="0.75" y="0.75" width="38.5" height="38.5" rx="3" stroke={GOLD} strokeWidth="1.2" />
-      <text x="50%" y="55%" textAnchor="middle" dominantBaseline="middle" fill={NAVY}
-        fontFamily="'Fraunces', Georgia, serif" fontWeight="700" fontSize="17">F</text>
-      <text x="70%" y="55%" textAnchor="middle" dominantBaseline="middle" fill={GOLD}
-        fontFamily="'Fraunces', Georgia, serif" fontWeight="700" fontSize="17">D</text>
-    </svg>
-  );
-}
-
 function RunningHeader({ client, section }: { client: string; section: string }) {
   return (
-    <div className="flex items-center justify-between pb-3 mb-6" style={{ borderBottom: `1px solid ${RULE}` }}>
-      <div className="flex items-center gap-2.5">
-        <Monogram size={22} />
-        <span className="text-[9px] uppercase tracking-[0.35em] font-semibold" style={{ color: NAVY }}>
-          {FIRM.name}
-        </span>
-      </div>
+    <div className="flex items-center justify-between pb-3 mb-5" style={{ borderBottom: `1px solid ${RULE}` }}>
+      <img src={logoDark} alt={FIRM.name} style={{ height: 22, width: "auto" }} />
       <div className="flex items-center gap-3 text-[9px] uppercase tracking-[0.3em]" style={{ color: MUTE }}>
         <span>{client || "Client"}</span>
         <span style={{ color: GOLD }}>·</span>
@@ -126,18 +109,15 @@ function RunningFooter({ page, total, date }: { page: number; total: number; dat
   );
 }
 
-/* ── SECTION PRIMITIVES ── */
-function SectionMark({ n, kicker, title }: { n: string; kicker: string; title: string }) {
+/* Refined section header — no huge Roman numeral, kicker + gold rule + title */
+function SectionMark({ kicker, title }: { kicker: string; title: string }) {
   return (
-    <div className="flex items-end gap-5 mb-5">
-      <div style={{ borderRight: `1px solid ${GOLD}` }} className="pr-5">
-        <div className="text-[9px] uppercase tracking-[0.35em] font-semibold" style={{ color: GOLD_DEEP }}>Section</div>
-        <div style={{ ...serif, color: NAVY, fontWeight: 500, fontSize: 40, lineHeight: 1 }} className="mt-1">{n}</div>
+    <div className="mb-5">
+      <div className="flex items-center gap-3 mb-2">
+        <div style={{ background: GOLD, height: 1, width: 28 }} />
+        <div className="text-[9px] uppercase tracking-[0.4em] font-semibold" style={{ color: GOLD_DEEP }}>{kicker}</div>
       </div>
-      <div className="pb-1">
-        <div className="text-[9px] uppercase tracking-[0.35em] font-semibold" style={{ color: GOLD }}>{kicker}</div>
-        <h2 style={{ ...serif, color: NAVY }} className="text-[26px] font-semibold leading-tight mt-1">{title}</h2>
-      </div>
+      <h2 style={{ ...serif, color: NAVY }} className="text-[28px] font-semibold leading-[1.1] tracking-tight">{title}</h2>
     </div>
   );
 }
@@ -156,7 +136,7 @@ function Row({ label, existing, comparison, highlight }:
         style={{
           borderColor: RULE,
           color: highlight ? GOLD_DEEP : NAVY,
-          background: highlight ? "rgba(201,162,76,0.12)" : "rgba(11,27,59,0.025)",
+          background: highlight ? "rgba(201,162,76,0.10)" : "rgba(11,27,59,0.02)",
         }}>{comparison}</td>
     </tr>
   );
@@ -189,14 +169,12 @@ function Stat({ label, value, sub, tone = "navy" }:
   );
 }
 
-function Callout({ title, body, tone = "navy" }: { title: string; body: React.ReactNode; tone?: "navy" | "gold" }) {
-  const bg = tone === "gold" ? "rgba(201,162,76,0.10)" : "rgba(11,27,59,0.04)";
-  const bar = tone === "gold" ? GOLD : NAVY;
-  const titleColor = tone === "gold" ? GOLD_DEEP : NAVY;
+/* Refined note — minimal, editorial. No more colored pill boxes. */
+function Note({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="p-4 rounded-sm" style={{ background: bg, borderLeft: `3px solid ${bar}` }}>
-      <div className="text-[9px] uppercase tracking-[0.3em] font-semibold" style={{ color: titleColor }}>{title}</div>
-      <div className="mt-1.5 text-[11.5px] leading-relaxed" style={{ color: "#334155" }}>{body}</div>
+    <div className="py-3" style={{ borderTop: `1px solid ${RULE}` }}>
+      <div className="text-[8.5px] uppercase tracking-[0.35em] font-semibold mb-1.5" style={{ color: GOLD_DEEP }}>{label}</div>
+      <div className="text-[11px] leading-relaxed" style={{ color: "#334155" }}>{children}</div>
     </div>
   );
 }
@@ -252,25 +230,21 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
   return (
     <div ref={ref} className="space-y-6" style={sans}>
 
-      {/* ═════ 01 · COVER (full bleed, no inner frame) ═════ */}
+      {/* ═════ 01 · COVER (full bleed) ═════ */}
       <Page bleed style={{ background: NAVY_DEEP }}>
         <div className="absolute inset-0">
-          <img src={coverImg} alt="" className="w-full h-full object-cover" style={{ opacity: 0.9 }} />
+          <img src={coverImg} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0" style={{
-            background: `linear-gradient(180deg, rgba(5,15,38,0.35) 0%, rgba(5,15,38,0.15) 30%, rgba(5,15,38,0.75) 72%, rgba(5,15,38,0.98) 100%)`,
+            background: `linear-gradient(180deg, rgba(5,15,38,0.55) 0%, rgba(5,15,38,0.35) 35%, rgba(5,15,38,0.85) 78%, rgba(5,15,38,0.98) 100%)`,
           }} />
         </div>
 
         <div className="relative flex flex-col justify-between"
-          style={{ minHeight: "297mm", padding: "20mm 22mm", color: "#F8FAFC" }}>
+          style={{ minHeight: "297mm", padding: "22mm 24mm", color: "#F8FAFC" }}>
 
-          {/* HEADER — full brand lockup, no inner frame */}
+          {/* HEADER — horizontal logo, no white box */}
           <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div style={{ background: "rgba(255,255,255,0.96)", padding: "10px 14px", borderRadius: 2 }}>
-                <img src={logoImg} alt={FIRM.name} style={{ height: 46, width: "auto", display: "block" }} />
-              </div>
-            </div>
+            <img src={logoLight} alt={FIRM.name} style={{ height: 42, width: "auto" }} />
             <div className="text-right">
               <div className="text-[8.5px] uppercase tracking-[0.35em]" style={{ color: "#CBD5E1" }}>Private & Confidential</div>
               <div className="text-[8.5px] uppercase tracking-[0.35em] mt-1" style={{ color: GOLD_SOFT }}>Doc No. {refNo}</div>
@@ -309,7 +283,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </div>
           </div>
 
-          {/* FOOTER — firm identity strip */}
+          {/* FOOTER */}
           <div>
             <div style={{ background: GOLD, height: 1, opacity: 0.5 }} className="mb-5" />
             <div className="flex items-end justify-between">
@@ -337,16 +311,16 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
           {/* CONTENTS */}
           <aside>
             <div className="text-[9px] uppercase tracking-[0.35em] font-semibold" style={{ color: GOLD_DEEP }}>Contents</div>
-            <ol className="mt-4 space-y-3">
+            <ol className="mt-4 space-y-2.5">
               {[
-                { n: "I", t: "Executive Summary", p: "02" },
-                { n: "II", t: "Your Position Today", p: "03" },
-                { n: "III", t: "Accumulation Projection", p: "04" },
-                { n: "IV", t: "Retirement Income", p: "05" },
-                { n: "V", t: "Insurance & Fees", p: "06" },
-              ].map((c) => (
-                <li key={c.n} className="flex items-baseline gap-3 text-[11px]">
-                  <span style={{ ...serif, color: GOLD, fontWeight: 500, width: 24 }}>{c.n}</span>
+                { t: "Executive Summary", p: "02" },
+                { t: "Your Position Today", p: "03" },
+                { t: "Accumulation Projection", p: "04" },
+                { t: "Retirement Income", p: "05" },
+                { t: "Insurance, Fees & Notes", p: "06" },
+              ].map((c, i) => (
+                <li key={i} className="flex items-baseline gap-3 text-[11px]">
+                  <span style={{ color: GOLD, fontWeight: 600, width: 16 }} className="text-[10px]">{String(i + 1).padStart(2, "0")}</span>
                   <span style={{ color: NAVY }} className="flex-1">{c.t}</span>
                   <span style={{ color: MUTE }} className="text-[9px] tracking-[0.2em]">p.{c.p}</span>
                 </li>
@@ -364,9 +338,9 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
             </div>
 
-            <div className="mt-6 p-4" style={{ border: `1px solid ${RULE}` }}>
+            <div className="mt-5">
               <div className="text-[9px] uppercase tracking-[0.35em] font-semibold" style={{ color: GOLD_DEEP }}>About {FIRM.name}</div>
-              <p className="text-[10px] mt-2 leading-relaxed" style={{ color: "#475569" }}>
+              <p className="text-[10.5px] mt-2 leading-relaxed" style={{ color: "#475569" }}>
                 A private wealth practice delivering evidence-based strategy for accumulators
                 and retirees across Australia. Every recommendation is modelled, benchmarked
                 and stress-tested against long-run capital market assumptions.
@@ -376,17 +350,15 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
 
           {/* EXECUTIVE SUMMARY */}
           <section className="flex flex-col">
-            <SectionMark n="I" kicker="Overview" title="Executive Summary" />
+            <SectionMark kicker="Overview" title="Executive Summary" />
 
             <p className="text-[12px] leading-relaxed text-slate-700 mb-5">
-              <span style={{ ...serif, color: NAVY, fontSize: 42, lineHeight: 0.85, float: "left", marginRight: 8, marginTop: 4 }}>B</span>
-              ased on {clientName}&apos;s current position (age {age}, retiring at {data.retirementAge}),
+              Based on {clientName}&apos;s current position (age {age}, retiring at {data.retirementAge}),
               we have modelled the existing arrangement against a firm-recommended {data.comparison.riskProfile.toLowerCase()}
               {" "}strategy. Projections use identical assumptions across both scenarios so the difference
               is attributable to fund construction, fees and asset allocation alone.
             </p>
 
-            {/* Headline stats */}
             <div className="grid grid-cols-3 gap-5 py-4"
               style={{ borderTop: `1px solid ${RULE}`, borderBottom: `1px solid ${RULE}` }}>
               <Stat label={`Existing at ${data.retirementAge}`} value={fmtMoney(ex.projectedBalance)} tone="muted" />
@@ -399,7 +371,6 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               />
             </div>
 
-            {/* Chart */}
             <div className="mt-4" style={{ height: 170 }}>
               <ResponsiveContainer>
                 <BarChart
@@ -416,7 +387,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </ResponsiveContainer>
             </div>
 
-            {/* Outlook — redesigned as a compact side-by-side navy panel */}
+            {/* Outlook strip */}
             <div className="mt-5 grid grid-cols-2 gap-0" style={{ border: `1px solid ${RULE}` }}>
               <div className="p-4" style={{ borderRight: `1px solid ${RULE}`, background: "#F8FAFC" }}>
                 <div className="flex items-center gap-2">
@@ -444,7 +415,6 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
             </div>
 
-            {/* Key findings — fills remaining space */}
             <div className="mt-5 flex-1">
               <div className="text-[9px] uppercase tracking-[0.3em] font-semibold mb-2" style={{ color: GOLD_DEEP }}>
                 Key findings
@@ -460,7 +430,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
                 <li className="flex gap-2"><span style={{ color: GOLD }}>◆</span>
                   Retirement income capacity increases by {fmtMoney(Math.abs(incomeUplift))} across the drawdown phase.</li>
                 <li className="flex gap-2"><span style={{ color: GOLD }}>◆</span>
-                  Insurance restructure lifts protection quality (see Section V) with a manageable premium impact.</li>
+                  Insurance restructure lifts protection quality (see final section) with a manageable premium impact.</li>
               </ul>
             </div>
           </section>
@@ -472,7 +442,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
       {/* ═════ 03 · YOUR POSITION ═════ */}
       <Page>
         <RunningHeader client={clientName} section="Your Position" />
-        <SectionMark n="II" kicker="Client" title={`Your Position Today · Age ${age}`} />
+        <SectionMark kicker="Client" title={`Your Position Today · Age ${age}`} />
 
         <div className="grid grid-cols-3 gap-x-8 gap-y-6 py-5"
           style={{ borderTop: `1px solid ${RULE}`, borderBottom: `1px solid ${RULE}` }}>
@@ -521,22 +491,22 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </ResponsiveContainer>
             </div>
 
-            <Callout tone="gold" title="Observation" body={
-              <>The recommended portfolio delivers a{" "}
-                <b style={{ color: NAVY }}>{((data.comparison.fiveYearReturn - data.existing.fiveYearReturn) * 100).toFixed(2)}%</b>{" "}
-                higher 5-year average return with an admin fee differential of{" "}
-                <b style={{ color: NAVY }}>{((data.comparison.adminFeePct - data.existing.adminFeePct) * 100).toFixed(2)}%</b>.</>
-            } />
+            <Note label="Observation">
+              The recommended portfolio delivers a{" "}
+              <b style={{ color: NAVY }}>{((data.comparison.fiveYearReturn - data.existing.fiveYearReturn) * 100).toFixed(2)}%</b>{" "}
+              higher 5-year average return with an admin fee differential of{" "}
+              <b style={{ color: NAVY }}>{((data.comparison.adminFeePct - data.existing.adminFeePct) * 100).toFixed(2)}%</b>.
+            </Note>
           </div>
         </div>
 
         <RunningFooter page={3} total={TOTAL_PAGES} date={today} />
       </Page>
 
-      {/* ═════ 04 · ACCUMULATION (kept — user liked this) ═════ */}
+      {/* ═════ 04 · ACCUMULATION ═════ */}
       <Page>
         <RunningHeader client={clientName} section="Accumulation Projection" />
-        <SectionMark n="III" kicker="Growth" title="Accumulation to Retirement" />
+        <SectionMark kicker="Growth" title="Accumulation to Retirement" />
 
         <div className="grid grid-cols-[2fr_1fr] gap-8">
           <div>
@@ -581,10 +551,10 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
             </div>
 
-            <Callout tone="gold" title="Key insight" body={
-              <>Over {yearsToRet} years, the {(data.comparison.fiveYearReturn * 100).toFixed(1)}% projected return
-                compounds into an additional <b style={{ color: NAVY }}>{fmtMoney(Math.abs(uplift))}</b> at retirement.</>
-            } />
+            <Note label="Key insight">
+              Over {yearsToRet} years, the {(data.comparison.fiveYearReturn * 100).toFixed(1)}% projected return
+              compounds into an additional <b style={{ color: NAVY }}>{fmtMoney(Math.abs(uplift))}</b> at retirement.
+            </Note>
 
             <div className="text-[10px] text-slate-600 leading-relaxed">
               <b style={{ color: NAVY }}>Assumptions.</b> Contributions include 12% SG plus personal
@@ -625,87 +595,98 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
         <RunningFooter page={4} total={TOTAL_PAGES} date={today} />
       </Page>
 
-      {/* ═════ 05 · RETIREMENT INCOME (redesigned, denser) ═════ */}
+      {/* ═════ 05 · RETIREMENT INCOME (denser, no empty space) ═════ */}
       <Page>
         <RunningHeader client={clientName} section="Retirement Income" />
-        <SectionMark n="IV" kicker="Retirement" title="Drawdown & Longevity" />
+        <SectionMark kicker="Retirement" title="Drawdown & Longevity" />
 
-        <div className="grid grid-cols-[2fr_1fr] gap-8">
-          <div>
-            <p className="text-[11.5px] leading-relaxed text-slate-700 mb-4">
-              Drawing <b style={{ color: NAVY }}>{fmtMoney(data.desiredIncomeAmount)}</b>{" "}
-              {data.desiredIncomeFrequency.toLowerCase()} (indexed at 2.5% p.a.) from age {data.retirementAge}.
-              The chart shows how each portfolio sustains that income across retirement.
-            </p>
+        <p className="text-[11.5px] leading-relaxed text-slate-700 mb-4 max-w-[170mm]">
+          Drawing <b style={{ color: NAVY }}>{fmtMoney(data.desiredIncomeAmount)}</b>{" "}
+          {data.desiredIncomeFrequency.toLowerCase()} (indexed at 2.5% p.a.) from age {data.retirementAge}.
+          The chart shows how each portfolio sustains that income across retirement.
+        </p>
 
-            <div style={{ height: 260 }}>
-              <ResponsiveContainer>
-                <LineChart data={wdSeries} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-                  <CartesianGrid stroke="#EEF2F7" vertical={false} />
-                  <XAxis dataKey="age" stroke={MUTE} tick={{ fontSize: 10 }} />
-                  <YAxis stroke={MUTE} tick={{ fontSize: 10 }} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip formatter={(v: number) => fmtMoney(v)} labelFormatter={(l) => `Age ${l}`} />
-                  <Legend wrapperStyle={{ fontSize: 10 }} iconType="circle" />
-                  <Line type="monotone" dataKey="Existing" stroke={EXISTING} strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="Recommended" stroke={GOLD} strokeWidth={2.5} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+        {/* Chart + longevity panel */}
+        <div className="grid grid-cols-[2fr_1fr] gap-6">
+          <div style={{ height: 260 }}>
+            <ResponsiveContainer>
+              <LineChart data={wdSeries} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
+                <CartesianGrid stroke="#EEF2F7" vertical={false} />
+                <XAxis dataKey="age" stroke={MUTE} tick={{ fontSize: 10 }} />
+                <YAxis stroke={MUTE} tick={{ fontSize: 10 }} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
+                <Tooltip formatter={(v: number) => fmtMoney(v)} labelFormatter={(l) => `Age ${l}`} />
+                <Legend wrapperStyle={{ fontSize: 10 }} iconType="circle" />
+                <Line type="monotone" dataKey="Existing" stroke={EXISTING} strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="Recommended" stroke={GOLD} strokeWidth={2.5} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
 
-          <aside className="space-y-4">
-            <div className="p-4" style={{ background: NAVY, color: "#F8FAFC" }}>
-              <div className="text-[9px] uppercase tracking-[0.3em]" style={{ color: GOLD_SOFT }}>Longevity</div>
-              <div className="mt-2 text-[10px]" style={{ color: "#CBD5E1" }}>Existing lasts to</div>
-              <div style={{ ...serif, fontSize: 22, color: "#F8FAFC" }}>
-                {ex.moneyNeverRunsOut ? "Age 100+" : `Age ${ex.ageMoneyLasts}`}
-              </div>
-              <div className="mt-3 pt-3 text-[10px]" style={{ color: "#CBD5E1", borderTop: `1px solid rgba(201,162,76,0.4)` }}>
-                Recommended lasts to
-              </div>
-              <div style={{ ...serif, fontSize: 22, color: GOLD_SOFT }}>
-                {cmp.moneyNeverRunsOut ? "Age 100+" : `Age ${cmp.ageMoneyLasts}`}
-              </div>
+          <div className="p-5" style={{ background: NAVY, color: "#F8FAFC" }}>
+            <div className="text-[9px] uppercase tracking-[0.3em]" style={{ color: GOLD_SOFT }}>Longevity</div>
+            <div className="mt-3 text-[10px]" style={{ color: "#CBD5E1" }}>Existing lasts to</div>
+            <div style={{ ...serif, fontSize: 26, color: "#F8FAFC", lineHeight: 1.1 }}>
+              {ex.moneyNeverRunsOut ? "Age 100+" : `Age ${ex.ageMoneyLasts}`}
             </div>
-
-            <Callout tone="gold" title="Lifetime income" body={
-              <>Recommended structure delivers <b style={{ color: NAVY }}>{fmtMoney(cmp.totalIncome)}</b>{" "}
-                across retirement, an additional <b style={{ color: NAVY }}>{fmtMoney(Math.abs(incomeUplift))}</b>{" "}
-                versus existing.</>
-            } />
-          </aside>
+            <div className="mt-4 pt-4 text-[10px]" style={{ color: "#CBD5E1", borderTop: `1px solid rgba(201,162,76,0.4)` }}>
+              Recommended lasts to
+            </div>
+            <div style={{ ...serif, fontSize: 26, color: GOLD_SOFT, lineHeight: 1.1 }}>
+              {cmp.moneyNeverRunsOut ? "Age 100+" : `Age ${cmp.ageMoneyLasts}`}
+            </div>
+            <div className="mt-5 pt-4 text-[10.5px] leading-relaxed" style={{ color: "#CBD5E1", borderTop: `1px solid rgba(201,162,76,0.4)` }}>
+              Recommended structure delivers <span style={{ color: GOLD_SOFT, fontWeight: 600 }}>{fmtMoney(cmp.totalIncome)}</span>{" "}
+              across retirement — an additional <span style={{ color: GOLD_SOFT, fontWeight: 600 }}>{fmtMoney(Math.abs(incomeUplift))}</span> versus existing.
+            </div>
+          </div>
         </div>
 
+        {/* Totals strip */}
         <div className="grid grid-cols-4 gap-5 mt-6 py-4"
           style={{ borderTop: `1px solid ${RULE}`, borderBottom: `1px solid ${RULE}` }}>
-          <Stat label="Existing lasts to" value={ex.moneyNeverRunsOut ? "100+" : `Age ${ex.ageMoneyLasts}`} tone="muted" />
-          <Stat label="Recommended lasts to" value={cmp.moneyNeverRunsOut ? "100+" : `Age ${cmp.ageMoneyLasts}`} />
           <Stat label="Existing total income" value={fmtMoney(ex.totalIncome)} tone="muted" />
           <Stat label="Recommended total income" value={fmtMoney(cmp.totalIncome)} tone="gold" />
+          <Stat label="Additional income" value={fmtMoney(Math.abs(incomeUplift))} />
+          <Stat label="Longevity gap"
+            value={
+              ex.moneyNeverRunsOut && cmp.moneyNeverRunsOut
+                ? "0 yrs"
+                : `${Math.max(0, (cmp.moneyNeverRunsOut ? 100 : cmp.ageMoneyLasts) - (ex.moneyNeverRunsOut ? 100 : ex.ageMoneyLasts))} yrs`
+            }
+            tone="gold" />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mt-6">
-          <Callout title="Longevity risk (existing)" body={
-            ex.moneyNeverRunsOut
-              ? <>Under current settings, the balance sustains withdrawals through age 100 with capital remaining.</>
-              : <>Capital depletes at age {ex.ageMoneyLasts}, exposing {clientName} to longevity risk should life expectancy exceed projections.</>
-          } />
-          <Callout tone="gold" title="Longevity outlook (recommended)" body={
-            cmp.moneyNeverRunsOut
-              ? <>The recommended portfolio maintains withdrawals through age 100 with meaningful capital preserved.</>
-              : <>Capital sustains until age {cmp.ageMoneyLasts}: {Math.max(0, cmp.ageMoneyLasts - ex.ageMoneyLasts)} additional years of funded retirement.</>
-          } />
+        {/* Editorial commentary — fills the bottom instead of leaving whitespace */}
+        <div className="grid grid-cols-2 gap-8 mt-6 flex-1">
+          <div>
+            <div className="text-[9px] uppercase tracking-[0.35em] font-semibold mb-2" style={{ color: MUTE }}>Longevity risk · Existing</div>
+            <div style={{ ...serif, color: NAVY }} className="text-[15px] font-semibold mb-2">The pattern to watch</div>
+            <p className="text-[11px] leading-relaxed" style={{ color: "#334155" }}>
+              {ex.moneyNeverRunsOut
+                ? <>Under current settings, the balance sustains withdrawals through age 100 with capital remaining. Continued monitoring is recommended as fee drag and market cycles will still influence long-term capacity.</>
+                : <>Capital depletes at <b style={{ color: NAVY }}>age {ex.ageMoneyLasts}</b>, exposing {clientName} to longevity risk should life expectancy exceed projections. Without structural change, drawdowns in the mid-70s onward would rely on the age pension or asset drawdown outside super.</>}
+            </p>
+          </div>
+          <div>
+            <div className="text-[9px] uppercase tracking-[0.35em] font-semibold mb-2" style={{ color: GOLD_DEEP }}>Longevity outlook · Recommended</div>
+            <div style={{ ...serif, color: NAVY }} className="text-[15px] font-semibold mb-2">The compounding effect</div>
+            <p className="text-[11px] leading-relaxed" style={{ color: "#334155" }}>
+              {cmp.moneyNeverRunsOut
+                ? <>The recommended portfolio maintains withdrawals through <b style={{ color: NAVY }}>age 100</b> with meaningful capital preserved, providing resilience against longevity risk and flexibility for legacy planning or aged-care funding.</>
+                : <>Capital sustains until <b style={{ color: NAVY }}>age {cmp.ageMoneyLasts}</b>, extending funded retirement by {Math.max(0, cmp.ageMoneyLasts - ex.ageMoneyLasts)} additional years compared to the existing arrangement.</>}
+            </p>
+          </div>
         </div>
 
         <RunningFooter page={5} total={TOTAL_PAGES} date={today} />
       </Page>
 
-      {/* ═════ 06 · INSURANCE, FEES & CLOSE (kept — user liked this) ═════ */}
+      {/* ═════ 06 · INSURANCE, FEES, NOTES & CLOSE ═════ */}
       <Page>
-        <RunningHeader client={clientName} section="Insurance & Fees" />
-        <SectionMark n="V" kicker="Protection" title="Insurance Comparison" />
+        <RunningHeader client={clientName} section="Insurance, Fees & Notes" />
+        <SectionMark kicker="Protection" title="Insurance Comparison" />
 
-        <table className="w-full border-collapse mb-8">
+        <table className="w-full border-collapse mb-7">
           <TableHead />
           <tbody>
             <Row label="Provider" existing={data.existingInsurance.provider || "Not stated"} comparison={data.comparisonInsurance.provider || "Not stated"} />
@@ -720,32 +701,35 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
           </tbody>
         </table>
 
-        <SectionMark n="VI" kicker="Advice" title="Fees Summary" />
-        <div className="grid grid-cols-[3fr_2fr] gap-6">
-          <table className="w-full border-collapse">
-            <TableHead />
-            <tbody>
-              <Row label="Advice / implementation (one-off)" existing="n/a" comparison={fmtMoney(data.fees.adviceFeeFlat)} />
-              <Row label="Annual advice fee %" existing="n/a" comparison={fmtPct(data.fees.annualAdvicePct, 2)} />
-              <Row label="Annual advice fee cap" existing="n/a" comparison={fmtMoney(data.fees.annualFeeCap)} />
-              <Row label="Effective annual advice fee (yr 1)" existing={fmtMoney(exAdvice)} comparison={fmtMoney(cmpAdvice)} highlight />
-            </tbody>
-          </table>
+        <SectionMark kicker="Advice" title="Fees Summary" />
+        <table className="w-full border-collapse mb-7">
+          <TableHead />
+          <tbody>
+            <Row label="Advice / implementation (one-off)" existing="n/a" comparison={fmtMoney(data.fees.adviceFeeFlat)} />
+            <Row label="Annual advice fee %" existing="n/a" comparison={fmtPct(data.fees.annualAdvicePct, 2)} />
+            <Row label="Annual advice fee cap" existing="n/a" comparison={fmtMoney(data.fees.annualFeeCap)} />
+            <Row label="Effective annual advice fee (yr 1)" existing={fmtMoney(exAdvice)} comparison={fmtMoney(cmpAdvice)} highlight />
+          </tbody>
+        </table>
 
+        {/* Research & Adviser Notes — proper section */}
+        <SectionMark kicker="Adviser" title="Research & Notes" />
+        <div className="p-5 mb-6" style={{ background: "#F8FAFC", borderLeft: `3px solid ${GOLD}` }}>
           {data.researchNotes ? (
-            <Callout title="Research & Notes" body={<span className="whitespace-pre-wrap">{data.researchNotes}</span>} />
+            <p className="text-[11.5px] leading-relaxed whitespace-pre-wrap" style={{ color: "#1E293B" }}>
+              {data.researchNotes}
+            </p>
           ) : (
-            <Callout tone="gold" title="Value in advice" body={
-              <>Even after fees, the recommended structure is projected to deliver{" "}
-                <b style={{ color: NAVY }}>{fmtMoney(Math.abs(incomeUplift))}</b>{" "}
-                of additional lifetime retirement income.</>
-            } />
+            <p className="text-[11px] italic" style={{ color: MUTE }}>
+              Adviser research notes will appear here. Add commentary from the client data form to
+              record the rationale, product research, and any strategy-specific considerations.
+            </p>
           )}
         </div>
 
         {/* SIGN-OFF */}
-        <div className="mt-8 p-6" style={{ background: NAVY_INK, color: "#F8FAFC", borderTop: `2px solid ${GOLD}` }}>
-          <div className="flex items-center justify-between">
+        <div className="p-6" style={{ background: NAVY_INK, color: "#F8FAFC", borderTop: `2px solid ${GOLD}` }}>
+          <div className="flex items-center justify-between gap-6">
             <div>
               <div className="text-[9px] uppercase tracking-[0.35em]" style={{ color: GOLD_SOFT }}>Prepared with care for</div>
               <div style={{ ...serif }} className="text-[22px] mt-1">{clientName}</div>
@@ -754,15 +738,14 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
             </div>
             <div className="text-right">
-              <Monogram size={34} />
-              <div className="text-[9px] uppercase tracking-[0.35em] mt-2" style={{ color: GOLD_SOFT }}>{FIRM.name}</div>
-              <div className="text-[9px] mt-1" style={{ color: "#CBD5E1" }}>{FIRM.phone}</div>
+              <img src={logoLight} alt={FIRM.name} style={{ height: 30, width: "auto", marginLeft: "auto" }} />
+              <div className="text-[9px] mt-2" style={{ color: "#CBD5E1" }}>{FIRM.phone}</div>
             </div>
           </div>
         </div>
 
         {/* Disclaimer */}
-        <div className="mt-5 text-[8.5px] leading-relaxed" style={{ color: MUTE }}>
+        <div className="mt-4 text-[8.5px] leading-relaxed" style={{ color: MUTE }}>
           <p className="mb-1.5">
             <span style={{ color: NAVY, fontWeight: 600 }}>Methodology.</span> Projections use the
             same calculation engine as our Super Health Check: employer SG at 12% (contributions tax 15%),
@@ -775,9 +758,8 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             nature. It does not take into account your personal objectives, financial situation or needs.
             Before acting on any recommendation, consider its appropriateness to your circumstances and
             read the relevant Product Disclosure Statement (PDS) and Target Market Determination (TMD).
-            Past performance is not indicative of future performance. Where insurance replacement is
-            recommended, existing cover should not be cancelled until replacement cover has been formally
-            accepted by the new insurer.
+            Where insurance replacement is recommended, existing cover should not be cancelled until
+            replacement cover has been formally accepted by the new insurer.
           </p>
           <p>
             <span style={{ color: NAVY, fontWeight: 600 }}>Confidentiality.</span> This document is
