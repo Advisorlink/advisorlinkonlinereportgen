@@ -482,7 +482,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-[10.5px]" style={{ color: MUTE }}>Target progress</div>
                   <div className="text-[11px] font-semibold" style={{ color: GOLD_DEEP }}>
-                    {data.goalBalance > 0 ? `${((cmp.projectedBalance / data.goalBalance) * 100).toFixed(1)}%` : ","}
+                    {data.goalBalance > 0 ? `${((cmp.projectedBalance / data.goalBalance) * 100).toFixed(1)}%` : "-"}
                   </div>
                 </div>
                 <ProgressBar pct={data.goalBalance > 0 ? (cmp.projectedBalance / data.goalBalance) * 100 : 0} />
