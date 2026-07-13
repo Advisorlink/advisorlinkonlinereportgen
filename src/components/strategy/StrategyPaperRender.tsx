@@ -54,7 +54,7 @@ interface Props {
   data: StrategyPaperData;
 }
 
-/* Brand palette — deep navy + warm yellow gold */
+/* Brand palette , deep navy + warm yellow gold */
 const NAVY = "#0A1F4D";
 const NAVY_DEEP = "#050F2E";
 const NAVY_INK = "#081733";
@@ -239,7 +239,7 @@ function Card({ children, className = "", style, tone = "light" }:
   );
 }
 
-// Small stat pill (label / value / underline / sub) — aligned via fixed row heights
+// Small stat pill (label / value / underline / sub) , aligned via fixed row heights
 function MiniStat({ label, value, sub, accent = "navy" }:
   { label: string; value: React.ReactNode; sub?: React.ReactNode; accent?: "navy" | "gold" | "white" }) {
   const color = accent === "gold" ? GOLD_DEEP : accent === "white" ? "#FFFFFF" : NAVY;
@@ -312,7 +312,7 @@ function Stat({ label, value, sub, tone = "navy" }:
   );
 }
 
-/* Refined note — minimal, editorial. */
+/* Refined note , minimal, editorial. */
 function Note({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="py-3" style={{ borderTop: `1px solid ${RULE}` }}>
@@ -385,7 +385,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
         <div className="relative flex flex-col justify-between"
           style={{ minHeight: "297mm", padding: "22mm 24mm", color: "#F8FAFC" }}>
 
-          {/* HEADER — horizontal logo, no white box */}
+          {/* HEADER , horizontal logo, no white box */}
           <div className="flex items-start justify-between">
             <GoldLogo height={44} color={GOLD} />
             <div className="text-right">
@@ -482,7 +482,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-[10.5px]" style={{ color: MUTE }}>Target progress</div>
                   <div className="text-[11px] font-semibold" style={{ color: GOLD_DEEP }}>
-                    {data.goalBalance > 0 ? `${((cmp.projectedBalance / data.goalBalance) * 100).toFixed(1)}%` : "—"}
+                    {data.goalBalance > 0 ? `${((cmp.projectedBalance / data.goalBalance) * 100).toFixed(1)}%` : ","}
                   </div>
                 </div>
                 <ProgressBar pct={data.goalBalance > 0 ? (cmp.projectedBalance / data.goalBalance) * 100 : 0} />
@@ -558,8 +558,8 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               <KVRow label="Investment option" value={data.existing.modelLabel} />
               <KVRow label="Risk profile" value={data.existing.riskProfile} />
               <KVRow label="5-year net return" value={fmtPct(data.existing.fiveYearReturn, 2)} />
-              <KVRow label="Admin fee — flat" value={fmtMoney(data.existing.adminFeeFlat)} />
-              <KVRow label="Admin fee — % of balance" value={fmtPct(data.existing.adminFeePct, 2)} last />
+              <KVRow label="Admin fee , flat" value={fmtMoney(data.existing.adminFeeFlat)} />
+              <KVRow label="Admin fee , % of balance" value={fmtPct(data.existing.adminFeePct, 2)} last />
               <div className="mt-4 p-3" style={{ background: "#F8FAFC", borderRadius: 8 }}>
                 <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>
                   Projected at age {data.retirementAge}
@@ -581,11 +581,11 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
               <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>One-off advice fee</div>
               <div className="mt-1 mb-3 text-[11px]" style={{ color: "#F1F5F9" }}>
-                <b style={{ color: "#FFFFFF" }}>{fmtMoney(data.fees.adviceFeeFlat)}</b> — once off payment from super
+                <b style={{ color: "#FFFFFF" }}>{fmtMoney(data.fees.adviceFeeFlat)}</b> , once off payment from super
               </div>
               <div className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>Ongoing advisory fee</div>
               <div className="mt-1 mb-3 text-[11px]" style={{ color: "#F1F5F9" }}>
-                <b style={{ color: "#FFFFFF" }}>{fmtPct(data.fees.annualAdvicePct, 2)} p.a.</b> — capped at {fmtMoney(data.fees.annualFeeCap)}
+                <b style={{ color: "#FFFFFF" }}>{fmtPct(data.fees.annualAdvicePct, 2)} p.a.</b> , capped at {fmtMoney(data.fees.annualFeeCap)}
               </div>
               <div className="mt-4 p-3" style={{ background: "rgba(232,184,64,0.15)", border: `1px solid ${GOLD}`, borderRadius: 8 }}>
                 <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: GOLD_SOFT }}>
@@ -783,7 +783,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
 
           <div className="grid grid-cols-2 gap-3 mb-4">
             <Card tone="navy">
-              <CardTitle icon="dot" onDark>Income sustainability — current</CardTitle>
+              <CardTitle icon="dot" onDark>Income sustainability , current</CardTitle>
               <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Money lasts to age</div>
               <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: "#FFFFFF", fontSize: 34, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 {ex.moneyNeverRunsOut ? "100+" : ex.ageMoneyLasts}
@@ -793,7 +793,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
               </div>
             </Card>
             <Card tone="navy">
-              <CardTitle icon="dot" onDark>Income sustainability — comparison</CardTitle>
+              <CardTitle icon="dot" onDark>Income sustainability , comparison</CardTitle>
               <div className="text-[9px] uppercase tracking-[0.28em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Money lasts to age</div>
               <div className="mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", color: GOLD_SOFT, fontSize: 34, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
                 {cmp.moneyNeverRunsOut ? "100+" : cmp.ageMoneyLasts}
@@ -882,7 +882,7 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
           </tbody>
         </table>
 
-        {/* Research & Adviser Notes — proper section */}
+        {/* Research & Adviser Notes , proper section */}
         <SectionMark kicker="Adviser" title="Research & Notes" />
         <div className="p-5 mb-6" style={{ background: "#F8FAFC", borderLeft: `3px solid ${GOLD}` }}>
           {data.researchNotes ? (

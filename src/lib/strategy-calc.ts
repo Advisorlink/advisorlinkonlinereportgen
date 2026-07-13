@@ -71,7 +71,7 @@ export interface StrategyPaperData {
   aiCompoundingRecommended?: string;
 }
 
-// Growth assets % per risk profile — used to feed the calc engine so the
+// Growth assets % per risk profile , used to feed the calc engine so the
 // dip-year mechanics and profile lookups behave correctly.
 export function growthAssetsForProfile(p: RiskProfile): number {
   switch (p) {

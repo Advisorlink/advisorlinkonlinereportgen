@@ -25,7 +25,7 @@ const SAMPLE_STRATEGY: StrategyPaperData = {
   desiredIncomeFrequency: "Annually",
   goalBalance: 1200000,
   existing: {
-    fundName: "AustralianSuper — Balanced",
+    fundName: "AustralianSuper , Balanced",
     superBalance: 285000,
     modelLabel: "Balanced (Default)",
     riskProfile: "Balanced",
@@ -37,7 +37,7 @@ const SAMPLE_STRATEGY: StrategyPaperData = {
   },
   comparison: {
     ...firmModelDefaults("Growth"),
-    fundName: "HUB24 — Firm Growth Model",
+    fundName: "HUB24 , Firm Growth Model",
     superBalance: 285000,
   },
   existingInsurance: {
@@ -68,7 +68,7 @@ const SAMPLE_STRATEGY: StrategyPaperData = {
     annualFeeCap: 5000,
   },
   researchNotes:
-    "Recommendation based on firm growth model portfolio research (Nov 2025). The client's existing balanced default option carries a higher admin fee load and lower 5-yr average return than the firm's HUB24 growth model. Insurance uplifted to reflect mortgage obligations and dependants — moving from Indemnity to Agreed Value IP with To Age 65 benefit period materially improves protection quality.",
+    "Recommendation based on firm growth model portfolio research (Nov 2025). The client's existing balanced default option carries a higher admin fee load and lower 5-yr average return than the firm's HUB24 growth model. Insurance uplifted to reflect mortgage obligations and dependants , moving from Indemnity to Agreed Value IP with To Age 65 benefit period materially improves protection quality.",
 };
 
 
