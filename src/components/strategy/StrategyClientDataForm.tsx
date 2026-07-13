@@ -8,6 +8,7 @@ import {
   type StrategyScenario,
   type StrategyInsurance,
   firmModelDefaults,
+  ageFromDob,
 } from "@/lib/strategy-calc";
 import type { RiskProfile, IncomeFrequency } from "@/lib/calc";
 
