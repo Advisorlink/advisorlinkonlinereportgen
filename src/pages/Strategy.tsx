@@ -82,7 +82,6 @@ export default function Strategy() {
     } catch { /* ignore */ }
     return DEFAULT_STRATEGY;
   });
-  const [tab, setTab] = useState("client");
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [paperId, setPaperId] = useState<string | null>(null);
