@@ -23,18 +23,19 @@ import {
   Area,
 } from "recharts";
 import coverImg from "@/assets/strategy-cover.jpg";
-import logoLightAsset from "@/assets/finance-direct-logo-custom.png.asset.json";
+import logoLightAsset from "@/assets/finance-direct-logo-v2.png.asset.json";
 const logoUrl = logoLightAsset.url;
+// Aspect ratio of the source PNG: 1600 x 544 => ~2.94:1
+const LOGO_ASPECT = 2.94;
 
 // Renders the transparent Finance Direct logo tinted to any solid color via CSS mask.
-// Aspect ratio of the source PNG is ~4.22:1.
 function GoldLogo({ height, color }: { height: number; color: string }) {
   return (
     <div
       aria-label="Finance Direct"
       style={{
         height,
-        width: height * 4.22,
+        width: height * LOGO_ASPECT,
         backgroundColor: color,
         WebkitMaskImage: `url(${logoUrl})`,
         maskImage: `url(${logoUrl})`,
