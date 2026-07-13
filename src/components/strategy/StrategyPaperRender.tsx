@@ -23,18 +23,19 @@ import {
   Area,
 } from "recharts";
 import coverImg from "@/assets/strategy-cover.jpg";
-import logoLightAsset from "@/assets/finance-direct-logo-custom.png.asset.json";
+import logoLightAsset from "@/assets/finance-direct-logo-v2.png.asset.json";
 const logoUrl = logoLightAsset.url;
+// Aspect ratio of the source PNG: 1600 x 544 => ~2.94:1
+const LOGO_ASPECT = 2.94;
 
 // Renders the transparent Finance Direct logo tinted to any solid color via CSS mask.
-// Aspect ratio of the source PNG is ~4.22:1.
 function GoldLogo({ height, color }: { height: number; color: string }) {
   return (
     <div
       aria-label="Finance Direct"
       style={{
         height,
-        width: height * 4.22,
+        width: height * LOGO_ASPECT,
         backgroundColor: color,
         WebkitMaskImage: `url(${logoUrl})`,
         maskImage: `url(${logoUrl})`,
@@ -380,6 +381,14 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
                 and retirees across Australia. Every recommendation is modelled, benchmarked
                 and stress-tested against long-run capital market assumptions.
               </p>
+              <div className="mt-3 pt-3 space-y-1 text-[9.5px]" style={{ color: "#475569", borderTop: `1px solid ${RULE}` }}>
+                <div className="flex justify-between"><span style={{ color: MUTE }}>Legal name</span><span style={{ color: NAVY, fontWeight: 500 }}>{FIRM.legal}</span></div>
+                <div className="flex justify-between"><span style={{ color: MUTE }}>AFSL</span><span style={{ color: NAVY, fontWeight: 500 }}>{FIRM.afsl}</span></div>
+                <div className="flex justify-between"><span style={{ color: MUTE }}>ABN</span><span style={{ color: NAVY, fontWeight: 500 }}>{FIRM.abn}</span></div>
+                <div className="flex justify-between"><span style={{ color: MUTE }}>Phone</span><span style={{ color: NAVY, fontWeight: 500 }}>{FIRM.phone}</span></div>
+                <div className="flex justify-between"><span style={{ color: MUTE }}>Email</span><span style={{ color: NAVY, fontWeight: 500 }}>{FIRM.email}</span></div>
+                <div className="flex justify-between"><span style={{ color: MUTE }}>Web</span><span style={{ color: NAVY, fontWeight: 500 }}>{FIRM.web}</span></div>
+              </div>
             </div>
           </aside>
 
@@ -527,10 +536,14 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </div>
 
             <Note label="Observation">
-              The recommended portfolio delivers a{" "}
-              <b style={{ color: NAVY }}>{((data.comparison.fiveYearReturn - data.existing.fiveYearReturn) * 100).toFixed(2)}%</b>{" "}
-              higher 5-year average return with an admin fee differential of{" "}
-              <b style={{ color: NAVY }}>{((data.comparison.adminFeePct - data.existing.adminFeePct) * 100).toFixed(2)}%</b>.
+              {data.aiObservation ? (
+                <span>{data.aiObservation}</span>
+              ) : (
+                <>The recommended portfolio delivers a{" "}
+                <b style={{ color: NAVY }}>{((data.comparison.fiveYearReturn - data.existing.fiveYearReturn) * 100).toFixed(2)}%</b>{" "}
+                higher 5-year average return with an admin fee differential of{" "}
+                <b style={{ color: NAVY }}>{((data.comparison.adminFeePct - data.existing.adminFeePct) * 100).toFixed(2)}%</b>.</>
+              )}
             </Note>
           </div>
         </div>
@@ -587,8 +600,12 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             </div>
 
             <Note label="Key insight">
-              Over {yearsToRet} years, the {(data.comparison.fiveYearReturn * 100).toFixed(1)}% projected return
-              compounds into an additional <b style={{ color: NAVY }}>{fmtMoney(Math.abs(uplift))}</b> at retirement.
+              {data.aiKeyInsight ? (
+                <span>{data.aiKeyInsight}</span>
+              ) : (
+                <>Over {yearsToRet} years, the {(data.comparison.fiveYearReturn * 100).toFixed(1)}% projected return
+                compounds into an additional <b style={{ color: NAVY }}>{fmtMoney(Math.abs(uplift))}</b> at retirement.</>
+              )}
             </Note>
 
             <div className="text-[10px] text-slate-600 leading-relaxed">
@@ -697,7 +714,9 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             <div className="text-[9px] uppercase tracking-[0.35em] font-semibold mb-2" style={{ color: MUTE }}>Longevity risk · Existing</div>
             <div style={{ ...serif, color: NAVY }} className="text-[15px] font-semibold mb-2">The pattern to watch</div>
             <p className="text-[11px] leading-relaxed" style={{ color: "#334155" }}>
-              {ex.moneyNeverRunsOut
+              {data.aiPatternExisting ? (
+                data.aiPatternExisting
+              ) : ex.moneyNeverRunsOut
                 ? <>Under current settings, the balance sustains withdrawals through age 100 with capital remaining. Continued monitoring is recommended as fee drag and market cycles will still influence long-term capacity.</>
                 : <>Capital depletes at <b style={{ color: NAVY }}>age {ex.ageMoneyLasts}</b>, exposing {clientName} to longevity risk should life expectancy exceed projections. Without structural change, drawdowns in the mid-70s onward would rely on the age pension or asset drawdown outside super.</>}
             </p>
@@ -706,7 +725,9 @@ export const StrategyPaperRender = forwardRef<HTMLDivElement, Props>(function St
             <div className="text-[9px] uppercase tracking-[0.35em] font-semibold mb-2" style={{ color: GOLD_DEEP }}>Longevity outlook · Recommended</div>
             <div style={{ ...serif, color: NAVY }} className="text-[15px] font-semibold mb-2">The compounding effect</div>
             <p className="text-[11px] leading-relaxed" style={{ color: "#334155" }}>
-              {cmp.moneyNeverRunsOut
+              {data.aiCompoundingRecommended ? (
+                data.aiCompoundingRecommended
+              ) : cmp.moneyNeverRunsOut
                 ? <>The recommended portfolio maintains withdrawals through <b style={{ color: NAVY }}>age 100</b> with meaningful capital preserved, providing resilience against longevity risk and flexibility for legacy planning or aged-care funding.</>
                 : <>Capital sustains until <b style={{ color: NAVY }}>age {cmp.ageMoneyLasts}</b>, extending funded retirement by {Math.max(0, cmp.ageMoneyLasts - ex.ageMoneyLasts)} additional years compared to the existing arrangement.</>}
             </p>

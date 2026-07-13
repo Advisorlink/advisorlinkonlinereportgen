@@ -63,6 +63,12 @@ export interface StrategyPaperData {
   comparisonInsurance: StrategyInsurance;
   fees: StrategyFees;
   researchNotes: string;
+  // AI-generated narrative fields (all optional; renderer falls back to
+  // sensible boilerplate when empty). Populate them via the "AI Notes" button.
+  aiObservation?: string;
+  aiKeyInsight?: string;
+  aiPatternExisting?: string;
+  aiCompoundingRecommended?: string;
 }
 
 // Growth assets % per risk profile — used to feed the calc engine so the
