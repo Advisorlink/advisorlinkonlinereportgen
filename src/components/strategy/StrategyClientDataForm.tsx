@@ -251,7 +251,7 @@ export function StrategyClientDataForm({ value, onChange }: Props) {
       {/* Personal */}
       <Card>
         <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold uppercase tracking-wide">Personal</CardTitle></CardHeader>
-        <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <CardContent className="grid grid-cols-2 gap-3">
           <Field label="Client name">
             <Input value={value.clientName} onChange={(e) => patch({ clientName: e.target.value })} placeholder="John Smith" />
           </Field>
