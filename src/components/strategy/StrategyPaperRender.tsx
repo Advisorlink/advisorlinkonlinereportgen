@@ -24,8 +24,30 @@ import {
 } from "recharts";
 import coverImg from "@/assets/strategy-cover.jpg";
 import logoLightAsset from "@/assets/finance-direct-logo-official.png.asset.json";
-import logoDark from "@/assets/finance-direct-logo-dark.png";
-const logoLight = logoLightAsset.url;
+const logoUrl = logoLightAsset.url;
+
+// Renders the transparent Finance Direct logo tinted to any solid color via CSS mask.
+// Aspect ratio of the source PNG is ~4.22:1.
+function GoldLogo({ height, color }: { height: number; color: string }) {
+  return (
+    <div
+      aria-label="Finance Direct"
+      style={{
+        height,
+        width: height * 4.22,
+        backgroundColor: color,
+        WebkitMaskImage: `url(${logoUrl})`,
+        maskImage: `url(${logoUrl})`,
+        WebkitMaskRepeat: "no-repeat",
+        maskRepeat: "no-repeat",
+        WebkitMaskSize: "contain",
+        maskSize: "contain",
+        WebkitMaskPosition: "left center",
+        maskPosition: "left center",
+      }}
+    />
+  );
+}
 
 interface Props {
   data: StrategyPaperData;
@@ -85,7 +107,7 @@ function Page({
 function RunningHeader({ client, section }: { client: string; section: string }) {
   return (
     <div className="flex items-center justify-between pb-3 mb-5" style={{ borderBottom: `1px solid ${RULE}` }}>
-      <img src={logoDark} alt={FIRM.name} style={{ height: 22, width: "auto" }} />
+      <GoldLogo height={22} color={GOLD} />
       <div className="flex items-center gap-3 text-[9px] uppercase tracking-[0.3em]" style={{ color: MUTE }}>
         <span>{client || "Client"}</span>
         <span style={{ color: GOLD }}>·</span>
