@@ -239,19 +239,21 @@ function Card({ children, className = "", style, tone = "light" }:
   );
 }
 
-// Small stat pill (label / value / underline / sub)
+// Small stat pill (label / value / underline / sub) — aligned via fixed row heights
 function MiniStat({ label, value, sub, accent = "navy" }:
-  { label: string; value: React.ReactNode; sub?: React.ReactNode; accent?: "navy" | "gold" }) {
-  const color = accent === "gold" ? GOLD_DEEP : NAVY;
-  const underline = accent === "gold" ? GOLD : NAVY;
+  { label: string; value: React.ReactNode; sub?: React.ReactNode; accent?: "navy" | "gold" | "white" }) {
+  const color = accent === "gold" ? GOLD_DEEP : accent === "white" ? "#FFFFFF" : NAVY;
+  const underline = accent === "gold" ? GOLD : accent === "white" ? GOLD : NAVY;
+  const labelColor = accent === "white" ? "rgba(255,255,255,0.7)" : MUTE;
+  const subColor = accent === "white" ? "rgba(255,255,255,0.75)" : MUTE;
   return (
-    <div className="flex flex-col">
-      <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: MUTE }}>{label}</div>
-      <div className="mt-2" style={{ ...serif, fontSize: 24, fontWeight: 600, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+    <div className="flex flex-col" style={{ minHeight: 78 }}>
+      <div className="text-[8.5px] uppercase tracking-[0.28em] font-semibold" style={{ color: labelColor, minHeight: 22, lineHeight: "11px" }}>{label}</div>
+      <div style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 22, fontWeight: 700, color, lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em", minHeight: 22 }}>
         {value}
       </div>
-      <div style={{ height: 2, width: 22, background: underline, marginTop: 6, borderRadius: 2, opacity: 0.6 }} />
-      {sub && <div className="text-[9.5px] mt-1.5" style={{ color: MUTE }}>{sub}</div>}
+      <div style={{ height: 2, width: 22, background: underline, marginTop: 6, borderRadius: 2, opacity: 0.7 }} />
+      <div className="text-[9.5px] mt-1.5" style={{ color: subColor, minHeight: 12 }}>{sub || "\u00A0"}</div>
     </div>
   );
 }
