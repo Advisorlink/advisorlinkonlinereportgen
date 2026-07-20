@@ -732,9 +732,20 @@ export function IncomePage({ s }: { s: ReportSummary }) {
     <PageShell>
       <PageHeader pageLabel="RETIREMENT INCOME" />
       <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Retirement income view</h2>
-      <p className="text-sm text-muted-foreground mt-1 mb-5">
+      <p className="text-sm text-muted-foreground mt-1 mb-4">
         How long will your money potentially last when you need it the most?
       </p>
+
+      <div className="mb-5 rounded-xl border-2 border-amber-500/70 bg-amber-50 px-5 py-4 shadow-[0_4px_18px_-6px_rgba(180,120,20,0.35)]">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-white text-xs font-bold">!</span>
+          <div className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-amber-900">Important disclaimer</div>
+        </div>
+        <p className="text-[12px] leading-relaxed text-amber-950 font-medium">
+          This projection <strong>does not account for</strong> any Age Pension or other government entitlements, any additional income streams you may have, real-world market corrections, or the ongoing benefit of continuing to receive advice services to keep the strategy on track. Figures are <strong>illustrative only</strong> and are not a guarantee of future income.
+        </p>
+      </div>
+
 
       <div className="grid grid-cols-2 gap-3 mb-5">
         <KpiCard label="Starting Balance" value={fmtMoney(s.projectedExisting)} sub={`Projected at retirement (age ${s.retirementAge})`} />
