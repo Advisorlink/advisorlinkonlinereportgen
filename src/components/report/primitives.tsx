@@ -3,7 +3,8 @@ import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Legend,
 } from "recharts";
-import logoUrl from "@/assets/logo.svg";
+import logoAsset from "@/assets/settled-and-sound-logo.png.asset.json";
+const logoUrl = logoAsset.url;
 
 export function PageShell({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn("report-page", className)}>{children}</div>;
@@ -26,8 +27,8 @@ export function PageHeader({ pageLabel = "SUPERANNUATION REPORT", flush = false 
       <div className="relative flex items-center justify-between gap-4">
         <img
           src={logoUrl}
-          alt="Advisor Link Online"
-          className="h-8 w-auto"
+          alt="Settled & Sound"
+          className="h-9 w-auto"
         />
       </div>
     </header>
@@ -37,7 +38,7 @@ export function PageHeader({ pageLabel = "SUPERANNUATION REPORT", flush = false 
 export function PageFooter() {
   return (
     <footer className="mt-auto pt-8 text-center text-[10px] text-muted-foreground">
-      Advisor Link Online · Superannuation education and financial adviser referrals
+      Settled &amp; Sound · Superannuation education and financial adviser referrals
     </footer>
   );
 }

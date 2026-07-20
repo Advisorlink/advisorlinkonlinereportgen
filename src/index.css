@@ -31,13 +31,13 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 32% 14%;
 
-    /* Brand: deep navy + bright cyan */
-    --navy: 215 60% 12%;
+    /* Brand: Settled & Sound - deep navy + teal */
+    --navy: 214 70% 18%;
     --navy-foreground: 0 0% 100%;
-    --cyan: 192 90% 50%;
+    --cyan: 172 78% 42%;
     --cyan-foreground: 0 0% 100%;
-    --cyan-glow: 192 90% 60%;
-    --accent-online: 160 70% 45%;
+    --cyan-glow: 172 78% 52%;
+    --accent-online: 172 78% 42%;
 
     --primary: 215 60% 12%;
     --primary-foreground: 0 0% 100%;
@@ -80,13 +80,13 @@
     --popover: 218 42% 11%;
     --popover-foreground: 210 40% 98%;
 
-    /* Brand stays vibrant in dark */
-    --navy: 215 60% 8%;
+    /* Brand stays vibrant in dark - Settled & Sound */
+    --navy: 214 70% 10%;
     --navy-foreground: 0 0% 100%;
-    --cyan: 188 95% 55%;
+    --cyan: 172 78% 50%;
     --cyan-foreground: 220 45% 6%;
-    --cyan-glow: 188 95% 65%;
-    --accent-online: 160 75% 50%;
+    --cyan-glow: 172 78% 60%;
+    --accent-online: 172 78% 50%;
 
     --primary: 188 95% 55%;
     --primary-foreground: 220 45% 6%;
