@@ -169,7 +169,7 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
   ];
   const steps = [
     { n: "01", title: "You decide", body: "Reading this report places you under no obligation. The introduction is entirely optional." },
-    { n: "02", title: "We match", body: "We hand-pick a licensed adviser from our network who fits your situation." },
+    { n: "02", title: "We match", body: "We hand-pick one of our licensed advisers who fits your situation." },
     { n: "03", title: "They advise", body: "Your adviser provides personal advice, prepares a Statement of Advice and can action it for you." },
   ];
   const restrictions = [
