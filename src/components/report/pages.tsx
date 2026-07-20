@@ -279,7 +279,7 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
             },
             {
               q: "What happens next?",
-              a: "If you would like to explore your options, we can introduce you to a licensed adviser in our network at no extra cost to you.",
+              a: "If you would like to explore your options, one of our licensed advisers can contact you at no extra cost to you.",
             },
             {
               q: "Are the numbers guaranteed?",
