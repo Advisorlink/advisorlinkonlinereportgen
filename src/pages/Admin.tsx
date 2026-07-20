@@ -279,7 +279,7 @@ export default function Admin() {
       ...prev,
       body: getTemplateBody(templateKey, prev.report!),
       subject: isReferral
-        ? "Get a $100 Gift Card - Referral Offer"
+        ? "Get a $100 Gift Card - Gift Card Offer"
         : isStandard
           ? "Your Free Superannuation Report"
           : "Superannuation Report",
