@@ -676,7 +676,6 @@ export default function Admin() {
               <FundsPage s={summary} />
               <IncomePage s={summary} />
               <ImprovementSummaryPage s={summary} />
-              <WhatsNextPage s={summary} />
               <WhatYouMayNotKnowPage s={summary} />
             </div>
           </div>
@@ -720,7 +719,6 @@ export default function Admin() {
                 <FundsPage s={summary} />
                 <IncomePage s={summary} />
                 <ImprovementSummaryPage s={summary} />
-                <WhatsNextPage s={summary} />
                 <WhatYouMayNotKnowPage s={summary} />
               </div>
             </div>
