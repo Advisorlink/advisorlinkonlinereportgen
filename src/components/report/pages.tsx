@@ -55,15 +55,14 @@ export function CoverPage({ s }: { s: ReportSummary }) {
           alt="Happy couple enjoying retirement by the coast"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Soft dark gradient for legibility while keeping the photo as the hero */}
+        {/* Slight dark gradient for legibility without overpowering the photo */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to top, rgba(15,23,42,0.78) 0%, rgba(15,23,42,0.38) 40%, rgba(15,23,42,0.12) 70%, rgba(15,23,42,0.04) 100%)",
+              "linear-gradient(to top, rgba(15,23,42,0.55) 0%, rgba(15,23,42,0.22) 45%, rgba(15,23,42,0.06) 75%, transparent 100%)",
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-navy/20 via-transparent to-cyan/10 pointer-events-none" />
 
         <div className="relative flex items-start justify-between gap-4 text-base">
           <img src={logoUrl} alt="Settled & Sound" className="h-7 w-auto" />
