@@ -647,15 +647,6 @@ export function ProjectionPage({ s }: { s: ReportSummary }) {
         </div>
       </div>
 
-      {/* Disclaimer: the comparison is current + 2.5% */}
-      <div className="mb-3 rounded-xl border border-cyan/30 bg-cyan/5 px-4 py-3">
-        <p className="text-[11px] leading-relaxed text-foreground">
-          <strong className="text-navy">Illustration only:</strong>{" "}
-          It is very common to see at least an additional <strong>2.5%</strong> increase in net return with the right advice.
-          The comparison figures below show what an extra 2.5% per year could mean for your balance at retirement,
-          keeping the same risk profile and contribution pattern. Past performance is not indicative of future performance.
-        </p>
-      </div>
 
       <div className="grid grid-cols-3 gap-3 mb-5">
         <KpiCard label="Current Balance" value={fmtMoney(s.startingBalance)} sub="Today" />
