@@ -15,6 +15,7 @@ import {
   FeeRow, FeeTableHeader, Disclaimer,
 } from "./primitives";
 import riskIllustration from "@/assets/risk-illustration.jpg";
+import coverCouple from "@/assets/cover-happy-couple.jpg";
 import logoAsset from "@/assets/settled-and-sound-logo-white.png.asset.json";
 const logoUrl = logoAsset.url;
 import asicRegistered from "@/assets/asic-registered.png";
@@ -43,21 +44,29 @@ function StackRow({ label, value }: { label: string; value: React.ReactNode }) {
 export function CoverPage({ s }: { s: ReportSummary }) {
   return (
     <PageShell>
-      {/* Unified cover hero - logo + title in one cohesive block so the PDF
-          renders a single, seamless header section. */}
+      {/* Unified cover hero - photo backdrop + logo + title in one cohesive block. */}
       <header
         className="relative -mx-14 -mt-[16mm] mb-6 px-14 pt-7 pb-10 rounded-b-[28px] text-navy-foreground overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(160deg, hsl(215 65% 14%) 0%, hsl(215 60% 18%) 40%, hsl(205 60% 26%) 80%, hsl(195 75% 34%) 100%)",
-        }}
       >
+        {/* Photo wallpaper */}
+        <img
+          src={coverCouple}
+          alt="Happy couple enjoying retirement by the coast"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Navy gradient overlay for legibility */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(160deg, hsl(215 65% 14% / 0.92) 0%, hsl(215 60% 18% / 0.86) 40%, hsl(205 60% 26% / 0.78) 80%, hsl(195 75% 34% / 0.72) 100%)",
+          }}
+        />
         <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/20 blur-3xl pointer-events-none" />
-        <div className="absolute -right-10 top-10 w-44 h-44 rounded-full bg-cyan/25 pointer-events-none" />
         <div className="absolute -left-20 -bottom-24 w-72 h-72 rounded-full bg-[hsl(225_85%_60%)]/15 blur-3xl pointer-events-none" />
 
         <div className="relative flex items-start justify-between gap-4 text-base">
-          <img src={logoUrl} alt="Settled & Sound" className="h-12 w-auto" />
+          <img src={logoUrl} alt="Settled & Sound" className="h-8 w-auto" />
           <div className="text-right leading-[1.5] opacity-90">
             <div className="font-bold tracking-wide text-lg">Settled &amp; Sound Pty Ltd</div>
             <div className="text-base">(07) 5241 1244</div>
