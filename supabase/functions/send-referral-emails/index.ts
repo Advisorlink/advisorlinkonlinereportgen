@@ -66,7 +66,7 @@ function buildReferralEmailHtml(referrerName: string, leadName: string, token: s
   <tr><td class="px" style="padding:0 32px 20px;">
     <p style="margin:0 0 12px;font-size:18px;font-weight:bold;color:${darkText};line-height:26px;">Hi ${safeName},</p>
     <p style="margin:0;font-size:15px;color:${bodyText};line-height:25px;">
-      Great news! <strong style="color:${brandBlue};">${safeReferrer}</strong> has just done a free superannuation review with us and got a lot of value, so they have referred you for a completely free Super Performance Report!
+      Great news! <strong style="color:${brandBlue};">${safeReferrer}</strong> has just done a free superannuation review with us and got a lot of value, so they have referred you for a completely free Superannuation Report!
     </p>
     <p style="margin:16px 0 0;font-size:15px;color:${bodyText};line-height:25px;">
       This report is completely free and gives you a detailed analysis of how your super fund is performing, how much you will potentially retire on, highlighting potential improvements that could make a real difference to your retirement.
@@ -215,7 +215,7 @@ Deno.serve(async (req) => {
     for (const lead of leads) {
       try {
         const html = buildReferralEmailHtml(lead.referrer_name, lead.lead_name, lead.token);
-        const subject = `REFERRED BY ${lead.referrer_name} for a Free Super Performance Report`;
+        const subject = `REFERRED BY ${lead.referrer_name} for a Free Superannuation Report`;
         const raw = buildRawEmail(lead.lead_email, subject, html, inlineLogo ? [inlineLogo] : []);
 
         const gmailRes = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {

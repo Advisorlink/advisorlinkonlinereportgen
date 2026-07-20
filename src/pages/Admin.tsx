@@ -262,7 +262,7 @@ export default function Admin() {
       open: true,
       report: r,
       to: clientEmail,
-      subject: "Your Free Super Performance Report",
+      subject: "Your Free Superannuation Report",
       body: getTemplateBody("standard", r),
       htmlBody: buildReportEmailHtml(r.client_name),
       isHtml: true,
@@ -281,8 +281,8 @@ export default function Admin() {
       subject: isReferral
         ? "Get a $100 Gift Card - Referral Offer"
         : isStandard
-          ? "Your Free Super Performance Report"
-          : "Super Performance Report",
+          ? "Your Free Superannuation Report"
+          : "Superannuation Report",
       htmlBody: isReferral
         ? buildReferralEmailHtml(clientName)
         : isStandard

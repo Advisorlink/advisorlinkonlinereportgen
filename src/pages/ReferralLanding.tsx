@@ -155,11 +155,11 @@ export default function ReferralLanding() {
         <div className="bg-gradient-to-r from-[#29B6F6] to-[#1E88E5] rounded-2xl p-8 mb-8 text-white text-center shadow-lg">
           <Sparkles className="w-10 h-10 mx-auto mb-3 opacity-90" />
           <h1 className="text-3xl font-bold mb-4 font-heading">
-            Your Free Super Performance Report
+            Your Free Superannuation Report
           </h1>
           {lead?.referrer_name && (
             <p className="text-white/90 text-lg leading-relaxed mb-3">
-              Great news! <strong>{lead.referrer_name}</strong> has just done a free superannuation review with us and got a lot of value, so they have referred you for a completely free Super Performance Report!
+              Great news! <strong>{lead.referrer_name}</strong> has just done a free superannuation review with us and got a lot of value, so they have referred you for a completely free Superannuation Report!
             </p>
           )}
           <p className="text-white/80 text-base leading-relaxed">

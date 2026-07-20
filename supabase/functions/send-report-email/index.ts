@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
     }
 
     const name = (clientName ?? "").trim() || "there";
-    const subject = customSubject ?? "Super Performance Report";
+    const subject = customSubject ?? "Superannuation Report";
     const shouldRequireReviewMessage = Boolean(
       pdfBase64 || fileName || subject.toLowerCase().includes("super performance report"),
     );
