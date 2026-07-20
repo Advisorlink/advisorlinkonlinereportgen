@@ -51,7 +51,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
       >
         {/* Photo wallpaper */}
         <img
-          src={coverCouple}
+          src={coverCoupleUrl}
           alt="Happy couple enjoying retirement by the coast"
           className="absolute inset-0 w-full h-full object-cover"
         />
