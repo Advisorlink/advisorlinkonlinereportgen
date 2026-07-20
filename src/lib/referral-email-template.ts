@@ -48,7 +48,7 @@ export function buildReferralEmailHtml(clientFullName: string, logoUrl = "https:
   <tr><td class="px" style="padding:24px 32px 0;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:16px 16px 0 0;overflow:hidden;">
       <tr><td class="hero" style="padding:32px;background:linear-gradient(135deg, ${brandBlueDark}, ${brandBlue});">
-        <p style="margin:0 0 6px;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.8);">Referral Reward Program</p>
+        <p style="margin:0 0 6px;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.8);">Gift Card Reward Program</p>
         <p class="hero-title" style="margin:0;font-size:26px;font-weight:bold;color:#ffffff;line-height:34px;">Hey ${safeName}, want to earn a <span style="color:${gold};">$100 Gift Card</span>?</p>
       </td></tr>
     </table>
