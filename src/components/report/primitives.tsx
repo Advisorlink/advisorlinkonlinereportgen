@@ -28,7 +28,8 @@ export function PageHeader({ pageLabel = "SUPERANNUATION REPORT", flush = false 
         <img
           src={logoUrl}
           alt="Settled & Sound"
-          className="h-9 w-auto"
+          className="h-14 w-auto"
+          style={{ filter: "brightness(0) invert(1)" }}
         />
       </div>
     </header>
