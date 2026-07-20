@@ -515,7 +515,7 @@ export default function Admin() {
                       {([
                         { label: "Report Sent", at: r.report_email_sent_at ?? r.email_sent_at },
                         { label: "Follow-up Sent", at: r.followup_email_sent_at },
-                        { label: "Referral Sent", at: r.referral_email_sent_at },
+                        { label: "Gift Card Sent", at: r.referral_email_sent_at },
                         { label: "Presentation Sent", at: r.presentation_completed_at },
                       ] as const)
                         .filter(p => !!p.at)
