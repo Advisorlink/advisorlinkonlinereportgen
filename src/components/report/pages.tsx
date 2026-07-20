@@ -15,7 +15,7 @@ import {
   FeeRow, FeeTableHeader, Disclaimer,
 } from "./primitives";
 import riskIllustration from "@/assets/risk-illustration.jpg";
-import logoAsset from "@/assets/settled-and-sound-logo.png.asset.json";
+import logoAsset from "@/assets/settled-and-sound-logo-white.png.asset.json";
 const logoUrl = logoAsset.url;
 import asicRegistered from "@/assets/asic-registered.png";
 
@@ -57,7 +57,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
         <div className="absolute -left-20 -bottom-24 w-72 h-72 rounded-full bg-[hsl(225_85%_60%)]/15 blur-3xl pointer-events-none" />
 
         <div className="relative flex items-start justify-between gap-4 text-base">
-          <img src={logoUrl} alt="Settled & Sound" className="h-20 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
+          <img src={logoUrl} alt="Settled & Sound" className="h-20 w-auto" />
           <div className="text-right leading-[1.5] opacity-90">
             <div className="font-bold tracking-wide text-lg">Settled &amp; Sound Pty Ltd</div>
             <div className="text-base">(07) 5241 1244</div>
