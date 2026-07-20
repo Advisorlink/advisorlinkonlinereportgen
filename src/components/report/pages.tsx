@@ -60,7 +60,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to top, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.62) 35%, rgba(15,23,42,0.32) 70%, rgba(15,23,42,0.12) 100%)",
+              "linear-gradient(to top, rgba(15,23,42,0.94) 0%, rgba(15,23,42,0.78) 35%, rgba(15,23,42,0.50) 70%, rgba(15,23,42,0.22) 100%)",
           }}
         />
 
