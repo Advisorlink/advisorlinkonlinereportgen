@@ -238,7 +238,7 @@ export default function ReferralForm() {
                   className="w-4 h-4 rounded border-[#c0b870] text-[#29B6F6] focus:ring-[#29B6F6]"
                 />
                 <span className="text-xs sm:text-sm font-medium text-[#3a3a4e]">
-                  I agree and give permission to contact my referrals
+                  I agree and give permission to contact my friends
                 </span>
               </label>
             </div>
