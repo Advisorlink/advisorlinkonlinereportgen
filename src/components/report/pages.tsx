@@ -1084,8 +1084,8 @@ export function WhatYouMayNotKnowPage({ s: _s }: { s: ReportSummary }) {
           </h2>
         </div>
         <div className="text-right shrink-0">
-          <div className="text-[42px] font-bold font-heading text-navy/10 leading-none tabular-nums">06</div>
-          <div className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Opportunities</div>
+          <div className="text-[42px] font-bold font-heading text-navy/10 leading-none tabular-nums"></div>
+          <div className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground mt-1"></div>
         </div>
       </div>
 
