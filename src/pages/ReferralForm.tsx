@@ -191,7 +191,7 @@ export default function ReferralForm() {
                       {i + 1}
                     </span>
                     <span className="text-sm font-medium text-[#3a3a4e]">
-                      Referral {i + 1}
+                      Person {i + 1}
                     </span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-3 sm:p-4">
