@@ -159,7 +159,7 @@ export default function ReferralLanding() {
           </h1>
           {lead?.referrer_name && (
             <p className="text-white/90 text-lg leading-relaxed mb-3">
-              Great news! <strong>{lead.referrer_name}</strong> has just done a free superannuation review with us and got a lot of value, so they have referred you for a completely free Superannuation Report!
+              Great news! <strong>{lead.referrer_name}</strong> has just done a free superannuation review with us and got a lot of value, so they shared this with you for a completely free Superannuation Report!
             </p>
           )}
           <p className="text-white/80 text-base leading-relaxed">

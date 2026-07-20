@@ -41,7 +41,7 @@ export default function ReferralForm() {
 
   const handleSubmit = async () => {
     if (filledEntries.length === 0) {
-      toast.error("Please fill in at least one referral");
+      toast.error("Please fill in at least one person");
       return;
     }
     if (!agreed) {
@@ -103,7 +103,7 @@ export default function ReferralForm() {
             Thank You, {clientFirstName}!
           </h1>
           <p className="text-[#5a5a6e] text-base leading-relaxed mb-6">
-            Your referrals have been submitted successfully. We'll reach out to
+            Your submissions have been received successfully. We'll reach out to
             each of them with an invitation for a free Superannuation Report.
           </p>
           <div className="inline-flex items-center gap-2 bg-[#29B6F6]/10 text-[#29B6F6] font-semibold text-lg px-6 py-3 rounded-xl">
@@ -138,7 +138,7 @@ export default function ReferralForm() {
             <div className="relative bg-gradient-to-br from-[#29B6F6] to-[#1E88E5] rounded-xl p-5 sm:p-6 text-white text-center">
               <Gift className="w-8 h-8 mx-auto mb-2 opacity-90" />
               <p className="text-base sm:text-lg font-semibold leading-snug">
-                Refer <span className="text-[#FFD700] font-bold">5 people</span> and receive a
+                Share with <span className="text-[#FFD700] font-bold">5 people</span> and receive a
               </p>
               <p className="text-3xl sm:text-4xl font-extrabold tracking-tight mt-1">
                 <span className="text-[#FFD700]">$100</span> Gift Card
@@ -174,7 +174,7 @@ export default function ReferralForm() {
         <div className="bg-white rounded-2xl border border-[#e5e9e8] shadow-sm overflow-hidden">
           <div className="px-5 sm:px-8 py-6 sm:py-8">
             <h2 className="text-lg font-bold text-[#1a1a2e] mb-1">
-              Your Referrals
+              People You're Sharing With
             </h2>
             <p className="text-[#7a7a8e] text-sm mb-6">
               Fill in the details of up to 5 people below.
@@ -191,7 +191,7 @@ export default function ReferralForm() {
                       {i + 1}
                     </span>
                     <span className="text-sm font-medium text-[#3a3a4e]">
-                      Referral {i + 1}
+                      Person {i + 1}
                     </span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-3 sm:p-4">
@@ -225,8 +225,8 @@ export default function ReferralForm() {
               <div className="flex gap-3">
                 <AlertCircle className="w-4 h-4 text-[#b89a30] flex-shrink-0 mt-0.5" />
                 <p className="text-xs sm:text-sm text-[#5a5540] leading-relaxed">
-                  By submitting, your referrals will receive an email from us letting them know
-                  <strong> {clientFirstName || "you"}</strong> referred them, inviting them to receive
+                  By submitting, your friends will receive an email from us letting them know
+                  <strong> {clientFirstName || "you"}</strong> shared this with them, inviting them to receive
                   a free Superannuation Report. Your information is handled per our privacy policy.
                 </p>
               </div>
@@ -238,7 +238,7 @@ export default function ReferralForm() {
                   className="w-4 h-4 rounded border-[#c0b870] text-[#29B6F6] focus:ring-[#29B6F6]"
                 />
                 <span className="text-xs sm:text-sm font-medium text-[#3a3a4e]">
-                  I agree and give permission to contact my referrals
+                  I agree and give permission to contact my friends
                 </span>
               </label>
             </div>
@@ -255,12 +255,12 @@ export default function ReferralForm() {
                 ) : (
                   <>
                     <Send className="w-4 h-4 mr-2" />
-                    Submit {filledEntries.length} Referral{filledEntries.length !== 1 ? "s" : ""}
+                    Submit {filledEntries.length} Person{filledEntries.length !== 1 ? "s" : ""}
                   </>
                 )}
               </Button>
               <p className="text-xs text-[#9a9aae]">
-                {filledEntries.length} of 5 referrals filled
+                {filledEntries.length} of 5 people filled
               </p>
             </div>
           </div>

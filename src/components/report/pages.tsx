@@ -123,7 +123,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
           </h3>
         </div>
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          Settled &amp; Sound is an independent education and referral service and is not licensed to provide financial advice. This Superannuation Report contains factual information only, based on publicly available data (e.g. RateCity, APRA reports, or your fund's website). It does not constitute personal or general financial product advice and does not consider your specific objectives, financial situation, or needs. All comparisons, projections, and illustrations are for information purposes only and are based on current public data. Past performance is not a reliable indicator of future results. If you believe an improvement may be possible, we can introduce you to a licensed financial adviser at your request from our referral network to contact you and provide a Statement of Advice after assessing your circumstances.
+          Settled &amp; Sound is a fully licensed financial advisory firm. This Superannuation Report contains factual information only, based on publicly available data (e.g. RateCity, APRA reports, or your fund's website). It does not constitute personal or general financial product advice and does not consider your specific objectives, financial situation, or needs. All comparisons, projections, and illustrations are for information purposes only and are based on current public data. Past performance is not a reliable indicator of future results. If you believe an improvement may be possible, one of our licensed financial advisers can contact you at your request and provide a Statement of Advice after assessing your circumstances.
         </p>
       </div>
 
@@ -143,7 +143,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
             </div>
             <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
               Registered with the Australian Securities &amp; Investments Commission. We operate
-              as an independent education and referral service - never a product issuer.
+              as a fully licensed financial advisory firm - never a product issuer.
             </p>
           </div>
         </div>
@@ -169,7 +169,7 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
   ];
   const steps = [
     { n: "01", title: "You decide", body: "Reading this report places you under no obligation. The introduction is entirely optional." },
-    { n: "02", title: "We match", body: "We hand-pick a licensed adviser from our network who fits your situation." },
+    { n: "02", title: "We match", body: "We hand-pick one of our licensed advisers who fits your situation." },
     { n: "03", title: "They advise", body: "Your adviser provides personal advice, prepares a Statement of Advice and can action it for you." },
   ];
   const restrictions = [
@@ -185,21 +185,21 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
       <PageHeader pageLabel="WHO WE ARE" />
       <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Who we are & why people choose us</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
-        Settled &amp; Sound is a 100% ASIC-regulated research and referral company. We don't sell
-        products - we help you understand your super and, if you choose, connect you with a
-        licensed adviser from our trusted network.
+        Settled &amp; Sound is a 100% ASIC-regulated fully licensed financial advisory firm. We don't sell
+        products - we help you understand your super and, if you choose, one of our licensed
+        advisers can provide personal advice tailored to your situation.
       </p>
 
-      {/* Referral partners hero */}
+      {/* Financial advisory team */}
       <div className="mb-5 overflow-hidden rounded-2xl border border-border bg-white shadow-card">
         <div className="bg-gradient-to-br from-navy to-navy/90 px-5 py-4">
           <div className="flex items-center gap-2">
             <div className="h-1.5 w-1.5 rounded-full bg-cyan" />
-            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan">Our Referral Partners</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan">Our Financial Advisory Team</div>
           </div>
           <p className="mt-2 text-[12px] leading-relaxed text-white/90">
-            If you'd like personal help, we can introduce you to a{" "}
-            <strong className="text-white">fully licensed financial adviser at no extra cost to you</strong>.
+            If you'd like personal help, one of our{" "}
+            <strong className="text-white">fully licensed financial advisers is here at no extra cost to you</strong>.
             Every adviser passes a strict qualification process before we put them in front of a client.
           </p>
         </div>
@@ -207,7 +207,7 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
         <div className="px-5 pt-4 pb-5">
           <div className="mb-3 flex items-baseline justify-between">
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-navy">The Six Standards</div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Every partner, every time</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Every adviser, every time</div>
           </div>
           <div className="grid grid-cols-3 gap-px rounded-xl bg-border overflow-hidden border border-border">
             {requirements.map((r) => (
@@ -275,11 +275,11 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
             },
             {
               q: "Is this financial advice?",
-              a: "No. Settled & Sound is an education and referral service. Only a licensed financial adviser can provide personal financial product advice.",
+              a: "No. Settled & Sound is a fully licensed financial advisory firm. This report is educational and factual only; personal advice is provided separately through a Statement of Advice if you choose to proceed.",
             },
             {
               q: "What happens next?",
-              a: "If you would like to explore your options, we can introduce you to a licensed adviser in our network at no extra cost to you.",
+              a: "If you would like to explore your options, one of our licensed advisers can contact you at no extra cost to you.",
             },
             {
               q: "Are the numbers guaranteed?",

@@ -68,18 +68,18 @@ export default function Referrals() {
               <Gift className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold font-heading text-navy">Referrals</h1>
+              <h1 className="text-2xl font-bold font-heading text-navy">Share & Earn</h1>
               <p className="text-sm text-muted-foreground">{responses.length} responses received</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <div className="relative w-full sm:w-56">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search referrals..." className="pl-9" />
+              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search responses..." className="pl-9" />
             </div>
             <div className="relative w-full sm:w-56">
               <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={referrerFilter} onChange={e => setReferrerFilter(e.target.value)} placeholder="Filter by referrer..." className="pl-9" />
+              <Input value={referrerFilter} onChange={e => setReferrerFilter(e.target.value)} placeholder="Filter by sender..." className="pl-9" />
             </div>
           </div>
         </div>
@@ -88,7 +88,7 @@ export default function Referrals() {
           {filtered.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Users className="w-10 h-10 mx-auto mb-3 opacity-40" />
-              <p className="text-sm">{search || referrerFilter ? "No referrals match that filter" : "No referral responses yet"}</p>
+              <p className="text-sm">{search || referrerFilter ? "No responses match that filter" : "No share responses yet"}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -120,12 +120,12 @@ export default function Referrals() {
                       {lead && (
                         <div className="flex items-center gap-3 sm:border-l sm:border-border sm:pl-4 shrink-0">
                           <div className="min-w-0">
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Referred by</p>
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Shared by</p>
                             <p className="text-xs font-semibold text-navy truncate">{lead.referrer_name}</p>
                             <p className="text-[11px] text-muted-foreground truncate">{lead.referrer_email}</p>
                           </div>
                           <span className="px-2.5 py-1 rounded-full bg-cyan/15 text-cyan text-[11px] font-bold whitespace-nowrap">
-                            {referrerTotal} referral{referrerTotal !== 1 ? "s" : ""}
+                            {referrerTotal} person{referrerTotal !== 1 ? "s" : ""}
                           </span>
                         </div>
                       )}
