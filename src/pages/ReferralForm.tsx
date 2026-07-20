@@ -255,7 +255,7 @@ export default function ReferralForm() {
                 ) : (
                   <>
                     <Send className="w-4 h-4 mr-2" />
-                    Submit {filledEntries.length} Referral{filledEntries.length !== 1 ? "s" : ""}
+                    Submit {filledEntries.length} Person{filledEntries.length !== 1 ? "s" : ""}
                   </>
                 )}
               </Button>
