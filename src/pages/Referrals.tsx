@@ -75,11 +75,11 @@ export default function Referrals() {
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <div className="relative w-full sm:w-56">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search referrals..." className="pl-9" />
+              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search responses..." className="pl-9" />
             </div>
             <div className="relative w-full sm:w-56">
               <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={referrerFilter} onChange={e => setReferrerFilter(e.target.value)} placeholder="Filter by referrer..." className="pl-9" />
+              <Input value={referrerFilter} onChange={e => setReferrerFilter(e.target.value)} placeholder="Filter by sender..." className="pl-9" />
             </div>
           </div>
         </div>
@@ -88,7 +88,7 @@ export default function Referrals() {
           {filtered.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Users className="w-10 h-10 mx-auto mb-3 opacity-40" />
-              <p className="text-sm">{search || referrerFilter ? "No referrals match that filter" : "No referral responses yet"}</p>
+              <p className="text-sm">{search || referrerFilter ? "No responses match that filter" : "No share responses yet"}</p>
             </div>
           ) : (
             <div className="space-y-3">
