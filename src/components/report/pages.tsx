@@ -15,7 +15,8 @@ import {
   FeeRow, FeeTableHeader, Disclaimer,
 } from "./primitives";
 import riskIllustration from "@/assets/risk-illustration.jpg";
-import logoUrl from "@/assets/logo.svg";
+import logoAsset from "@/assets/settled-and-sound-logo.png.asset.json";
+const logoUrl = logoAsset.url;
 import asicRegistered from "@/assets/asic-registered.png";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -56,13 +57,13 @@ export function CoverPage({ s }: { s: ReportSummary }) {
         <div className="absolute -left-20 -bottom-24 w-72 h-72 rounded-full bg-[hsl(225_85%_60%)]/15 blur-3xl pointer-events-none" />
 
         <div className="relative flex items-start justify-between gap-4 text-base">
-          <img src={logoUrl} alt="Advisor Link Online" className="h-12 w-auto" />
+          <img src={logoUrl} alt="Settled & Sound" className="h-14 w-auto" />
           <div className="text-right leading-[1.5] opacity-90">
-            <div className="font-bold tracking-wide text-lg">Advisor Link Pty Ltd</div>
+            <div className="font-bold tracking-wide text-lg">Settled &amp; Sound Pty Ltd</div>
             <div className="text-base">(07) 5241 1244</div>
             <div className="text-base">21 Upton Street,</div>
             <div className="text-base">Bundall QLD 4217</div>
-            <div className="text-base">admin@advisorlinkonline.com.au</div>
+            <div className="text-base">admin@settledandsound.com.au</div>
           </div>
         </div>
 
@@ -114,7 +115,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
           </h3>
         </div>
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          Advisor Link Online is an independent education and referral service and is not licensed to provide financial advice. This Superannuation Report contains factual information only, based on publicly available data (e.g. RateCity, APRA reports, or your fund's website). It does not constitute personal or general financial product advice and does not consider your specific objectives, financial situation, or needs. All comparisons, projections, and illustrations are for information purposes only and are based on current public data. Past performance is not a reliable indicator of future results. If you believe an improvement may be possible, we can introduce you to a licensed financial adviser at your request from our referral network to contact you and provide a Statement of Advice after assessing your circumstances.
+          Settled &amp; Sound is an independent education and referral service and is not licensed to provide financial advice. This Superannuation Report contains factual information only, based on publicly available data (e.g. RateCity, APRA reports, or your fund's website). It does not constitute personal or general financial product advice and does not consider your specific objectives, financial situation, or needs. All comparisons, projections, and illustrations are for information purposes only and are based on current public data. Past performance is not a reliable indicator of future results. If you believe an improvement may be possible, we can introduce you to a licensed financial adviser at your request from our referral network to contact you and provide a Statement of Advice after assessing your circumstances.
         </p>
       </div>
 
@@ -123,14 +124,14 @@ export function CoverPage({ s }: { s: ReportSummary }) {
         <div className="grid grid-cols-[auto_1fr] gap-5 items-center">
           <img
             src={asicRegistered}
-            alt="ASIC registered company extract for Advisorlink Pty Ltd"
+            alt="ASIC registered company extract for Settled & Sound Pty Ltd"
             className="h-24 w-auto object-contain"
             loading="lazy"
           />
           <div>
             <div className="text-[10px] tracking-[0.22em] font-semibold text-cyan mb-1">100% ASIC REGULATED</div>
             <div className="text-lg text-navy leading-tight font-medium" style={{ fontFamily: "'Montserrat', system-ui, sans-serif" }}>
-              ADVISORLINK PTY LTD &nbsp;·&nbsp; ACN 671 139 923
+              SETTLED &amp; SOUND PTY LTD &nbsp;·&nbsp; ACN 671 139 923
             </div>
             <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
               Registered with the Australian Securities &amp; Investments Commission. We operate
@@ -176,7 +177,7 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
       <PageHeader pageLabel="WHO WE ARE" />
       <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Who we are & why people choose us</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
-        Advisor Link is a 100% ASIC-regulated research and referral company. We don't sell
+        Settled &amp; Sound is a 100% ASIC-regulated research and referral company. We don't sell
         products - we help you understand your super and, if you choose, connect you with a
         licensed adviser from our trusted network.
       </p>
@@ -1002,7 +1003,7 @@ export function WhatsNextPage({ s: _s }: { s: ReportSummary }) {
             <div className="mb-2">
               <div className="text-base font-bold leading-tight font-heading !text-white drop-shadow-md">Travis Seckold</div>
               <div className="text-[10px] uppercase tracking-wider text-white/70 font-bold mt-0.5">
-                Advisor Link Online
+                Settled &amp; Sound
               </div>
             </div>
 
@@ -1011,9 +1012,9 @@ export function WhatsNextPage({ s: _s }: { s: ReportSummary }) {
                 <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">☎</span>
                 <span className="tabular-nums">0485 991 688</span>
               </a>
-              <a href="mailto:admin@advisorlinkonline.com.au" className="flex items-center gap-2.5 text-[12px] font-semibold text-white">
+              <a href="mailto:admin@settledandsound.com.au" className="flex items-center gap-2.5 text-[12px] font-semibold text-white">
                 <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">✉</span>
-                <span>admin@advisorlinkonline.com.au</span>
+                <span>admin@settledandsound.com.au</span>
               </a>
             </div>
           </div>
