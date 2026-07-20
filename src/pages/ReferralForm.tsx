@@ -174,7 +174,7 @@ export default function ReferralForm() {
         <div className="bg-white rounded-2xl border border-[#e5e9e8] shadow-sm overflow-hidden">
           <div className="px-5 sm:px-8 py-6 sm:py-8">
             <h2 className="text-lg font-bold text-[#1a1a2e] mb-1">
-              Your Referrals
+              People You're Sharing With
             </h2>
             <p className="text-[#7a7a8e] text-sm mb-6">
               Fill in the details of up to 5 people below.
