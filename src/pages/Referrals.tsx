@@ -120,12 +120,12 @@ export default function Referrals() {
                       {lead && (
                         <div className="flex items-center gap-3 sm:border-l sm:border-border sm:pl-4 shrink-0">
                           <div className="min-w-0">
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Referred by</p>
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Shared by</p>
                             <p className="text-xs font-semibold text-navy truncate">{lead.referrer_name}</p>
                             <p className="text-[11px] text-muted-foreground truncate">{lead.referrer_email}</p>
                           </div>
                           <span className="px-2.5 py-1 rounded-full bg-cyan/15 text-cyan text-[11px] font-bold whitespace-nowrap">
-                            {referrerTotal} referral{referrerTotal !== 1 ? "s" : ""}
+                            {referrerTotal} person{referrerTotal !== 1 ? "s" : ""}
                           </span>
                         </div>
                       )}
