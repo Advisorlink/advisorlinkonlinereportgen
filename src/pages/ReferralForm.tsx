@@ -225,8 +225,8 @@ export default function ReferralForm() {
               <div className="flex gap-3">
                 <AlertCircle className="w-4 h-4 text-[#b89a30] flex-shrink-0 mt-0.5" />
                 <p className="text-xs sm:text-sm text-[#5a5540] leading-relaxed">
-                  By submitting, your referrals will receive an email from us letting them know
-                  <strong> {clientFirstName || "you"}</strong> referred them, inviting them to receive
+                  By submitting, your friends will receive an email from us letting them know
+                  <strong> {clientFirstName || "you"}</strong> shared this with them, inviting them to receive
                   a free Superannuation Report. Your information is handled per our privacy policy.
                 </p>
               </div>
