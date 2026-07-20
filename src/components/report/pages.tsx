@@ -394,7 +394,14 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
           the projected balance at age {s.retirementAge} is <strong className="text-navy">{fmtMoney(s.projectedExisting)}</strong>.
           The reference target of {fmtMoney(s.goalBalance)} is included for context only.
         </p>
+        <div className="mt-3 rounded-lg border-2 border-amber-500/70 bg-amber-50 px-4 py-3">
+          <div className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-amber-900 mb-1">Disclaimer</div>
+          <p className="text-[12px] leading-relaxed text-amber-950 font-medium">
+            The comparison scenario numbers are based on achieving just a <strong>2% higher rate of return</strong> than your current fund. This is <strong>not guaranteed</strong> and is provided for <strong>illustration purposes only</strong>.
+          </p>
+        </div>
       </SectionCard>
+
 
       <SectionCard title="Selected projection years" icon="◉" className="mt-5">
         <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-1.5">
