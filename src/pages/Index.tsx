@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ClientForm } from "@/components/ClientForm";
-import { CoverPage, WhoWeArePage, SnapshotPage, FundsPage, ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage } from "@/components/report/pages";
+import { CoverPage, WhoWeArePage, SnapshotPage, FundsPage, ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage, WhatYouMayNotKnowPage } from "@/components/report/pages";
 import { buildSummary } from "@/lib/calc";
 import { importFromFile } from "@/lib/xlsx-import";
 import { useAuth } from "@/hooks/useAuth";
