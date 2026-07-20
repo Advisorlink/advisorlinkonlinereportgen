@@ -721,6 +721,7 @@ export default function Admin() {
                 <IncomePage s={summary} />
                 <ImprovementSummaryPage s={summary} />
                 <WhatsNextPage s={summary} />
+                <WhatYouMayNotKnowPage s={summary} />
               </div>
             </div>
           </div>
