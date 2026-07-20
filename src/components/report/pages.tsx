@@ -72,7 +72,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
             SUPER PERFORMANCE<br/>REPORT
           </h1>
           <p className="mt-3 text-sm max-w-lg opacity-80 leading-relaxed">
-            A complete factual report of your superannuation: current position, projection to retirement, income outlook, fees and a comparison scenario.
+            A complete factual report &mdash; an <strong className="text-white">illustrative only</strong> view of your superannuation: current balance, estimated projection to retirement, potential income outlook, current fees and a comparison scenario.
           </p>
           <div className="mt-5">
             <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan">Prepared For</div>
@@ -341,9 +341,20 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
     <PageShell>
       <PageHeader pageLabel="CLIENT SNAPSHOT" />
       <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Executive snapshot</h2>
-      <p className="text-sm text-muted-foreground mt-1 mb-5">
+      <p className="text-sm text-muted-foreground mt-1 mb-4">
         Personal details, targets and the current super position at a glance.
       </p>
+
+      <div className="mb-5 rounded-xl border-2 border-amber-500/70 bg-amber-50 px-5 py-4 shadow-[0_4px_18px_-6px_rgba(180,120,20,0.35)]">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-white text-xs font-bold">!</span>
+          <div className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-amber-900">Important &mdash; how we worked out the trajectory</div>
+        </div>
+        <p className="text-[12px] leading-relaxed text-amber-950 font-medium">
+          Projections are based on your fund's <strong>most recent 5-year net return</strong> being applied consistently through to retirement, with fees, income and contributions held constant. In reality, <strong>this is very unlikely to play out exactly as shown</strong>: fees can change, your income and contributions will almost certainly change, and investment performance will <strong>almost definitely change</strong> from year to year. These figures are illustrative only and are not a prediction of future outcomes.
+        </p>
+      </div>
+
 
       <div className="grid grid-cols-4 gap-3 mb-5">
         <KpiCard label="Age" value={String(i.age)} sub="Current age" />
@@ -383,7 +394,14 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
           the projected balance at age {s.retirementAge} is <strong className="text-navy">{fmtMoney(s.projectedExisting)}</strong>.
           The reference target of {fmtMoney(s.goalBalance)} is included for context only.
         </p>
+        <div className="mt-3 rounded-lg border-2 border-amber-500/70 bg-amber-50 px-4 py-3">
+          <div className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-amber-900 mb-1">Disclaimer</div>
+          <p className="text-[12px] leading-relaxed text-amber-950 font-medium">
+            The comparison scenario numbers are based on achieving just a <strong>2% higher rate of return</strong> than your current fund. This is <strong>not guaranteed</strong> and is provided for <strong>illustration purposes only</strong>.
+          </p>
+        </div>
       </SectionCard>
+
 
       <SectionCard title="Selected projection years" icon="◉" className="mt-5">
         <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-1.5">
@@ -714,9 +732,20 @@ export function IncomePage({ s }: { s: ReportSummary }) {
     <PageShell>
       <PageHeader pageLabel="RETIREMENT INCOME" />
       <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Retirement income view</h2>
-      <p className="text-sm text-muted-foreground mt-1 mb-5">
+      <p className="text-sm text-muted-foreground mt-1 mb-4">
         How long will your money potentially last when you need it the most?
       </p>
+
+      <div className="mb-5 rounded-xl border-2 border-amber-500/70 bg-amber-50 px-5 py-4 shadow-[0_4px_18px_-6px_rgba(180,120,20,0.35)]">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-white text-xs font-bold">!</span>
+          <div className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-amber-900">Important disclaimer</div>
+        </div>
+        <p className="text-[12px] leading-relaxed text-amber-950 font-medium">
+          This projection <strong>does not account for</strong> any Age Pension or other government entitlements, any additional income streams you may have, real-world market corrections, or the ongoing benefit of continuing to receive advice services to keep the strategy on track. Figures are <strong>illustrative only</strong> and are not a guarantee of future income.
+        </p>
+      </div>
+
 
       <div className="grid grid-cols-2 gap-3 mb-5">
         <KpiCard label="Starting Balance" value={fmtMoney(s.projectedExisting)} sub={`Projected at retirement (age ${s.retirementAge})`} />
@@ -827,14 +856,13 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
   const incomeUplift = Math.max(0, s.totalIncomeComparison - s.totalIncomeExisting);
   const yearsUplift = Math.max(0, s.yearsIncomeComparison - s.yearsIncomeExisting);
   const totalBenefit = balanceUplift + incomeUplift;
-  const eligible = totalBenefit > 100_000;
 
   return (
     <PageShell>
       <PageHeader pageLabel="POTENTIAL IMPROVEMENT" />
       <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Potential improvement summary</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
-        A consolidated view of the projected uplift if the comparison scenario were implemented, and your eligibility for an adviser referral.
+        A consolidated view of the projected uplift if the comparison scenario were implemented.
       </p>
 
       <div className="grid grid-cols-3 gap-3 mb-5">
@@ -844,24 +872,18 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
       </div>
 
       <SectionCard title="Total projected extra benefit" icon="◆" className="mb-5">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Balance uplift + additional retirement income
-            </div>
-            <div className="mt-1 text-4xl text-cyan tabular-nums font-bold">{fmtMoney(totalBenefit)}</div>
-            <div className="text-[11px] text-muted-foreground mt-1">
-              Potential Combined lifetime benefit after receiving licenced financial advice.
-            </div>
+        <div>
+          <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Balance uplift + additional retirement income
           </div>
-          <div className={cnTone(eligible)}>
-            <div className="text-[10px] font-bold uppercase tracking-wider">{eligible ? "Eligible for referral" : "Not currently eligible"}</div>
-            <div className="text-base mt-0.5 font-medium">{eligible ? "✓ $100,000+ threshold met" : "Below $100,000 threshold"}</div>
+          <div className="mt-1 text-4xl text-cyan tabular-nums font-bold">{fmtMoney(totalBenefit)}</div>
+          <div className="text-[11px] text-muted-foreground mt-1">
+            Potential combined lifetime benefit, illustrative only.
           </div>
         </div>
       </SectionCard>
 
-      <SectionCard title="Factors Influencing the Projection" icon="◉" className="mb-5">
+      <SectionCard title="Factors influencing the projection" icon="◉" className="mb-5">
         <div className="space-y-2">
           <div className="grid grid-cols-[1.4fr_1fr_1fr] gap-3 pb-2 border-b-2 border-navy text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             <div>Driver</div>
@@ -883,39 +905,12 @@ export function ImprovementSummaryPage({ s }: { s: ReportSummary }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Referral eligibility criteria" icon="✓">
-        <p className="text-xs text-muted-foreground mb-3">
-          To be referred to a licensed financial adviser from our network, the following criteria must be met:
-        </p>
-        <div className="rounded-lg border border-cyan/30 bg-cyan/5 p-4">
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan text-cyan-foreground text-xs font-bold">1</span>
-            <div>
-              <div className="text-sm font-bold text-navy font-heading">Total projected extra benefit must exceed $100,000</div>
-              <div className="text-[11px] text-muted-foreground mt-1">
-                Calculated as the balance uplift at retirement plus the additional retirement income generated by the comparison scenario over the drawdown phase.
-              </div>
-              <div className="mt-2 text-[11px]">
-                <span className="font-semibold text-navy">Your result:</span>{" "}
-                <span className={eligible ? "text-online font-bold" : "text-destructive font-bold"}>
-                  {fmtMoney(totalBenefit)} {eligible ? "- eligible" : "- below threshold"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </SectionCard>
-
       <PageFooter />
     </PageShell>
   );
 }
 
-function cnTone(eligible: boolean) {
-  return eligible
-    ? "rounded-lg border border-online/40 bg-online/10 text-online px-4 py-3 min-w-[220px]"
-    : "rounded-lg border border-border bg-secondary/60 text-muted-foreground px-4 py-3 min-w-[220px]";
-}
+
 
 /* ------------------------------------------------------------------ */
 /* PAGE - WHAT'S NEXT                                                  */
