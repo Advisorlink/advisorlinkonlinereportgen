@@ -1039,7 +1039,7 @@ export function WhatYouMayNotKnowPage({ s: _s }: { s: ReportSummary }) {
   ];
 
   return (
-    <PageShell className="!justify-between">
+    <PageShell>
       <PageHeader pageLabel="WHAT YOU MAY NOT KNOW" />
 
       <div className="flex-1 flex flex-col justify-between min-h-0">
