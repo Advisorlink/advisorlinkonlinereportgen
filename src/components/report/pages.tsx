@@ -275,7 +275,7 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
             },
             {
               q: "Is this financial advice?",
-              a: "No. Settled & Sound is an education and referral service. Only a licensed financial adviser can provide personal financial product advice.",
+              a: "No. Settled & Sound is a fully licensed financial advisory firm. This report is educational and factual only; personal advice is provided separately through a Statement of Advice if you choose to proceed.",
             },
             {
               q: "What happens next?",
