@@ -138,7 +138,7 @@ export default function ReferralForm() {
             <div className="relative bg-gradient-to-br from-[#29B6F6] to-[#1E88E5] rounded-xl p-5 sm:p-6 text-white text-center">
               <Gift className="w-8 h-8 mx-auto mb-2 opacity-90" />
               <p className="text-base sm:text-lg font-semibold leading-snug">
-                Refer <span className="text-[#FFD700] font-bold">5 people</span> and receive a
+                Share with <span className="text-[#FFD700] font-bold">5 people</span> and receive a
               </p>
               <p className="text-3xl sm:text-4xl font-extrabold tracking-tight mt-1">
                 <span className="text-[#FFD700]">$100</span> Gift Card
