@@ -190,16 +190,16 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
         advisers can provide personal advice tailored to your situation.
       </p>
 
-      {/* Referral partners hero */}
+      {/* Financial advisory team */}
       <div className="mb-5 overflow-hidden rounded-2xl border border-border bg-white shadow-card">
         <div className="bg-gradient-to-br from-navy to-navy/90 px-5 py-4">
           <div className="flex items-center gap-2">
             <div className="h-1.5 w-1.5 rounded-full bg-cyan" />
-            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan">Our Referral Partners</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan">Our Financial Advisory Team</div>
           </div>
           <p className="mt-2 text-[12px] leading-relaxed text-white/90">
-            If you'd like personal help, we can introduce you to a{" "}
-            <strong className="text-white">fully licensed financial adviser at no extra cost to you</strong>.
+            If you'd like personal help, one of our{" "}
+            <strong className="text-white">fully licensed financial advisers is here at no extra cost to you</strong>.
             Every adviser passes a strict qualification process before we put them in front of a client.
           </p>
         </div>
@@ -207,7 +207,7 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
         <div className="px-5 pt-4 pb-5">
           <div className="mb-3 flex items-baseline justify-between">
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-navy">The Six Standards</div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Every partner, every time</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Every adviser, every time</div>
           </div>
           <div className="grid grid-cols-3 gap-px rounded-xl bg-border overflow-hidden border border-border">
             {requirements.map((r) => (
