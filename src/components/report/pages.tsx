@@ -185,9 +185,9 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
       <PageHeader pageLabel="WHO WE ARE" />
       <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Who we are & why people choose us</h2>
       <p className="text-sm text-muted-foreground mt-1 mb-5">
-        Settled &amp; Sound is a 100% ASIC-regulated research and referral company. We don't sell
-        products - we help you understand your super and, if you choose, connect you with a
-        licensed adviser from our trusted network.
+        Settled &amp; Sound is a 100% ASIC-regulated fully licensed financial advisory firm. We don't sell
+        products - we help you understand your super and, if you choose, one of our licensed
+        advisers can provide personal advice tailored to your situation.
       </p>
 
       {/* Referral partners hero */}
