@@ -15,6 +15,7 @@ import {
   FeeRow, FeeTableHeader, Disclaimer,
 } from "./primitives";
 import riskIllustration from "@/assets/risk-illustration.jpg";
+import coverCouple from "@/assets/cover-happy-couple.jpg";
 import logoAsset from "@/assets/settled-and-sound-logo-white.png.asset.json";
 const logoUrl = logoAsset.url;
 import asicRegistered from "@/assets/asic-registered.png";
