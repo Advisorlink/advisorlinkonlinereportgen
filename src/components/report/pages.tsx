@@ -57,7 +57,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
         <div className="absolute -left-20 -bottom-24 w-72 h-72 rounded-full bg-[hsl(225_85%_60%)]/15 blur-3xl pointer-events-none" />
 
         <div className="relative flex items-start justify-between gap-4 text-base">
-          <img src={logoUrl} alt="Settled & Sound" className="h-14 w-auto" />
+          <img src={logoUrl} alt="Settled & Sound" className="h-20 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
           <div className="text-right leading-[1.5] opacity-90">
             <div className="font-bold tracking-wide text-lg">Settled &amp; Sound Pty Ltd</div>
             <div className="text-base">(07) 5241 1244</div>
