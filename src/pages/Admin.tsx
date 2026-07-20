@@ -16,7 +16,7 @@ import { DEFAULT_INPUTS } from "@/lib/xlsx-import";
 import { moveDealToReportSent } from "@/lib/pipeline-auto";
 import {
   CoverPage, WhoWeArePage, SnapshotPage, FundsPage,
-  ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage,
+  ProjectionPage, IncomePage, ImprovementSummaryPage, WhatsNextPage, WhatYouMayNotKnowPage,
 } from "@/components/report/pages";
 
 interface ReportRow {
