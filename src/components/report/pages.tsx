@@ -55,19 +55,18 @@ export function CoverPage({ s }: { s: ReportSummary }) {
           alt="Happy couple enjoying retirement by the coast"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Navy gradient overlay for legibility */}
+        {/* Soft dark gradient for legibility while keeping the photo as the hero */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(160deg, hsl(215 65% 14% / 0.92) 0%, hsl(215 60% 18% / 0.86) 40%, hsl(205 60% 26% / 0.78) 80%, hsl(195 75% 34% / 0.72) 100%)",
+              "linear-gradient(to top, rgba(15,23,42,0.78) 0%, rgba(15,23,42,0.38) 40%, rgba(15,23,42,0.12) 70%, rgba(15,23,42,0.04) 100%)",
           }}
         />
-        <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/20 blur-3xl pointer-events-none" />
-        <div className="absolute -left-20 -bottom-24 w-72 h-72 rounded-full bg-[hsl(225_85%_60%)]/15 blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-navy/20 via-transparent to-cyan/10 pointer-events-none" />
 
         <div className="relative flex items-start justify-between gap-4 text-base">
-          <img src={logoUrl} alt="Settled & Sound" className="h-8 w-auto" />
+          <img src={logoUrl} alt="Settled & Sound" className="h-7 w-auto" />
           <div className="text-right leading-[1.5] opacity-90">
             <div className="font-bold tracking-wide text-lg">Settled &amp; Sound Pty Ltd</div>
             <div className="text-base">(07) 5241 1244</div>
