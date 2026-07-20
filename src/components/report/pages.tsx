@@ -143,7 +143,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
             </div>
             <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
               Registered with the Australian Securities &amp; Investments Commission. We operate
-              as an independent education and referral service - never a product issuer.
+              as a fully licensed financial advisory firm - never a product issuer.
             </p>
           </div>
         </div>
