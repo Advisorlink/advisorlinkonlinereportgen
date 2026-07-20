@@ -260,7 +260,7 @@ export default function ReferralForm() {
                 )}
               </Button>
               <p className="text-xs text-[#9a9aae]">
-                {filledEntries.length} of 5 referrals filled
+                {filledEntries.length} of 5 people filled
               </p>
             </div>
           </div>
