@@ -103,7 +103,7 @@ export default function ReferralForm() {
             Thank You, {clientFirstName}!
           </h1>
           <p className="text-[#5a5a6e] text-base leading-relaxed mb-6">
-            Your referrals have been submitted successfully. We'll reach out to
+            Your submissions have been received successfully. We'll reach out to
             each of them with an invitation for a free Superannuation Report.
           </p>
           <div className="inline-flex items-center gap-2 bg-[#29B6F6]/10 text-[#29B6F6] font-semibold text-lg px-6 py-3 rounded-xl">
