@@ -123,7 +123,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
           </h3>
         </div>
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          Settled &amp; Sound is an independent education and referral service and is not licensed to provide financial advice. This Superannuation Report contains factual information only, based on publicly available data (e.g. RateCity, APRA reports, or your fund's website). It does not constitute personal or general financial product advice and does not consider your specific objectives, financial situation, or needs. All comparisons, projections, and illustrations are for information purposes only and are based on current public data. Past performance is not a reliable indicator of future results. If you believe an improvement may be possible, we can introduce you to a licensed financial adviser at your request from our referral network to contact you and provide a Statement of Advice after assessing your circumstances.
+          Settled &amp; Sound is a fully licensed financial advisory firm. This Superannuation Report contains factual information only, based on publicly available data (e.g. RateCity, APRA reports, or your fund's website). It does not constitute personal or general financial product advice and does not consider your specific objectives, financial situation, or needs. All comparisons, projections, and illustrations are for information purposes only and are based on current public data. Past performance is not a reliable indicator of future results. If you believe an improvement may be possible, one of our licensed financial advisers can contact you at your request and provide a Statement of Advice after assessing your circumstances.
         </p>
       </div>
 
