@@ -69,7 +69,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
         <div className="relative mt-8">
           <div className="h-[3px] w-12 rounded-full bg-cyan mb-4" />
           <h1 className="text-[44px] leading-[1.02] font-black tracking-tight">
-            SUPER PERFORMANCE<br/>REPORT
+            SUPERANNUATION<br/>REPORT
           </h1>
           <p className="mt-3 text-sm max-w-lg opacity-80 leading-relaxed">
             A complete factual report &mdash; an <strong className="text-white">illustrative only</strong> view of your superannuation: current balance, estimated projection to retirement, potential income outlook, current fees and a comparison scenario.
