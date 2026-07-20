@@ -1042,78 +1042,76 @@ export function WhatYouMayNotKnowPage({ s: _s }: { s: ReportSummary }) {
     <PageShell>
       <PageHeader pageLabel="WHAT YOU MAY NOT KNOW" />
 
-      {/* Editorial header */}
-      <div className="mb-5 flex items-end justify-between gap-6 border-b border-navy/10 pb-4">
-        <div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-cyan mb-2">There is so much more</div>
-          <h2 className="text-[26px] font-bold font-heading text-navy leading-[1.1] max-w-xl">
-            Six other areas that <span className="text-cyan">could be quietly costing you</span>
-          </h2>
-        </div>
-        <div className="text-right shrink-0">
-          <div className="text-[42px] font-bold font-heading text-navy/10 leading-none tabular-nums"></div>
-          <div className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground mt-1"></div>
-        </div>
-      </div>
-
-      <p className="text-[12px] text-muted-foreground mb-5 max-w-2xl leading-relaxed">
-        Your superannuation is only one piece of the picture. Below are a handful of strategies most Australians
-        never get walked through, and any one of them could shift your retirement outcome.
-      </p>
-
-      {/* Numbered opportunity list */}
-      <div className="grid grid-cols-2 gap-x-5 gap-y-4 mb-5">
-        {topics.map((t, idx) => (
-          <div key={t.title} className="group relative pl-11 pr-1">
-            <div className="absolute left-0 top-0 flex flex-col items-center">
-              <div className="h-8 w-8 rounded-full border border-cyan/40 bg-cyan/5 flex items-center justify-center text-[11px] font-bold text-cyan tabular-nums">
-                {String(idx + 1).padStart(2, "0")}
-              </div>
-              <div className="w-px flex-1 bg-gradient-to-b from-cyan/30 to-transparent mt-1" />
-            </div>
-            <div className="text-[9px] font-bold uppercase tracking-[0.22em] text-cyan/80 mb-0.5">{t.tag}</div>
-            <div className="text-[13px] font-bold font-heading text-navy leading-tight">{t.title}</div>
-            <div className="text-[10.5px] text-muted-foreground leading-relaxed mt-1">{t.body}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Closing CTA with contact */}
-      <div
-        className="rounded-2xl overflow-hidden relative shadow-elevated"
-        style={{ background: "linear-gradient(120deg, hsl(215 65% 10%) 0%, hsl(210 60% 16%) 55%, hsl(200 70% 24%) 100%)" }}
-      >
-        <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/25 blur-3xl pointer-events-none" />
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan via-cyan/70 to-cyan/20" />
-
-        <div className="relative px-6 py-5 grid grid-cols-[1fr_auto] gap-6 items-center">
+      <div className="flex-1 flex flex-col justify-between min-h-0">
+        {/* Editorial header */}
+        <div className="flex items-end justify-between gap-6 border-b border-navy/10 pb-5 mb-6">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
-              <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-cyan">Let's talk it through</div>
-            </div>
-            <div className="text-[22px] leading-tight font-bold font-heading !text-white drop-shadow-md">
-              We look forward to walking you through this at your <span className="text-cyan">presentation</span>.
-            </div>
-            <div className="mt-2 text-[11.5px] text-white/75 max-w-md leading-relaxed">
-              No pressure, no obligation. Just a friendly conversation about the options available to you and
-              which of the above could genuinely make a difference.
-            </div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-cyan mb-2">There is so much more</div>
+            <h2 className="text-[28px] font-bold font-heading text-navy leading-[1.1] max-w-xl">
+              Six other areas that <span className="text-cyan">could be quietly costing you</span>
+            </h2>
           </div>
+        </div>
 
-          <div className="rounded-xl bg-white/[0.06] backdrop-blur border border-white/15 px-5 py-4 min-w-[240px]">
-            <div className="text-[15px] font-bold leading-tight font-heading !text-white drop-shadow-md">Travis Seckold</div>
-            <div className="text-[9px] uppercase tracking-[0.22em] text-white/60 font-bold mt-0.5">Settled &amp; Sound</div>
+        <p className="text-[13px] text-muted-foreground mb-8 max-w-2xl leading-relaxed">
+          Your superannuation is only one piece of the picture. Below are a handful of strategies most Australians
+          never get walked through, and any one of them could shift your retirement outcome.
+        </p>
 
-            <div className="mt-3 space-y-1.5">
-              <a href="tel:0485991688" className="flex items-center gap-2.5 text-[12px] font-bold text-white">
-                <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">☎</span>
-                <span className="tabular-nums">0485 991 688</span>
-              </a>
-              <a href="mailto:admin@settledandsound.com.au" className="flex items-center gap-2.5 text-[11.5px] font-semibold text-white">
-                <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">✉</span>
-                <span>admin@settledandsound.com.au</span>
-              </a>
+        {/* Numbered opportunity list */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-7 mb-8 flex-1">
+          {topics.map((t, idx) => (
+            <div key={t.title} className="group relative pl-12 pr-2">
+              <div className="absolute left-0 top-0 flex flex-col items-center h-full">
+                <div className="h-9 w-9 rounded-full border border-cyan/40 bg-cyan/5 flex items-center justify-center text-[12px] font-bold text-cyan tabular-nums">
+                  {String(idx + 1).padStart(2, "0")}
+                </div>
+                <div className="w-px flex-1 bg-gradient-to-b from-cyan/30 to-transparent mt-2" />
+              </div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan/80 mb-1">{t.tag}</div>
+              <div className="text-[14px] font-bold font-heading text-navy leading-tight">{t.title}</div>
+              <div className="text-[11.5px] text-muted-foreground leading-relaxed mt-1.5">{t.body}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Closing CTA with contact */}
+        <div
+          className="rounded-2xl overflow-hidden relative shadow-elevated"
+          style={{ background: "linear-gradient(120deg, hsl(215 65% 10%) 0%, hsl(210 60% 16%) 55%, hsl(200 70% 24%) 100%)" }}
+        >
+          <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/25 blur-3xl pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan via-cyan/70 to-cyan/20" />
+
+          <div className="relative px-8 py-7 grid grid-cols-[1fr_auto] gap-8 items-center">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
+                <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-cyan">Let's talk it through</div>
+              </div>
+              <div className="text-[24px] leading-tight font-bold font-heading !text-white drop-shadow-md">
+                We look forward to walking you through this at your <span className="text-cyan">presentation</span>.
+              </div>
+              <div className="mt-3 text-[12px] text-white/75 max-w-md leading-relaxed">
+                No pressure, no obligation. Just a friendly conversation about the options available to you and
+                which of the above could genuinely make a difference.
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-white/[0.06] backdrop-blur border border-white/15 px-6 py-5 min-w-[260px]">
+              <div className="text-[16px] font-bold leading-tight font-heading !text-white drop-shadow-md">Travis Seckold</div>
+              <div className="text-[10px] uppercase tracking-[0.22em] text-white/60 font-bold mt-0.5">Settled &amp; Sound</div>
+
+              <div className="mt-4 space-y-2">
+                <a href="tel:0485991688" className="flex items-center gap-2.5 text-[13px] font-bold text-white">
+                  <span className="h-7 w-7 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[12px]">☎</span>
+                  <span className="tabular-nums">0485 991 688</span>
+                </a>
+                <a href="mailto:admin@settledandsound.com.au" className="flex items-center gap-2.5 text-[12.5px] font-semibold text-white">
+                  <span className="h-7 w-7 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[12px]">✉</span>
+                  <span>admin@settledandsound.com.au</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
