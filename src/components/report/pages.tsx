@@ -1,4 +1,4 @@
-import { Check, Info, Star } from "lucide-react";
+import { Check, Info } from "lucide-react";
 import type { ReportSummary, FundEntry } from "@/lib/calc";
 import {
   fmtMoney, fmtPct,
@@ -260,68 +260,35 @@ export function WhoWeArePage({ s }: { s: ReportSummary }) {
         </ul>
       </div>
 
-      {/* Google-style reviews */}
+      {/* Common questions */}
       <div className="mt-5 rounded-2xl border border-border bg-white p-5 shadow-card">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <svg viewBox="0 0 48 48" className="w-10 h-10" xmlns="http://www.w3.org/2000/svg">
-              <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
-              <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
-              <path fill="#FBBC05" d="M11.69 28.18c-.44-1.32-.69-2.73-.69-4.18s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/>
-              <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
-            </svg>
-             <div>
-              <div className="text-sm font-semibold text-navy leading-tight">Google Reviews</div>
-              <div className="flex flex-row items-center gap-1.5 mt-2 whitespace-nowrap">
-                 <span className="inline-flex items-center">
-                   {[0,1,2,3,4].map(i => (
-                     <Star key={i} className="w-3.5 h-3.5 fill-[#FBBC05] text-[#FBBC05]" />
-                   ))}
-                 </span>
-               </div>
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="text-[10px] tracking-[0.2em] font-bold text-cyan">VERIFIED</span>
-            <span className="text-[10px] font-medium text-muted-foreground italic">Just Google us and check yourself - 5.0 star rating on Google</span>
-          </div>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="h-1.5 w-1.5 rounded-full bg-cyan" />
+          <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-navy">Common questions</div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {[
             {
-              name: "Gay Tooze",
-              loc: "Verified Google Review",
-              initials: "GT",
-              color: "bg-[hsl(210_70%_55%)]",
-              text: "Travis was very professional & knowledgeable as we looked at my superannuation statement together, pointing out things I had never noticed or realised before. I have not been happy with my Superannuation's performance and now I am taking steps to do something about this. Thank you Travis.",
+              q: "What is this report?",
+              a: "A factual, educational snapshot of your current superannuation balance, fees, estimated projection, and a comparison scenario. It is not a Statement of Advice.",
             },
             {
-              name: "Kim Homersham",
-              loc: "Verified Google Review",
-              initials: "KH",
-              color: "bg-[hsl(150_55%_42%)]",
-              text: "Travis made it very easy to understand and clear how the changes will make a huge difference to my super in years to come. You really can't go wrong by making the appointment with the financial advisor. Thanks for your help and friendly nature Travis.",
+              q: "Is this financial advice?",
+              a: "No. Settled & Sound is an education and referral service. Only a licensed financial adviser can provide personal financial product advice.",
             },
             {
-              name: "Michael Kelly",
-              loc: "Verified Google Review",
-              initials: "MK",
-              color: "bg-[hsl(15_80%_55%)]",
-              text: "Travis was very helpful and explained the entire process to me in an easy to understand way. It was a pleasure dealing with someone who came across as friendly, knowledgeable and willing to assist. Most notably though was Travis' patience and professional approach.",
+              q: "What happens next?",
+              a: "If you would like to explore your options, we can introduce you to a licensed adviser in our network at no extra cost to you.",
             },
-          ].map(r => (
-            <div key={r.name} className="rounded-xl border border-border bg-secondary/30 p-3.5">
-              <div className="flex items-center">
-                {[0,1,2,3,4].map(i => (
-                  <Star key={i} className="w-3 h-3 fill-[#FBBC05] text-[#FBBC05] block" />
-                ))}
-              </div>
-              <p className="mt-2 text-[11px] leading-relaxed text-foreground">"{r.text}"</p>
-              <div className="mt-3">
-                <div className="text-[11px] font-bold text-navy leading-tight font-heading">{r.name}</div>
-                <div className="text-[9px] text-muted-foreground">{r.loc}</div>
-              </div>
+            {
+              q: "Are the numbers guaranteed?",
+              a: "No. Projections are based on public data and assumptions such as returns, fees, and inflation. Past performance is not a reliable indicator of future results.",
+            },
+          ].map(faq => (
+            <div key={faq.q} className="rounded-xl border border-border bg-secondary/30 p-3.5">
+              <div className="text-[11px] font-bold text-navy leading-tight mb-1">{faq.q}</div>
+              <p className="text-[10.5px] leading-relaxed text-muted-foreground">{faq.a}</p>
             </div>
           ))}
         </div>
