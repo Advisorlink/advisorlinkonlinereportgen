@@ -341,9 +341,20 @@ export function SnapshotPage({ s }: { s: ReportSummary }) {
     <PageShell>
       <PageHeader pageLabel="CLIENT SNAPSHOT" />
       <h2 className="mt-1 text-2xl font-bold font-heading text-navy">Executive snapshot</h2>
-      <p className="text-sm text-muted-foreground mt-1 mb-5">
+      <p className="text-sm text-muted-foreground mt-1 mb-4">
         Personal details, targets and the current super position at a glance.
       </p>
+
+      <div className="mb-5 rounded-xl border-2 border-amber-500/70 bg-amber-50 px-5 py-4 shadow-[0_4px_18px_-6px_rgba(180,120,20,0.35)]">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-white text-xs font-bold">!</span>
+          <div className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-amber-900">Important &mdash; how we worked out the trajectory</div>
+        </div>
+        <p className="text-[12px] leading-relaxed text-amber-950 font-medium">
+          Projections are based on your fund's <strong>most recent 5-year net return</strong> being applied consistently through to retirement, with fees, income and contributions held constant. In reality, <strong>this is very unlikely to play out exactly as shown</strong>: fees can change, your income and contributions will almost certainly change, and investment performance will <strong>almost definitely change</strong> from year to year. These figures are illustrative only and are not a prediction of future outcomes.
+        </p>
+      </div>
+
 
       <div className="grid grid-cols-4 gap-3 mb-5">
         <KpiCard label="Age" value={String(i.age)} sub="Current age" />
