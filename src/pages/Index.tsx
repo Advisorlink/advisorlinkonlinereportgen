@@ -411,7 +411,6 @@ export default function Index() {
             <FundsPage s={summary} />
             <IncomePage s={summary} />
             <ImprovementSummaryPage s={summary} />
-            <WhatsNextPage s={summary} />
             <WhatYouMayNotKnowPage s={summary} />
           </section>
         </div>
