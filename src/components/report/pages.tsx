@@ -1040,37 +1040,31 @@ export function WhatsNextPage({ s: _s }: { s: ReportSummary }) {
 export function WhatYouMayNotKnowPage({ s: _s }: { s: ReportSummary }) {
   const topics = [
     {
-      icon: "%",
       tag: "Tax",
       title: "Tax minimisation strategies",
       body: "Salary sacrifice, concessional and non-concessional contributions, spouse contributions and government co-contributions can meaningfully reduce tax while growing your super.",
     },
     {
-      icon: "◍",
       tag: "Structure",
       title: "The bucket strategy",
       body: "Splitting your super across short, medium and long term buckets helps protect income in retirement from market downturns while keeping growth working in the background.",
     },
     {
-      icon: "↧",
       tag: "Drawdown",
       title: "Smart drawdown planning",
       body: "The order you draw from super, pension and personal investments has a real impact on how long your money lasts and how much tax you pay along the way.",
     },
     {
-      icon: "⇋",
       tag: "TTR",
       title: "Transition to retirement",
       body: "A TTR strategy can allow you to reduce work hours, top up income from super, and potentially boost your retirement balance through tax effective contributions.",
     },
     {
-      icon: "＋",
       tag: "Contributions",
       title: "Catch up contributions",
       body: "Unused concessional contribution caps from previous years can often be carried forward, giving you a powerful way to accelerate your super in higher income years.",
     },
     {
-      icon: "♥",
       tag: "Estate",
       title: "Beneficiaries & estate planning",
       body: "Binding death benefit nominations, reversionary pensions and beneficiary structures make sure your super ends up in the right hands, quickly and tax effectively.",
@@ -1081,58 +1075,79 @@ export function WhatYouMayNotKnowPage({ s: _s }: { s: ReportSummary }) {
     <PageShell>
       <PageHeader pageLabel="WHAT YOU MAY NOT KNOW" />
 
-      <div className="mb-4">
-        <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-cyan mb-1.5">There is so much more</div>
-        <h2 className="text-2xl font-bold font-heading text-navy leading-tight">
-          A few other areas you may be able to benefit from
-        </h2>
-        <p className="text-[12px] text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-          Your superannuation is just one piece of the puzzle. Below are a handful of the strategies and
-          opportunities that often get overlooked, all of which we can explore together in your review.
-        </p>
+      {/* Editorial header */}
+      <div className="mb-5 flex items-end justify-between gap-6 border-b border-navy/10 pb-4">
+        <div>
+          <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-cyan mb-2">There is so much more</div>
+          <h2 className="text-[26px] font-bold font-heading text-navy leading-[1.1] max-w-xl">
+            Six other areas that <span className="text-cyan">could be quietly costing you</span>
+          </h2>
+        </div>
+        <div className="text-right shrink-0">
+          <div className="text-[42px] font-bold font-heading text-navy/10 leading-none tabular-nums">06</div>
+          <div className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Opportunities</div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        {topics.map((t) => (
-          <div
-            key={t.title}
-            className="relative rounded-2xl border border-border bg-card p-4 overflow-hidden"
-          >
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan via-cyan/60 to-cyan/20" />
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 h-9 w-9 rounded-xl bg-cyan/10 text-cyan flex items-center justify-center text-base font-bold">
-                {t.icon}
+      <p className="text-[12px] text-muted-foreground mb-5 max-w-2xl leading-relaxed">
+        Your superannuation is only one piece of the picture. Below are a handful of strategies most Australians
+        never get walked through, and any one of them could shift your retirement outcome.
+      </p>
+
+      {/* Numbered opportunity list */}
+      <div className="grid grid-cols-2 gap-x-5 gap-y-4 mb-5">
+        {topics.map((t, idx) => (
+          <div key={t.title} className="group relative pl-11 pr-1">
+            <div className="absolute left-0 top-0 flex flex-col items-center">
+              <div className="h-8 w-8 rounded-full border border-cyan/40 bg-cyan/5 flex items-center justify-center text-[11px] font-bold text-cyan tabular-nums">
+                {String(idx + 1).padStart(2, "0")}
               </div>
-              <div className="min-w-0">
-                <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan mb-0.5">{t.tag}</div>
-                <div className="text-[13px] font-bold font-heading text-navy leading-tight">{t.title}</div>
-                <div className="text-[10.5px] text-muted-foreground leading-relaxed mt-1.5">{t.body}</div>
-              </div>
+              <div className="w-px flex-1 bg-gradient-to-b from-cyan/30 to-transparent mt-1" />
             </div>
+            <div className="text-[9px] font-bold uppercase tracking-[0.22em] text-cyan/80 mb-0.5">{t.tag}</div>
+            <div className="text-[13px] font-bold font-heading text-navy leading-tight">{t.title}</div>
+            <div className="text-[10.5px] text-muted-foreground leading-relaxed mt-1">{t.body}</div>
           </div>
         ))}
       </div>
 
-      {/* Closing message */}
+      {/* Closing CTA with contact */}
       <div
-        className="rounded-2xl overflow-hidden relative text-navy-foreground shadow-elevated"
+        className="rounded-2xl overflow-hidden relative shadow-elevated"
         style={{ background: "linear-gradient(120deg, hsl(215 65% 10%) 0%, hsl(210 60% 16%) 55%, hsl(200 70% 24%) 100%)" }}
       >
         <div className="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-cyan/25 blur-3xl pointer-events-none" />
-        <div className="absolute -left-16 -bottom-16 w-56 h-56 rounded-full bg-cyan/10 blur-3xl pointer-events-none" />
-        <div className="relative px-6 py-6 text-center">
-          <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-cyan mb-2">Until next time</div>
-          <div className="text-xl leading-snug font-bold font-heading !text-white drop-shadow-md max-w-2xl mx-auto">
-            We look forward to speaking with you at your <span className="text-cyan">presentation</span> and
-            walking you through everything in more detail.
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan via-cyan/70 to-cyan/20" />
+
+        <div className="relative px-6 py-5 grid grid-cols-[1fr_auto] gap-6 items-center">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
+              <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-cyan">Let's talk it through</div>
+            </div>
+            <div className="text-[22px] leading-tight font-bold font-heading !text-white drop-shadow-md">
+              We look forward to walking you through this at your <span className="text-cyan">presentation</span>.
+            </div>
+            <div className="mt-2 text-[11.5px] text-white/75 max-w-md leading-relaxed">
+              No pressure, no obligation. Just a friendly conversation about the options available to you and
+              which of the above could genuinely make a difference.
+            </div>
           </div>
-          <div className="mt-3 text-[12px] text-white/80 max-w-xl mx-auto">
-            No pressure, no obligation, just a friendly conversation about the options available to you.
-          </div>
-          <div className="mt-4 inline-flex items-center gap-2 text-[11px] font-bold tracking-wider uppercase text-cyan">
-            <span className="h-px w-6 bg-cyan/60" />
-            Settled &amp; Sound
-            <span className="h-px w-6 bg-cyan/60" />
+
+          <div className="rounded-xl bg-white/[0.06] backdrop-blur border border-white/15 px-5 py-4 min-w-[240px]">
+            <div className="text-[15px] font-bold leading-tight font-heading !text-white drop-shadow-md">Travis Seckold</div>
+            <div className="text-[9px] uppercase tracking-[0.22em] text-white/60 font-bold mt-0.5">Settled &amp; Sound</div>
+
+            <div className="mt-3 space-y-1.5">
+              <a href="tel:0485991688" className="flex items-center gap-2.5 text-[12px] font-bold text-white">
+                <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">☎</span>
+                <span className="tabular-nums">0485 991 688</span>
+              </a>
+              <a href="mailto:admin@settledandsound.com.au" className="flex items-center gap-2.5 text-[11.5px] font-semibold text-white">
+                <span className="h-6 w-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center text-[11px]">✉</span>
+                <span>admin@settledandsound.com.au</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
