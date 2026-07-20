@@ -55,12 +55,12 @@ export function CoverPage({ s }: { s: ReportSummary }) {
           alt="Happy couple enjoying retirement by the coast"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Slight dark gradient for legibility without overpowering the photo */}
+        {/* Darker gradient for legibility while still letting the photo show through */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to top, rgba(15,23,42,0.55) 0%, rgba(15,23,42,0.22) 45%, rgba(15,23,42,0.06) 75%, transparent 100%)",
+              "linear-gradient(to top, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.62) 35%, rgba(15,23,42,0.32) 70%, rgba(15,23,42,0.12) 100%)",
           }}
         />
 
