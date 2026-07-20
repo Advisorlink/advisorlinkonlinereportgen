@@ -120,7 +120,7 @@ export function buildReferralEmailHtml(clientFullName: string, logoUrl = "https:
       <tr>
         <td style="border-radius:14px;background-color:${gold};text-align:center;">
           <a href="${referralFormUrl}" style="display:block;padding:20px 32px;color:${darkText};font-size:20px;font-weight:800;text-decoration:none;letter-spacing:0.5px;">
-            👉 Click Here To Refer &amp; Earn $100!
+            👉 Click Here To Share &amp; Earn $100!
           </a>
         </td>
       </tr>
