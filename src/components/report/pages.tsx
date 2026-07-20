@@ -15,7 +15,8 @@ import {
   FeeRow, FeeTableHeader, Disclaimer,
 } from "./primitives";
 import riskIllustration from "@/assets/risk-illustration.jpg";
-import coverCouple from "@/assets/cover-happy-couple.jpg";
+import coverCoupleAsset from "@/assets/cover-happy-couple-new.png.asset.json";
+const coverCoupleUrl = coverCoupleAsset.url;
 import logoAsset from "@/assets/settled-and-sound-logo-white.png.asset.json";
 const logoUrl = logoAsset.url;
 import asicRegistered from "@/assets/asic-registered.png";
@@ -50,7 +51,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
       >
         {/* Photo wallpaper */}
         <img
-          src={coverCouple}
+          src={coverCoupleUrl}
           alt="Happy couple enjoying retirement by the coast"
           className="absolute inset-0 w-full h-full object-cover"
         />
