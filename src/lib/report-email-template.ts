@@ -1,6 +1,6 @@
 /**
  * Generates a beautifully designed HTML email for sending the
- * Superannuation Report. Matches the Advisor Link Online brand.
+ * Superannuation Report. Matches the Settled & Sound brand.
  */
 export function buildReportEmailHtml(
   clientFullName: string,
@@ -48,7 +48,7 @@ export function buildReportEmailHtml(
 
   <!-- HEADER / LOGO -->
   <tr><td style="padding:22px 32px;border-bottom:1px solid ${borderColor};">
-    <img src="${safeLogoUrl}" alt="Advisor Link Online" width="170" style="display:inline-block;width:170px;max-width:60%;height:auto;border:0;" />
+    <img src="${safeLogoUrl}" alt="Settled &amp; Sound" width="170" style="display:inline-block;width:170px;max-width:60%;height:auto;border:0;" />
   </td></tr>
 
   <!-- HERO BANNER -->
@@ -110,7 +110,7 @@ export function buildReportEmailHtml(
   <!-- SIGN OFF -->
   <tr><td class="px" style="padding:24px 32px 8px;">
     <p style="margin:0 0 4px;font-size:15px;color:${bodyText};line-height:24px;">Kind regards,</p>
-    <p style="margin:0;font-size:15px;color:${darkText};font-weight:700;line-height:24px;">The Advisor Link Online Team</p>
+    <p style="margin:0;font-size:15px;color:${darkText};font-weight:700;line-height:24px;">The Settled &amp; Sound Team</p>
   </td></tr>
 
   <!-- DISCLAIMER -->
@@ -122,7 +122,7 @@ export function buildReportEmailHtml(
 
   <!-- FOOTER -->
   <tr><td style="background-color:${bgPage};padding:18px 32px;text-align:center;border-top:1px solid ${borderColor};">
-    <p style="margin:0;font-size:11px;color:${mutedText};line-height:18px;">&copy; ${new Date().getFullYear()} Advisor Link Online. All rights reserved.</p>
+    <p style="margin:0;font-size:11px;color:${mutedText};line-height:18px;">&copy; ${new Date().getFullYear()} Settled &amp; Sound. All rights reserved.</p>
   </td></tr>
 
 </table>
