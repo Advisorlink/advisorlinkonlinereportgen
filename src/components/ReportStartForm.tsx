@@ -244,7 +244,7 @@ export function ReportStartForm({ prefill }: { prefill: ReportStartPrefill }) {
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">Generate Super Report</h3>
+              <h3 className="text-sm font-bold text-white tracking-tight">Generate Superannuation Report</h3>
               <p className="text-[11px] text-white/60">Quick details to kick off the analysis</p>
             </div>
           </div>

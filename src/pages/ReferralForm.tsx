@@ -104,7 +104,7 @@ export default function ReferralForm() {
           </h1>
           <p className="text-[#5a5a6e] text-base leading-relaxed mb-6">
             Your referrals have been submitted successfully. We'll reach out to
-            each of them with an invitation for a free Super Performance Report.
+            each of them with an invitation for a free Superannuation Report.
           </p>
           <div className="inline-flex items-center gap-2 bg-[#29B6F6]/10 text-[#29B6F6] font-semibold text-lg px-6 py-3 rounded-xl">
             <Gift className="w-5 h-5" />
@@ -227,7 +227,7 @@ export default function ReferralForm() {
                 <p className="text-xs sm:text-sm text-[#5a5540] leading-relaxed">
                   By submitting, your referrals will receive an email from us letting them know
                   <strong> {clientFirstName || "you"}</strong> referred them, inviting them to receive
-                  a free Super Performance Report. Your information is handled per our privacy policy.
+                  a free Superannuation Report. Your information is handled per our privacy policy.
                 </p>
               </div>
               <label className="flex items-center gap-2.5 mt-3 cursor-pointer">
