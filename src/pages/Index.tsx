@@ -412,6 +412,7 @@ export default function Index() {
             <IncomePage s={summary} />
             <ImprovementSummaryPage s={summary} />
             <WhatsNextPage s={summary} />
+            <WhatYouMayNotKnowPage s={summary} />
           </section>
         </div>
       </div>
