@@ -41,7 +41,7 @@ export default function ReferralForm() {
 
   const handleSubmit = async () => {
     if (filledEntries.length === 0) {
-      toast.error("Please fill in at least one referral");
+      toast.error("Please fill in at least one person");
       return;
     }
     if (!agreed) {
