@@ -325,16 +325,22 @@ export function LetterheadGenerator({ onBack }: { onBack: () => void }) {
             }}
           >
             {/* Header */}
-            <div className="flex items-start justify-between pb-4 border-b-2" style={{ borderColor: "#0f172a" }}>
-              <img src={LOGO_URL} alt={state.firm.name} style={{ height: "18mm", width: "auto", objectFit: "contain" }} crossOrigin="anonymous" />
-              <div className="text-right text-[9pt] leading-snug" style={{ color: "#334155" }}>
-                <div className="font-semibold text-[10pt]" style={{ color: "#0f172a" }}>{state.firm.name}</div>
+            <div className="flex items-end justify-between pb-3" style={{ borderBottom: "1px solid #e2e8f0" }}>
+              <img
+                src={LOGO_URL}
+                alt={state.firm.name}
+                style={{ height: "9mm", width: "auto", objectFit: "contain", display: "block" }}
+                crossOrigin="anonymous"
+              />
+              <div className="text-right" style={{ color: "#475569", fontSize: "8.5pt", lineHeight: 1.5 }}>
                 {state.firm.address && <div>{state.firm.address}</div>}
-                {state.firm.phone && <div>{state.firm.phone}</div>}
-                {state.firm.email && <div>{state.firm.email}</div>}
-                {state.firm.website && <div>{state.firm.website}</div>}
+                <div>
+                  {[state.firm.phone, state.firm.email].filter(Boolean).join("  ·  ")}
+                </div>
               </div>
             </div>
+            <div style={{ height: "2px", background: "#0f172a", marginTop: "1.5mm", width: "100%" }} />
+
 
             {/* Date */}
             <div className="mt-8 text-[10.5pt]">{state.date}</div>
