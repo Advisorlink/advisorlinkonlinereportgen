@@ -35,13 +35,13 @@ type LetterState = {
 };
 
 const DEFAULT_FIRM: FirmDetails = {
-  name: "Advisor Link Online",
-  legal: "Advisor Link Online Pty Ltd",
-  abn: "",
+  name: "Advisorlink",
+  legal: "Advisorlink Pty Ltd",
+  abn: "99 671 139 923",
   acn: "",
-  address: "",
-  phone: "",
-  email: "",
+  address: "2/21 Upton Street, Bundall QLD 4217",
+  phone: "(07) 5241 1244",
+  email: "admin@advisorlinkonline.com.au",
   website: "advisorlinkonline.com.au",
 };
 
