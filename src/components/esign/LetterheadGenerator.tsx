@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, Download, Eraser, PenTool, Settings2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-const STORAGE_KEY = "letterhead-generator:v1";
+const STORAGE_KEY = "letterhead-generator:v2";
 const LOGO_URL = "/logo-email-black.svg";
 
 type FirmDetails = {
