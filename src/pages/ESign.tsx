@@ -47,6 +47,15 @@ const menuItems = [
     available: true,
   },
   {
+    id: "letterhead",
+    label: "Letterhead",
+    icon: FileText,
+    description: "Type a letter on your branded letterhead and download as a signed PDF",
+    gradient: "from-primary/20 to-primary/5",
+    iconColor: "text-primary",
+    available: true,
+  },
+  {
     id: "archive",
     label: "Archive",
     icon: FolderOpen,
