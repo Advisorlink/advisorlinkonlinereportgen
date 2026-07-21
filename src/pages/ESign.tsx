@@ -130,6 +130,14 @@ export default function ESign() {
     );
   }
 
+  if (activeSection === "letterhead") {
+    return (
+      <CRMLayout>
+        <LetterheadGenerator onBack={() => setActiveSection(null)} />
+      </CRMLayout>
+    );
+  }
+
   return (
     <CRMLayout>
       <div className="max-w-5xl mx-auto py-10 px-4 space-y-10">
