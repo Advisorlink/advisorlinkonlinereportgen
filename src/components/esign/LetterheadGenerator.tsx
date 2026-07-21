@@ -329,7 +329,7 @@ export function LetterheadGenerator({ onBack }: { onBack: () => void }) {
               <img
                 src={LOGO_URL}
                 alt={state.firm.name}
-                style={{ height: "9mm", width: "auto", objectFit: "contain", display: "block" }}
+                style={{ height: "13mm", width: "auto", objectFit: "contain", display: "block" }}
                 crossOrigin="anonymous"
               />
               <div className="text-right" style={{ color: "#475569", fontSize: "8.5pt", lineHeight: 1.5 }}>
