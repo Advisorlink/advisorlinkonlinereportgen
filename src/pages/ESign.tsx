@@ -12,9 +12,11 @@ import {
   Send,
   FolderOpen,
   ArrowRight,
+  FileText,
 } from "lucide-react";
 import { ESignNewRequest } from "@/components/esign/ESignNewRequest";
 import { ESignDocumentList } from "@/components/esign/ESignDocumentList";
+import { LetterheadGenerator } from "@/components/esign/LetterheadGenerator";
 
 const menuItems = [
   {
