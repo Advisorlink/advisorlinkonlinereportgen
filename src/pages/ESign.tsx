@@ -12,9 +12,11 @@ import {
   Send,
   FolderOpen,
   ArrowRight,
+  FileText,
 } from "lucide-react";
 import { ESignNewRequest } from "@/components/esign/ESignNewRequest";
 import { ESignDocumentList } from "@/components/esign/ESignDocumentList";
+import { LetterheadGenerator } from "@/components/esign/LetterheadGenerator";
 
 const menuItems = [
   {
@@ -42,6 +44,15 @@ const menuItems = [
     description: "Create reusable templates to speed up your workflow",
     gradient: "from-cyan/20 to-cyan/5",
     iconColor: "text-cyan",
+    available: true,
+  },
+  {
+    id: "letterhead",
+    label: "Letterhead",
+    icon: FileText,
+    description: "Type a letter on your branded letterhead and download as a signed PDF",
+    gradient: "from-primary/20 to-primary/5",
+    iconColor: "text-primary",
     available: true,
   },
   {
@@ -115,6 +126,14 @@ export default function ESign() {
             setActiveSection("esign");
           }}
         />
+      </CRMLayout>
+    );
+  }
+
+  if (activeSection === "letterhead") {
+    return (
+      <CRMLayout>
+        <LetterheadGenerator onBack={() => setActiveSection(null)} />
       </CRMLayout>
     );
   }
