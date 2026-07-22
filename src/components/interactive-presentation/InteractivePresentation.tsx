@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  ChevronLeft, ChevronRight, Maximize, Minimize, X, Check, Send, Loader2, Copy, MessageCircle,
+  ChevronLeft, ChevronRight, Maximize, Minimize, X, Check, CheckCircle2, Send, Loader2, Copy, MessageCircle,
   Target, Clock, ShieldCheck, PiggyBank, Wallet, Landmark, CreditCard, Scroll, HeartPulse, Gift,
   Layers, Sparkles, Repeat, Users, Home, LucideIcon,
 } from "lucide-react";
