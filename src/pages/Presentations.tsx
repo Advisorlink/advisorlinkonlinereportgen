@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMeetingHost } from "@/hooks/useMeetingHost";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { CRMLayout } from "@/components/CRMLayout";
-import { InteractivePresentation } from "@/components/interactive-presentation/InteractivePresentation";
+import InteractivePresentation from "@/components/interactive-presentation/InteractivePresentation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Monitor, Play, Copy, StopCircle, Search, Mic, MicOff, Circle, ScreenShare, ScreenShareOff, UserCheck, UserX, Presentation, Trash2, UserPlus } from "lucide-react";
@@ -313,7 +313,7 @@ export default function Presentations() {
         {showSlideshow && activeMeeting && (
           <InteractivePresentation
             clientName={activeMeeting.client_name}
-            onClose={() => { setShowSlideshow(false); setPausedSlide(null); }}
+            onExit={() => { setShowSlideshow(false); setPausedSlide(null); }}
           />
         )}
 
