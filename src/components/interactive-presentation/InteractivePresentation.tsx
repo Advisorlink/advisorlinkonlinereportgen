@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ChevronLeft, ChevronRight, Maximize, Minimize, X, Check, Send, Loader2, Copy,
-  PiggyBank, TrendingUp, Umbrella, Home as HomeIcon, HandCoins, FileText,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
