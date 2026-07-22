@@ -696,3 +696,50 @@ function NotesSlide({
   );
 }
 
+/* ============================================================ */
+/*  THANK YOU SLIDE — completion screen with big green tick      */
+/* ============================================================ */
+
+function ThankYouSlide({ selectedCount, onNext }: { selectedCount: number; onNext: () => void }) {
+  return (
+    <div className="absolute inset-0 bg-[#F5F3EE] flex flex-col items-center justify-center text-center px-[5%]"
+         style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <div className="relative">
+        <div className="absolute inset-0 bg-[#18A5AF]/10 rounded-full blur-3xl" style={{ transform: "scale(1.4)" }} />
+        <div className="relative rounded-full bg-white shadow-[0_20px_60px_-20px_rgba(15,42,68,0.25)] flex items-center justify-center"
+             style={{ width: "clamp(120px, 14vw, 200px)", height: "clamp(120px, 14vw, 200px)" }}>
+          <CheckCircle2 className="text-[#18A5AF]" style={{ width: "55%", height: "55%" }} strokeWidth={1.5} />
+        </div>
+      </div>
+
+      <h2 className="font-black text-[#0F2A44] mt-8 leading-tight"
+          style={{ fontSize: "clamp(32px, 4.5vw, 64px)" }}>
+        Thank you
+      </h2>
+      <p className="font-semibold text-[#0F2A44]/80 mt-3 max-w-2xl"
+         style={{ fontSize: "clamp(16px, 1.6vw, 26px)" }}>
+        Your presentation is complete.
+      </p>
+      <p className="text-[#0F2A44]/60 mt-2 max-w-xl"
+         style={{ fontSize: "clamp(13px, 1.2vw, 20px)" }}>
+        Your selections have been sent to your advisor to prepare for your meeting.
+      </p>
+
+      <div className="mt-8 rounded-full bg-[#0F2A44]/5 text-[#0F2A44] font-semibold px-6 py-3"
+           style={{ fontSize: "clamp(12px, 1vw, 16px)" }}>
+        {selectedCount} {selectedCount === 1 ? "area" : "areas"} selected
+      </div>
+
+      <button
+        onClick={onNext}
+        className="mt-10 group flex items-center gap-2 bg-[#18A5AF] hover:bg-[#18A5AF]/90 text-white rounded-full transition-all font-semibold shadow-lg"
+        style={{ padding: "clamp(10px, 1vw, 16px) clamp(24px, 2.5vw, 42px)", fontSize: "clamp(13px, 1.1vw, 18px)" }}
+      >
+        Next steps
+        <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+      </button>
+    </div>
+  );
+}
+
+
