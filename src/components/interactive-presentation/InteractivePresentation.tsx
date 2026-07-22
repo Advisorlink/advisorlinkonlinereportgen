@@ -20,6 +20,7 @@ import slide07 from "@/assets/presentation/07-why-choose-us.png";
 import slide08 from "@/assets/presentation/08-explained-clearly.png";
 import slide09 from "@/assets/presentation/09-next-steps.png";
 import slide10 from "@/assets/presentation/10-opportunities.png";
+import beachBg from "@/assets/presentation/opportunities-beach.jpg";
 
 /* ============================================================ */
 /*  ADVICE CATEGORIES — grouped                                  */
