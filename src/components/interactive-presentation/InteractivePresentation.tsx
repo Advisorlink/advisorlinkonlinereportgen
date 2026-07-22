@@ -314,6 +314,7 @@ export default function InteractivePresentation({
               src={slide.src}
               alt={slide.label}
               className="w-full h-full object-contain"
+              style={slide.scale ? { transform: `scale(${slide.scale})`, transformOrigin: "center center" } : undefined}
               draggable={false}
             />
           )}
