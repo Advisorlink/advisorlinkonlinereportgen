@@ -51,6 +51,10 @@ verify_jwt = false
 [functions.deal-task-reminders]
 verify_jwt = false
 
+[functions.submit-advice-request]
+verify_jwt = false
+
+
 
 
 
