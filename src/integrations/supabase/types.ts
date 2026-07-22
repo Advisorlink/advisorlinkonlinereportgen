@@ -41,6 +41,42 @@ export type Database = {
         }
         Relationships: []
       }
+      advice_requests: {
+        Row: {
+          client_email: string
+          client_name: string
+          client_phone: string | null
+          created_at: string
+          drive_file_id: string | null
+          drive_view_link: string | null
+          id: string
+          selected_ids: number[] | null
+          selected_titles: string[] | null
+        }
+        Insert: {
+          client_email: string
+          client_name: string
+          client_phone?: string | null
+          created_at?: string
+          drive_file_id?: string | null
+          drive_view_link?: string | null
+          id?: string
+          selected_ids?: number[] | null
+          selected_titles?: string[] | null
+        }
+        Update: {
+          client_email?: string
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string
+          drive_file_id?: string | null
+          drive_view_link?: string | null
+          id?: string
+          selected_ids?: number[] | null
+          selected_titles?: string[] | null
+        }
+        Relationships: []
+      }
       ai_caller_call_logs: {
         Row: {
           campaign_id: string | null

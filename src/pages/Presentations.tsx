@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMeetingHost } from "@/hooks/useMeetingHost";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { CRMLayout } from "@/components/CRMLayout";
-import { PresentationSlideshow } from "@/components/PresentationSlideshow";
+import { InteractivePresentation } from "@/components/interactive-presentation/InteractivePresentation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Monitor, Play, Copy, StopCircle, Search, Mic, MicOff, Circle, ScreenShare, ScreenShareOff, UserCheck, UserX, Presentation, Trash2, UserPlus } from "lucide-react";
@@ -311,28 +311,12 @@ export default function Presentations() {
         )}
 
         {showSlideshow && activeMeeting && (
-          <PresentationSlideshow
+          <InteractivePresentation
             clientName={activeMeeting.client_name}
-            meetingId={activeMeeting.meeting_id}
-            clientConnected={clientConnected}
-            clientCount={clientCount}
-            screenSharePaused={screenSharePaused}
-            onTogglePauseShare={togglePauseScreenShare}
             onClose={() => { setShowSlideshow(false); setPausedSlide(null); }}
-            onShareReport={handleShareReport}
-            onFinish={() => {
-              setShowSlideshow(false);
-              setPausedSlide(null);
-              const cName = activeMeeting?.client_name || "";
-              const cEmail = selectedReport?.email || reports.find(r => r.client_name === cName)?.email || "";
-              const params = new URLSearchParams({ send: "1" });
-              if (cName) params.set("name", cName);
-              if (cEmail) params.set("email", cEmail);
-              navigate(`/documents?${params.toString()}`);
-            }}
-            initialSlide={pausedSlide ?? 0}
           />
         )}
+
 
         <div className="bg-card rounded-xl shadow-elevated p-6">
           <div className="flex items-center justify-between mb-4">

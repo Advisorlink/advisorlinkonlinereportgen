@@ -16,6 +16,8 @@ import Auth from "./pages/Auth.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Pipeline from "./pages/Pipeline.tsx";
 import Presentations from "./pages/Presentations.tsx";
+import PresentPublic from "./pages/PresentPublic.tsx";
+
 import Index from "./pages/Index.tsx";
 import Admin from "./pages/Admin.tsx";
 import Referrals from "./pages/Referrals.tsx";
@@ -68,6 +70,8 @@ const App = () => (
                   <Route path="/refer/claim" element={<ReferralLanding />} />
                   <Route path="/meeting/join" element={<MeetingJoin />} />
                   <Route path="/esign/sign" element={<ESignPublic />} />
+                  <Route path="/present" element={<PresentPublic />} />
+
                   <Route path="/upload" element={<UploadDocuments />} />
                   <Route path="/upload-statement" element={<StatementUpload />} />
                   <Route path="/upload-license" element={<LicenseUpload />} />
