@@ -1006,105 +1006,68 @@ export function WhatsNextPage({ s: _s }: { s: ReportSummary }) {
 /* WHAT YOU MAY NOT KNOW - closing opportunities page                  */
 /* ------------------------------------------------------------------ */
 export function WhatYouMayNotKnowPage({ s: _s }: { s: ReportSummary }) {
-  const groups: {
-    section: string;
-    items: { n: number; title: string; overview: string; benefit: string }[];
-  }[] = [
+  const topics = [
     {
-      section: "Core planning & income strategies",
-      items: [
-        { n: 1, title: 'Retirement readiness ("The Number")', overview: "Detailed cash flow modeling to project how long capital will last based on expected expenses, healthcare and travel.", benefit: "Gives complete clarity on whether you can afford to stop working and at what age." },
-        { n: 2, title: "Transition to Retirement (TTR) strategy", overview: "Commencing a partial pension from super while still working past age 60.", benefit: "Allows you to reduce working hours without dropping lifestyle income, or boost super tax free via salary sacrifice while working full time." },
-        { n: 3, title: "De risking & sequence of returns protection", overview: "Shifting portfolio allocation to protect wealth from a sudden market downturn right before retirement.", benefit: "Prevents forced selling of growth assets (shares/property) at a loss during market dips." },
-        { n: 4, title: "Maximising late stage super contributions", overview: "Utilising salary sacrificing, catch up concessional rules and non concessional caps during peak earning years.", benefit: "Maximises compounding inside a low tax environment before hitting full retirement." },
-        { n: 5, title: "Tax efficient withdrawal & income sequencing", overview: "Planning the exact order in which you draw down from cash, taxable accounts and tax sheltered super.", benefit: "Keeps personal marginal income tax as close to zero as possible across your retirement." },
-      ],
+      tag: "Tax",
+      title: "Tax minimisation strategies",
+      body: "Salary sacrifice, concessional and non-concessional contributions, spouse contributions and government co-contributions can meaningfully reduce tax while growing your super.",
     },
     {
-      section: "Entitlements, debt & legacy",
-      items: [
-        { n: 6, title: "Social security & Age Pension optimisation", overview: "Structuring assets and income streams to align with government means tests (Assets & Income Tests).", benefit: "Maximises state pension entitlements and healthcare concession cards." },
-        { n: 7, title: "Pre retirement debt clearance", overview: "Directing cash flow to eliminate mortgages, personal loans and credit debts prior to leaving work.", benefit: "Drastically reduces monthly overheads, lowering the income required to fund retirement." },
-        { n: 8, title: "Estate planning & beneficiary structuring", overview: "Updating binding nominations, testamentary trusts and ownership structures.", benefit: "Ensures seamless, tax minimised wealth transfer to loved ones without legal disputes." },
-        { n: 9, title: "Healthcare & aged care planning", overview: "Stress testing portfolios for longevity (living into your 90s) and setting aside contingency buffers for long term care.", benefit: "Protects the surviving spouse from financial distress if one partner requires high level aged care." },
-        { n: 10, title: "Early legacy & gifting strategies", overview: "Assisting adult children with home deposits or family costs using structured gifts or formal family loans.", benefit: "Helps children when they need it most while ensuring you don't breach gifting rules or jeopardise your own security." },
-      ],
+      tag: "Structure",
+      title: "The bucket strategy",
+      body: "Splitting your super across short, medium and long term buckets helps protect income in retirement from market downturns while keeping growth working in the background.",
     },
     {
-      section: "Specialised execution strategies",
-      items: [
-        { n: 11, title: 'The "three bucket" income strategy', overview: "Dividing wealth into Bucket 1 (cash for 1 to 3 years), Bucket 2 (defensive income) and Bucket 3 (long term growth).", benefit: "Eliminates market anxiety by ensuring living expenses are funded by cash regardless of market crashes." },
-        { n: 12, title: 'Super re contribution strategy ("anti death tax")', overview: "Withdrawing super tax free after age 60 and re contributing it back as an after tax (non concessional) amount.", benefit: 'Shifts the balance from "taxable" to "tax free," saving non dependant adult children up to 17% tax on inherited super.' },
-        { n: 13, title: "Redraw & recycle (mortgage offset to super)", overview: "Using cash in home loan offset/redraw accounts to make tax deductible super contributions before age 67.", benefit: "Reduces personal taxable income while building higher tax sheltered wealth inside super." },
-        { n: 14, title: "Spouse equalisation & pension shielding", overview: "Transferring super contributions to a younger or lower balance spouse.", benefit: "Shields accumulation balances from Centrelink tests (if the spouse is under Age Pension age) and doubles tax free pension transfer caps." },
-        { n: 15, title: "Downsizer contribution strategy", overview: "Contributing up to $300,000 per person ($600,000 per couple) into super from the sale of a home owned for 10+ years.", benefit: "Turns the equity in your family home into a tax free super boost late in life without impacting your contribution caps." },
-      ],
+      tag: "Drawdown",
+      title: "Smart drawdown planning",
+      body: "The order you draw from super, pension and personal investments has a real impact on how long your money lasts and how much tax you pay along the way.",
+    },
+    {
+      tag: "TTR",
+      title: "Transition to retirement",
+      body: "A TTR strategy can allow you to reduce work hours, top up income from super, and potentially boost your retirement balance through tax effective contributions.",
+    },
+    {
+      tag: "Contributions",
+      title: "Catch up contributions",
+      body: "Unused concessional contribution caps from previous years can often be carried forward, giving you a powerful way to accelerate your super in higher income years.",
+    },
+    {
+      tag: "Estate",
+      title: "Beneficiaries & estate planning",
+      body: "Binding death benefit nominations, reversionary pensions and beneficiary structures make sure your super ends up in the right hands, quickly and tax effectively.",
     },
   ];
-
-  const [open, setOpen] = useState<Record<number, boolean>>({});
-  const toggle = (n: number) => setOpen((o) => ({ ...o, [n]: !o[n] }));
 
   return (
     <PageShell>
       <PageHeader pageLabel="WHAT YOU MAY NOT KNOW" />
 
       <div className="flex-1 flex flex-col min-h-0">
-        <div className="flex items-end justify-between gap-6 border-b border-navy/10 pb-4 mb-5">
+        <div className="flex items-end justify-between gap-6 border-b border-navy/10 pb-4 mb-6">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-cyan mb-2">There is so much more</div>
-            <h2 className="text-[26px] font-bold font-heading text-navy leading-[1.1] max-w-2xl">
-              Fifteen other areas that <span className="text-cyan">could be quietly costing you</span>
+            <h2 className="text-[28px] font-bold font-heading text-navy leading-[1.1] max-w-2xl">
+              Other areas where advice <span className="text-cyan">could quietly change your outcome</span>
             </h2>
           </div>
         </div>
 
-        <p className="text-[12px] text-muted-foreground mb-5 max-w-3xl leading-relaxed">
-          Your superannuation is only one piece of the picture. Tap <span className="font-semibold text-navy">Read more</span> on any strategy below to see how it works and the key benefit it delivers.
+        <p className="text-[13px] text-muted-foreground mb-6 max-w-3xl leading-relaxed">
+          Your superannuation is only one piece of the picture. Below are a few of the areas that most people
+          have never had walked through in plain language, and where a good adviser can make a real difference.
         </p>
 
-        <div className="space-y-5 flex-1">
-          {groups.map((g) => (
-            <div key={g.section}>
-              <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan/90 mb-2">{g.section}</div>
-              <div className="rounded-xl border border-navy/10 divide-y divide-navy/10 overflow-hidden bg-white">
-                {g.items.map((t) => {
-                  const isOpen = !!open[t.n];
-                  return (
-                    <div key={t.n} className="px-3 py-2">
-                      <button
-                        type="button"
-                        onClick={() => toggle(t.n)}
-                        className="w-full flex items-center gap-3 text-left"
-                      >
-                        <div className="h-7 w-7 shrink-0 rounded-full border border-cyan/40 bg-cyan/5 flex items-center justify-center text-[10.5px] font-bold text-cyan tabular-nums">
-                          {String(t.n).padStart(2, "0")}
-                        </div>
-                        <div className="flex-1 text-[12.5px] font-semibold font-heading text-navy leading-tight">
-                          {t.title}
-                        </div>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-cyan/40 bg-cyan/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-cyan hover:bg-cyan/10 transition">
-                          {isOpen ? "Hide" : "Read more"}
-                          <ChevronDown className={`h-3 w-3 transition-transform ${isOpen ? "rotate-180" : ""}`} />
-                        </span>
-                      </button>
-                      {isOpen && (
-                        <div className="mt-2 ml-10 pl-3 border-l-2 border-cyan/30 space-y-1.5">
-                          <div className="text-[11.5px] leading-relaxed text-muted-foreground">
-                            <span className="text-navy font-semibold">Overview: </span>{t.overview}
-                          </div>
-                          <div className="text-[11.5px] leading-relaxed text-muted-foreground">
-                            <span className="text-navy font-semibold">Key benefit: </span>{t.benefit}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+        <div className="grid grid-cols-2 gap-5 flex-1">
+          {topics.map((t) => (
+            <div key={t.title} className="rounded-xl border border-navy/10 bg-white p-5 flex flex-col">
+              <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan mb-2">{t.tag}</div>
+              <div className="text-[15px] font-bold font-heading text-navy leading-tight mb-2">{t.title}</div>
+              <div className="text-[12px] leading-relaxed text-muted-foreground">{t.body}</div>
             </div>
           ))}
         </div>
+
 
 
 
