@@ -232,7 +232,7 @@ export default function InteractivePresentation({
         doc.setFont("helvetica", "bold");
         doc.text(`• ${c.title}`, 20, y); y += 6;
         doc.setFont("helvetica", "normal");
-        const lines = doc.splitTextToSize(c.blurb, 165);
+        const lines = doc.splitTextToSize(c.overview, 165);
         doc.text(lines, 25, y); y += lines.length * 5 + 4;
       });
     }
