@@ -4,7 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ChevronLeft, ChevronRight, Maximize, Minimize, X, Check, Send, Loader2, Copy, MessageCircle,
+  Target, Clock, ShieldCheck, PiggyBank, Wallet, Landmark, CreditCard, Scroll, HeartPulse, Gift,
+  Layers, Sparkles, Repeat, Users, Home, LucideIcon,
 } from "lucide-react";
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  "retirement-readiness": Target,
+  "ttr": Clock,
+  "de-risking": ShieldCheck,
+  "late-super": PiggyBank,
+  "tax-withdrawal": Wallet,
+  "age-pension": Landmark,
+  "debt-clearance": CreditCard,
+  "estate": Scroll,
+  "aged-care": HeartPulse,
+  "legacy-gifting": Gift,
+  "three-bucket": Layers,
+  "anti-death-tax": Sparkles,
+  "redraw-recycle": Repeat,
+  "spouse-equalisation": Users,
+  "downsizer": Home,
+};
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import jsPDF from "jspdf";
