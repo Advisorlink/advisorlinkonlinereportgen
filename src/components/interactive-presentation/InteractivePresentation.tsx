@@ -329,6 +329,13 @@ export default function InteractivePresentation({
             />
           )}
 
+          {slide.kind === "thankyou" && (
+            <ThankYouSlide
+              selectedCount={selected.size}
+              onNext={next}
+            />
+          )}
+
           {slide.kind === "notes" && (
             <NotesSlide
               clientName={initialName}
