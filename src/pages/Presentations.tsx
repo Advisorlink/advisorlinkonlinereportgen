@@ -313,7 +313,7 @@ export default function Presentations() {
         {showSlideshow && activeMeeting && (
           <InteractivePresentation
             clientName={activeMeeting.client_name}
-            onClose={() => { setShowSlideshow(false); setPausedSlide(null); }}
+            onExit={() => { setShowSlideshow(false); setPausedSlide(null); }}
           />
         )}
 
