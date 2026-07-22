@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ChevronLeft, ChevronRight, Maximize, Minimize, X, Check, Send, Loader2, Copy,
-  ChevronDown,
+  PiggyBank, TrendingUp, Umbrella, Home, HandCoins, Receipt, MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,72 +26,27 @@ import slide10 from "@/assets/presentation/10-opportunities.png";
 /* ============================================================ */
 
 type Category = { id: string; title: string; overview: string; benefit: string };
-type Section = { heading: string; items: Category[] };
 
-const SECTIONS: Section[] = [
-  {
-    heading: "Core Planning & Income Strategies",
-    items: [
-      { id: "retirement-readiness", title: 'Retirement Readiness ("The Number")',
-        overview: "Detailed cash-flow modeling to project how long capital will last based on expected expenses, healthcare, and travel.",
-        benefit: "Gives complete clarity on whether you can afford to stop working and at what age." },
-      { id: "ttr", title: "Transition-to-Retirement (TTR) Strategy",
-        overview: "Commencing a partial pension from super while still working past age 60.",
-        benefit: "Reduce working hours without dropping lifestyle income, or boost super tax-free via salary sacrifice while working full-time." },
-      { id: "de-risking", title: "De-risking & Sequence-of-Returns Protection",
-        overview: "Shifting portfolio allocation to protect wealth from a sudden market downturn right before retirement.",
-        benefit: "Prevents forced selling of growth assets at a loss during market dips." },
-      { id: "late-super", title: "Maximising Late-Stage Super Contributions",
-        overview: "Utilising salary sacrificing, catch-up concessional rules, and non-concessional caps during peak earning years.",
-        benefit: "Maximises compounding inside a low-tax environment before hitting full retirement." },
-      { id: "tax-withdrawal", title: "Tax-Efficient Withdrawal & Income Sequencing",
-        overview: "Planning the exact order in which you draw down from cash, taxable accounts, and tax-sheltered super.",
-        benefit: "Keeps personal marginal income tax as close to zero as possible across your retirement." },
-    ],
-  },
-  {
-    heading: "Entitlements, Debt & Legacy",
-    items: [
-      { id: "age-pension", title: "Social Security & Age Pension Optimisation",
-        overview: "Structuring assets and income streams to align with government means tests (Assets & Income Tests).",
-        benefit: "Maximises state pension entitlements and healthcare concession cards." },
-      { id: "debt-clearance", title: "Pre-Retirement Debt Clearance",
-        overview: "Directing cash flow to eliminate mortgages, personal loans, and credit debts prior to leaving work.",
-        benefit: "Drastically reduces monthly overheads, lowering the income required to fund retirement." },
-      { id: "estate", title: "Estate Planning & Beneficiary Structuring",
-        overview: "Updating binding nominations, testamentary trusts, and ownership structures.",
-        benefit: "Ensures seamless, tax-minimised wealth transfer to loved ones without legal disputes." },
-      { id: "aged-care", title: "Healthcare & Aged Care Planning",
-        overview: "Stress-testing portfolios for longevity (living into your 90s) and setting aside contingency buffers for long-term care.",
-        benefit: "Protects the surviving spouse from financial distress if one partner requires high-level aged care." },
-      { id: "gifting", title: "Early Legacy & Gifting Strategies",
-        overview: "Assisting adult children with home deposits or family costs using structured gifts or formal family loans.",
-        benefit: "Helps children when they need it most while ensuring you don't breach gifting rules or jeopardise your own security." },
-    ],
-  },
-  {
-    heading: "Specialised Execution Strategies",
-    items: [
-      { id: "three-bucket", title: 'The "Three-Bucket" Income Strategy',
-        overview: "Dividing wealth into Bucket 1 (Cash for 1–3 years), Bucket 2 (Defensive Income), and Bucket 3 (Long-term Growth).",
-        benefit: "Eliminates market anxiety by ensuring living expenses are funded by cash regardless of market crashes." },
-      { id: "recontribution", title: 'Super Re-Contribution Strategy ("Anti-Death Tax")',
-        overview: "Withdrawing super tax-free after age 60 and re-contributing it back as an after-tax (non-concessional) amount.",
-        benefit: "Shifts the balance from taxable to tax-free, saving non-dependant adult children up to 17% tax on inherited super." },
-      { id: "redraw-recycle", title: "Redraw & Recycle (Mortgage Offset to Super)",
-        overview: "Using cash in home loan offset/redraw accounts to make tax-deductible super contributions before age 67.",
-        benefit: "Reduces personal taxable income while building higher tax-sheltered wealth inside super." },
-      { id: "spouse-equalisation", title: "Spouse Equalisation & Pension Shielding",
-        overview: "Transferring super contributions to a younger or lower-balance spouse.",
-        benefit: "Shields accumulation balances from Centrelink tests and doubles tax-free pension transfer caps." },
-      { id: "downsizer", title: "Downsizer Contribution Strategy",
-        overview: "Contributing up to $300,000 per person ($600,000 per couple) into super from the sale of a home owned for 10+ years.",
-        benefit: "Injects a large lump sum into the tax-free retirement environment late in life without breaching contribution caps." },
-    ],
-  },
+const CATEGORIES: Category[] = [
+  { id: "superannuation", title: "Superannuation",
+    overview: "Make sure your super is working as hard as it can for your future.",
+    benefit: "Optimise fund choice, fees and contributions to maximise your retirement balance." },
+  { id: "investments", title: "Investments",
+    overview: "Grow your wealth faster with the right investment strategy.",
+    benefit: "Tailored portfolios aligned to your goals, timeframe and risk profile." },
+  { id: "insurance", title: "Insurance",
+    overview: "Protect what matters most and get the right cover in place.",
+    benefit: "Life, TPD, trauma and income protection structured to safeguard your family." },
+  { id: "retirement-planning", title: "Retirement Planning",
+    overview: "Build a plan today for the lifestyle you want tomorrow.",
+    benefit: "A clear roadmap covering income, drawdowns, aged care and legacy." },
+  { id: "debt-management", title: "Debt Management",
+    overview: "Pay off debt sooner and take control of your financial future.",
+    benefit: "Restructure loans, reduce interest and free up cash flow for what matters." },
+  { id: "tax-optimisation", title: "Tax Optimisation",
+    overview: "Legal strategies to help you keep more of what you earn.",
+    benefit: "Smart structuring, deductions and timing to legally minimise tax." },
 ];
-
-const CATEGORIES: Category[] = SECTIONS.flatMap(s => s.items);
 
 /* ============================================================ */
 /*  SLIDE DEFINITIONS                                            */
@@ -389,146 +344,166 @@ export default function InteractivePresentation({
 function OpportunitiesSlide({
   selected, onToggle, onContinue,
 }: { selected: Set<string>; onToggle: (id: string) => void; onContinue: () => void }) {
+  const iconFor = (id: string) => {
+    const cls = "w-full h-full";
+    switch (id) {
+      case "superannuation": return <PiggyBank className={cls} strokeWidth={1.75} />;
+      case "investments": return <TrendingUp className={cls} strokeWidth={1.75} />;
+      case "insurance": return <Umbrella className={cls} strokeWidth={1.75} />;
+      case "retirement-planning": return <Home className={cls} strokeWidth={1.75} />;
+      case "debt-management": return <HandCoins className={cls} strokeWidth={1.75} />;
+      case "tax-optimisation": return <Receipt className={cls} strokeWidth={1.75} />;
+      default: return null;
+    }
+  };
+
   return (
-    <div className="absolute inset-0 flex bg-[#0F2A44] text-white overflow-hidden font-sans"
+    <div className="absolute inset-0 flex bg-white overflow-hidden"
          style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <style>{`
-        .opps-scroll::-webkit-scrollbar { width: 4px; }
-        .opps-scroll::-webkit-scrollbar-track { background: transparent; }
-        .opps-scroll::-webkit-scrollbar-thumb { background: rgba(24,165,175,0.35); border-radius: 10px; }
-        .opps-scroll::-webkit-scrollbar-thumb:hover { background: rgba(24,165,175,0.65); }
-        .opps-serif { font-family: 'Playfair Display', Georgia, serif; }
-      `}</style>
-
-      {/* LEFT — brand panel */}
-      <div className="w-[34%] h-full bg-[#0B2038] border-r border-white/5 relative overflow-hidden flex flex-col justify-between"
-           style={{ padding: "clamp(24px, 3.5vw, 64px)" }}>
-        {/* ambient glow */}
-        <div className="absolute -top-24 -left-24 rounded-full"
-             style={{ width: "60%", height: "60%", background: "rgba(24,165,175,0.18)", filter: "blur(90px)" }} />
-        <div className="absolute -bottom-24 -right-24 rounded-full"
-             style={{ width: "55%", height: "55%", background: "rgba(24,165,175,0.10)", filter: "blur(100px)" }} />
-
-        <div className="relative z-10">
-          <div className="text-[#18A5AF] font-medium uppercase tracking-[0.28em]"
-               style={{ fontSize: "clamp(9px, 0.75vw, 12px)" }}>
-            Settled &amp; Sound
+      {/* LEFT — cream/white brand panel */}
+      <div className="w-[42%] h-full relative flex flex-col bg-[#F5F3EE]">
+        {/* Top: logo */}
+        <div style={{ padding: "clamp(28px, 3.5vw, 60px)" }}>
+          <div className="font-bold tracking-tight text-[#0F2A44]"
+               style={{ fontSize: "clamp(22px, 2.1vw, 34px)" }}>
+            Settled<span className="text-[#18A5AF]">&amp;</span>Sound
           </div>
-          <h2 className="opps-serif italic text-white mt-6 leading-[1.05]"
-              style={{ fontSize: "clamp(28px, 3.2vw, 52px)" }}>
-            Some other<br/>
-            <span className="text-[#18A5AF]">opportunities</span><br/>
-            for advice
-          </h2>
-          <div className="h-[2px] w-14 bg-[#18A5AF] mt-6" />
         </div>
 
-        <div className="relative z-10">
-          <p className="text-white/60 leading-relaxed max-w-xs mb-6"
-             style={{ fontSize: "clamp(11px, 0.95vw, 15px)" }}>
-            Select the areas you'd like to explore further. We'll tailor your roadmap around what matters most to you.
+        {/* Middle: heading + copy */}
+        <div className="flex-1 flex flex-col justify-center relative z-10"
+             style={{ padding: "0 clamp(28px, 3.5vw, 60px)" }}>
+          <h1 className="font-black text-[#0F2A44] leading-[0.98] tracking-tight"
+              style={{ fontSize: "clamp(38px, 4.6vw, 82px)" }}>
+            Some other<br/>
+            opportunities<br/>
+            <span className="text-[#18A5AF]">for advice.</span>
+          </h1>
+          <div className="h-[3px] w-20 bg-[#18A5AF] mt-6" />
+          <p className="text-[#0F2A44]/75 mt-8 max-w-md leading-relaxed"
+             style={{ fontSize: "clamp(13px, 1.05vw, 18px)" }}>
+            There may be other areas of your financial life that, with the right advice,
+            could drastically improve your future.
           </p>
-          <div className="flex items-center justify-between gap-4">
-            <div className="text-white/50 uppercase tracking-widest"
-                 style={{ fontSize: "clamp(9px, 0.75vw, 11px)" }}>
-              {selected.size} selected
+          <p className="text-[#0F2A44] font-bold mt-6"
+             style={{ fontSize: "clamp(14px, 1.15vw, 20px)" }}>
+            What ones interest you?
+          </p>
+        </div>
+
+        {/* Bottom: navy wave with chat callout */}
+        <div className="relative">
+          <svg viewBox="0 0 720 140" preserveAspectRatio="none" className="w-full block"
+               style={{ height: "clamp(110px, 14vw, 180px)" }}>
+            <defs>
+              <linearGradient id="wave1" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stopColor="#0F2A44"/>
+                <stop offset="1" stopColor="#123657"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,40 C180,90 360,10 540,50 C640,72 700,60 720,55 L720,140 L0,140 Z" fill="url(#wave1)"/>
+            <path d="M0,80 C180,120 360,60 540,90 C640,105 700,100 720,98 L720,140 L0,140 Z" fill="#18A5AF" opacity="0.55"/>
+          </svg>
+          <div className="absolute inset-0 flex items-center gap-4"
+               style={{ padding: "0 clamp(28px, 3.5vw, 60px)" }}>
+            <div className="flex-shrink-0 rounded-full border-2 border-[#18A5AF]/70 flex items-center justify-center bg-[#0F2A44]/40"
+                 style={{ width: "clamp(38px, 3.6vw, 60px)", height: "clamp(38px, 3.6vw, 60px)" }}>
+              <MessageCircle className="text-[#18A5AF]" style={{ width: "55%", height: "55%" }} strokeWidth={1.75}/>
             </div>
-            <button
-              onClick={onContinue}
-              className="group flex items-center gap-2 text-white hover:text-[#18A5AF] transition-colors font-medium"
-              style={{ fontSize: "clamp(11px, 0.95vw, 14px)" }}
-            >
-              Skip to form
-              <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </button>
+            <div className="text-white leading-tight">
+              <div className="font-medium" style={{ fontSize: "clamp(11px, 0.95vw, 16px)" }}>
+                Let's uncover what's possible for you.
+              </div>
+              <div className="text-[#7CE3E9]" style={{ fontSize: "clamp(11px, 0.95vw, 16px)" }}>
+                Which areas would you like advice on?
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* RIGHT — scrollable grid */}
-      <div className="flex-1 h-full flex flex-col min-w-0">
-        <div className="flex-1 overflow-y-auto opps-scroll min-h-0"
-             style={{ padding: "clamp(20px, 2.8vw, 48px)" }}>
-          <div className="grid grid-cols-3" style={{ gap: "clamp(14px, 1.8vw, 32px)" }}>
-            {SECTIONS.map((section, colIdx) => (
-              <div key={section.heading} className="flex flex-col">
-                <div className="sticky top-0 bg-[#0F2A44] pb-3 pt-1 z-20">
-                  <div className="flex items-baseline gap-2 mb-1">
-                    <span className="opps-serif italic text-[#18A5AF]"
-                          style={{ fontSize: "clamp(14px, 1.2vw, 20px)" }}>
-                      0{colIdx + 1}
-                    </span>
-                    <div className="h-px flex-1 bg-white/10" />
+      {/* RIGHT — photo backdrop + 3×2 card grid */}
+      <div className="flex-1 h-full relative overflow-hidden">
+        <img
+          src={slide10}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ objectPosition: "70% center" }}
+          draggable={false}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-[#0F2A44]/25" />
+
+        <div className="relative z-10 h-full flex flex-col justify-center"
+             style={{ padding: "clamp(24px, 3vw, 56px)" }}>
+          <div className="grid grid-cols-3 grid-rows-2 flex-1"
+               style={{ gap: "clamp(10px, 1.3vw, 22px)", maxHeight: "82%" }}>
+            {CATEGORIES.map(cat => {
+              const isSel = selected.has(cat.id);
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => onToggle(cat.id)}
+                  aria-pressed={isSel}
+                  className={[
+                    "group relative rounded-2xl bg-white text-center flex flex-col items-center justify-center transition-all duration-200",
+                    "shadow-[0_10px_30px_-12px_rgba(15,42,68,0.35)] hover:shadow-[0_18px_40px_-14px_rgba(15,42,68,0.5)]",
+                    "hover:-translate-y-0.5",
+                    isSel ? "ring-2 ring-[#18A5AF] shadow-[0_18px_40px_-12px_rgba(24,165,175,0.55)]" : "ring-1 ring-black/5",
+                  ].join(" ")}
+                  style={{ padding: "clamp(14px, 1.8vw, 28px) clamp(10px, 1.4vw, 22px)" }}
+                >
+                  {/* selected check pill */}
+                  <div className={[
+                    "absolute top-2.5 right-2.5 rounded-full flex items-center justify-center transition-all",
+                    isSel ? "bg-[#18A5AF] scale-100 opacity-100" : "bg-[#0F2A44]/5 scale-90 opacity-0 group-hover:opacity-60",
+                  ].join(" ")}
+                       style={{ width: "clamp(18px, 1.4vw, 24px)", height: "clamp(18px, 1.4vw, 24px)" }}>
+                    <Check className="text-white" style={{ width: "70%", height: "70%" }} strokeWidth={3.5} />
                   </div>
-                  <h3 className="text-[#18A5AF]/90 uppercase font-bold tracking-[0.18em] leading-tight"
-                      style={{ fontSize: "clamp(9px, 0.72vw, 11px)" }}>
-                    {section.heading}
+
+                  <div className="text-[#0F2A44]"
+                       style={{ width: "clamp(34px, 3.2vw, 54px)", height: "clamp(34px, 3.2vw, 54px)" }}>
+                    {iconFor(cat.id)}
+                  </div>
+
+                  <h3 className="font-bold text-[#0F2A44] mt-3 leading-tight"
+                      style={{ fontSize: "clamp(13px, 1.15vw, 20px)" }}>
+                    {cat.title}
                   </h3>
-                </div>
-
-                <div className="space-y-3">
-                  {section.items.map(cat => {
-                    const isSel = selected.has(cat.id);
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => onToggle(cat.id)}
-                        aria-pressed={isSel}
-                        className={[
-                          "w-full text-left rounded-lg border transition-all duration-200 relative",
-                          isSel
-                            ? "bg-[#18A5AF]/12 border-[#18A5AF]/50 shadow-[0_0_0_1px_rgba(24,165,175,0.25),0_10px_30px_-15px_rgba(24,165,175,0.5)]"
-                            : "bg-white/[0.03] border-white/8 hover:bg-white/[0.06] hover:border-white/15",
-                        ].join(" ")}
-                        style={{ padding: "clamp(10px, 1.1vw, 18px)" }}
-                      >
-                        <div className="flex justify-between items-start gap-3 mb-1.5">
-                          <h4 className="font-semibold text-white leading-tight"
-                              style={{ fontSize: "clamp(11px, 0.9vw, 14px)" }}>
-                            {cat.title}
-                          </h4>
-                          <div
-                            className={[
-                              "flex-shrink-0 rounded border-2 flex items-center justify-center transition-colors mt-0.5",
-                              isSel ? "bg-[#18A5AF] border-[#18A5AF]" : "border-white/25",
-                            ].join(" ")}
-                            style={{ width: "clamp(14px, 1vw, 18px)", height: "clamp(14px, 1vw, 18px)" }}
-                          >
-                            {isSel && <Check className="text-white" style={{ width: "70%", height: "70%" }} strokeWidth={3.5} />}
-                          </div>
-                        </div>
-                        <p className="text-white/55 leading-snug mb-2"
-                           style={{ fontSize: "clamp(9.5px, 0.75vw, 12px)" }}>
-                          {cat.overview}
-                        </p>
-                        <div className="text-[#18A5AF]/85 uppercase tracking-wider font-semibold"
-                             style={{ fontSize: "clamp(8px, 0.62vw, 10px)" }}>
-                          Key benefit &middot; <span className="text-[#18A5AF] normal-case tracking-normal font-medium">{cat.benefit}</span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+                  <p className="text-[#0F2A44]/65 mt-1.5 leading-snug"
+                     style={{ fontSize: "clamp(10px, 0.85vw, 14px)" }}>
+                    {cat.overview}
+                  </p>
+                </button>
+              );
+            })}
           </div>
-        </div>
 
-        {/* footer strip */}
-        <div className="border-t border-white/5 bg-[#0B2038]/80 backdrop-blur flex items-center justify-between"
-             style={{ padding: "clamp(10px, 1vw, 18px) clamp(20px, 2.8vw, 48px)" }}>
-          <div className="text-white/40 uppercase tracking-[0.2em]"
-               style={{ fontSize: "clamp(9px, 0.7vw, 11px)" }}>
-            Slide 10 &mdash; Opportunities
+          {/* footer actions */}
+          <div className="flex items-center justify-between gap-4 mt-4">
+            <div className="text-white/95 font-medium bg-[#0F2A44]/55 backdrop-blur px-3 py-1.5 rounded-full"
+                 style={{ fontSize: "clamp(10px, 0.85vw, 13px)" }}>
+              {selected.size} selected
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onContinue}
+                className="text-white/95 hover:text-white bg-[#0F2A44]/55 hover:bg-[#0F2A44]/75 backdrop-blur rounded-full transition-all"
+                style={{ padding: "clamp(6px, 0.7vw, 10px) clamp(12px, 1.2vw, 18px)", fontSize: "clamp(10px, 0.85vw, 13px)" }}
+              >
+                Skip
+              </button>
+              <button
+                onClick={onContinue}
+                className="group flex items-center gap-2 bg-[#18A5AF] hover:bg-[#18A5AF]/90 text-white rounded-full transition-all font-semibold shadow-lg"
+                style={{ padding: "clamp(8px, 0.8vw, 12px) clamp(16px, 1.6vw, 26px)", fontSize: "clamp(11px, 0.95vw, 15px)" }}
+              >
+                Continue to form
+                <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
           </div>
-          <button
-            onClick={onContinue}
-            className="group flex items-center gap-2 bg-[#18A5AF] hover:bg-[#18A5AF]/90 text-white rounded-full transition-all"
-            style={{ padding: "clamp(8px, 0.7vw, 12px) clamp(14px, 1.4vw, 22px)", fontSize: "clamp(11px, 0.9vw, 14px)" }}
-          >
-            Continue to form
-            <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </button>
         </div>
       </div>
     </div>
