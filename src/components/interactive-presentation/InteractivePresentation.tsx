@@ -40,6 +40,8 @@ import slide08 from "@/assets/presentation/08-explained-clearly.png";
 import slide09 from "@/assets/presentation/09-next-steps.png";
 import beachBg from "@/assets/presentation/opportunities-beach.jpg";
 import opportunitiesBackdrop from "@/assets/presentation/opportunities-backdrop.png.asset.json";
+import ssLogoWhite from "@/assets/settled-and-sound-wordmark-white.png.asset.json";
+import ssLogoNavy from "@/assets/settled-and-sound-wordmark.png.asset.json";
 
 /* ============================================================ */
 /*  ADVICE CATEGORIES — grouped                                  */
@@ -120,7 +122,7 @@ const CATEGORIES: Category[] = CATEGORY_GROUPS.flatMap(g => g.items);
 type SlideDef =
   | { kind: "image"; src: string; label: string }
   | { kind: "opportunities"; label: string }
-  | { kind: "form"; label: string };
+  | { kind: "notes"; label: string };
 
 const SLIDES: SlideDef[] = [
   { kind: "image", src: slide01, label: "Welcome" },
@@ -133,7 +135,7 @@ const SLIDES: SlideDef[] = [
   { kind: "image", src: slide08, label: "Was everything explained" },
   { kind: "image", src: slide09, label: "Super easy next steps" },
   { kind: "opportunities", label: "Other opportunities for advice" },
-  { kind: "form", label: "Your details" },
+  { kind: "notes", label: "Client file note" },
 ];
 
 /* ============================================================ */
@@ -324,15 +326,11 @@ export default function InteractivePresentation({
             />
           )}
 
-          {slide.kind === "form" && (
-            <FormSlide
-              name={name} setName={setName}
-              email={email} setEmail={setEmail}
-              phone={phone} setPhone={setPhone}
+          {slide.kind === "notes" && (
+            <NotesSlide
+              clientName={initialName}
+              clientEmail={initialEmail}
               selected={selected}
-              submit={submit}
-              submitting={submitting}
-              submitted={submitted}
               onExit={handleExit}
             />
           )}
@@ -471,7 +469,7 @@ function OpportunitiesSlide({
                 )}
 
                 <div
-                  className="flex items-center justify-center text-[#0F2A44]"
+                  className="flex items-center justify-center text-[#18A5AF]"
                   style={{
                     width: "clamp(42px, 3.4vw, 60px)",
                     height: "clamp(42px, 3.4vw, 60px)",
@@ -517,7 +515,7 @@ function OpportunitiesSlide({
           className="group flex items-center gap-2 bg-[#18A5AF] hover:bg-[#18A5AF]/90 text-white rounded-full transition-all font-semibold shadow-lg"
           style={{ padding: "clamp(6px, 0.68vw, 10px) clamp(14px, 1.35vw, 22px)", fontSize: "clamp(10px, 0.78vw, 13px)" }}
         >
-          Continue to form
+          Continue
           <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
@@ -534,108 +532,156 @@ function OpportunitiesSlide({
 }
 
 /* ============================================================ */
-/*  FORM SLIDE — client details + submit to Drive                */
+/*  NOTES SLIDE — beautiful client file note for the adviser     */
 /* ============================================================ */
 
-function FormSlide({
-  name, setName, email, setEmail, phone, setPhone,
-  selected, submit, submitting, submitted, onExit,
+function NotesSlide({
+  clientName, clientEmail, selected, onExit,
 }: {
-  name: string; setName: (s: string) => void;
-  email: string; setEmail: (s: string) => void;
-  phone: string; setPhone: (s: string) => void;
+  clientName: string;
+  clientEmail: string;
   selected: Set<string>;
-  submit: () => void; submitting: boolean; submitted: boolean;
   onExit: () => void;
 }) {
   const picked = CATEGORIES.filter(c => selected.has(c.id));
-
-  if (submitted) {
-    return (
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0F2A44] to-[#123657] text-white flex flex-col items-center justify-center p-8 text-center">
-        <div className="h-24 w-24 rounded-full bg-[#18A5AF] flex items-center justify-center mb-6 shadow-2xl">
-          <Check className="h-12 w-12 text-white" strokeWidth={3} />
-        </div>
-        <h1 className="font-black tracking-tight" style={{ fontSize: "clamp(28px, 4vw, 64px)" }}>Thank you!</h1>
-        <p className="mt-4 max-w-2xl text-white/80" style={{ fontSize: "clamp(14px, 1.4vw, 22px)" }}>
-          Your request has been received. One of our licensed advisers will be in touch with you shortly.
-        </p>
-        <Button onClick={onExit} className="mt-10 bg-white text-[#0F2A44] hover:bg-white/90 rounded-full px-8">
-          Close presentation
-        </Button>
-      </div>
-    );
-  }
+  const groupedPicks = CATEGORY_GROUPS
+    .map(g => ({ ...g, items: g.items.filter(i => selected.has(i.id)) }))
+    .filter(g => g.items.length > 0);
+  const dateStr = new Date().toLocaleDateString("en-AU", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
 
   return (
-    <div className="absolute inset-0 grid grid-cols-2 bg-white">
-      {/* LEFT: brand panel */}
-      <div className="relative bg-[#0F2A44] p-[3.5%] text-white flex flex-col">
-        <div className="text-white font-bold text-[1.6vw] tracking-tight">
-          Settled<span className="text-[#18A5AF]">&</span>Sound
-        </div>
-        <div className="mt-[15%]">
-          <h1 className="font-black leading-[1.02] tracking-tight" style={{ fontSize: "clamp(28px, 4.2vw, 68px)" }}>
-            Let's<br/>get you<br/><span className="text-[#18A5AF]">connected.</span>
-          </h1>
-          <div className="h-[3px] w-16 bg-[#18A5AF] mt-4" />
-          <p className="text-white/80 mt-6 max-w-[85%]" style={{ fontSize: "clamp(12px, 1.15vw, 20px)" }}>
-            Pop in your details and we'll send this straight through to our advisory team.
-          </p>
+    <div className="absolute inset-0 bg-[#F5F3EE] flex items-center justify-center p-[2%]"
+         style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      {/* File note "paper" */}
+      <div className="relative w-full h-full max-w-[92%] max-h-[96%] bg-white rounded-2xl shadow-[0_30px_60px_-20px_rgba(15,42,68,0.35)] overflow-hidden flex flex-col">
+        {/* Header band */}
+        <div className="relative bg-gradient-to-r from-[#0F2A44] via-[#123657] to-[#0F2A44] text-white px-[3%] py-[2%] flex items-center justify-between">
+          <img src={ssLogoWhite.url} alt="Settled & Sound" className="h-[3.2vw] max-h-[46px] object-contain" draggable={false} />
+          <div className="text-right">
+            <div className="uppercase tracking-[0.25em] text-[#18A5AF] font-semibold"
+                 style={{ fontSize: "clamp(9px, 0.72vw, 12px)" }}>Client File Note</div>
+            <div className="text-white/70 mt-1" style={{ fontSize: "clamp(10px, 0.85vw, 14px)" }}>{dateStr}</div>
+          </div>
         </div>
 
-        <div className="mt-auto space-y-2 text-white/70" style={{ fontSize: "clamp(11px, 1vw, 16px)" }}>
-          {picked.length > 0 ? (
-            <>
-              <div className="text-[#18A5AF] font-semibold uppercase tracking-wider text-xs">You're interested in</div>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {picked.map(p => (
-                  <span key={p.id} className="px-3 py-1 rounded-full bg-white/10 text-white text-xs">{p.title}</span>
-                ))}
+        {/* Body */}
+        <div className="flex-1 min-h-0 overflow-y-auto opp-scroll px-[4%] py-[2.5%]">
+          {/* Client block */}
+          <div className="flex flex-wrap items-end justify-between gap-4 pb-4 border-b border-[#0F2A44]/10">
+            <div>
+              <div className="text-[#0F2A44]/50 uppercase tracking-wider font-semibold"
+                   style={{ fontSize: "clamp(9px, 0.7vw, 11px)" }}>Prepared for</div>
+              <div className="text-[#0F2A44] font-black leading-tight mt-1"
+                   style={{ fontSize: "clamp(22px, 2.4vw, 40px)" }}>
+                {clientName?.trim() || "Client"}
               </div>
-            </>
-          ) : (
-            <div className="text-white/50 italic text-xs">No areas selected — go back to pick some.</div>
+              {clientEmail && (
+                <div className="text-[#0F2A44]/60 mt-1" style={{ fontSize: "clamp(11px, 0.95vw, 15px)" }}>
+                  {clientEmail}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="rounded-full bg-[#18A5AF]/10 text-[#0F2A44] font-semibold px-4 py-2"
+                   style={{ fontSize: "clamp(11px, 0.9vw, 14px)" }}>
+                {picked.length} {picked.length === 1 ? "area" : "areas"} of interest
+              </div>
+            </div>
+          </div>
+
+          {/* Summary paragraph */}
+          <p className="text-[#0F2A44]/75 mt-5 leading-relaxed max-w-4xl"
+             style={{ fontSize: "clamp(12px, 1vw, 16px)" }}>
+            During today's presentation, {clientName?.trim() || "the client"} indicated interest in the
+            following advice areas. Please review ahead of your upcoming meeting and prepare talking
+            points and any supporting analysis.
+          </p>
+
+          {/* Grouped picks */}
+          <div className="mt-6 space-y-6">
+            {groupedPicks.length === 0 && (
+              <div className="rounded-xl border border-dashed border-[#0F2A44]/20 p-6 text-center text-[#0F2A44]/50"
+                   style={{ fontSize: "clamp(12px, 1vw, 15px)" }}>
+                No areas were selected during the presentation.
+              </div>
+            )}
+            {groupedPicks.map(g => (
+              <section key={g.id}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-[2px] w-6 bg-[#18A5AF]" />
+                  <h3 className="text-[#0F2A44] font-bold uppercase tracking-wider"
+                      style={{ fontSize: "clamp(11px, 0.9vw, 14px)" }}>{g.label}</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {g.items.map(item => {
+                    const Icon = CATEGORY_ICONS[item.id] ?? Sparkles;
+                    return (
+                      <div key={item.id}
+                           className="rounded-xl border border-[#0F2A44]/10 bg-white p-4 flex gap-3 hover:border-[#18A5AF]/40 transition">
+                        <div className="shrink-0 rounded-lg bg-[#18A5AF]/10 flex items-center justify-center"
+                             style={{ width: "clamp(38px, 2.6vw, 46px)", height: "clamp(38px, 2.6vw, 46px)" }}>
+                          <Icon className="text-[#18A5AF]" style={{ width: "60%", height: "60%" }} strokeWidth={2} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-[#0F2A44] font-bold leading-tight"
+                               style={{ fontSize: "clamp(12px, 0.98vw, 15px)" }}>
+                            {item.title}
+                          </div>
+                          <div className="text-[#0F2A44]/65 mt-1 leading-snug"
+                               style={{ fontSize: "clamp(10px, 0.82vw, 13px)" }}>
+                            {item.overview}
+                          </div>
+                          <div className="mt-2 text-[#18A5AF] font-semibold"
+                               style={{ fontSize: "clamp(10px, 0.78vw, 12px)" }}>
+                            Client benefit: <span className="text-[#0F2A44]/75 font-normal">{item.benefit}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
+
+          {/* Adviser prep box */}
+          {picked.length > 0 && (
+            <div className="mt-8 rounded-xl bg-[#0F2A44] text-white p-5">
+              <div className="text-[#18A5AF] uppercase tracking-wider font-semibold"
+                   style={{ fontSize: "clamp(10px, 0.78vw, 12px)" }}>Adviser preparation</div>
+              <p className="mt-2 text-white/85 leading-relaxed"
+                 style={{ fontSize: "clamp(11px, 0.9vw, 14px)" }}>
+                Bring specific figures, worked examples and any relevant strategy papers for the
+                selected areas to the next meeting. Confirm the client's current position for each
+                topic and outline the next actionable step.
+              </p>
+            </div>
           )}
         </div>
-      </div>
 
-      {/* RIGHT: form */}
-      <div className="p-[5%] flex flex-col justify-center">
-        <h2 className="text-[#0F2A44] font-black tracking-tight" style={{ fontSize: "clamp(22px, 2.6vw, 44px)" }}>
-          Your details
-        </h2>
-        <p className="text-[#0F2A44]/60 mt-2" style={{ fontSize: "clamp(12px, 1.05vw, 18px)" }}>
-          We'll only use these to have an adviser reach out.
-        </p>
-
-        <div className="mt-8 space-y-4 max-w-lg">
+        {/* Thank-you / footer */}
+        <div className="relative bg-[#F5F3EE] border-t border-[#0F2A44]/10 px-[4%] py-[1.6%] flex items-center justify-between">
           <div>
-            <label className="text-[#0F2A44] font-semibold text-sm">Full name *</label>
-            <Input value={name} onChange={e => setName(e.target.value)} placeholder="Jane Smith" className="mt-1 h-12 text-base" />
+            <div className="text-[#0F2A44] font-black leading-tight"
+                 style={{ fontSize: "clamp(14px, 1.3vw, 22px)" }}>
+              Thank you.
+            </div>
+            <div className="text-[#0F2A44]/65 mt-0.5"
+                 style={{ fontSize: "clamp(10px, 0.85vw, 13px)" }}>
+              Your selections have been sent to your adviser to prepare for your meeting.
+            </div>
           </div>
-          <div>
-            <label className="text-[#0F2A44] font-semibold text-sm">Email *</label>
-            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@example.com" className="mt-1 h-12 text-base" />
-          </div>
-          <div>
-            <label className="text-[#0F2A44] font-semibold text-sm">Phone</label>
-            <Input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="0400 000 000" className="mt-1 h-12 text-base" />
-          </div>
-
           <Button
-            onClick={submit}
-            disabled={submitting}
-            className="w-full h-14 mt-4 bg-gradient-to-r from-[#7A2CFF] to-[#2F6BFF] hover:opacity-90 text-white text-base font-semibold rounded-xl shadow-lg"
+            onClick={onExit}
+            className="bg-[#18A5AF] hover:bg-[#18A5AF]/90 text-white rounded-full px-6"
           >
-            {submitting ? (
-              <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Sending…</>
-            ) : (
-              <><Send className="h-5 w-5 mr-2" /> Submit request</>
-            )}
+            Close
           </Button>
         </div>
       </div>
     </div>
   );
 }
+
