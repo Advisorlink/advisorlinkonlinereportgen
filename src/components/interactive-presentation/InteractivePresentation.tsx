@@ -389,150 +389,132 @@ export default function InteractivePresentation({
 function OpportunitiesSlide({
   selected, onToggle, onContinue,
 }: { selected: Set<string>; onToggle: (id: string) => void; onContinue: () => void }) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const toggleExpand = (id: string) => {
-    setExpanded(prev => {
-      const s = new Set(prev);
-      s.has(id) ? s.delete(id) : s.add(id);
-      return s;
-    });
-  };
+  const [openId, setOpenId] = useState<string | null>(null);
 
   return (
-    <div className="absolute inset-0 grid grid-cols-[36%_1fr] bg-white">
-      {/* LEFT — brand panel */}
-      <div className="relative bg-[#0F2A44] p-[3.5%] flex flex-col text-white overflow-hidden">
-        <div className="font-bold text-[1.4vw] tracking-tight">
-          Settled<span className="text-[#18A5AF]">&</span>Sound
-        </div>
-        <div className="mt-[12%]">
-          <h1 className="font-black leading-[1.02] tracking-tight" style={{ fontSize: "clamp(24px, 3.4vw, 56px)" }}>
-            Some other<br/>opportunities<br/><span className="text-[#18A5AF]">for advice.</span>
-          </h1>
-          <div className="h-[3px] w-14 bg-[#18A5AF] mt-4" />
-          <p className="text-white/80 mt-5 max-w-[92%]" style={{ fontSize: "clamp(11px, 1vw, 17px)" }}>
-            There may be other areas of your financial life that, with the right advice, could drastically improve your future.
-          </p>
-          <p className="font-bold mt-4" style={{ fontSize: "clamp(12px, 1.1vw, 19px)" }}>
-            Tick the ones that interest you.
-          </p>
-          <p className="text-white/60 mt-2" style={{ fontSize: "clamp(10px, 0.85vw, 14px)" }}>
-            Tap "Read more" on any item to see the details.
-          </p>
-        </div>
-
-        <div className="mt-auto relative z-10">
-          <div className="text-white/70 mb-3" style={{ fontSize: "clamp(11px, 0.95vw, 15px)" }}>
-            {selected.size} selected
+    <div className="absolute inset-0 grid grid-cols-[34%_1fr] bg-white">
+      {/* LEFT — brand panel matching the rest of the deck */}
+      <div className="relative overflow-hidden">
+        <img
+          src={slide10}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          draggable={false}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A44]/95 via-[#0F2A44]/90 to-[#0F2A44]/95" />
+        <div className="relative h-full w-full p-[8%] flex flex-col text-white">
+          <div className="font-bold tracking-tight" style={{ fontSize: "clamp(14px, 1.4vw, 22px)" }}>
+            Settled<span className="text-[#18A5AF]">&</span>Sound
           </div>
-          <Button
-            onClick={onContinue}
-            className="bg-[#18A5AF] hover:bg-[#18A5AF]/90 text-white rounded-full px-6 h-11"
-            style={{ fontSize: "clamp(12px, 1vw, 16px)" }}
-          >
-            Continue <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-        </div>
 
-        {/* decorative wave */}
-        <svg className="absolute bottom-0 left-0 w-full pointer-events-none" viewBox="0 0 500 120" preserveAspectRatio="none" style={{ height: "22%" }}>
-          <path d="M0,80 Q125,20 250,60 T500,50 L500,120 L0,120 Z" fill="#18A5AF" opacity="0.15" />
-          <path d="M0,95 Q125,45 250,80 T500,75 L500,120 L0,120 Z" fill="#18A5AF" opacity="0.25" />
-        </svg>
+          <div className="mt-auto mb-auto">
+            <h1 className="font-black leading-[1.02] tracking-tight" style={{ fontSize: "clamp(24px, 3.2vw, 54px)" }}>
+              Some other<br/>opportunities<br/><span className="text-[#18A5AF]">for advice.</span>
+            </h1>
+            <div className="h-[3px] w-14 bg-[#18A5AF] mt-4" />
+            <p className="text-white/85 mt-5" style={{ fontSize: "clamp(11px, 1vw, 17px)" }}>
+              There may be other areas of your financial life that, with the right advice, could drastically improve your future.
+            </p>
+            <p className="font-bold mt-4 text-[#18A5AF]" style={{ fontSize: "clamp(12px, 1.05vw, 18px)" }}>
+              Tick the ones that interest you.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-white/70" style={{ fontSize: "clamp(11px, 0.9vw, 14px)" }}>
+              {selected.size} selected
+            </div>
+            <Button
+              onClick={onContinue}
+              className="bg-[#18A5AF] hover:bg-[#18A5AF]/90 text-white rounded-full px-5 h-10"
+              style={{ fontSize: "clamp(11px, 0.95vw, 15px)" }}
+            >
+              Skip to form <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {/* RIGHT — the form */}
-      <div className="relative flex flex-col bg-[#F7F9FC]">
-        <div className="px-[4%] pt-[3%] pb-3 border-b border-[#0F2A44]/10 bg-white/70 backdrop-blur">
-          <div className="text-[#0F2A44] font-black tracking-tight" style={{ fontSize: "clamp(16px, 1.6vw, 26px)" }}>
-            Areas of interest
-          </div>
-          <div className="text-[#0F2A44]/60" style={{ fontSize: "clamp(10px, 0.9vw, 14px)" }}>
-            Choose any that resonate. We'll cover them together on your call.
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-[4%] py-[2.5%] space-y-5">
+      {/* RIGHT — compact 3-column grid, fits 16:9 with no scroll */}
+      <div className="relative flex flex-col bg-[#F7F9FC] p-[2.2%]">
+        <div className="grid grid-cols-3 gap-[1.8%] flex-1 min-h-0">
           {SECTIONS.map(section => (
-            <div key={section.heading}>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="h-[2px] flex-1 bg-[#18A5AF]/30" />
-                <div className="text-[#18A5AF] font-bold uppercase tracking-[0.14em]"
-                     style={{ fontSize: "clamp(9px, 0.8vw, 12px)" }}>
-                  {section.heading}
-                </div>
-                <div className="h-[2px] flex-1 bg-[#18A5AF]/30" />
+            <div key={section.heading} className="flex flex-col min-h-0">
+              <div className="text-[#18A5AF] font-bold uppercase tracking-[0.12em] mb-2 leading-tight"
+                   style={{ fontSize: "clamp(9px, 0.75vw, 12px)" }}>
+                {section.heading}
               </div>
 
-              <ul className="space-y-2">
+              <ul className="space-y-[6px] flex-1">
                 {section.items.map(cat => {
                   const isSel = selected.has(cat.id);
-                  const isOpen = expanded.has(cat.id);
+                  const isOpen = openId === cat.id;
                   return (
-                    <li
-                      key={cat.id}
-                      className={[
-                        "rounded-xl bg-white border transition-all",
-                        isSel ? "border-[#18A5AF] shadow-[0_4px_16px_-6px_rgba(24,165,175,0.4)]" : "border-[#0F2A44]/10 hover:border-[#18A5AF]/40",
-                      ].join(" ")}
-                    >
-                      <div className="flex items-center gap-3 px-4 py-3">
+                    <li key={cat.id} className="relative">
+                      <div
+                        className={[
+                          "rounded-lg bg-white border transition-all flex items-center gap-2 px-2.5 py-2",
+                          isSel ? "border-[#18A5AF] shadow-sm" : "border-[#0F2A44]/10 hover:border-[#18A5AF]/50",
+                        ].join(" ")}
+                      >
                         <button
                           onClick={() => onToggle(cat.id)}
                           aria-pressed={isSel}
                           aria-label={`Select ${cat.title}`}
                           className={[
-                            "flex-shrink-0 h-6 w-6 rounded-md border-2 flex items-center justify-center transition-all",
+                            "flex-shrink-0 rounded flex items-center justify-center transition-all",
                             isSel
                               ? "bg-[#18A5AF] border-[#18A5AF] text-white"
                               : "bg-white border-[#0F2A44]/30 hover:border-[#18A5AF]",
                           ].join(" ")}
+                          style={{ width: "clamp(16px, 1.3vw, 22px)", height: "clamp(16px, 1.3vw, 22px)", borderWidth: 2 }}
                         >
-                          {isSel && <Check className="h-4 w-4" strokeWidth={3} />}
+                          {isSel && <Check style={{ width: "70%", height: "70%" }} strokeWidth={3.5} />}
                         </button>
 
                         <button
                           onClick={() => onToggle(cat.id)}
                           className="flex-1 text-left text-[#0F2A44] font-semibold leading-tight"
-                          style={{ fontSize: "clamp(12px, 1.05vw, 17px)" }}
+                          style={{ fontSize: "clamp(10px, 0.85vw, 14px)" }}
                         >
                           {cat.title}
                         </button>
 
                         <button
-                          onClick={() => toggleExpand(cat.id)}
-                          className="flex items-center gap-1 text-[#18A5AF] hover:text-[#0F2A44] font-semibold flex-shrink-0"
-                          style={{ fontSize: "clamp(10px, 0.85vw, 13px)" }}
+                          onClick={() => setOpenId(isOpen ? null : cat.id)}
+                          className="text-[#18A5AF] hover:text-[#0F2A44] font-semibold flex-shrink-0 flex items-center gap-0.5"
+                          style={{ fontSize: "clamp(9px, 0.7vw, 11px)" }}
                         >
-                          {isOpen ? "Hide" : "Read more"}
+                          {isOpen ? "Hide" : "Read"}
                           <ChevronDown
-                            className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                            className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
+                            style={{ width: "clamp(10px, 0.85vw, 14px)", height: "clamp(10px, 0.85vw, 14px)" }}
                           />
                         </button>
                       </div>
 
+                      {/* Popover for read-more so it doesn't push layout / cause scroll */}
                       {isOpen && (
-                        <div className="px-4 pb-4 pt-1 border-t border-[#0F2A44]/5 ml-9">
-                          <div className="mt-2">
-                            <div className="text-[#0F2A44]/50 uppercase tracking-wider font-bold mb-1"
-                                 style={{ fontSize: "clamp(8px, 0.65vw, 10px)" }}>
-                              Overview
-                            </div>
-                            <p className="text-[#0F2A44]/80 leading-snug"
-                               style={{ fontSize: "clamp(11px, 0.9vw, 14px)" }}>
-                              {cat.overview}
-                            </p>
+                        <div
+                          className="absolute left-0 right-0 top-full mt-1 z-30 rounded-lg bg-[#0F2A44] text-white shadow-2xl p-3 ring-1 ring-[#18A5AF]/40"
+                          onClick={() => setOpenId(null)}
+                        >
+                          <div className="text-[#18A5AF] uppercase tracking-wider font-bold mb-0.5"
+                               style={{ fontSize: "clamp(7px, 0.6vw, 10px)" }}>
+                            Overview
                           </div>
-                          <div className="mt-2">
-                            <div className="text-[#18A5AF] uppercase tracking-wider font-bold mb-1"
-                                 style={{ fontSize: "clamp(8px, 0.65vw, 10px)" }}>
-                              Key benefit
-                            </div>
-                            <p className="text-[#0F2A44] leading-snug"
-                               style={{ fontSize: "clamp(11px, 0.9vw, 14px)" }}>
-                              {cat.benefit}
-                            </p>
+                          <p className="text-white/90 leading-snug mb-2"
+                             style={{ fontSize: "clamp(9px, 0.75vw, 12px)" }}>
+                            {cat.overview}
+                          </p>
+                          <div className="text-[#18A5AF] uppercase tracking-wider font-bold mb-0.5"
+                               style={{ fontSize: "clamp(7px, 0.6vw, 10px)" }}>
+                            Key benefit
                           </div>
+                          <p className="text-white leading-snug"
+                             style={{ fontSize: "clamp(9px, 0.75vw, 12px)" }}>
+                            {cat.benefit}
+                          </p>
                         </div>
                       )}
                     </li>
@@ -541,6 +523,12 @@ function OpportunitiesSlide({
               </ul>
             </div>
           ))}
+        </div>
+
+        <div className="mt-3 flex items-center justify-between text-[#0F2A44]/60"
+             style={{ fontSize: "clamp(9px, 0.75vw, 12px)" }}>
+          <span>Tap a row to tick it. Tap "Read" for a short description.</span>
+          <span>{selected.size} selected</span>
         </div>
       </div>
     </div>
