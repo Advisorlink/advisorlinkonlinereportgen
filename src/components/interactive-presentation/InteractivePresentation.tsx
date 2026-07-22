@@ -4,7 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ChevronLeft, ChevronRight, Maximize, Minimize, X, Check, Send, Loader2, Copy, MessageCircle,
+  Target, Clock, ShieldCheck, PiggyBank, Wallet, Landmark, CreditCard, Scroll, HeartPulse, Gift,
+  Layers, Sparkles, Repeat, Users, Home, LucideIcon,
 } from "lucide-react";
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  "retirement-readiness": Target,
+  "ttr": Clock,
+  "de-risking": ShieldCheck,
+  "late-super": PiggyBank,
+  "tax-withdrawal": Wallet,
+  "age-pension": Landmark,
+  "debt-clearance": CreditCard,
+  "estate": Scroll,
+  "aged-care": HeartPulse,
+  "legacy-gifting": Gift,
+  "three-bucket": Layers,
+  "anti-death-tax": Sparkles,
+  "redraw-recycle": Repeat,
+  "spouse-equalisation": Users,
+  "downsizer": Home,
+};
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import jsPDF from "jspdf";
@@ -494,6 +514,7 @@ function OpportunitiesSlide({
                   {group.items.map(cat => {
                     const isSel = selected.has(cat.id);
                     const isOpen = expanded.has(cat.id);
+                    const Icon = CATEGORY_ICONS[cat.id] ?? Sparkles;
                     return (
                       <div
                         key={cat.id}
@@ -507,19 +528,27 @@ function OpportunitiesSlide({
                           padding: "clamp(8px, 0.75vw, 12px)",
                         }}
                       >
+                        {isSel && (
+                          <div className="absolute top-1.5 right-1.5 rounded-full bg-[#18A5AF] flex items-center justify-center shadow"
+                               style={{ width: "clamp(16px, 1.15vw, 20px)", height: "clamp(16px, 1.15vw, 20px)" }}>
+                            <Check className="text-white" style={{ width: "72%", height: "72%" }} strokeWidth={3.5} />
+                          </div>
+                        )}
                         <button
                           onClick={() => onToggle(cat.id)}
                           aria-pressed={isSel}
-                          className="flex items-start gap-2 text-left w-full"
+                          className="flex items-start gap-2.5 text-left w-full pr-5"
                         >
                           <div className={[
-                            "shrink-0 rounded-md flex items-center justify-center mt-0.5 transition-all",
-                            isSel ? "bg-[#18A5AF]" : "bg-[#0F2A44]/8 border border-[#0F2A44]/20",
+                            "shrink-0 rounded-lg flex items-center justify-center transition-all",
+                            isSel
+                              ? "bg-gradient-to-br from-[#18A5AF] to-[#0F2A44] text-white shadow-md"
+                              : "bg-gradient-to-br from-[#EAF6F7] to-[#DCEEF1] text-[#0F2A44] ring-1 ring-[#18A5AF]/25",
                           ].join(" ")}
-                               style={{ width: "clamp(18px, 1.3vw, 22px)", height: "clamp(18px, 1.3vw, 22px)" }}>
-                            {isSel && <Check className="text-white" style={{ width: "72%", height: "72%" }} strokeWidth={3.5} />}
+                               style={{ width: "clamp(30px, 2.4vw, 40px)", height: "clamp(30px, 2.4vw, 40px)" }}>
+                            <Icon style={{ width: "58%", height: "58%" }} strokeWidth={2} />
                           </div>
-                          <h4 className="font-semibold text-[#0F2A44] leading-snug"
+                          <h4 className="font-semibold text-[#0F2A44] leading-snug pt-0.5"
                               style={{ fontSize: "clamp(10px, 0.76vw, 13px)" }}>
                             {cat.title}
                           </h4>
