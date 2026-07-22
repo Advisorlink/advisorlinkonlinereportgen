@@ -437,12 +437,13 @@ function OpportunitiesSlide({
           right: "3%",
           top: "5%",
           bottom: "18%",
+          paddingLeft: "12px",
           paddingRight: "8px",
         }}
       >
         <div
           className="grid grid-cols-3"
-          style={{ gap: "clamp(10px, 1vw, 18px)" }}
+          style={{ gap: "clamp(9px, 0.9vw, 15px)" }}
         >
           {CATEGORIES.map(cat => {
             const isSel = selected.has(cat.id);
