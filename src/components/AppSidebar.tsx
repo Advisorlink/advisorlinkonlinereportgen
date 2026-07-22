@@ -57,7 +57,7 @@ export function AppSidebar() {
           ) : (
             <div className="flex items-center justify-center py-1">
               <img
-                src={logoSvg}
+                src={logoAsset.url}
                 alt="Settled & Sound"
                 className="h-10 w-auto drop-shadow-lg"
               />
