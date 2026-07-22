@@ -430,101 +430,73 @@ function OpportunitiesSlide({
         draggable={false}
       />
 
-      {/* Card overlay — sits in the empty right region of the backdrop */}
+      {/* Card overlay — sits in the empty right region of the backdrop, vertical scroll */}
       <div
-        className="absolute flex flex-col"
+        className="absolute overflow-y-auto overflow-x-hidden opp-scroll"
         style={{
           left: "37%",
           right: "3%",
           top: "5%",
-          bottom: "24%",
-          gap: "clamp(8px, 0.9vw, 14px)",
+          bottom: "18%",
+          paddingRight: "8px",
         }}
       >
-        {CATEGORY_GROUPS.map((group, gi) => (
-          <div key={group.id} className="flex-1 min-h-0 flex flex-col">
-            <div className="flex items-center gap-2 mb-1.5 shrink-0">
-              <span className="font-black text-[#18A5AF] tabular-nums tracking-tight"
-                    style={{ fontSize: "clamp(12px, 0.95vw, 16px)" }}>
-                0{gi + 1}
-              </span>
-              <span className="text-[#0F2A44] font-semibold uppercase tracking-[0.14em]"
-                    style={{ fontSize: "clamp(8px, 0.66vw, 11px)" }}>
-                {group.label}
-              </span>
-              <div className="flex-1 h-px bg-[#0F2A44]/15" />
-            </div>
+        <div
+          className="grid grid-cols-3"
+          style={{ gap: "clamp(10px, 1vw, 18px)" }}
+        >
+          {CATEGORIES.map(cat => {
+            const isSel = selected.has(cat.id);
+            const Icon = CATEGORY_ICONS[cat.id] ?? Sparkles;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => onToggle(cat.id)}
+                aria-pressed={isSel}
+                className={[
+                  "relative rounded-2xl bg-white flex flex-col items-center text-center transition-all duration-200",
+                  "shadow-[0_14px_30px_-16px_rgba(15,42,68,0.35)]",
+                  isSel ? "ring-2 ring-[#18A5AF]" : "ring-1 ring-black/5 hover:ring-[#18A5AF]/40",
+                ].join(" ")}
+                style={{
+                  padding: "clamp(12px, 1.1vw, 20px) clamp(10px, 0.9vw, 16px)",
+                  minHeight: "clamp(140px, 12vw, 190px)",
+                }}
+              >
+                {isSel && (
+                  <div className="absolute top-2 right-2 rounded-full bg-[#18A5AF] flex items-center justify-center shadow"
+                       style={{ width: "clamp(18px, 1.25vw, 22px)", height: "clamp(18px, 1.25vw, 22px)" }}>
+                    <Check className="text-white" style={{ width: "70%", height: "70%" }} strokeWidth={3.5} />
+                  </div>
+                )}
 
-            {/* horizontal scroller */}
-            <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden opp-scroll pb-1">
-              <div className="flex h-full items-stretch" style={{ gap: "clamp(8px, 0.9vw, 14px)" }}>
-                {group.items.map(cat => {
-                  const isSel = selected.has(cat.id);
-                  const isOpen = expanded.has(cat.id);
-                  const Icon = CATEGORY_ICONS[cat.id] ?? Sparkles;
-                  return (
-                    <div
-                      key={cat.id}
-                      className={[
-                        "relative shrink-0 rounded-xl bg-white flex flex-col transition-all duration-200",
-                        "shadow-[0_10px_24px_-14px_rgba(15,42,68,0.35)]",
-                        isSel ? "ring-2 ring-[#18A5AF]" : "ring-1 ring-black/5",
-                      ].join(" ")}
-                      style={{
-                        width: "clamp(172px, 16vw, 238px)",
-                        padding: "clamp(8px, 0.75vw, 12px)",
-                      }}
-                    >
-                      {isSel && (
-                        <div className="absolute top-1.5 right-1.5 rounded-full bg-[#18A5AF] flex items-center justify-center shadow"
-                             style={{ width: "clamp(16px, 1.15vw, 20px)", height: "clamp(16px, 1.15vw, 20px)" }}>
-                          <Check className="text-white" style={{ width: "72%", height: "72%" }} strokeWidth={3.5} />
-                        </div>
-                      )}
-                      <button
-                        onClick={() => onToggle(cat.id)}
-                        aria-pressed={isSel}
-                        className="flex items-start gap-2.5 text-left w-full pr-5"
-                      >
-                        <div className={[
-                          "shrink-0 rounded-lg flex items-center justify-center transition-all",
-                          isSel
-                            ? "bg-gradient-to-br from-[#18A5AF] to-[#0F2A44] text-white shadow-md"
-                            : "bg-gradient-to-br from-[#EAF6F7] to-[#DCEEF1] text-[#0F2A44] ring-1 ring-[#18A5AF]/25",
-                        ].join(" ")}
-                             style={{ width: "clamp(30px, 2.4vw, 40px)", height: "clamp(30px, 2.4vw, 40px)" }}>
-                          <Icon style={{ width: "58%", height: "58%" }} strokeWidth={2} />
-                        </div>
-                        <h4 className="font-semibold text-[#0F2A44] leading-snug pt-0.5"
-                            style={{ fontSize: "clamp(10px, 0.76vw, 13px)" }}>
-                          {cat.title}
-                        </h4>
-                      </button>
+                <div
+                  className="flex items-center justify-center text-[#0F2A44]"
+                  style={{
+                    width: "clamp(42px, 3.4vw, 60px)",
+                    height: "clamp(42px, 3.4vw, 60px)",
+                  }}
+                >
+                  <Icon style={{ width: "100%", height: "100%" }} strokeWidth={1.75} />
+                </div>
 
-                      {isOpen && (
-                        <div className="mt-1.5 pt-1.5 border-t border-[#0F2A44]/10 space-y-1 overflow-y-auto min-h-0 opp-card-scroll"
-                             style={{ fontSize: "clamp(9px, 0.68vw, 11px)" }}>
-                          <p className="text-[#0F2A44]/75 leading-snug">{cat.overview}</p>
-                          <p className="text-[#0F2A44] leading-snug">
-                            <span className="font-semibold text-[#18A5AF]">Benefit &mdash; </span>{cat.benefit}
-                          </p>
-                        </div>
-                      )}
+                <h4
+                  className="font-bold text-[#0F2A44] leading-tight mt-2"
+                  style={{ fontSize: "clamp(11px, 0.95vw, 15px)" }}
+                >
+                  {cat.title}
+                </h4>
 
-                      <button
-                        onClick={() => toggleExpand(cat.id)}
-                        className="mt-auto self-start text-[#18A5AF] hover:text-[#0F2A44] font-semibold pt-1.5"
-                        style={{ fontSize: "clamp(8px, 0.62vw, 10px)" }}
-                      >
-                        {isOpen ? "Show less" : "Read more →"}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        ))}
+                <p
+                  className="text-[#0F2A44]/70 leading-snug mt-1.5 px-1"
+                  style={{ fontSize: "clamp(9px, 0.72vw, 12px)" }}
+                >
+                  {cat.overview}
+                </p>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Footer actions — floats over the navy wave */}
@@ -552,12 +524,11 @@ function OpportunitiesSlide({
 
       {/* scrollbar styling */}
       <style>{`
-        .opp-scroll::-webkit-scrollbar { height: 7px; }
+        .opp-scroll::-webkit-scrollbar { width: 8px; }
         .opp-scroll::-webkit-scrollbar-thumb { background: rgba(24,165,175,0.55); border-radius: 999px; }
         .opp-scroll::-webkit-scrollbar-track { background: rgba(15,42,68,0.08); border-radius: 999px; }
-        .opp-card-scroll::-webkit-scrollbar { width: 4px; }
-        .opp-card-scroll::-webkit-scrollbar-thumb { background: rgba(15,42,68,0.2); border-radius: 999px; }
       `}</style>
+
     </div>
   );
 }
