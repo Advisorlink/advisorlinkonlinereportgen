@@ -40,6 +40,8 @@ import slide08 from "@/assets/presentation/08-explained-clearly.png";
 import slide09 from "@/assets/presentation/09-next-steps.png";
 import beachBg from "@/assets/presentation/opportunities-beach.jpg";
 import opportunitiesBackdrop from "@/assets/presentation/opportunities-backdrop.png.asset.json";
+import ssLogoWhite from "@/assets/settled-and-sound-wordmark-white.png.asset.json";
+import ssLogoNavy from "@/assets/settled-and-sound-wordmark.png.asset.json";
 
 /* ============================================================ */
 /*  ADVICE CATEGORIES — grouped                                  */
