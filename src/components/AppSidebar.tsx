@@ -59,7 +59,7 @@ export function AppSidebar() {
               <img
                 src={logoAsset.url}
                 alt="Settled & Sound"
-                className="h-14 w-auto drop-shadow-lg"
+                className="h-16 w-auto drop-shadow-lg"
               />
             </div>
           )}
