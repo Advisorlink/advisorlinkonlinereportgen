@@ -122,7 +122,7 @@ const CATEGORIES: Category[] = CATEGORY_GROUPS.flatMap(g => g.items);
 type SlideDef =
   | { kind: "image"; src: string; label: string }
   | { kind: "opportunities"; label: string }
-  | { kind: "form"; label: string };
+  | { kind: "notes"; label: string };
 
 const SLIDES: SlideDef[] = [
   { kind: "image", src: slide01, label: "Welcome" },
@@ -135,7 +135,7 @@ const SLIDES: SlideDef[] = [
   { kind: "image", src: slide08, label: "Was everything explained" },
   { kind: "image", src: slide09, label: "Super easy next steps" },
   { kind: "opportunities", label: "Other opportunities for advice" },
-  { kind: "form", label: "Your details" },
+  { kind: "notes", label: "Client file note" },
 ];
 
 /* ============================================================ */
