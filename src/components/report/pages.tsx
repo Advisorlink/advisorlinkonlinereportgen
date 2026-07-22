@@ -1107,27 +1107,6 @@ export function WhatYouMayNotKnowPage({ s: _s }: { s: ReportSummary }) {
         </div>
 
 
-        <p className="text-[13px] text-muted-foreground mb-8 max-w-2xl leading-relaxed">
-          Your superannuation is only one piece of the picture. Below are a handful of strategies most Australians
-          never get walked through, and any one of them could shift your retirement outcome.
-        </p>
-
-        {/* Numbered opportunity list */}
-        <div className="grid grid-cols-2 gap-x-6 gap-y-7 mb-8 flex-1">
-          {topics.map((t, idx) => (
-            <div key={t.title} className="group relative pl-12 pr-2">
-              <div className="absolute left-0 top-0 flex flex-col items-center h-full">
-                <div className="h-9 w-9 rounded-full border border-cyan/40 bg-cyan/5 flex items-center justify-center text-[12px] font-bold text-cyan tabular-nums">
-                  {String(idx + 1).padStart(2, "0")}
-                </div>
-                <div className="w-px flex-1 bg-gradient-to-b from-cyan/30 to-transparent mt-2" />
-              </div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan/80 mb-1">{t.tag}</div>
-              <div className="text-[14px] font-bold font-heading text-navy leading-tight">{t.title}</div>
-              <div className="text-[11.5px] text-muted-foreground leading-relaxed mt-1.5">{t.body}</div>
-            </div>
-          ))}
-        </div>
 
         {/* Closing CTA with contact */}
         <div
