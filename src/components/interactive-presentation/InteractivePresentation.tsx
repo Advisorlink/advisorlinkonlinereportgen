@@ -133,11 +133,10 @@ const SLIDES: SlideDef[] = [
   { kind: "image", src: slide08, label: "Option 2: SMSF" },
   { kind: "image", src: slide05, label: "Option 3: Adviser Driven" },
   { kind: "image", src: slide06, label: "Fees & costs" },
-  { kind: "image", src: slide04, label: "Was everything explained", scale: 0.82 },
+  { kind: "image", src: slide04, label: "Was everything explained" },
   { kind: "opportunities", label: "Other opportunities for advice" },
   { kind: "thankyou", label: "Presentation complete" },
   { kind: "image", src: slide09, label: "Super easy next steps" },
-  { kind: "notes", label: "Client file note" },
 ];
 
 /* ============================================================ */
