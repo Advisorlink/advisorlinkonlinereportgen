@@ -120,21 +120,21 @@ const CATEGORIES: Category[] = CATEGORY_GROUPS.flatMap(g => g.items);
 /* ============================================================ */
 
 type SlideDef =
-  | { kind: "image"; src: string; label: string }
+  | { kind: "image"; src: string; label: string; scale?: number }
   | { kind: "opportunities"; label: string }
   | { kind: "notes"; label: string };
 
 const SLIDES: SlideDef[] = [
   { kind: "image", src: slide01, label: "Welcome" },
   { kind: "image", src: slide02, label: "Your analyst" },
+  { kind: "image", src: slide07, label: "Why choose us" },
   { kind: "image", src: slide03, label: "Option 1: Industry / Retail" },
   { kind: "image", src: slide04, label: "Option 2: SMSF" },
   { kind: "image", src: slide05, label: "Option 3: Adviser Driven" },
   { kind: "image", src: slide06, label: "Fees & costs" },
-  { kind: "image", src: slide07, label: "Why choose us" },
-  { kind: "image", src: slide08, label: "Was everything explained" },
-  { kind: "image", src: slide09, label: "Super easy next steps" },
+  { kind: "image", src: slide08, label: "Was everything explained", scale: 0.82 },
   { kind: "opportunities", label: "Other opportunities for advice" },
+  { kind: "image", src: slide09, label: "Super easy next steps" },
   { kind: "notes", label: "Client file note" },
 ];
 
