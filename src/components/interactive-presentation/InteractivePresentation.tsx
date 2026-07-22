@@ -459,8 +459,8 @@ function OpportunitiesSlide({
                   isSel ? "ring-2 ring-[#18A5AF]" : "ring-1 ring-black/5 hover:ring-[#18A5AF]/40",
                 ].join(" ")}
                 style={{
-                  padding: "clamp(12px, 1.1vw, 20px) clamp(10px, 0.9vw, 16px)",
-                  minHeight: "clamp(140px, 12vw, 190px)",
+                  padding: "clamp(10px, 0.95vw, 17px) clamp(9px, 0.8vw, 14px)",
+                  minHeight: "clamp(130px, 11vw, 175px)",
                 }}
               >
                 {isSel && (
