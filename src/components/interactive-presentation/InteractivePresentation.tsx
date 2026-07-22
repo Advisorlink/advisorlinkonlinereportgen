@@ -326,15 +326,11 @@ export default function InteractivePresentation({
             />
           )}
 
-          {slide.kind === "form" && (
-            <FormSlide
-              name={name} setName={setName}
-              email={email} setEmail={setEmail}
-              phone={phone} setPhone={setPhone}
+          {slide.kind === "notes" && (
+            <NotesSlide
+              clientName={initialName}
+              clientEmail={initialEmail}
               selected={selected}
-              submit={submit}
-              submitting={submitting}
-              submitted={submitted}
               onExit={handleExit}
             />
           )}
