@@ -104,7 +104,7 @@ export default function Auth() {
       <div className="w-full max-w-md relative">
         {/* Logo above card */}
         <div className="flex justify-center mb-8">
-          <img src={logoSvg} alt="Advisor Link Online" className="h-10 drop-shadow-2xl" />
+          <img src={logoSvg} alt="Settled & Sound" className="h-10 drop-shadow-2xl" />
         </div>
 
         <div className="bg-white/[0.97] backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/20 p-8 border border-white/20">
@@ -158,7 +158,7 @@ export default function Auth() {
         </div>
 
         <p className="text-center text-white/30 text-[11px] mt-6">
-          Powered by Advisor Link Online
+          Powered by Settled & Sound
         </p>
       </div>
     </div>

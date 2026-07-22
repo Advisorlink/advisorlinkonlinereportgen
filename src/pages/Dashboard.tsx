@@ -45,7 +45,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold font-heading text-foreground tracking-tight">Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-1">Welcome back to Advisor Link Online</p>
+            <p className="text-sm text-muted-foreground mt-1">Welcome back to Settled & Sound</p>
           </div>
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan/10 text-cyan text-xs font-medium">
             <Sparkles className="w-3.5 h-3.5" />

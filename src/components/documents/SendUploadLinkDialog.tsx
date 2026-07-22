@@ -51,7 +51,7 @@ const ADVISORS = [
   { id: "pure-private-wealth", name: "Pure Private Wealth" },
   { id: "my-advice-hub", name: "My Advice Hub" },
   { id: "inheritance-financial", name: "Inheritance Financial" },
-  { id: "advisor-link-online", name: "Advisor Link Online" },
+  { id: "advisor-link-online", name: "Settled & Sound" },
 ] as const;
 
 type AdvisorId = typeof ADVISORS[number]["id"];

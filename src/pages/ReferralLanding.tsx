@@ -143,8 +143,8 @@ export default function ReferralLanding() {
       <div className="bg-white border-b border-[#e8e8ee]">
         <div className="max-w-2xl mx-auto px-4 py-6 flex items-center gap-4">
           <img
-            src="https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png"
-            alt="Advisor Link Online"
+            src="/__l5e/assets-v1/a3aae510-8dae-40f9-b9e4-1eb7dd99f519/settled-and-sound-wordmark.png"
+            alt="Settled & Sound"
             className="h-10"
           />
         </div>

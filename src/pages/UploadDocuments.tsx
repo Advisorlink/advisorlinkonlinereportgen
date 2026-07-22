@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 
-const LOGO_BLACK_URL = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png";
+const LOGO_BLACK_URL = "/__l5e/assets-v1/a3aae510-8dae-40f9-b9e4-1eb7dd99f519/settled-and-sound-wordmark.png";
 const PURE_LOGO_URL = "/pure-private-wealth-logo.png";
 
 const REPRESENTATIVES = [
@@ -440,7 +440,7 @@ export default function UploadDocuments() {
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[hsl(192_90%_50%)]/25 blur-3xl" />
           <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[hsl(192_90%_60%)]/15 blur-3xl" />
           <div className="relative mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-5">
-            <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-9 w-auto invert" />
+            <img src={LOGO_BLACK_URL} alt="Settled & Sound" className="h-9 w-auto invert" />
             <div className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/15 backdrop-blur">
               <span className="h-1.5 w-1.5 rounded-full bg-[hsl(192_90%_55%)] shadow-[0_0_12px_2px_hsl(192_90%_55%)]" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Secure Channel</span>
@@ -456,7 +456,7 @@ export default function UploadDocuments() {
         <header className="bg-[hsl(var(--page-alt))]">
           <div className="mx-auto max-w-3xl px-5 pt-7">
             <div className="flex items-center justify-between gap-4 pb-5">
-              <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-7 w-auto opacity-80" />
+              <img src={LOGO_BLACK_URL} alt="Settled & Sound" className="h-7 w-auto opacity-80" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.4em] text-[hsl(var(--ink))]/50">Confidential</span>
               <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className="h-12 w-auto sm:h-14" />
             </div>
@@ -470,7 +470,7 @@ export default function UploadDocuments() {
         // Soft Modern, pill nav floating on tinted surface
         <header className="bg-[hsl(var(--page-alt))] pt-5">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 rounded-2xl bg-white px-5 py-3 shadow-[0_4px_24px_-8px_rgba(15,23,42,0.08)] sm:mx-5 md:mx-auto">
-            <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-8 w-auto" />
+            <img src={LOGO_BLACK_URL} alt="Settled & Sound" className="h-8 w-auto" />
             <div className="flex items-center gap-2 rounded-full bg-[hsl(14_65%_58%)]/8 px-3 py-1 text-[hsl(14_60%_42%)]">
               <ArrowRight className="h-3 w-3" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">Sharing with</span>
@@ -484,7 +484,7 @@ export default function UploadDocuments() {
         // Mono Lux, full bleed black, gold hairline, oversized typography
         <header className="bg-black text-white">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-6">
-            <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-8 w-auto invert" />
+            <img src={LOGO_BLACK_URL} alt="Settled & Sound" className="h-8 w-auto invert" />
             <div className="text-[9px] font-bold uppercase tracking-[0.5em] text-[hsl(45_85%_60%)]">Vault · Secure</div>
             <img src={PURE_LOGO_URL} alt="Pure Private Wealth" className="h-12 w-auto invert sm:h-14" />
           </div>
@@ -496,7 +496,7 @@ export default function UploadDocuments() {
         // Warm Trust, illustrated peach band, rounded card
         <header className="bg-[#f5e6d8]">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-5">
-            <img src={LOGO_BLACK_URL} alt="Advisor Link Online" className="h-9 w-auto" />
+            <img src={LOGO_BLACK_URL} alt="Settled & Sound" className="h-9 w-auto" />
             <div className="hidden items-center gap-2 sm:flex">
               <span className="h-px w-8 bg-[hsl(16_72%_46%)]/60" />
               <ArrowRight className="h-4 w-4 text-[hsl(16_72%_46%)]" />
@@ -946,7 +946,7 @@ export default function UploadDocuments() {
             <span className="flex items-center gap-1.5"><FileCheck2 className="h-3 w-3" /> Privacy Act 1988</span>
           </div>
           <p className="text-center text-[11px] text-[hsl(var(--ink))]/45">
-            © {new Date().getFullYear()} Pure Private Wealth · Powered by Advisor Link Online
+            © {new Date().getFullYear()} Pure Private Wealth · Powered by Settled & Sound
           </p>
         </footer>
       </main>

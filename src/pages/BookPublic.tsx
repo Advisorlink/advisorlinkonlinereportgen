@@ -56,7 +56,7 @@ export default function BookPublic() {
       <div className="relative max-w-5xl mx-auto px-4 py-10 sm:py-16">
         <header className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="Advisor Link Online" className="h-10 w-auto" />
+            <img src={logo} alt="Settled & Sound" className="h-10 w-auto" />
           </div>
           <div className="text-[10px] uppercase tracking-[0.3em] text-cyan/70 font-semibold">
             Book a call
@@ -158,7 +158,7 @@ export default function BookPublic() {
         </div>
 
         <footer className="text-center text-[11px] text-white/30 mt-12">
-          Powered by Advisor Link Online · advisorlinkonline.com.au
+          Powered by Settled & Sound · advisorlinkonline.com.au
         </footer>
       </div>
     </div>

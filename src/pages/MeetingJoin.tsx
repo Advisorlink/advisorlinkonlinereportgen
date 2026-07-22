@@ -10,7 +10,7 @@ import heroImg from "@/assets/meeting-hero.jpg";
 import meetingPreview from "@/assets/meeting-join-preview.png.asset.json";
 
 const MEETING_PREVIEW_URL = `https://report.advisorlinkonline.com.au${meetingPreview.url}`;
-const MEETING_TITLE = "Join Your Advisor Link Online Meeting";
+const MEETING_TITLE = "Join Your Settled & Sound Meeting";
 const MEETING_DESCRIPTION = "Connect with your advisor in a secure, encrypted video meeting.";
 
 const MeetingJoinHelmet = () => (
@@ -349,7 +349,7 @@ export default function MeetingJoin() {
       <MeetingJoinHelmet />
       <div ref={viewingRef} className="min-h-screen min-h-[100dvh] bg-black flex flex-col relative">
         <header className="px-4 py-3 bg-black/80 backdrop-blur-sm flex items-center justify-between shrink-0 fullscreen-hide">
-          <img src={logoSvg} alt="Advisor Link Online" className="h-7 sm:h-8" />
+          <img src={logoSvg} alt="Settled & Sound" className="h-7 sm:h-8" />
           <div className="flex items-center gap-3">
             <span className="text-white/50 text-xs font-mono">ID: {meetingId}</span>
             <Button
@@ -423,7 +423,7 @@ export default function MeetingJoin() {
           <div className="absolute inset-0 bg-[hsl(210_60%_12%/0.75)]" />
         </div>
         <header className="px-4 sm:px-8 py-4 flex items-center justify-between">
-          <img src={logoSvg} alt="Advisor Link Online" className="h-8 sm:h-10" />
+          <img src={logoSvg} alt="Settled & Sound" className="h-8 sm:h-10" />
         </header>
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="text-center max-w-md">
@@ -459,7 +459,7 @@ export default function MeetingJoin() {
 
       {/* Header */}
       <header className="px-4 sm:px-8 py-4 flex items-center justify-between shrink-0">
-        <img src={logoSvg} alt="Advisor Link Online" className="h-8 sm:h-10" />
+        <img src={logoSvg} alt="Settled & Sound" className="h-8 sm:h-10" />
       </header>
 
       {/* Main */}
@@ -467,7 +467,7 @@ export default function MeetingJoin() {
         {/* Hero text */}
         <div className="text-center mb-6 sm:mb-10 max-w-2xl">
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
-            Welcome To Your Advisor Link Online Meeting.
+            Welcome To Your Settled & Sound Meeting.
           </h1>
           <p className="text-[hsl(170_80%_60%)] text-sm sm:text-base mt-3">
             Please wait for your consultant to call you with your meeting ID so you can view their screen
@@ -539,7 +539,7 @@ function Footer() {
           Terms and Conditions
         </a>
       </div>
-      <p className="text-white/20 text-[10px]">© {new Date().getFullYear()} Advisor Link Online. All rights reserved.</p>
+      <p className="text-white/20 text-[10px]">© {new Date().getFullYear()} Settled & Sound. All rights reserved.</p>
     </footer>
   );
 }

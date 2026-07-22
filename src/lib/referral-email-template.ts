@@ -1,7 +1,7 @@
 /**
  * Generates a referral email that matches the referral form page design.
  */
-export function buildReferralEmailHtml(clientFullName: string, logoUrl = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png", clientEmail = ""): string {
+export function buildReferralEmailHtml(clientFullName: string, logoUrl = "/__l5e/assets-v1/a3aae510-8dae-40f9-b9e4-1eb7dd99f519/settled-and-sound-wordmark.png", clientEmail = ""): string {
   const safeName = clientFullName.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
   const safeLogoUrl = logoUrl.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
   const referralFormUrl = `https://report.advisorlinkonline.com.au/refer?name=${encodeURIComponent(clientFullName)}&email=${encodeURIComponent(clientEmail)}`;
@@ -41,7 +41,7 @@ export function buildReferralEmailHtml(clientFullName: string, logoUrl = "https:
 
   <!-- HEADER / LOGO -->
   <tr><td style="padding:20px 32px;border-bottom:1px solid ${borderColor};">
-    <img src="${safeLogoUrl}" alt="Advisor Link Online" width="160" style="display:inline-block;width:160px;max-width:60%;height:auto;border:0;" />
+    <img src="${safeLogoUrl}" alt="Settled & Sound" width="160" style="display:inline-block;width:160px;max-width:60%;height:auto;border:0;" />
   </td></tr>
 
   <!-- TEAL HERO BANNER -->
@@ -130,7 +130,7 @@ export function buildReferralEmailHtml(clientFullName: string, logoUrl = "https:
 
   <!-- FOOTER -->
   <tr><td style="background-color:${bgPage};padding:20px 32px;text-align:center;border-top:1px solid ${borderColor};">
-    <p style="margin:0;font-size:11px;color:${mutedText};line-height:18px;">&copy; ${new Date().getFullYear()} Advisor Link Online. All rights reserved.</p>
+    <p style="margin:0;font-size:11px;color:${mutedText};line-height:18px;">&copy; ${new Date().getFullYear()} Settled & Sound. All rights reserved.</p>
   </td></tr>
 
 </table>
