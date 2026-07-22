@@ -55,11 +55,11 @@ export function AppSidebar() {
               <Sparkles className="w-4 h-4 text-white" />
             </div>
           ) : (
-            <div className="flex items-center justify-center py-1">
+            <div className="flex items-center justify-center py-2">
               <img
                 src={logoAsset.url}
                 alt="Settled & Sound"
-                className="h-10 w-auto drop-shadow-lg"
+                className="h-14 w-auto drop-shadow-lg"
               />
             </div>
           )}
