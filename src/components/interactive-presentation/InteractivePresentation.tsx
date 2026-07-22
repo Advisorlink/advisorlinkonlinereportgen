@@ -469,7 +469,7 @@ function OpportunitiesSlide({
                 )}
 
                 <div
-                  className="flex items-center justify-center text-[#0F2A44]"
+                  className="flex items-center justify-center text-[#18A5AF]"
                   style={{
                     width: "clamp(42px, 3.4vw, 60px)",
                     height: "clamp(42px, 3.4vw, 60px)",
