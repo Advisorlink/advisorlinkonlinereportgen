@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
-import logoSvg from "@/assets/logo.svg";
+import logoAsset from "@/assets/settled-and-sound-wordmark-white.png.asset.json";
 
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: BarChart3 },
