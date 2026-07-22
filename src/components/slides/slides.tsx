@@ -93,7 +93,7 @@ function TopBar({ light = false, pageLabel }: { light?: boolean; pageLabel?: str
     >
       <img
         src={logo}
-        alt="Advisor Link Online"
+        alt="Settled & Sound"
         style={{ height: 44, width: "auto", filter: light ? "brightness(0) invert(1)" : undefined }}
       />
       <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
@@ -132,7 +132,7 @@ function BottomBar({ light = false, page, total = 15 }: { light?: boolean; page:
         color: c,
       }}
     >
-      <span>Advisor Link Online · Est. Australia</span>
+      <span>Settled & Sound · Est. Australia</span>
       <span>
         {String(page).padStart(2, "0")} <span style={{ opacity: 0.4 }}>/ {total}</span>
       </span>

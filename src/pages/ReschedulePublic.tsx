@@ -48,7 +48,7 @@ export default function ReschedulePublic() {
       />
       <div className="relative max-w-4xl mx-auto px-4 py-10 sm:py-16">
         <header className="flex items-center justify-between mb-10">
-          <img src={logo} alt="Advisor Link Online" className="h-10 w-auto" />
+          <img src={logo} alt="Settled & Sound" className="h-10 w-auto" />
           <div className="text-[10px] uppercase tracking-[0.3em] text-cyan/70 font-semibold">Reschedule</div>
         </header>
 

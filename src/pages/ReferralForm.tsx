@@ -121,8 +121,8 @@ export default function ReferralForm() {
       <header className="bg-white border-b border-[#e5e9e8]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4">
           <img
-            src="https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png"
-            alt="Advisor Link Online"
+            src="/__l5e/assets-v1/a3aae510-8dae-40f9-b9e4-1eb7dd99f519/settled-and-sound-wordmark.png"
+            alt="Settled & Sound"
             className="h-8 sm:h-9"
           />
         </div>
@@ -267,7 +267,7 @@ export default function ReferralForm() {
         </div>
 
         <p className="text-center text-xs text-[#b0b0be] mt-6 mb-4">
-          © {new Date().getFullYear()} Advisor Link Online. All rights reserved.
+          © {new Date().getFullYear()} Settled & Sound. All rights reserved.
         </p>
       </main>
     </div>

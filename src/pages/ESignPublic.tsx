@@ -302,7 +302,7 @@ export default function ESignPublic() {
           <p className="text-sm" style={{ color: BRAND.gray500 }}>A confirmation email with a copy of your signed document will be sent to you shortly.</p>
           <div className="mt-6 flex items-center justify-center gap-2 text-xs" style={{ color: BRAND.gray400 }}>
             <ShieldCheck className="w-4 h-4" />
-            <span>Secured by Advisor Link Online</span>
+            <span>Secured by Settled & Sound</span>
           </div>
         </div>
       </div>
@@ -317,8 +317,8 @@ export default function ESignPublic() {
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
-              src="https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png"
-              alt="Advisor Link Online"
+              src="/__l5e/assets-v1/a3aae510-8dae-40f9-b9e4-1eb7dd99f519/settled-and-sound-wordmark.png"
+              alt="Settled & Sound"
               className="h-8 sm:h-10 brightness-0 invert"
             />
           </div>
@@ -430,7 +430,7 @@ export default function ESignPublic() {
           </p>
           <div className="flex items-center justify-center gap-2 text-xs" style={{ color: BRAND.gray400 }}>
             <ShieldCheck className="w-4 h-4" style={{ color: BRAND.cyan }} />
-            <span>Secured by <strong>Advisor Link Online</strong></span>
+            <span>Secured by <strong>Settled & Sound</strong></span>
           </div>
         </div>
       </div>

@@ -938,7 +938,7 @@ export default function Messages() {
                             </button>
                           ))}
                           <p className="px-2 py-1.5 text-[10px] text-muted-foreground border-t border-border mt-1">
-                            Australian English. No em dashes. Brand stays "Advisor Link Online".
+                            Australian English. No em dashes. Brand stays "Settled & Sound".
                           </p>
                         </PopoverContent>
                       </Popover>

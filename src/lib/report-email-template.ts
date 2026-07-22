@@ -4,7 +4,7 @@
  */
 export function buildReportEmailHtml(
   clientFullName: string,
-  logoUrl = "https://osqreiyssdhpplxtcxdv.supabase.co/storage/v1/object/public/email-assets/logo-email-black.png",
+  logoUrl = "/__l5e/assets-v1/a3aae510-8dae-40f9-b9e4-1eb7dd99f519/settled-and-sound-wordmark.png",
 ): string {
   const escape = (s: string) =>
     s.replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));

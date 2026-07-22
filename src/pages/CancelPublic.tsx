@@ -43,7 +43,7 @@ export default function CancelPublic() {
         style={{ background: "radial-gradient(ellipse 60% 40% at 30% 0%, hsl(192 90% 50% / 0.12), transparent 60%)" }} />
       <div className="relative max-w-md mx-auto px-4 py-10 sm:py-16">
         <header className="flex items-center justify-between mb-10">
-          <img src={logo} alt="Advisor Link Online" className="h-10 w-auto" />
+          <img src={logo} alt="Settled & Sound" className="h-10 w-auto" />
           <div className="text-[10px] uppercase tracking-[0.3em] text-white/40 font-semibold">Cancel booking</div>
         </header>
 

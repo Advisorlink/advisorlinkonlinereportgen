@@ -35,8 +35,8 @@ type LetterState = {
 };
 
 const DEFAULT_FIRM: FirmDetails = {
-  name: "Advisorlink",
-  legal: "Advisorlink Pty Ltd",
+  name: "Settled & Sound",
+  legal: "Paramount Wealth Group Pty Ltd",
   abn: "99 671 139 923",
   acn: "",
   address: "2/21 Upton Street, Bundall QLD 4217",
