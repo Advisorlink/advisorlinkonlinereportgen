@@ -515,7 +515,7 @@ function OpportunitiesSlide({
           className="group flex items-center gap-2 bg-[#18A5AF] hover:bg-[#18A5AF]/90 text-white rounded-full transition-all font-semibold shadow-lg"
           style={{ padding: "clamp(6px, 0.68vw, 10px) clamp(14px, 1.35vw, 22px)", fontSize: "clamp(10px, 0.78vw, 13px)" }}
         >
-          Continue to form
+          Continue
           <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
