@@ -1,4 +1,5 @@
-import { Check, Info } from "lucide-react";
+import { useState } from "react";
+import { Check, ChevronDown, Info } from "lucide-react";
 import type { ReportSummary, FundEntry } from "@/lib/calc";
 import {
   fmtMoney, fmtPct,
