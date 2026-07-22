@@ -18,7 +18,6 @@ import slide06 from "@/assets/presentation/06-fees.png";
 import slide07 from "@/assets/presentation/07-why-choose-us.png";
 import slide08 from "@/assets/presentation/08-explained-clearly.png";
 import slide09 from "@/assets/presentation/09-next-steps.png";
-import slide10 from "@/assets/presentation/10-opportunities.png";
 import beachBg from "@/assets/presentation/opportunities-beach.jpg";
 
 /* ============================================================ */
@@ -399,44 +398,33 @@ function OpportunitiesSlide({
   };
 
   return (
-    <div className="absolute inset-0 flex overflow-hidden"
+    <div className="absolute inset-0 flex overflow-hidden bg-[#0F2A44]"
          style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-      {/* Beach/cruise backdrop across the entire slide */}
-      <img
-        src={beachBg}
-        alt=""
-        aria-hidden
-        className="absolute inset-0 w-full h-full object-cover"
-        draggable={false}
-      />
-      {/* Soft wash so content stays readable */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#F5F3EE]/95 via-[#F5F3EE]/70 to-[#0F2A44]/25" />
-
-      {/* LEFT — brand panel (transparent so beach shows subtly through) */}
-      <div className="relative z-10 w-[36%] h-full flex flex-col">
-        <div style={{ padding: "clamp(24px, 3vw, 52px)" }}>
+      {/* LEFT — fixed solid brand panel */}
+      <div className="relative z-10 w-[34%] h-full flex flex-col bg-[#F5F3EE] overflow-hidden">
+        <div style={{ padding: "clamp(18px, 2.3vw, 38px)" }}>
           <div className="font-bold tracking-tight text-[#0F2A44]"
-               style={{ fontSize: "clamp(20px, 1.9vw, 30px)" }}>
+               style={{ fontSize: "clamp(18px, 1.65vw, 27px)" }}>
             Settled<span className="text-[#18A5AF]">&amp;</span>Sound
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col justify-center relative z-10"
-             style={{ padding: "0 clamp(24px, 3vw, 52px)" }}>
+        <div className="flex-1 min-h-0 flex flex-col justify-center relative z-10"
+             style={{ padding: "0 clamp(18px, 2.3vw, 38px)" }}>
           <h1 className="font-black text-[#0F2A44] leading-[0.98] tracking-tight"
-              style={{ fontSize: "clamp(32px, 4vw, 70px)" }}>
+              style={{ fontSize: "clamp(30px, 3.55vw, 60px)" }}>
             Some other<br/>
             opportunities<br/>
             <span className="text-[#18A5AF]">for advice.</span>
           </h1>
-          <div className="h-[3px] w-16 bg-[#18A5AF] mt-5" />
+          <div className="h-[3px] w-16 bg-[#18A5AF] mt-4" />
           <p className="text-[#0F2A44]/80 mt-6 max-w-md leading-relaxed"
-             style={{ fontSize: "clamp(12px, 0.95vw, 16px)" }}>
-            Scroll through the areas below. Tick the ones that interest you and
-            tap <span className="font-semibold">Read more</span> to see how each strategy works.
+             style={{ fontSize: "clamp(11px, 0.86vw, 14px)" }}>
+            Scroll each row across, tick the areas that interest you, and tap
+            <span className="font-semibold"> Read more</span> for extra detail.
           </p>
           <p className="text-[#0F2A44] font-bold mt-5"
-             style={{ fontSize: "clamp(13px, 1.05vw, 18px)" }}>
+             style={{ fontSize: "clamp(12px, 0.95vw, 16px)" }}>
             What ones interest you?
           </p>
         </div>
@@ -455,7 +443,7 @@ function OpportunitiesSlide({
             <path d="M0,80 C180,120 360,60 540,90 C640,105 700,100 720,98 L720,140 L0,140 Z" fill="#18A5AF" opacity="0.55"/>
           </svg>
           <div className="absolute inset-0 flex items-center gap-4"
-               style={{ padding: "0 clamp(24px, 3vw, 52px)" }}>
+                style={{ padding: "0 clamp(18px, 2.3vw, 38px)" }}>
             <div className="flex-shrink-0 rounded-full border-2 border-[#18A5AF]/70 flex items-center justify-center bg-[#0F2A44]/40"
                  style={{ width: "clamp(34px, 3.2vw, 54px)", height: "clamp(34px, 3.2vw, 54px)" }}>
               <MessageCircle className="text-[#18A5AF]" style={{ width: "55%", height: "55%" }} strokeWidth={1.75}/>
@@ -472,26 +460,36 @@ function OpportunitiesSlide({
         </div>
       </div>
 
-      {/* RIGHT — 3 horizontal scroll rows of small cards */}
-      <div className="relative z-10 flex-1 h-full flex flex-col"
-           style={{ padding: "clamp(20px, 2.4vw, 44px) clamp(20px, 2.4vw, 44px) clamp(14px, 1.6vw, 24px)" }}>
-        <div className="flex-1 min-h-0 flex flex-col" style={{ gap: "clamp(10px, 1.2vw, 18px)" }}>
+      {/* RIGHT — background image stays only behind the scrolling form */}
+      <div className="relative z-10 flex-1 h-full flex flex-col overflow-hidden">
+        <img
+          src={beachBg}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full object-cover"
+          draggable={false}
+        />
+        <div className="absolute inset-0 bg-[#0F2A44]/35" />
+        <div className="relative z-10 flex-1 min-h-0 flex flex-col"
+             style={{ padding: "clamp(12px, 1.55vw, 26px) clamp(14px, 1.7vw, 30px) clamp(10px, 1.2vw, 20px)" }}>
+        <div className="flex-1 min-h-0 flex flex-col" style={{ gap: "clamp(7px, 0.75vw, 12px)" }}>
           {CATEGORY_GROUPS.map((group, gi) => (
-            <div key={group.id} className="flex-1 min-h-0 flex flex-col">
-              <div className="flex items-center gap-3 mb-2">
+            <div key={group.id} className="flex-1 min-h-0 flex flex-col rounded-2xl bg-white/12 backdrop-blur-sm border border-white/20 overflow-hidden"
+                 style={{ padding: "clamp(7px, 0.8vw, 12px)" }}>
+              <div className="flex items-center gap-2 mb-1.5 shrink-0">
                 <span className="font-black text-[#18A5AF] tabular-nums tracking-tight"
-                      style={{ fontSize: "clamp(14px, 1.15vw, 20px)" }}>
+                      style={{ fontSize: "clamp(12px, 0.95vw, 16px)" }}>
                   0{gi + 1}
                 </span>
                 <span className="text-white font-semibold uppercase tracking-[0.14em] drop-shadow"
-                      style={{ fontSize: "clamp(10px, 0.8vw, 13px)" }}>
+                      style={{ fontSize: "clamp(8px, 0.66vw, 11px)" }}>
                   {group.label}
                 </span>
                 <div className="flex-1 h-px bg-white/30" />
               </div>
 
               {/* horizontal scroller */}
-              <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden opp-scroll">
+              <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden opp-scroll pb-1">
                 <div className="flex h-full items-stretch" style={{ gap: "clamp(8px, 0.9vw, 14px)" }}>
                   {group.items.map(cat => {
                     const isSel = selected.has(cat.id);
@@ -505,8 +503,8 @@ function OpportunitiesSlide({
                           isSel ? "ring-2 ring-[#18A5AF]" : "ring-1 ring-black/5",
                         ].join(" ")}
                         style={{
-                          width: isOpen ? "clamp(230px, 22vw, 340px)" : "clamp(155px, 14vw, 210px)",
-                          padding: "clamp(10px, 0.9vw, 14px)",
+                          width: "clamp(172px, 16vw, 238px)",
+                          padding: "clamp(8px, 0.75vw, 12px)",
                         }}
                       >
                         <button
@@ -522,14 +520,14 @@ function OpportunitiesSlide({
                             {isSel && <Check className="text-white" style={{ width: "72%", height: "72%" }} strokeWidth={3.5} />}
                           </div>
                           <h4 className="font-semibold text-[#0F2A44] leading-snug"
-                              style={{ fontSize: "clamp(11px, 0.85vw, 14px)" }}>
+                              style={{ fontSize: "clamp(10px, 0.76vw, 13px)" }}>
                             {cat.title}
                           </h4>
                         </button>
 
                         {isOpen && (
-                          <div className="mt-2 pt-2 border-t border-[#0F2A44]/10 space-y-1.5 overflow-y-auto"
-                               style={{ fontSize: "clamp(10px, 0.75vw, 12px)" }}>
+                          <div className="mt-1.5 pt-1.5 border-t border-[#0F2A44]/10 space-y-1 overflow-y-auto min-h-0 opp-card-scroll"
+                               style={{ fontSize: "clamp(9px, 0.68vw, 11px)" }}>
                             <p className="text-[#0F2A44]/75 leading-snug">{cat.overview}</p>
                             <p className="text-[#0F2A44] leading-snug">
                               <span className="font-semibold text-[#18A5AF]">Benefit — </span>{cat.benefit}
@@ -540,7 +538,7 @@ function OpportunitiesSlide({
                         <button
                           onClick={() => toggleExpand(cat.id)}
                           className="mt-auto self-start text-[#18A5AF] hover:text-[#0F2A44] font-semibold pt-1.5"
-                          style={{ fontSize: "clamp(9px, 0.72vw, 11px)" }}
+                          style={{ fontSize: "clamp(8px, 0.62vw, 10px)" }}
                         >
                           {isOpen ? "Show less" : "Read more →"}
                         </button>
@@ -554,7 +552,7 @@ function OpportunitiesSlide({
         </div>
 
         {/* footer actions */}
-        <div className="flex items-center justify-between gap-4 mt-3">
+        <div className="flex items-center justify-between gap-4 mt-2 shrink-0">
           <div className="text-white font-medium bg-[#0F2A44]/60 backdrop-blur px-3 py-1.5 rounded-full"
                style={{ fontSize: "clamp(10px, 0.82vw, 13px)" }}>
             {selected.size} selected
@@ -563,14 +561,14 @@ function OpportunitiesSlide({
             <button
               onClick={onContinue}
               className="text-white hover:text-white bg-[#0F2A44]/55 hover:bg-[#0F2A44]/75 backdrop-blur rounded-full transition-all"
-              style={{ padding: "clamp(6px, 0.7vw, 10px) clamp(12px, 1.2vw, 18px)", fontSize: "clamp(10px, 0.82vw, 13px)" }}
+              style={{ padding: "clamp(5px, 0.58vw, 8px) clamp(11px, 1vw, 16px)", fontSize: "clamp(9px, 0.72vw, 12px)" }}
             >
               Skip
             </button>
             <button
               onClick={onContinue}
               className="group flex items-center gap-2 bg-[#18A5AF] hover:bg-[#18A5AF]/90 text-white rounded-full transition-all font-semibold shadow-lg"
-              style={{ padding: "clamp(8px, 0.8vw, 12px) clamp(16px, 1.6vw, 26px)", fontSize: "clamp(11px, 0.9vw, 15px)" }}
+              style={{ padding: "clamp(6px, 0.68vw, 10px) clamp(14px, 1.35vw, 22px)", fontSize: "clamp(10px, 0.78vw, 13px)" }}
             >
               Continue to form
               <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -578,12 +576,15 @@ function OpportunitiesSlide({
           </div>
         </div>
       </div>
+      </div>
 
       {/* scrollbar styling */}
       <style>{`
-        .opp-scroll::-webkit-scrollbar { height: 6px; }
+        .opp-scroll::-webkit-scrollbar { height: 7px; }
         .opp-scroll::-webkit-scrollbar-thumb { background: rgba(24,165,175,0.55); border-radius: 999px; }
-        .opp-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.15); border-radius: 999px; }
+        .opp-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.28); border-radius: 999px; }
+        .opp-card-scroll::-webkit-scrollbar { width: 4px; }
+        .opp-card-scroll::-webkit-scrollbar-thumb { background: rgba(15,42,68,0.2); border-radius: 999px; }
       `}</style>
     </div>
   );
