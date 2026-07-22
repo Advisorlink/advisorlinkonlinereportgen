@@ -705,10 +705,10 @@ function ThankYouSlide({ selectedCount, onNext }: { selectedCount: number; onNex
     <div className="absolute inset-0 bg-[#F5F3EE] flex flex-col items-center justify-center text-center px-[5%]"
          style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <div className="relative">
-        <div className="absolute inset-0 bg-green-500/10 rounded-full blur-3xl" style={{ transform: "scale(1.4)" }} />
+        <div className="absolute inset-0 rounded-full blur-3xl" style={{ transform: "scale(1.4)", background: "rgba(34,197,94,0.12)" }} />
         <div className="relative rounded-full bg-white shadow-[0_20px_60px_-20px_rgba(15,42,68,0.25)] flex items-center justify-center"
              style={{ width: "clamp(120px, 14vw, 200px)", height: "clamp(120px, 14vw, 200px)" }}>
-          <CheckCircle2 className="text-green-500" style={{ width: "55%", height: "55%" }} strokeWidth={1.5} />
+          <CheckCircle2 style={{ width: "55%", height: "55%", color: "#22C55E" }} strokeWidth={1.5} />
         </div>
       </div>
 
