@@ -22,19 +22,76 @@ import slide09 from "@/assets/presentation/09-next-steps.png";
 import slide10 from "@/assets/presentation/10-opportunities.png";
 
 /* ============================================================ */
-/*  ADVICE CATEGORIES (matches the 6 cards on slide 10)          */
+/*  ADVICE CATEGORIES — grouped                                  */
 /* ============================================================ */
 
-type Category = { id: string; title: string; blurb: string; Icon: any };
+type Category = { id: string; title: string; overview: string; benefit: string };
+type Section = { heading: string; items: Category[] };
 
-const CATEGORIES: Category[] = [
-  { id: "superannuation", title: "Superannuation", blurb: "Make sure your super is working as hard as it can for your future.", Icon: PiggyBank },
-  { id: "investments", title: "Investments", blurb: "Grow your wealth faster with the right investment strategy.", Icon: TrendingUp },
-  { id: "insurance", title: "Insurance", blurb: "Protect what matters most and get the right cover in place.", Icon: Umbrella },
-  { id: "retirement-planning", title: "Retirement Planning", blurb: "Build a plan today for the lifestyle you want tomorrow.", Icon: HomeIcon },
-  { id: "debt-management", title: "Debt Management", blurb: "Pay off debt sooner and take control of your financial future.", Icon: HandCoins },
-  { id: "tax-optimisation", title: "Tax Optimisation", blurb: "Legal strategies to help you keep more of what you earn.", Icon: FileText },
+const SECTIONS: Section[] = [
+  {
+    heading: "Core Planning & Income Strategies",
+    items: [
+      { id: "retirement-readiness", title: 'Retirement Readiness ("The Number")',
+        overview: "Detailed cash-flow modeling to project how long capital will last based on expected expenses, healthcare, and travel.",
+        benefit: "Gives complete clarity on whether you can afford to stop working and at what age." },
+      { id: "ttr", title: "Transition-to-Retirement (TTR) Strategy",
+        overview: "Commencing a partial pension from super while still working past age 60.",
+        benefit: "Reduce working hours without dropping lifestyle income, or boost super tax-free via salary sacrifice while working full-time." },
+      { id: "de-risking", title: "De-risking & Sequence-of-Returns Protection",
+        overview: "Shifting portfolio allocation to protect wealth from a sudden market downturn right before retirement.",
+        benefit: "Prevents forced selling of growth assets at a loss during market dips." },
+      { id: "late-super", title: "Maximising Late-Stage Super Contributions",
+        overview: "Utilising salary sacrificing, catch-up concessional rules, and non-concessional caps during peak earning years.",
+        benefit: "Maximises compounding inside a low-tax environment before hitting full retirement." },
+      { id: "tax-withdrawal", title: "Tax-Efficient Withdrawal & Income Sequencing",
+        overview: "Planning the exact order in which you draw down from cash, taxable accounts, and tax-sheltered super.",
+        benefit: "Keeps personal marginal income tax as close to zero as possible across your retirement." },
+    ],
+  },
+  {
+    heading: "Entitlements, Debt & Legacy",
+    items: [
+      { id: "age-pension", title: "Social Security & Age Pension Optimisation",
+        overview: "Structuring assets and income streams to align with government means tests (Assets & Income Tests).",
+        benefit: "Maximises state pension entitlements and healthcare concession cards." },
+      { id: "debt-clearance", title: "Pre-Retirement Debt Clearance",
+        overview: "Directing cash flow to eliminate mortgages, personal loans, and credit debts prior to leaving work.",
+        benefit: "Drastically reduces monthly overheads, lowering the income required to fund retirement." },
+      { id: "estate", title: "Estate Planning & Beneficiary Structuring",
+        overview: "Updating binding nominations, testamentary trusts, and ownership structures.",
+        benefit: "Ensures seamless, tax-minimised wealth transfer to loved ones without legal disputes." },
+      { id: "aged-care", title: "Healthcare & Aged Care Planning",
+        overview: "Stress-testing portfolios for longevity (living into your 90s) and setting aside contingency buffers for long-term care.",
+        benefit: "Protects the surviving spouse from financial distress if one partner requires high-level aged care." },
+      { id: "gifting", title: "Early Legacy & Gifting Strategies",
+        overview: "Assisting adult children with home deposits or family costs using structured gifts or formal family loans.",
+        benefit: "Helps children when they need it most while ensuring you don't breach gifting rules or jeopardise your own security." },
+    ],
+  },
+  {
+    heading: "Specialised Execution Strategies",
+    items: [
+      { id: "three-bucket", title: 'The "Three-Bucket" Income Strategy',
+        overview: "Dividing wealth into Bucket 1 (Cash for 1–3 years), Bucket 2 (Defensive Income), and Bucket 3 (Long-term Growth).",
+        benefit: "Eliminates market anxiety by ensuring living expenses are funded by cash regardless of market crashes." },
+      { id: "recontribution", title: 'Super Re-Contribution Strategy ("Anti-Death Tax")',
+        overview: "Withdrawing super tax-free after age 60 and re-contributing it back as an after-tax (non-concessional) amount.",
+        benefit: "Shifts the balance from taxable to tax-free, saving non-dependant adult children up to 17% tax on inherited super." },
+      { id: "redraw-recycle", title: "Redraw & Recycle (Mortgage Offset to Super)",
+        overview: "Using cash in home loan offset/redraw accounts to make tax-deductible super contributions before age 67.",
+        benefit: "Reduces personal taxable income while building higher tax-sheltered wealth inside super." },
+      { id: "spouse-equalisation", title: "Spouse Equalisation & Pension Shielding",
+        overview: "Transferring super contributions to a younger or lower-balance spouse.",
+        benefit: "Shields accumulation balances from Centrelink tests and doubles tax-free pension transfer caps." },
+      { id: "downsizer", title: "Downsizer Contribution Strategy",
+        overview: "Contributing up to $300,000 per person ($600,000 per couple) into super from the sale of a home owned for 10+ years.",
+        benefit: "Injects a large lump sum into the tax-free retirement environment late in life without breaching contribution caps." },
+    ],
+  },
 ];
+
+const CATEGORIES: Category[] = SECTIONS.flatMap(s => s.items);
 
 /* ============================================================ */
 /*  SLIDE DEFINITIONS                                            */
