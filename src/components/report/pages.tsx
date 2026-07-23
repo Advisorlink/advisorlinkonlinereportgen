@@ -18,7 +18,7 @@ import {
 import riskIllustration from "@/assets/risk-illustration.jpg";
 import coverCoupleAsset from "@/assets/cover-happy-couple-new.png.asset.json";
 const coverCoupleUrl = coverCoupleAsset.url;
-import logoAsset from "@/assets/settled-and-sound-logo-white.png.asset.json";
+import logoAsset from "@/assets/settled-and-sound-wordmark-white.png.asset.json";
 const logoUrl = logoAsset.url;
 import asicRegistered from "@/assets/asic-registered.png";
 
