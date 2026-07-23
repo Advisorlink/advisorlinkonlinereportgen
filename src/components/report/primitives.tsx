@@ -3,7 +3,7 @@ import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Legend,
 } from "recharts";
-import logoAsset from "@/assets/settled-and-sound-logo-white.png.asset.json";
+import logoAsset from "@/assets/settled-and-sound-wordmark-white.png.asset.json";
 const logoUrl = logoAsset.url;
 
 export function PageShell({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -28,8 +28,9 @@ export function PageHeader({ pageLabel = "SUPERANNUATION REPORT", flush = false 
         <img
           src={logoUrl}
           alt="Settled & Sound"
-          className="h-6 w-auto"
+          className="h-10 w-auto"
         />
+
       </div>
     </header>
   );

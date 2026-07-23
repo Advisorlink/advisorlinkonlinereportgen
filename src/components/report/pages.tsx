@@ -18,7 +18,7 @@ import {
 import riskIllustration from "@/assets/risk-illustration.jpg";
 import coverCoupleAsset from "@/assets/cover-happy-couple-new.png.asset.json";
 const coverCoupleUrl = coverCoupleAsset.url;
-import logoAsset from "@/assets/settled-and-sound-logo-white.png.asset.json";
+import logoAsset from "@/assets/settled-and-sound-wordmark-white.png.asset.json";
 const logoUrl = logoAsset.url;
 import asicRegistered from "@/assets/asic-registered.png";
 
@@ -66,7 +66,7 @@ export function CoverPage({ s }: { s: ReportSummary }) {
         />
 
         <div className="relative flex items-start justify-between gap-4 text-base">
-          <img src={logoUrl} alt="Settled & Sound" className="h-7 w-auto" />
+          <img src={logoUrl} alt="Settled & Sound" className="h-12 w-auto" />
           <div className="text-right leading-[1.5] opacity-90">
             <div className="font-bold tracking-wide text-lg">Settled &amp; Sound Pty Ltd</div>
             <div className="text-base">(07) 5241 1244</div>
