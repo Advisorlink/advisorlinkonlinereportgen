@@ -3,7 +3,7 @@ import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Legend,
 } from "recharts";
-import logoAsset from "@/assets/settled-and-sound-logo-white.png.asset.json";
+import logoAsset from "@/assets/settled-and-sound-wordmark-white.png.asset.json";
 const logoUrl = logoAsset.url;
 
 export function PageShell({ children, className }: { children: React.ReactNode; className?: string }) {
