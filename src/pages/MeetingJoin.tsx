@@ -531,14 +531,6 @@ function Footer() {
       <p className="text-white/40 text-xs sm:text-sm max-w-lg mx-auto">
         With Settled & Sound, we connect you to fully Licensed and Vetted advisors to take the guesswork out of who to trust.
       </p>
-      <div className="flex items-center justify-center gap-4 text-white/30 text-xs">
-        <a href="https://advisorlinkonline.com.au/privacy-policy/" target="_blank" rel="noopener noreferrer" className="hover:text-white/60 transition-colors underline underline-offset-2">
-          Privacy Policy
-        </a>
-        <a href="https://advisorlinkonline.com.au/terms-and-conditions/" target="_blank" rel="noopener noreferrer" className="hover:text-white/60 transition-colors underline underline-offset-2">
-          Terms and Conditions
-        </a>
-      </div>
       <p className="text-white/20 text-[10px]">© {new Date().getFullYear()} Settled & Sound. All rights reserved.</p>
     </footer>
   );
