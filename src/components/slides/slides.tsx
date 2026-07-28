@@ -609,7 +609,7 @@ export function Slide01() {
             <Phone size={18} /> 07 5662 5977
           </span>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-            <Mail size={18} /> admin@advisorlinkonline.com.au
+            <Mail size={18} /> admin@settledandsound.com.au
           </span>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
             <MapPin size={18} /> Bundall QLD 4217

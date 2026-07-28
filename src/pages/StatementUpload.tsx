@@ -260,13 +260,13 @@ export default function StatementUpload() {
 
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-[hsl(215_60%_12%)]">
-      {/* Header, AdvisorLink */}
+      {/* Header, Settled & Sound */}
       <header className="relative overflow-hidden bg-[hsl(215_60%_10%)] text-white">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[hsl(192_90%_50%)]/25 blur-3xl" />
         <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[hsl(192_90%_60%)]/15 blur-3xl" />
         <div className="relative mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-5">
           <div className="flex items-center">
-            <img src={BRAND_LOGO} alt="AdvisorLink Online" className="h-10 w-auto" />
+            <img src={BRAND_LOGO} alt="Settled & Sound" className="h-10 w-auto" />
           </div>
           <div className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/15 backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-[hsl(192_90%_55%)] shadow-[0_0_12px_2px_hsl(192_90%_55%)]" />
@@ -296,7 +296,7 @@ export default function StatementUpload() {
                 Welcome
               </span>
               <h1 className="font-heading mt-3 text-[28px] font-bold leading-tight tracking-tight sm:text-[34px]">
-                Welcome to AdvisorLink Online secure document upload
+                Welcome to Settled & Sound secure document upload
               </h1>
               <p className="mx-auto mt-3 max-w-md text-[14px] leading-relaxed text-[hsl(215_60%_12%)]/65">
                 Please send through your most recent statement before our meeting so we can prepare properly and make sure everything runs smoothly on the day.
@@ -451,7 +451,7 @@ export default function StatementUpload() {
 
                 <label className="mt-4 flex cursor-pointer items-start gap-2 text-[12px] text-[hsl(215_60%_12%)]/70">
                   <Checkbox checked={consent} onCheckedChange={(v) => setConsent(v === true)} className="mt-0.5" />
-                  <span>I consent to AdvisorLink Online receiving and storing this statement securely for the purpose of preparing for our meeting.</span>
+                  <span>I consent to Settled & Sound receiving and storing this statement securely for the purpose of preparing for our meeting.</span>
                 </label>
 
                 {submitting && (
@@ -470,7 +470,7 @@ export default function StatementUpload() {
         )}
 
         <p className="mt-8 text-center text-[10px] uppercase tracking-[0.3em] text-[hsl(215_60%_12%)]/40">
-          AdvisorLink Online · Secure document portal
+          Settled & Sound · Secure document portal
         </p>
       </main>
 

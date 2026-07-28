@@ -176,7 +176,7 @@ Deno.serve(async (req) => {
     let fullHtml: string;
 
     if (isHtml && customBody) {
-      // Already formatted HTML — use as-is, append signature
+      // Already formatted HTML - use as-is, append signature
       fullHtml = customBody;
       const lowerHtml = fullHtml.toLowerCase();
       if (shouldRequireReviewMessage && !lowerHtml.includes("free review") && !lowerHtml.includes("fully licensed financial advisor")) {
@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
         fullHtml += `\n<br>\n<div class="gmail_signature">${signatureHtml}</div>`;
       }
     } else {
-      // Plain text — convert to simple HTML
+      // Plain text - convert to simple HTML
       const plainBody = customBody ??
         `Hi ${name},
 

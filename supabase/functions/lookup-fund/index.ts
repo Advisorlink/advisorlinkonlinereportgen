@@ -16,7 +16,7 @@ const lookupCache = new Map<
   string,
   { expiresAt: number; data: Record<string, unknown> }
 >();
-const CACHE_MS = 0; // disabled — every click must re-fetch the latest published figures
+const CACHE_MS = 0; // disabled - every click must re-fetch the latest published figures
 
 const jsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -132,7 +132,7 @@ async function fetchPageText(
   url: string,
   timeoutMs = 10000,
 ): Promise<string | null> {
-  // Use Firecrawl for full JS rendering — same content Gemini.google.com sees
+  // Use Firecrawl for full JS rendering - same content Gemini.google.com sees
   if (FIRECRAWL_API_KEY) {
     try {
       const ctrl = new AbortController();
@@ -301,7 +301,7 @@ function returnAppearsNearOption(
   }
 
   // Check 2 (relaxed for table layouts): if the ENTIRE page contains all three
-  // signals — the percentage, "5 year", and the option label — accept it.
+  // signals - the percentage, "5 year", and the option label - accept it.
   // Many fund websites render performance tables where headers are far from values.
   const pageFiveYr = /(5|five)\s*[- ]?\s*(year|years|yr|yrs|y)\b/i.test(normalized);
   const pageOption = tokens.length === 0 || tokens.some((t) => normalized.includes(t));
@@ -415,21 +415,21 @@ const PREV_MONTH_NAME = new Date(NOW.getFullYear(), NOW.getMonth() - 1, 1).toLoc
 const PREV2_MONTH_NAME = new Date(NOW.getFullYear(), NOW.getMonth() - 2, 1).toLocaleString("en-AU", { month: "long" });
 
 const STEP1_SYSTEM =
-  `You are a research assistant for Australian superannuation. You have Gemini 3 Google Search lookup enabled — USE IT for every lookup. Today's date is ${
+  `You are a research assistant for Australian superannuation. You have Gemini 3 Google Search lookup enabled - USE IT for every lookup. Today's date is ${
     NOW.toISOString().slice(0, 10)
   }.
 
 For the named fund, you MUST locate the OFFICIAL fund website pages (and PDS / Investment Guide / Fees & Costs document if needed) that publish:
-  (a) the MOST RECENTLY PUBLISHED investment performance / returns table for the allocated investment option (must show 5-year p.a. return). IMPORTANT: Always find the LATEST month-end data available — right now that is likely "as at 30 ${PREV_MONTH_NAME} ${CURRENT_YEAR}" or "as at 30 ${PREV2_MONTH_NAME} ${CURRENT_YEAR}". Do NOT use older month-end data if a newer month is published. Search for "${PREV_MONTH_NAME} ${CURRENT_YEAR} performance" and "${PREV2_MONTH_NAME} ${CURRENT_YEAR} performance" to find the freshest page.), and
-  (b) the CURRENT (${CURRENT_YEAR}) fees & costs (admin fee + asset-based admin fee) — find the latest published fees page, fee schedule, or current PDS/Fees & Costs update for ${CURRENT_YEAR}, and
-  (c) the CURRENT (${CURRENT_YEAR}) strategic asset allocation / growth assets % and the official risk profile label for the allocated option — find the latest investment option page, investment guide update, or asset-allocation disclosure for ${CURRENT_YEAR}.
+  (a) the MOST RECENTLY PUBLISHED investment performance / returns table for the allocated investment option (must show 5-year p.a. return). IMPORTANT: Always find the LATEST month-end data available - right now that is likely "as at 30 ${PREV_MONTH_NAME} ${CURRENT_YEAR}" or "as at 30 ${PREV2_MONTH_NAME} ${CURRENT_YEAR}". Do NOT use older month-end data if a newer month is published. Search for "${PREV_MONTH_NAME} ${CURRENT_YEAR} performance" and "${PREV2_MONTH_NAME} ${CURRENT_YEAR} performance" to find the freshest page.), and
+  (b) the CURRENT (${CURRENT_YEAR}) fees & costs (admin fee + asset-based admin fee) - find the latest published fees page, fee schedule, or current PDS/Fees & Costs update for ${CURRENT_YEAR}, and
+  (c) the CURRENT (${CURRENT_YEAR}) strategic asset allocation / growth assets % and the official risk profile label for the allocated option - find the latest investment option page, investment guide update, or asset-allocation disclosure for ${CURRENT_YEAR}.
 
 Rules:
-- Identify WHICHEVER Australian super fund the user names — industry, retail, corporate, public sector, SMSF platform, etc. Never default to AustralianSuper or any specific fund.
-- CRITICAL: Match the EXACT investment option name the user specifies. If the user says "Balanced", you must find the option named "Balanced" — do NOT substitute a different option like "Growth" or "Core Strategy" even if the fund considers them related.
-- CRITICAL — "DEFAULT" / "DEFULT" / "MYSUPER" HANDLING: If the user writes "default", "defult", "Default", "MySuper", "my super", or any similar misspelling/synonym that means "the fund's default option", you MUST:
+- Identify WHICHEVER Australian super fund the user names - industry, retail, corporate, public sector, SMSF platform, etc. Never default to AustralianSuper or any specific fund.
+- CRITICAL: Match the EXACT investment option name the user specifies. If the user says "Balanced", you must find the option named "Balanced" - do NOT substitute a different option like "Growth" or "Core Strategy" even if the fund considers them related.
+- CRITICAL - "DEFAULT" / "DEFULT" / "MYSUPER" HANDLING: If the user writes "default", "defult", "Default", "MySuper", "my super", or any similar misspelling/synonym that means "the fund's default option", you MUST:
   1. Look up the fund's official website to find which investment option is their MySuper / default product.
-  2. MANY FUNDS HAVE AGE-BASED / LIFECYCLE DEFAULT OPTIONS — the default option changes depending on the member's age. You MUST consider the client's AGE from the input text when determining which option is the default. Examples:
+  2. MANY FUNDS HAVE AGE-BASED / LIFECYCLE DEFAULT OPTIONS - the default option changes depending on the member's age. You MUST consider the client's AGE from the input text when determining which option is the default. Examples:
      - Aware Super: MySuper Lifecycle. Under 55 → "High Growth" is the default. Age 55-64 → different allocation. 65+ → different again. You must use the age bracket that matches the client's age.
      - HESTA: MySuper has age-based stages.
      - UniSuper: Lifecycle options change at different ages.
@@ -437,12 +437,12 @@ Rules:
      Search the fund's website for "MySuper lifecycle", "age-based", "lifestage", or "lifecycle" to find the correct age-dependent option.
   3. Find the EXACT ROW LABEL for that age-appropriate option as it appears in the fund's performance table on their website.
   4. Set modelLabel to that exact label (e.g. if client is age 52 and in Aware Super, the MySuper default is "High Growth" → modelLabel = "High Growth"; REST Super's default is "Core Strategy" → modelLabel = "Core Strategy"; AustralianSuper's default is "Balanced" → modelLabel = "Balanced").
-  The modelLabel MUST match the row label in the fund's performance table so we can verify the extracted figure against the scraped text. NEVER set modelLabel to "default" or "defult" — always resolve it to the real option name.
+  The modelLabel MUST match the row label in the fund's performance table so we can verify the extracted figure against the scraped text. NEVER set modelLabel to "default" or "defult" - always resolve it to the real option name.
   If the fund has an age-based default but no age is provided in the input, use the youngest/accumulation-phase default and add a note explaining the age dependency.
-- PRIMARY SOURCE — finder.com.au/super-funds: ALWAYS look here FIRST. Find the matching fund page on https://www.finder.com.au/super-funds (e.g. https://www.finder.com.au/super-funds/<fund-slug>) and use it to identify the fund's official website, the correct MySuper / default option name, current fees, growth-asset allocation, and the published 5-year return. Put the Finder URL(s) FIRST in sourceUrls.
-- FALLBACK — official fund domain: ONLY if Finder doesn't have the fund or is missing the figure you need, fall back to the fund's own official domain (performance / fees / asset-allocation / PDS pages). Never use other third-party sites (SuperRatings, Canstar, Chant West, blogs, news).
+- PRIMARY SOURCE - finder.com.au/super-funds: ALWAYS look here FIRST. Find the matching fund page on https://www.finder.com.au/super-funds (e.g. https://www.finder.com.au/super-funds/<fund-slug>) and use it to identify the fund's official website, the correct MySuper / default option name, current fees, growth-asset allocation, and the published 5-year return. Put the Finder URL(s) FIRST in sourceUrls.
+- FALLBACK - official fund domain: ONLY if Finder doesn't have the fund or is missing the figure you need, fall back to the fund's own official domain (performance / fees / asset-allocation / PDS pages). Never use other third-party sites (SuperRatings, Canstar, Chant West, blogs, news).
 - Add search terms like "site:finder.com.au/super-funds <fund name>", "${PREV_MONTH_NAME} ${CURRENT_YEAR}", "${PREV2_MONTH_NAME} ${CURRENT_YEAR}", "monthly returns", "performance update", "as at", "fees and costs ${CURRENT_YEAR}", "current PDS", "asset allocation ${CURRENT_YEAR}", "investment guide ${CURRENT_YEAR}". Prefer current ${CURRENT_YEAR} pages over older PDS PDFs.
-- Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages — do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
+- Include SEPARATE URLs for (a) performance, (b) fees, and (c) asset allocation if they live on different pages - do not assume one page covers all three. The fees and growth-assets figures must also be the most recent ${CURRENT_YEAR} version available.
 - Return up to 7 URLs: matching finder.com.au/super-funds page(s) FIRST, then official fund pages by recency (newest ${CURRENT_YEAR} first, then ${PREV_YEAR}, then PDS/Investment Guide as last resort). The URLs must be real lookup results or pages clearly reached from real lookup results.
 - Also parse the client's personal details from the free-text input.
 - MULTIPLE FUNDS: If the input mentions MORE THAN ONE super fund (e.g. "AustralianSuper Balanced $80k AND HostPlus Indexed $50k"), set the PRIMARY fields (fundName, modelLabel, superBalance) to the FIRST fund only, and list EVERY remaining fund in the additionalFunds array with its fundName, modelLabel and superBalance. Do not skip any fund the user mentioned.
@@ -514,8 +514,8 @@ const STEP2_SYSTEM =
 
 Strict rules:
 - ONLY use numbers that literally appear in the provided page text. Do NOT use prior knowledge, do NOT estimate, do NOT use other time periods.
-- Sources may be from finder.com.au/super-funds (preferred primary source) AND/OR the fund's official website. Treat them equally — extract from whichever page actually shows the figure. If both show a figure, prefer the one with the most recent "as at" date.
-- grossReturn must be the 5-year p.a. return for the allocated investment option. Some funds use a different label on their performance table than the option's marketing name (e.g. REST Super's "Core Strategy" is listed as "Growth" in the performance table). Match the option by its meaning — use the row that corresponds to the allocated option even if the table label differs slightly. Copy the 5-year p.a. figure straight from the page text — whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
+- Sources may be from finder.com.au/super-funds (preferred primary source) AND/OR the fund's official website. Treat them equally - extract from whichever page actually shows the figure. If both show a figure, prefer the one with the most recent "as at" date.
+- grossReturn must be the 5-year p.a. return for the allocated investment option. Some funds use a different label on their performance table than the option's marketing name (e.g. REST Super's "Core Strategy" is listed as "Growth" in the performance table). Match the option by its meaning - use the row that corresponds to the allocated option even if the table label differs slightly. Copy the 5-year p.a. figure straight from the page text - whatever the website publishes (net or gross, whichever is shown). Do not convert or adjust it. If both are shown, prefer the one labelled net; otherwise just take whatever 5-year p.a. figure the page shows for that option. If no 5-year figure is shown for that option, return null.
 - If MULTIPLE pages each show a 5-year p.a. figure for the option, ALWAYS pick the one with the most recent "as at" date (e.g. prefer "as at 31 ${CURRENT_YEAR}" over a PDS dated ${
     PREV_YEAR - 1
   }). State the as-of date in sourceNotes. CRITICAL: if the page shows figures for multiple month-ends (e.g. both March and April ${CURRENT_YEAR}), you MUST use the LATEST/MOST RECENT month-end figures, not older ones.
@@ -544,7 +544,7 @@ const STEP2_TOOL = [{
         grossReturn: {
           type: ["number", "null"],
           description:
-            "Decimal e.g. 0.0633 — exact 5yr p.a. return shown on the website",
+            "Decimal e.g. 0.0633 - exact 5yr p.a. return shown on the website",
         },
         growthAssetsPct: {
           type: ["number", "null"],
@@ -627,7 +627,7 @@ Deno.serve(async (req) => {
     );
     candidateUrls.push(...officialAiUrls);
 
-    // Augment with Firecrawl web search — finds the freshest performance pages
+    // Augment with Firecrawl web search - finds the freshest performance pages
     if (fundName) {
       const searchQueries = [
         `${fundName} ${optionLabel} investment performance ${PREV_MONTH_NAME} ${CURRENT_YEAR}`,
@@ -746,7 +746,7 @@ Deno.serve(async (req) => {
       }
     } else {
       figures.sourceNotes =
-        "No official fund pages could be scraped — fees and 5-year net return were not auto-filled. Please fill manually.";
+        "No official fund pages could be scraped - fees and 5-year net return were not auto-filled. Please fill manually.";
     }
 
     const emailMatch = typeof query === "string" ? query.match(/[\w.+-]+@[\w-]+\.[\w.-]+/) : null;

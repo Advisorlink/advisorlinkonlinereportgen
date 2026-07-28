@@ -41,8 +41,8 @@ const DEFAULT_FIRM: FirmDetails = {
   acn: "",
   address: "2/21 Upton Street, Bundall QLD 4217",
   phone: "(07) 5241 1244",
-  email: "admin@advisorlinkonline.com.au",
-  website: "advisorlinkonline.com.au",
+  email: "admin@settledandsound.com.au",
+  website: "settledandsound.com.au",
 };
 
 const DEFAULT_STATE: LetterState = {

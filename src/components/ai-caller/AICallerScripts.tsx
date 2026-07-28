@@ -124,7 +124,7 @@ export function AICallerScripts() {
   const [description, setDescription] = useState(savedDraft.current?.description ?? "");
   const [callDirection, setCallDirection] = useState<"outbound" | "inbound">(savedDraft.current?.callDirection ?? "outbound");
   const [systemPrompt, setSystemPrompt] = useState(savedDraft.current?.systemPrompt ?? "You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
-  const [firstMessage, setFirstMessage] = useState(savedDraft.current?.firstMessage ?? "G'day, is this {{first_name}}? My name is Sarah and I'm calling from Advisor Link - how are you today?");
+  const [firstMessage, setFirstMessage] = useState(savedDraft.current?.firstMessage ?? "G'day, is this {{first_name}}? My name is Sarah and I'm calling from Settled & Sound - how are you today?");
   const [followUpStatements, setFollowUpStatements] = useState<string[]>(savedDraft.current?.followUpStatements ?? [
     "Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?"
   ]);
@@ -199,7 +199,7 @@ export function AICallerScripts() {
     setDescription("");
     setCallDirection(directionFilter);
     setSystemPrompt("You are a friendly Australian financial advisor assistant calling potential clients to discuss their superannuation options.");
-    setFirstMessage("G'day, is this {{first_name}}? My name is Sarah and I'm calling from Advisor Link - how are you today?");
+    setFirstMessage("G'day, is this {{first_name}}? My name is Sarah and I'm calling from Settled & Sound - how are you today?");
     setFollowUpStatements(["Great to hear! The reason for my call today is to let you know about a free superannuation review we're offering. It only takes a few minutes and could save you thousands. Would you mind if I asked you a couple of quick questions?"]);
     setQuestions([
       { id: crypto.randomUUID(), question: "Which super fund are you currently with?", fieldName: "super_fund_name" },
@@ -436,7 +436,7 @@ export function AICallerScripts() {
                   onChange={e => setFirstMessage(e.target.value)}
                   rows={2}
                   placeholder={callDirection === "inbound"
-                    ? "e.g. G'day! Thanks for calling Advisor Link. How can I help you today?"
+                    ? "e.g. G'day! Thanks for calling Settled & Sound. How can I help you today?"
                     : "What does the AI say first?"}
                 />
               </div>

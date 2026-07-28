@@ -158,7 +158,7 @@ export default function BookPublic() {
         </div>
 
         <footer className="text-center text-[11px] text-white/30 mt-12">
-          Powered by Settled & Sound · advisorlinkonline.com.au
+          Powered by Settled & Sound
         </footer>
       </div>
     </div>

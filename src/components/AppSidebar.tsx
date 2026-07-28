@@ -26,13 +26,14 @@ const navItems = [
   { title: "Automations", url: "/automations", icon: Workflow, badge: "NEW", badgeColor: "gradient-accent" },
   { title: "SMS Hub", url: "/sms-hub", icon: Send },
   { title: "Report Generator", url: "/", icon: FileText },
-  { title: "Strategy Paper", url: "/strategy", icon: Target, badge: "NEW", badgeColor: "gradient-accent" },
-  { title: "Fact Find", url: "/fact-find", icon: ClipboardList },
+  // Hidden (recoverable) - restore by uncommenting:
+  // { title: "Strategy Paper", url: "/strategy", icon: Target, badge: "NEW", badgeColor: "gradient-accent" },
+  // { title: "Fact Find", url: "/fact-find", icon: ClipboardList },
   { title: "E-Sign Docs", url: "/esign", icon: FileSignature },
   { title: "Documents", url: "/documents", icon: ShieldCheck, badge: "NEW", badgeColor: "gradient-accent" },
   { title: "Phone", url: "/phone", icon: Phone, badge: "NEW", badgeColor: "gradient-accent" },
-  { title: "Dialer", url: "/ai-caller", icon: PhoneCall, badge: "LEAP", badgeColor: "bg-emerald-500" },
-  { title: "Share & Earn", url: "/referrals", icon: Gift, badge: "12 new" },
+  // { title: "Dialer", url: "/ai-caller", icon: PhoneCall, badge: "LEAP", badgeColor: "bg-emerald-500" },
+  // { title: "Share & Earn", url: "/referrals", icon: Gift, badge: "12 new" },
   { title: "Client Reports", url: "/admin", icon: Settings },
 ];
 

@@ -34,7 +34,7 @@ export function usePushNotifications() {
         await PushNotifications.createChannel?.({
           id: 'calls',
           name: 'Incoming calls',
-          description: 'AdvisorLink Online call alerts',
+          description: 'Settled & Sound call alerts',
           importance: 5,
           visibility: 1,
           sound: 'default',
@@ -44,7 +44,7 @@ export function usePushNotifications() {
         await LocalNotifications.createChannel?.({
           id: 'calls',
           name: 'Incoming calls',
-          description: 'AdvisorLink Online call alerts',
+          description: 'Settled & Sound call alerts',
           importance: 5,
           visibility: 1,
           sound: 'default',
@@ -91,7 +91,7 @@ export function usePushNotifications() {
               await LocalNotifications.schedule({
                 notifications: [{
                   id: Math.max(1, Date.now() % 2147483647),
-                  title: notification.title || 'AdvisorLink',
+                  title: notification.title || 'Settled & Sound',
                   body: notification.body || '',
                   channelId: 'calls',
                   sound: 'default',

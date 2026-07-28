@@ -413,7 +413,7 @@ serve(async (req) => {
             .update(logPayload)
             .eq("vapi_call_id", vapiCallId);
         } else {
-          // Inbound call — no prior log exists
+          // Inbound call - no prior log exists
           const callerPhone = call?.customer?.number || call?.customerNumber || "";
           await supabase.from("ai_caller_call_logs").insert({
             ...logPayload,
@@ -443,7 +443,7 @@ serve(async (req) => {
       const hasExtractedData = Object.keys(extractedFields).length > 0;
       const wasQualified = duration > 30 || hasExtractedData || consentToContact;
 
-      // Qualification score is driven by the callback consent — if the client
+      // Qualification score is driven by the callback consent - if the client
       // said "yes, have someone call me back", that's a 100% qualified lead
       // regardless of whether we captured email or other fields. Otherwise
       // fall back to a partial score based on how many fields were extracted.
@@ -487,7 +487,7 @@ serve(async (req) => {
             }
           }
         } else {
-          // Inbound call — create lead directly
+          // Inbound call - create lead directly
           const callerPhone = call?.customer?.number || call?.customerNumber || "";
           await supabase.from("ai_caller_leads").insert({
             campaign_id: null,
@@ -565,7 +565,7 @@ serve(async (req) => {
           duration < 8;
 
         // A lead is "qualified" (100%) if the client agreed to a callback.
-        // Email is no longer required — the script only asks for a callback
+        // Email is no longer required - the script only asks for a callback
         // commitment at the end, so consent alone routes them into New Lead.
         const fullyQualified = consentToContact;
 
@@ -592,7 +592,7 @@ serve(async (req) => {
         }
 
         const noteLines: string[] = [];
-        noteLines.push(`[AI Voice Caller — ${new Date().toLocaleString("en-AU")}]`);
+        noteLines.push(`[AI Voice Caller - ${new Date().toLocaleString("en-AU")}]`);
         noteLines.push(`Outcome: ${targetStage} (ended: ${endedReason}, ${Math.round(duration)}s)`);
         if (finalSummary) noteLines.push(`Summary: ${finalSummary}`);
         if (Object.keys(extractedFields).length) {
@@ -678,7 +678,7 @@ serve(async (req) => {
       }
     }
 
-    // Handle status-update events — Vapi often sends recordingUrl here after processing
+    // Handle status-update events - Vapi often sends recordingUrl here after processing
     if (type === "status-update") {
       const vapiCallId = call?.id || message?.callId || null;
       const recordingUrl = message?.recordingUrl || call?.recordingUrl || call?.artifact?.recordingUrl || null;

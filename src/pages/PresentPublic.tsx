@@ -3,7 +3,7 @@ import InteractivePresentation from "@/components/interactive-presentation/Inter
 
 export default function PresentPublic() {
   useEffect(() => {
-    document.title = "Settled & Sound — Retirement Presentation";
+    document.title = "Settled & Sound - Retirement Presentation";
   }, []);
   return <InteractivePresentation />;
 }

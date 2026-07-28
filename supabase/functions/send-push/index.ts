@@ -1,7 +1,7 @@
 // Send a push notification via Firebase Cloud Messaging (HTTP v1 API).
 //
 // Required secrets (set after creating a Firebase project):
-//   FCM_PROJECT_ID         - Firebase project ID (e.g. "advisorlink-app")
+//   FCM_PROJECT_ID         - Firebase project ID (e.g. "settled-and-sound-app")
 //   FCM_SERVICE_ACCOUNT    - Full JSON of a Firebase service account key
 //
 // Call from another edge function (e.g. sms-inbound) like:
