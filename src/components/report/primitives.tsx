@@ -28,8 +28,9 @@ export function PageHeader({ pageLabel = "SUPERANNUATION REPORT", flush = false 
         <img
           src={logoUrl}
           alt="Settled & Sound"
-          className="h-10 w-auto"
+          className="h-12 w-auto"
         />
+
 
       </div>
     </header>
