@@ -54,6 +54,9 @@ verify_jwt = false
 [functions.submit-advice-request]
 verify_jwt = false
 
+[functions.admin-create-owner]
+verify_jwt = false
+
 
 
 
