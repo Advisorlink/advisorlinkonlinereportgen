@@ -168,7 +168,7 @@ export function brandedEmailHtml(opts: {
           </td></tr>
           ${footerNote ? `<tr><td style="padding:16px 32px 28px;font:400 12px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#94a3b8;">${footerNote}</td></tr>` : ""}
           <tr><td style="background:#f8fafc;padding:18px 32px;text-align:center;font:400 11px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#94a3b8;border-top:1px solid #e2e8f0;">
-            Settled & Sound · advisorlinkonline.com.au
+            Settled & Sound
           </td></tr>
         </table>
       </td></tr>

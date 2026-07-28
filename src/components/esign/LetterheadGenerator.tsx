@@ -42,7 +42,7 @@ const DEFAULT_FIRM: FirmDetails = {
   address: "2/21 Upton Street, Bundall QLD 4217",
   phone: "(07) 5241 1244",
   email: "admin@settledandsound.com.au",
-  website: "advisorlinkonline.com.au",
+  website: "settledandsound.com.au",
 };
 
 const DEFAULT_STATE: LetterState = {
