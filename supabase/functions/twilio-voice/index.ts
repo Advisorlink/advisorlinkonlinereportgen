@@ -149,7 +149,7 @@ Deno.serve(async (req: Request) => {
     console.log("inbound routing lookup failed, falling back to softphone:", e);
   }
 
-  // No AI assistant assigned — ring the browser softphone (with push notification fallback).
+  // No AI assistant assigned - ring the browser softphone (with push notification fallback).
   // Attempt contact lookup for nicer logs
   let contactName: string | null = null;
   try {

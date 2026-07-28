@@ -44,7 +44,7 @@ import ssLogoWhite from "@/assets/settled-and-sound-wordmark-white.png.asset.jso
 import ssLogoNavy from "@/assets/settled-and-sound-wordmark.png.asset.json";
 
 /* ============================================================ */
-/*  ADVICE CATEGORIES — grouped                                  */
+/*  ADVICE CATEGORIES - grouped                                  */
 /* ============================================================ */
 
 type Category = { id: string; title: string; overview: string; benefit: string };
@@ -56,7 +56,7 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
     items: [
       { id: "retirement-readiness", title: 'Retirement Readiness ("The Number")',
         overview: "Detailed cash-flow modelling to project how long capital will last based on expected expenses, healthcare and travel.",
-        benefit: "Complete clarity on whether you can afford to stop working — and at what age." },
+        benefit: "Complete clarity on whether you can afford to stop working - and at what age." },
       { id: "ttr", title: "Transition-to-Retirement (TTR) Strategy",
         overview: "Commencing a partial pension from super while still working past age 60.",
         benefit: "Reduce hours without dropping lifestyle income, or boost super tax-free while working full-time." },
@@ -96,10 +96,10 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
     items: [
       { id: "three-bucket", title: 'The "Three-Bucket" Income Strategy',
         overview: "Dividing wealth into Bucket 1 (Cash 1–3 yrs), Bucket 2 (Defensive Income) and Bucket 3 (Long-term Growth).",
-        benefit: "Eliminates market anxiety — living expenses are funded by cash regardless of crashes." },
+        benefit: "Eliminates market anxiety - living expenses are funded by cash regardless of crashes." },
       { id: "anti-death-tax", title: 'Super Re-Contribution ("Anti-Death Tax")',
         overview: "Withdrawing super tax-free after 60 and re-contributing as an after-tax (non-concessional) amount.",
-        benefit: "Shifts balance from taxable to tax-free — saving non-dependent adult children up to 17% tax." },
+        benefit: "Shifts balance from taxable to tax-free - saving non-dependent adult children up to 17% tax." },
       { id: "redraw-recycle", title: "Redraw & Recycle (Mortgage Offset to Super)",
         overview: "Using cash in offset/redraw to make tax-deductible super contributions before age 67.",
         benefit: "Reduces personal taxable income while building higher tax-sheltered wealth inside super." },
@@ -226,7 +226,7 @@ export default function InteractivePresentation({
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.setTextColor(15, 42, 68);
-    doc.text("Advice Request — Settled & Sound", 20, 25);
+    doc.text("Advice Request - Settled & Sound", 20, 25);
     doc.setDrawColor(24, 165, 175);
     doc.setLineWidth(0.8);
     doc.line(20, 30, 190, 30);
@@ -300,7 +300,7 @@ export default function InteractivePresentation({
       ref={containerRef}
       className="fixed inset-0 z-[100] bg-black overflow-hidden select-none"
     >
-      {/* SLIDE STAGE — always 16:9, letterboxed */}
+      {/* SLIDE STAGE - always 16:9, letterboxed */}
       <div className="w-full h-full flex items-center justify-center">
         <div
           className="relative bg-white shadow-2xl"
@@ -346,7 +346,7 @@ export default function InteractivePresentation({
         </div>
       </div>
 
-      {/* TOP CHROME — hover reveal */}
+      {/* TOP CHROME - hover reveal */}
       <div className="absolute top-0 left-0 right-0 opacity-0 hover:opacity-100 transition-opacity duration-200 z-20 pointer-events-none">
         <div className="bg-gradient-to-b from-black/70 to-transparent px-6 py-4 flex items-center justify-between pointer-events-auto">
           <div className="text-white/80 text-sm font-medium">
@@ -410,7 +410,7 @@ export default function InteractivePresentation({
 }
 
 /* ============================================================ */
-/*  OPPORTUNITIES SLIDE — interactive selection                  */
+/*  OPPORTUNITIES SLIDE - interactive selection                  */
 /* ============================================================ */
 
 function OpportunitiesSlide({
@@ -437,7 +437,7 @@ function OpportunitiesSlide({
         draggable={false}
       />
 
-      {/* Card overlay — sits in the empty right region of the backdrop, vertical scroll */}
+      {/* Card overlay - sits in the empty right region of the backdrop, vertical scroll */}
       <div
         className="absolute overflow-y-auto overflow-x-hidden opp-scroll"
         style={{
@@ -507,7 +507,7 @@ function OpportunitiesSlide({
         </div>
       </div>
 
-      {/* Footer actions — floats over the navy wave */}
+      {/* Footer actions - floats over the navy wave */}
       <div className="absolute right-[3%] bottom-[3%] z-20 flex items-center gap-2">
         <div className="text-white font-medium bg-[#0F2A44]/70 backdrop-blur px-3 py-1.5 rounded-full"
              style={{ fontSize: "clamp(10px, 0.82vw, 13px)" }}>
@@ -542,7 +542,7 @@ function OpportunitiesSlide({
 }
 
 /* ============================================================ */
-/*  NOTES SLIDE — beautiful client file note for the adviser     */
+/*  NOTES SLIDE - beautiful client file note for the adviser     */
 /* ============================================================ */
 
 function NotesSlide({
@@ -696,7 +696,7 @@ function NotesSlide({
 }
 
 /* ============================================================ */
-/*  THANK YOU SLIDE — completion screen with big green tick      */
+/*  THANK YOU SLIDE - completion screen with big green tick      */
 /* ============================================================ */
 
 function ThankYouSlide({ selectedCount, onNext }: { selectedCount: number; onNext: () => void }) {

@@ -10,7 +10,7 @@ function stripEmDashes(s: string): string {
   // The client explicitly does not want em dashes anywhere. Also normalise
   // en dashes and any surrounding whitespace.
   return s
-    .replace(/\s*[—–]\s*/g, ", ")
+    .replace(/\s*[-–]\s*/g, ", ")
     .replace(/\s{2,}/g, " ")
     .trim();
 }
@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
       uplift, upliftPct, incomeUplift,
     } = body;
 
-    const system = `You are a senior Australian financial adviser at Finance Direct writing personalised strategy paper commentary. Voice: warm, human, plain-spoken, confident. Never robotic. Never repetitive. Never use em dashes or en dashes (— or –). Use commas or full stops instead. Never use the phrase "in conclusion" or "moreover" or "furthermore". Do not restate the same fact in multiple sections. Each section covers a distinct angle. Australian English. No emojis. No markdown. Reference the client by first name only. Numbers as written by a person (e.g. "$1.2 million", "an extra $180,000", "roughly 12%"). Keep each field within its word limit.`;
+    const system = `You are a senior Australian financial adviser at Finance Direct writing personalised strategy paper commentary. Voice: warm, human, plain-spoken, confident. Never robotic. Never repetitive. Never use em dashes or en dashes (- or –). Use commas or full stops instead. Never use the phrase "in conclusion" or "moreover" or "furthermore". Do not restate the same fact in multiple sections. Each section covers a distinct angle. Australian English. No emojis. No markdown. Reference the client by first name only. Numbers as written by a person (e.g. "$1.2 million", "an extra $180,000", "roughly 12%"). Keep each field within its word limit.`;
 
     const userPrompt = `Write four short pieces of commentary for ${clientName || "the client"}'s strategy paper. Every piece must be specific to their actual numbers and must NOT repeat the same idea another piece already covers.
 

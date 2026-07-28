@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
     const idxEmployment = col("employment");
     const idxComments = col("comments");
 
-    // Already-imported phone digits (and those previously deleted from the pipeline —
+    // Already-imported phone digits (and those previously deleted from the pipeline -
     // we never want to re-import a lead the user has deleted)
     const { data: existingImports } = await admin
       .from("sheet_lead_imports")
@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
         .filter((t: string) => t.length >= 9)
     );
 
-    // Existing pipeline phones (last 9 digits match) — paginate to bypass 1000-row default
+    // Existing pipeline phones (last 9 digits match) - paginate to bypass 1000-row default
     const existingTails = new Set<string>();
     {
       const pageSize = 1000;
@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
           )
         );
       }
-      // Assign positions in sheet order — sheet top → pipeline top of batch.
+      // Assign positions in sheet order - sheet top → pipeline top of batch.
       toInsert.forEach((row, idx) => { row.position = idx; });
 
       const { data: inserted, error: insErr } = await admin

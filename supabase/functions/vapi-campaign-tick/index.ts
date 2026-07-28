@@ -110,7 +110,7 @@ async function tickCampaign(supabase: any, campaign: any) {
     .limit(Math.min(availableSlots, hourlyRemaining));
 
   if (!contacts || contacts.length === 0) {
-    // Nothing left to dial — mark complete.
+    // Nothing left to dial - mark complete.
     await supabase
       .from("ai_caller_campaigns")
       .update({

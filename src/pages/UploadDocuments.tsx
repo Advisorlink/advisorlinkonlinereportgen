@@ -38,7 +38,7 @@ type VariantConfig = {
 
 const VARIANTS: Record<1 | 2 | 3 | 4 | 5, VariantConfig> = {
   1: {
-    label: "AdvisorLink",
+    label: "Settled & Sound",
     page: "bg-[hsl(var(--page-alt))]",
     ink: "215 60% 12%",
     accent: "192 90% 42%",
@@ -435,7 +435,7 @@ export default function UploadDocuments() {
     >
       {/* ============ VARIANT-SPECIFIC HEADER ============ */}
       {variant === 1 && (
-        // AdvisorLink, product feel, dark navy bar with cyan rule
+        // Settled & Sound, product feel, dark navy bar with cyan rule
         <header className="relative overflow-hidden bg-[hsl(215_60%_10%)] text-white">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[hsl(192_90%_50%)]/25 blur-3xl" />
           <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-[hsl(192_90%_60%)]/15 blur-3xl" />
@@ -521,7 +521,7 @@ export default function UploadDocuments() {
             else setStage("screenshot_pick");
           };
 
-          // V1, AdvisorLink product cards with cyan accent
+          // V1, Settled & Sound product cards with cyan accent
           if (variant === 1) {
             return (
               <section className="page-enter">

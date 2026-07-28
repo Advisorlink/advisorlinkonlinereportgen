@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
       const to = email || settings?.host_email;
       if (!to) return json({ error: "No email address" }, 400);
       const html = brandedEmailHtml({
-        preheader: "Test reminder from Advisor Link Online",
+        preheader: "Test reminder from Settled & Sound",
         heading: subject,
         intro: bodyText.split("\n")[0] || "This is a test reminder so you can preview what clients receive.",
         details: [

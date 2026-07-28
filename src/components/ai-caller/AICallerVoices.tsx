@@ -82,7 +82,7 @@ export function AICallerVoices() {
       }
 
       // Fallback: browser speech synthesis
-      const sampleText = `Hi there, this is ${voice.name} from Advisor Link. How are you going today?`;
+      const sampleText = `Hi there, this is ${voice.name} from Settled & Sound. How are you going today?`;
       const utterance = new SpeechSynthesisUtterance(sampleText);
       utterance.lang = "en-AU";
       utterance.rate = 0.95;

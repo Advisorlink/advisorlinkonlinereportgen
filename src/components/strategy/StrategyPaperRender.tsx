@@ -181,7 +181,7 @@ function TableHead() {
   );
 }
 
-/* ── AdvisorLink-style primitives ── */
+/* ── Settled & Sound-style primitives ── */
 
 // Dark navy band across the top of interior pages with a bigger left-aligned logo.
 // The decorative gold "bubble" sits below the band as a soft background element on the page.

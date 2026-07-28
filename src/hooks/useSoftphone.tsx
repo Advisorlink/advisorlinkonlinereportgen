@@ -82,7 +82,7 @@ async function notifyNativeIncomingCall(title: string, body: string, extra: Reco
     await LocalNotifications.createChannel?.({
       id: "calls",
       name: "Incoming calls",
-      description: "AdvisorLink Online call alerts",
+      description: "Settled & Sound call alerts",
       importance: 5,
       visibility: 1,
       sound: "default",
@@ -97,7 +97,7 @@ async function notifyNativeIncomingCall(title: string, body: string, extra: Reco
         title,
         body,
         largeBody: body,
-        summaryText: "AdvisorLink Online",
+        summaryText: "Settled & Sound",
         channelId: "calls",
         sound: "default",
         autoCancel: true,
@@ -258,7 +258,7 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
       device.on("incoming", async (call: Call) => {
         const from = call.parameters?.From || "Unknown";
         const sid = call.parameters?.CallSid || "incoming-call";
-        notifyIncomingCall("Incoming AdvisorLink call", `${from} is calling ${caller_id}`, { type: "call", from, sid, route: "/phone" });
+        notifyIncomingCall("Incoming Settled & Sound call", `${from} is calling ${caller_id}`, { type: "call", from, sid, route: "/phone" });
         toast.message("Incoming call", {
           description: `${from} is calling ${caller_id}`,
           duration: 30_000,

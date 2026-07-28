@@ -10,8 +10,8 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const STYLE_RULES = `STYLE RULES (apply to EVERY output without exception):
 - Tone: fun but not funny; confident and professional.
 - Australian English ONLY: spelling, grammar, vocabulary, number formatting, and any formulas. e.g. "specialise" not "specialize", "organisation" not "organization", "recognise" not "recognize", "colour" not "color", "centre" not "center", "favourite" not "favourite", "analyse" not "analyze", "fulfil" not "fulfill", "enrol" not "enroll", "licence" (noun) / "license" (verb), "practise" (verb) / "practice" (noun), "mum" not "mom", "maths" not "math".
-- NEVER use em dashes (—). NEVER use en dashes (–) as punctuation. Use commas, full stops, brackets, or rewrite the sentence. If you would have used an em dash, replace it.
-- The ONLY exception to Australian spelling is the brand name: always write "Advisor Link Online" (never "Adviser Link Online").
+- NEVER use em dashes (-). NEVER use en dashes (–) as punctuation. Use commas, full stops, brackets, or rewrite the sentence. If you would have used an em dash, replace it.
+- The ONLY exception to Australian spelling is the brand name: always write "Settled & Sound" (never "Settled & Sound").
 - Keep merge tags like {{first_name}}, {{super_fund_name}} intact and unchanged.
 - Keep links, phone numbers, and emails intact.
 - Do NOT add greetings, sign-offs, quotes, markdown, or commentary. Return ONLY the rewritten message text.`;
@@ -70,8 +70,8 @@ Deno.serve(async (req) => {
     let out: string = j.choices?.[0]?.message?.content ?? "";
 
     // Hard-enforce: strip em/en dashes, fix common US -> AU, enforce brand.
-    out = out.replace(/—/g, ", ").replace(/–/g, ", ");
-    out = out.replace(/\bAdviser Link Online\b/gi, "Advisor Link Online");
+    out = out.replace(/-/g, ", ").replace(/–/g, ", ");
+    out = out.replace(/\bSettled & Sound\b/gi, "Settled & Sound");
 
     return new Response(JSON.stringify({ text: out.trim() }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -63,7 +63,7 @@ function emailWrapper(content: string): string {
         <!-- Header -->
         <tr>
           <td style="background:#0f172a;padding:28px 32px;border-radius:16px 16px 0 0;text-align:center;">
-            <img src="${LOGO_URL}" alt="Advisor Link Online" width="180" style="max-width:180px;height:auto;" />
+            <img src="${LOGO_URL}" alt="Settled & Sound" width="180" style="max-width:180px;height:auto;" />
           </td>
         </tr>
         <!-- Cyan accent -->
@@ -79,7 +79,7 @@ function emailWrapper(content: string): string {
         <!-- Footer -->
         <tr>
           <td style="padding:24px 32px;text-align:center;">
-            <p style="margin:0 0 8px;font-size:12px;color:#94a3b8;">Powered by <strong style="color:#0f172a;">Advisor Link Online</strong></p>
+            <p style="margin:0 0 8px;font-size:12px;color:#94a3b8;">Powered by <strong style="color:#0f172a;">Settled & Sound</strong></p>
             <p style="margin:0;font-size:11px;color:#cbd5e1;">This is an automated message. Please do not reply directly to this email.</p>
           </td>
         </tr>

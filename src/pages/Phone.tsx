@@ -134,7 +134,7 @@ export default function PhonePage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <img src={logoUrl} alt="AdvisorLink Online" className="h-5 opacity-90" />
+                    <img src={logoUrl} alt="Settled & Sound" className="h-5 opacity-90" />
                     <span className="text-[10px] uppercase tracking-[0.2em] text-cyan/70 font-bold">Softphone</span>
                   </div>
                   <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight font-heading leading-none">

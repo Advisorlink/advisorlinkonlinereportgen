@@ -49,7 +49,7 @@ function buildReferralEmailHtml(referrerName: string, leadName: string, token: s
 
   <!-- LOGO -->
   <tr><td style="padding:32px 32px 20px;text-align:center;background-color:#ffffff;">
-    <img src="cid:${LOGO_CID}" alt="Advisor Link Online" width="180" style="display:inline-block;width:180px;max-width:70%;height:auto;border:0;" />
+    <img src="cid:${LOGO_CID}" alt="Settled & Sound" width="180" style="display:inline-block;width:180px;max-width:70%;height:auto;border:0;" />
   </td></tr>
 
   <!-- HERO BANNER -->
@@ -95,7 +95,7 @@ function buildReferralEmailHtml(referrerName: string, leadName: string, token: s
 
   <!-- FOOTER -->
   <tr><td style="background-color:#f7f7fa;padding:20px 32px;text-align:center;border-top:1px solid #e8e8ee;">
-    <p style="margin:0;font-size:11px;color:${mutedText};line-height:18px;">Advisor Link Online · Helping you get the most from your super</p>
+    <p style="margin:0;font-size:11px;color:${mutedText};line-height:18px;">Settled & Sound · Helping you get the most from your super</p>
   </td></tr>
 
 </table>

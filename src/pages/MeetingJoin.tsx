@@ -529,7 +529,7 @@ function Footer() {
   return (
     <footer className="px-4 sm:px-8 py-6 text-center space-y-3 shrink-0">
       <p className="text-white/40 text-xs sm:text-sm max-w-lg mx-auto">
-        With AdvisorLink, we connect you to fully Licensed and Vetted advisors to take the guesswork out of who to trust.
+        With Settled & Sound, we connect you to fully Licensed and Vetted advisors to take the guesswork out of who to trust.
       </p>
       <div className="flex items-center justify-center gap-4 text-white/30 text-xs">
         <a href="https://advisorlinkonline.com.au/privacy-policy/" target="_blank" rel="noopener noreferrer" className="hover:text-white/60 transition-colors underline underline-offset-2">

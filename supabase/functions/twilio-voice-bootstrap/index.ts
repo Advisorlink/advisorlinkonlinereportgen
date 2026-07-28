@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     const preferredCallerId = smsNumber?.phone_number as string | null | undefined;
     const update: Record<string, unknown> = {};
 
-    // 1. Caller ID — use the texting number first, then existing, then first owned number.
+    // 1. Caller ID - use the texting number first, then existing, then first owned number.
     let callerId = preferredCallerId || (existing?.caller_id as string | null | undefined);
     if (!callerId) {
       const r = await fetch(`${base}/IncomingPhoneNumbers.json?PageSize=1`, { headers: { Authorization: basic } });

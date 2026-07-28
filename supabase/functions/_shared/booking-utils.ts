@@ -154,7 +154,7 @@ export function brandedEmailHtml(opts: {
       <tr><td align="center">
         <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px -4px rgba(15,23,42,0.08);">
           <tr><td style="background:linear-gradient(135deg,#0c1b3d 0%,#0f172a 60%,#082030 100%);padding:32px 32px 28px;text-align:center;">
-            <div style="font:700 22px/1.1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#ffffff;letter-spacing:-0.02em;">Advisor Link <span style="color:#22d3ee;">Online</span></div>
+            <div style="font:700 22px/1.1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#ffffff;letter-spacing:-0.02em;">Settled & Sound <span style="color:#22d3ee;">Online</span></div>
             <div style="font:500 12px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#94a3b8;margin-top:6px;letter-spacing:0.06em;text-transform:uppercase;">Travis Seckold</div>
           </td></tr>
           <tr><td style="padding:36px 32px 16px;">
@@ -168,7 +168,7 @@ export function brandedEmailHtml(opts: {
           </td></tr>
           ${footerNote ? `<tr><td style="padding:16px 32px 28px;font:400 12px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#94a3b8;">${footerNote}</td></tr>` : ""}
           <tr><td style="background:#f8fafc;padding:18px 32px;text-align:center;font:400 11px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#94a3b8;border-top:1px solid #e2e8f0;">
-            Advisor Link Online · advisorlinkonline.com.au
+            Settled & Sound · advisorlinkonline.com.au
           </td></tr>
         </table>
       </td></tr>
@@ -184,8 +184,8 @@ export interface IcsAttachment { filename: string; content: string; }
 
 export async function sendGmail(to: string, subject: string, html: string, ics?: IcsAttachment) {
   // Strip em/en dashes and normalize narrow/no-break spaces to regular spaces.
-  subject = subject.replace(/[—–]/g, "-").replace(/[\u202F\u00A0\u2009]/g, " ");
-  html = html.replace(/[—–]/g, "-").replace(/[\u202F\u00A0\u2009]/g, " ");
+  subject = subject.replace(/[-–]/g, "-").replace(/[\u202F\u00A0\u2009]/g, " ");
+  html = html.replace(/[-–]/g, "-").replace(/[\u202F\u00A0\u2009]/g, " ");
   // RFC 2047 encode the subject so non-ASCII chars don't display as mojibake.
   const encodedSubject = `=?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=`;
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
@@ -285,7 +285,7 @@ export function buildIcs(opts: {
     status = "CONFIRMED", sequence = 0, tz,
   } = opts;
   // Scrub dashes from human-facing strings.
-  const clean = (s: string) => s.replace(/[—–]/g, "-");
+  const clean = (s: string) => s.replace(/[-–]/g, "-");
   const esc = (s: string) =>
     clean(s).replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
   const dtStart = tz ? `DTSTART;TZID=${tz}:${icsLocalDate(start, tz)}` : `DTSTART:${icsDate(start)}`;
@@ -293,7 +293,7 @@ export function buildIcs(opts: {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Advisor Link Online//Bookings//EN",
+    "PRODID:-//Settled & Sound//Bookings//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:REQUEST",
     "BEGIN:VEVENT",
@@ -316,7 +316,7 @@ export function buildIcs(opts: {
 
 /** Strip em-dashes / en-dashes from any user-facing copy. */
 export function stripDashes(s: string): string {
-  return s.replace(/[—–]/g, "-");
+  return s.replace(/[-–]/g, "-");
 }
 
 export async function sendSmsViaTwilio(to: string, body: string) {
