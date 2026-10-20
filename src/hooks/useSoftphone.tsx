@@ -482,3 +482,8 @@ export function useSoftphone() {
   if (!ctx) throw new Error("useSoftphone must be used inside SoftphoneProvider");
   return ctx;
 }
+
+/** Non-throwing variant: returns null when no provider is mounted (e.g. during a hot reload). */
+export function useOptionalSoftphone() {
+  return useContext(SoftphoneCtx);
+}

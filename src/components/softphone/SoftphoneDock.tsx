@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useSoftphone } from "@/hooks/useSoftphone";
+import { useSoftphone, useOptionalSoftphone } from "@/hooks/useSoftphone";
 import { Phone, PhoneOff, PhoneIncoming, Mic, MicOff, Pause, Play, Grid3x3, ChevronDown, ChevronUp, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,13 @@ function formatDuration(ms: number) {
 }
 
 export function SoftphoneDock() {
+  // Never blank the whole app if the phone provider is missing (e.g. mid hot-reload).
+  const ctx = useOptionalSoftphone();
+  if (!ctx) return null;
+  return <SoftphoneDockInner />;
+}
+
+function SoftphoneDockInner() {
   const { ready, registering, callerId, incoming, incomingMatch, active, answer, reject, hangup, toggleMute, toggleHold, sendDigit } = useSoftphone();
   const [now, setNow] = useState(Date.now());
   const [showDtmf, setShowDtmf] = useState(false);
