@@ -266,7 +266,7 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
         try {
           const r = await fetchToken();
           device.updateToken(r.token);
-        } catch (e) { console.error("token refresh failed", e); }
+        } catch (e) { console.warn("token refresh failed", e instanceof Error ? e.message : e); }
       });
       device.on("incoming", async (call: Call) => {
         const from = call.parameters?.From || "Unknown";
