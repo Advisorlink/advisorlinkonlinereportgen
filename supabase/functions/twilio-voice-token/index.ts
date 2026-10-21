@@ -50,13 +50,23 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const admin = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    let { data: cfg } = await admin.from("twilio_voice_config").select("*").eq("id", 1).maybeSingle();
+    const first = await admin.from("twilio_voice_config").select("*").eq("id", 1).maybeSingle();
+    // If the database itself couldn't be read (e.g. backend restarting), say so
+    // instead of wrongly claiming setup is incomplete or re-running setup.
+    if (first.error) {
+      console.warn("twilio_voice_config read failed", first.error.message?.slice(0, 200));
+      return json(503, { error: "Phone service temporarily unavailable, retrying shortly." });
+    }
+    let cfg = first.data;
     if (!cfg?.api_key_sid || !cfg?.api_key_secret || !cfg?.twiml_app_sid) {
       await fetch(`${supabaseUrl}/functions/v1/twilio-voice-bootstrap`, {
         method: "POST",
         headers: { Authorization: authHeader, "Content-Type": "application/json" },
       }).catch(() => null);
       const refreshed = await admin.from("twilio_voice_config").select("*").eq("id", 1).maybeSingle();
+      if (refreshed.error) {
+        return json(503, { error: "Phone service temporarily unavailable, retrying shortly." });
+      }
       cfg = refreshed.data;
     }
     if (!cfg?.api_key_sid || !cfg?.api_key_secret || !cfg?.twiml_app_sid) {

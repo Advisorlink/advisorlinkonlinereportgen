@@ -217,8 +217,11 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
 
 
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // When Twilio rejects our credentials, stop retrying until this time.
+  const blockedUntilRef = useRef<number>(0);
   const scheduleReconnect = useCallback((delayMs = 1500) => {
     if (reconnectTimerRef.current) return;
+    if (blockedUntilRef.current > Date.now()) return;
     reconnectTimerRef.current = setTimeout(async () => {
       reconnectTimerRef.current = null;
       try {
@@ -237,6 +240,7 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
 
   const initialize = useCallback(async () => {
     if (deviceRef.current || initializingRef.current) return;
+    if (blockedUntilRef.current > Date.now()) return;
     initializingRef.current = true;
     setRegistering(true);
     try {
@@ -251,8 +255,22 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
         scheduleReconnect(2000);
       });
       device.on("error", (e: { code?: number; message?: string }) => {
-        console.error("Twilio Device error", e);
         const code = e?.code;
+        console.warn("Twilio Device error", code, e?.message);
+        // Twilio rejected our credentials (account inactive, key revoked, etc.).
+        // Retrying won't help, so pause reconnects for a while and tell the user once.
+        const fatal = code === 20101 || code === 20103 || code === 20151 || code === 20003;
+        if (fatal) {
+          const firstTime = blockedUntilRef.current < Date.now();
+          blockedUntilRef.current = Date.now() + 10 * 60_000;
+          try { device.destroy(); } catch { /* noop */ }
+          if (deviceRef.current === device) deviceRef.current = null;
+          setReady(false);
+          if (firstTime) {
+            toast.error("Phone unavailable: Twilio is not accepting this account. Check your Twilio account is active.", { duration: 15_000 });
+          }
+          return;
+        }
         // 31005 websocket closed, 31009 transport, 20104 token expired, 31204 jwt issues
         const recoverable = code === 31005 || code === 31009 || code === 20104 || code === 31204 || code === 31000;
         if (recoverable) {
