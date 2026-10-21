@@ -60,9 +60,29 @@ Deno.serve(async (req) => {
       update.caller_id = callerId;
     }
 
+    // Optional { rotate: true } forces a fresh API key (used when Twilio rejects tokens).
+    let rotate = false;
+    try {
+      const body = await req.json();
+      rotate = body?.rotate === true;
+    } catch { /* no body */ }
+
     // 2. API Key (cannot retrieve secret after creation, so always create new if missing)
     let apiKeySid = existing?.api_key_sid as string | null | undefined;
     let apiKeySecret = existing?.api_key_secret as string | null | undefined;
+    if (apiKeySid && apiKeySecret && !rotate) {
+      // Make sure the stored key still exists in this Twilio account.
+      const chk = await fetch(`${base}/Keys/${apiKeySid}.json`, { headers: { Authorization: basic } });
+      if (chk.status === 404) {
+        console.warn("Stored Twilio API key no longer exists; creating a new one");
+        apiKeySid = null;
+        apiKeySecret = null;
+      }
+    }
+    if (rotate) {
+      apiKeySid = null;
+      apiKeySecret = null;
+    }
     if (!apiKeySid || !apiKeySecret) {
       const r = await fetch(`${base}/Keys.json`, {
         method: "POST",
@@ -79,6 +99,13 @@ Deno.serve(async (req) => {
 
     // 3. TwiML App pointing at our voice webhook
     let appSid = existing?.twiml_app_sid as string | null | undefined;
+    if (appSid) {
+      const chk = await fetch(`${base}/Applications/${appSid}.json`, { headers: { Authorization: basic } });
+      if (chk.status === 404) {
+        console.warn("Stored TwiML app no longer exists; creating a new one");
+        appSid = null;
+      }
+    }
     if (!appSid) {
       const r = await fetch(`${base}/Applications.json`, {
         method: "POST",
