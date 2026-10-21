@@ -240,6 +240,7 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
 
   const initialize = useCallback(async () => {
     if (deviceRef.current || initializingRef.current) return;
+    if (blockedUntilRef.current > Date.now()) return;
     initializingRef.current = true;
     setRegistering(true);
     try {
