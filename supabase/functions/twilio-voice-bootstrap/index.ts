@@ -37,6 +37,21 @@ Deno.serve(async (req) => {
     const base = `https://api.twilio.com/2010-04-01/Accounts/${ACCOUNT_SID}`;
     const voiceUrl = `${SUPABASE_URL}/functions/v1/twilio-voice`;
 
+    // 0. Confirm the Twilio account credentials work and the account is active.
+    const acct = await fetch(`${base}.json`, { headers: { Authorization: basic } });
+    const acctJson = await acct.json().catch(() => ({}));
+    if (!acct.ok) {
+      return json(502, {
+        error: "Twilio rejected the account credentials",
+        twilio_status: acct.status,
+        twilio_code: acctJson?.code,
+        twilio_message: acctJson?.message,
+      });
+    }
+    if (acctJson?.status && acctJson.status !== "active") {
+      return json(502, { error: `Twilio account is ${acctJson.status}`, twilio_status: acctJson.status });
+    }
+
     // Load existing config and prefer the same Twilio number used for outbound SMS.
     const { data: existing } = await supa.from("twilio_voice_config").select("*").eq("id", 1).maybeSingle();
     const { data: smsNumber } = await supa
