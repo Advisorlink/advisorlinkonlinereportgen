@@ -217,8 +217,11 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
 
 
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // When Twilio rejects our credentials, stop retrying until this time.
+  const blockedUntilRef = useRef<number>(0);
   const scheduleReconnect = useCallback((delayMs = 1500) => {
     if (reconnectTimerRef.current) return;
+    if (blockedUntilRef.current > Date.now()) return;
     reconnectTimerRef.current = setTimeout(async () => {
       reconnectTimerRef.current = null;
       try {
