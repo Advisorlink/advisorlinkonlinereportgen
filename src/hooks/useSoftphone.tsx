@@ -189,17 +189,30 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
 
 
   const fetchToken = useCallback(async () => {
-    // Guard: skip the call entirely if there's no valid session.
-    // A stale JWT (e.g. from the signing-key migration) would otherwise 401.
-    const { data: userData, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !userData?.user) {
-      // Clear the dead session so we stop retrying with it.
-      try { await supabase.auth.signOut({ scope: "local" }); } catch { /* noop */ }
-      throw new Error("Not signed in");
+    // Use the locally stored session; don't sign the user out on network hiccups.
+    const { data: sessData } = await supabase.auth.getSession();
+    if (!sessData?.session) throw new Error("Not signed in");
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20_000);
+    try {
+      const { data, error } = await supabase.functions.invoke("twilio-voice-token", { signal: controller.signal });
+      if (error) {
+        const status = (error as { context?: { status?: number } })?.context?.status;
+        const err = new Error(status === 401 ? "Session expired" : `Phone service unavailable${status ? ` (${status})` : ""}`);
+        (err as Error & { transient?: boolean }).transient = status !== 401;
+        throw err;
+      }
+      return data as { token: string; identity: string; caller_id: string };
+    } catch (e) {
+      if (controller.signal.aborted) {
+        const err = new Error("Phone service timed out");
+        (err as Error & { transient?: boolean }).transient = true;
+        throw err;
+      }
+      throw e;
+    } finally {
+      clearTimeout(timer);
     }
-    const { data, error } = await supabase.functions.invoke("twilio-voice-token");
-    if (error) throw error;
-    return data as { token: string; identity: string; caller_id: string };
   }, []);
 
 
@@ -294,8 +307,14 @@ export function SoftphoneProvider({ children }: { children: React.ReactNode }) {
         deviceRef.current = null;
       }
       setReady(false);
-      console.error("initialize failed", e);
-      toast.error(`Couldn't start phone: ${String(e)}`);
+      const msg = e instanceof Error ? e.message : String(e);
+      console.warn("Phone not started:", msg);
+      if (msg === "Not signed in" || msg === "Session expired") {
+        // Nothing to do until the user signs in again.
+      } else {
+        // Backend hiccup: retry quietly in the background.
+        scheduleReconnect(30_000);
+      }
     } finally {
       initializingRef.current = false;
       setRegistering(false);
