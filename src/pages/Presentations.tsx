@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMeetingHost } from "@/hooks/useMeetingHost";
 import { useClientInputs } from "@/hooks/useClientInputs";
 import { CRMLayout } from "@/components/CRMLayout";
-import InteractivePresentation from "@/components/interactive-presentation/InteractivePresentation";
+import InteractivePresentation, { PRESENTATION_DECKS, type PresentationDeck } from "@/components/interactive-presentation/InteractivePresentation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Monitor, Play, Copy, StopCircle, Search, Mic, MicOff, Circle, ScreenShare, ScreenShareOff, UserCheck, UserX, Presentation, Trash2, UserPlus } from "lucide-react";
@@ -68,6 +68,8 @@ export default function Presentations() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const hostPreviewRef = useRef<HTMLVideoElement>(null);
   const [showSlideshow, setShowSlideshow] = useState(false);
+  const [deckPickerOpen, setDeckPickerOpen] = useState(false);
+  const [deck, setDeck] = useState<PresentationDeck>("super");
   const [pausedSlide, setPausedSlide] = useState<number | null>(null);
   const [guestName, setGuestName] = useState("");
   const [showGuestInput, setShowGuestInput] = useState(false);
@@ -304,7 +306,7 @@ export default function Presentations() {
         )}
 
         {activeMeeting && (
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-6 text-base font-semibold w-full" onClick={() => setShowSlideshow(true)}>
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-6 text-base font-semibold w-full" onClick={() => setDeckPickerOpen(true)}>
             <Presentation className="w-5 h-5 mr-2" />
             <span>Start Presentation for {activeMeeting.client_name}</span>
           </Button>
@@ -312,6 +314,8 @@ export default function Presentations() {
 
         {showSlideshow && activeMeeting && (
           <InteractivePresentation
+            key={deck}
+            deck={deck}
             clientName={activeMeeting.client_name}
             onExit={() => { setShowSlideshow(false); setPausedSlide(null); }}
           />
@@ -445,6 +449,37 @@ export default function Presentations() {
             {filteredReports.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-6">No clients found</p>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deckPickerOpen} onOpenChange={setDeckPickerOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-navy font-heading">Choose a presentation</DialogTitle>
+            <DialogDescription>Pick which presentation to show {activeMeeting?.client_name || "your client"}</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {PRESENTATION_DECKS.map((d) => (
+              <button
+                key={d.id}
+                onClick={() => {
+                  setDeck(d.id);
+                  setDeckPickerOpen(false);
+                  setShowSlideshow(true);
+                }}
+                className="group text-left rounded-xl border border-border overflow-hidden hover:border-cyan hover:shadow-elevated transition bg-card"
+              >
+                <div className="aspect-video bg-muted overflow-hidden">
+                  <img src={d.cover} alt={d.title} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform" />
+                </div>
+                <div className="p-4">
+                  <p className="text-sm font-bold text-navy">{d.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{d.description}</p>
+                  <p className="text-[11px] text-muted-foreground mt-2">{d.slideCount} slides</p>
+                </div>
+              </button>
+            ))}
           </div>
         </DialogContent>
       </Dialog>
