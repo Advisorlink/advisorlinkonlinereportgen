@@ -256,7 +256,7 @@ export default function InteractivePresentation({
   };
 
   const copyShareLink = async () => {
-    const url = `${window.location.origin}/present`;
+    const url = `${window.location.origin}/present${deck === "home-loan" ? "?deck=home-loan" : ""}`;
     try { await navigator.clipboard.writeText(url); toast.success("Share link copied"); }
     catch { toast.error("Could not copy"); }
   };
