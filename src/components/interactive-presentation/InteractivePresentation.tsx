@@ -42,6 +42,16 @@ import beachBg from "@/assets/presentation/opportunities-beach.jpg";
 import opportunitiesBackdrop from "@/assets/presentation/opportunities-backdrop.png.asset.json";
 import ssLogoWhite from "@/assets/settled-and-sound-wordmark-white.png.asset.json";
 import ssLogoNavy from "@/assets/settled-and-sound-wordmark.png.asset.json";
+import hl01 from "@/assets/presentation/home-loan/slide-01.jpg.asset.json";
+import hl02 from "@/assets/presentation/home-loan/slide-02.jpg.asset.json";
+import hl03 from "@/assets/presentation/home-loan/slide-03.jpg.asset.json";
+import hl04 from "@/assets/presentation/home-loan/slide-04.jpg.asset.json";
+import hl05 from "@/assets/presentation/home-loan/slide-05.jpg.asset.json";
+import hl06 from "@/assets/presentation/home-loan/slide-06.jpg.asset.json";
+import hl07 from "@/assets/presentation/home-loan/slide-07.jpg.asset.json";
+import hl08 from "@/assets/presentation/home-loan/slide-08.jpg.asset.json";
+import hl09 from "@/assets/presentation/home-loan/slide-09.jpg.asset.json";
+import hl10 from "@/assets/presentation/home-loan/slide-10.jpg.asset.json";
 
 /* ============================================================ */
 /*  ADVICE CATEGORIES - grouped                                  */
@@ -125,7 +135,7 @@ type SlideDef =
   | { kind: "thankyou"; label: string }
   | { kind: "notes"; label: string };
 
-const SLIDES: SlideDef[] = [
+const SUPER_SLIDES: SlideDef[] = [
   { kind: "image", src: slide01, label: "Welcome" },
   { kind: "image", src: slide02, label: "Your analyst" },
   { kind: "image", src: slide07, label: "Why choose us" },
@@ -139,6 +149,26 @@ const SLIDES: SlideDef[] = [
   { kind: "image", src: slide09, label: "Super easy next steps" },
 ];
 
+const HOME_LOAN_SLIDES: SlideDef[] = [
+  { kind: "image", src: hl01.url, label: "Community Funding" },
+  { kind: "image", src: hl02.url, label: "How it works" },
+  { kind: "image", src: hl03.url, label: "Your team" },
+  { kind: "image", src: hl04.url, label: "Where does the money come from" },
+  { kind: "image", src: hl05.url, label: "The investment" },
+  { kind: "image", src: hl06.url, label: "Two decisions, one strategy" },
+  { kind: "image", src: hl07.url, label: "Your journey" },
+  { kind: "image", src: hl08.url, label: "Refinance conditions" },
+  { kind: "image", src: hl09.url, label: "Why work with us" },
+  { kind: "image", src: hl10.url, label: "Next steps" },
+];
+
+export type PresentationDeck = "super" | "home-loan";
+
+export const PRESENTATION_DECKS: { id: PresentationDeck; title: string; description: string; cover: string; slideCount: number }[] = [
+  { id: "super", title: "Superannuation", description: "Super options, fees and other areas of advice", cover: slide01, slideCount: SUPER_SLIDES.length },
+  { id: "home-loan", title: "Zero Deposit Home Loan", description: "Community Funding: your pathway to home ownership", cover: hl01.url, slideCount: HOME_LOAN_SLIDES.length },
+];
+
 /* ============================================================ */
 /*  MAIN COMPONENT                                               */
 /* ============================================================ */
@@ -147,15 +177,18 @@ interface InteractivePresentationProps {
   onExit?: () => void;
   clientName?: string;
   clientEmail?: string;
+  deck?: PresentationDeck;
 }
 
 export default function InteractivePresentation({
   onExit,
   clientName: initialName = "",
   clientEmail: initialEmail = "",
+  deck = "super",
 }: InteractivePresentationProps) {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
+  const SLIDES = deck === "home-loan" ? HOME_LOAN_SLIDES : SUPER_SLIDES;
 
   const [index, setIndex] = useState(0);
   const [isFs, setIsFs] = useState(false);
@@ -166,11 +199,18 @@ export default function InteractivePresentation({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const slide = SLIDES[index];
+  useEffect(() => {
+    // Preload deck images so slide changes don't flash
+    SLIDES.forEach(s => {
+      if (s.kind === "image") { const img = new Image(); img.src = s.src; }
+    });
+  }, [SLIDES]);
+
+  const slide = SLIDES[index] ?? SLIDES[0];
   const isFirst = index === 0;
   const isLast = index === SLIDES.length - 1;
 
-  const next = useCallback(() => setIndex(i => Math.min(i + 1, SLIDES.length - 1)), []);
+  const next = useCallback(() => setIndex(i => Math.min(i + 1, SLIDES.length - 1)), [SLIDES]);
   const prev = useCallback(() => setIndex(i => Math.max(i - 1, 0)), []);
 
   const toggleSelect = (id: string) => {
